@@ -1,6 +1,7 @@
 import { decodeFunctionResult, encodeFunctionData, formatUnits, parseAbi, type Address } from 'viem';
 import type { ChainClient } from '../rpc.js';
 import type { Asset, Position, ProtocolResult } from '../../src/types.js';
+import { perSecondApr, rate, unavailableRate } from '../rates.js';
 import { liquidationPrices, riskLevel } from '../risk.js';
 // Official deployments: compound-finance/comet/deployments/mainnet/{usdc,weth}/roots.json.
 const markets = [
@@ -8,6 +9,9 @@ const markets = [
   { address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94' as Address, label: 'WETH market' },
 ];
 const abi = parseAbi([
+  'function getUtilization() view returns (uint256)',
+  'function getSupplyRate(uint256 utilization) view returns (uint64)',
+  'function getBorrowRate(uint256 utilization) view returns (uint64)',
   'function accrueAccount(address account)',
   'function balanceOf(address account) view returns (uint256)',
   'function borrowBalanceOf(address account) view returns (uint256)',
@@ -42,7 +46,25 @@ async function readMarket(client: ChainClient, wallet: Address, blockNumber: big
     client.readContract({ address, abi, functionName: 'getPrice', args: [feed], blockNumber }),
   ]);
   if (price === 0n) throw new Error('Zero oracle price');
-  const baseAsset: Asset = { symbol, address: base, supplied: n(supply, decimals), borrowed: n(borrow, decimals), priceUsd: n(price, 8), collateral: false, liquidationThreshold: null, liquidationPriceUsd: null };
+  let supplyRate = unavailableRate(); let borrowRate = unavailableRate();
+  try {
+    const rateCalls = [
+      { target: address, allowFailure: false, callData: encodeFunctionData({ abi, functionName: 'accrueAccount', args: [wallet] }) },
+      { target: address, allowFailure: false, callData: encodeFunctionData({ abi, functionName: 'getUtilization' }) },
+    ];
+    const response = await client.call({ to: multicall, data: encodeFunctionData({ abi: multiAbi, functionName: 'aggregate3', args: [rateCalls] }), blockNumber });
+    if (!response.data) throw new Error('Missing rate state');
+    const state = decodeFunctionResult({ abi: multiAbi, functionName: 'aggregate3', data: response.data });
+    if (state.length !== 2 || state.some(s => !s.success)) throw new Error('Rate simulation failed');
+    const utilization = decodeFunctionResult({ abi, functionName: 'getUtilization', data: state[1].returnData });
+    const [supplyRaw, borrowRaw] = await Promise.all([
+      client.readContract({ address, abi, functionName: 'getSupplyRate', args: [utilization], blockNumber }),
+      client.readContract({ address, abi, functionName: 'getBorrowRate', args: [utilization], blockNumber }),
+    ]);
+    supplyRate = rate(perSecondApr(supplyRaw), 'Current Compound base-token supply APR at accrued utilization; excludes COMP rewards.');
+    borrowRate = rate(perSecondApr(borrowRaw), 'Current Compound borrowing APR at accrued utilization; excludes COMP rewards.');
+  } catch { /* Rates unavailable; preserve account balances. */ }
+  const baseAsset: Asset = { supplyRate, borrowRate, symbol, address: base, supplied: n(supply, decimals), borrowed: n(borrow, decimals), priceUsd: n(price, 8), collateral: false, liquidationThreshold: null, liquidationPriceUsd: null };
   const collateral = await Promise.all(Array.from({ length: count }, async (_, i) => {
     const info = await client.readContract({ address, abi, functionName: 'getAssetInfo', args: [i], blockNumber });
     const balance = await client.readContract({ address, abi, functionName: 'collateralBalanceOf', args: [wallet, info.asset], blockNumber });
@@ -52,7 +74,7 @@ async function readMarket(client: ChainClient, wallet: Address, blockNumber: big
       client.readContract({ address, abi, functionName: 'getPrice', args: [info.priceFeed], blockNumber }),
     ]);
     if (assetPrice === 0n) throw new Error('Zero oracle price');
-    return { symbol: assetSymbol, address: info.asset, supplied: Number(balance) / Number(info.scale), borrowed: 0, priceUsd: n(assetPrice, 8), collateral: true, liquidationThreshold: n(info.liquidateCollateralFactor, 18), liquidationPriceUsd: null } satisfies Asset;
+    return { supplyRate: rate(0, 'Compound v3 collateral is not lent out and earns no protocol supply interest. Excludes intrinsic token yield and incentives.'), symbol: assetSymbol, address: info.asset, supplied: Number(balance) / Number(info.scale), borrowed: 0, priceUsd: n(assetPrice, 8), collateral: true, liquidationThreshold: n(info.liquidateCollateralFactor, 18), liquidationPriceUsd: null } satisfies Asset;
   }));
   const assets = [baseAsset, ...collateral.filter((a): a is NonNullable<typeof a> => a !== null)].filter(a => a.supplied > 0 || a.borrowed > 0);
   if (!assets.length) return null;

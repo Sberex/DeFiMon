@@ -16,7 +16,7 @@ const position = (id: bigint, type = 10000n) => {
   const smartDebt = type === 30000n || type === 40000n;
   return [
     { nftId: id, owner: wallet, isLiquidated: false, isSupplyPosition: false, supply: smartCol ? 4n * E18 : 10n * E18, borrow: smartDebt ? (smartCol ? E18 : 2n * E18) : (smartCol ? 12000n : 15000n) * E6, beforeSupply: 100n * E18, beforeBorrow: 100000n * E6 },
-    { vault: POOL, isSmartCol: smartCol, isSmartDebt: smartDebt, constantVariables: { vaultType: type, vaultId: 11n, supply: POOL, borrow: POOL, supplyToken: { token0: ETH, token1: smartCol ? USDC : ZERO }, borrowToken: { token0: USDC, token1: smartDebt ? USDT : ZERO } }, configs: { collateralFactor: 7000, liquidationThreshold: smartCol ? 8000 : 8500, oraclePriceLiquidate: smartDebt ? (smartCol ? 6n * 10n ** 26n : 3n * 10n ** 26n) : (smartCol ? 6n : 3n) * E18 } },
+    { vault: POOL, isSmartCol: smartCol, isSmartDebt: smartDebt, constantVariables: { vaultType: type, vaultId: 11n, supply: POOL, borrow: POOL, supplyToken: { token0: ETH, token1: smartCol ? USDC : ZERO }, borrowToken: { token0: USDC, token1: smartDebt ? USDT : ZERO } }, exchangePricesAndRates: { supplyRateVault: 300n, borrowRateVault: 500n }, configs: { collateralFactor: 7000, liquidationThreshold: smartCol ? 8000 : 8500, oraclePriceLiquidate: smartDebt ? (smartCol ? 6n * 10n ** 26n : 3n * 10n ** 26n) : (smartCol ? 6n : 3n) * E18 } },
   ] as const;
 };
 function mock(options: { types?: bigint[]; ids?: bigint[]; lending?: boolean; missingEthPrice?: boolean; missingDebtPrice?: boolean; failNft?: bigint; failDiscovery?: 'vault' | 'lending' | 'both'; zeroReserves?: boolean; zeroOracle?: boolean; liquidated?: boolean; closed?: boolean; sameToken?: boolean; chainlink?: boolean; staleRound?: boolean } = {}) {
@@ -71,6 +71,7 @@ describe('Fluid vaults', () => {
     expect(p.suppliedUsd).toBe(30000); expect(p.debtUsd).toBe(15000);
     expect(p.assets[0].symbol).toBe('ETH'); expect(p.assets[0].supplied).toBe(10);
     expect(p.healthFactor).toBeCloseTo(1.7); expect(p.risk).toBe('lower');
+    expect(p.assets[0].supplyRate?.apr).toBe(0.03); expect(p.assets.find(a => a.borrowed > 0)?.borrowRate?.apr).toBe(0.05);
     expect(p.assets[0].liquidationPriceUsd).toBeCloseTo(1764.705882);
     expect(p.liquidationQuote?.current).toBeCloseTo(3000);
     expect(p.liquidationQuote?.threshold).toBeCloseTo(1764.705882);

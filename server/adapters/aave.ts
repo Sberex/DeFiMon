@@ -1,6 +1,7 @@
 import { formatUnits, parseAbi, type Address } from 'viem';
 import type { ProtocolResult, Asset, NetworkId } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
+import { rate, unavailableRate, rayApr } from '../rates.js';
 import { networks } from '../networks.js';
 import { liquidationPrices, riskLevel } from '../risk.js';
 const providerAbi = parseAbi([
@@ -13,6 +14,7 @@ const poolAbi = parseAbi([
   'function getUserEMode(address user) view returns (uint256)',
 ]);
 const dataAbi = parseAbi([
+  'function getReserveData(address asset) view returns (uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint40)',
   'function getAllReservesTokens() view returns ((string symbol, address tokenAddress)[])',
   'function getUserReserveData(address asset, address user) view returns (uint256 currentATokenBalance, uint256 currentStableDebt, uint256 currentVariableDebt, uint256 principalStableDebt, uint256 scaledVariableDebt, uint256 stableBorrowRate, uint256 liquidityRate, uint40 stableRateLastUpdated, bool usageAsCollateralEnabled)',
   'function getReserveConfigurationData(address asset) view returns (uint256 decimals, uint256 ltv, uint256 liquidationThreshold, uint256 liquidationBonus, uint256 reserveFactor, bool usageAsCollateralEnabled, bool borrowingEnabled, bool stableBorrowRateEnabled, bool isActive, bool isFrozen)',
@@ -38,7 +40,15 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
       client.readContract({ address: oracle, abi: oracleAbi, functionName: 'getAssetPrice', args: [reserve.tokenAddress], blockNumber }),
     ]);
     if (price === 0n) throw new Error('Oracle returned a zero price');
-    return { symbol: reserve.symbol, address: reserve.tokenAddress, supplied: n(balances[0], Number(config[0])), borrowed: n(balances[1] + balances[2], Number(config[0])), priceUsd: Number(price) / Number(unit), collateral: balances[8] && config[2] > 0n, liquidationThreshold: emode === 0n ? Number(config[2]) / 1e4 : null, liquidationPriceUsd: null } satisfies Asset;
+    let borrowRate = unavailableRate();
+    if (balances[1] + balances[2] > 0n) {
+      try {
+        const rates = await client.readContract({ address: data, abi: dataAbi, functionName: 'getReserveData', args: [reserve.tokenAddress], blockNumber });
+        const annual = (Number(balances[1]) * rayApr(balances[5]) + Number(balances[2]) * rayApr(rates[6])) / Number(balances[1] + balances[2]);
+        borrowRate = rate(annual, 'Current Aave borrowing APR; stable and variable debt are weighted by this wallet’s balances. Excludes reward-token incentives.');
+      } catch { /* A missing rate must not discard balances or liquidation risk. */ }
+    }
+    return { supplyRate: rate(rayApr(balances[6]), 'Current Aave liquidity APR, without compounding or reward-token incentives.'), borrowRate, symbol: reserve.symbol, address: reserve.tokenAddress, supplied: n(balances[0], Number(config[0])), borrowed: n(balances[1] + balances[2], Number(config[0])), priceUsd: Number(price) / Number(unit), collateral: balances[8] && config[2] > 0n, liquidationThreshold: emode === 0n ? Number(config[2]) / 1e4 : null, liquidationPriceUsd: null } satisfies Asset;
   }))).filter((asset): asset is NonNullable<typeof asset> => asset !== null);
   const debtUsd = Number(account[1]) / Number(unit);
   const suppliedUsd = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd!, 0);

@@ -5,7 +5,7 @@ import type { ChainClient } from '../server/rpc';
 const wallet = '0x1111111111111111111111111111111111111111';
 const token = '0x2222222222222222222222222222222222222222';
 const multiAbi = parseAbi(['function aggregate3((address target, bool allowFailure, bytes callData)[] calls) payable returns ((bool success, bytes returnData)[] returnData)']);
-const balanceAbi = parseAbi(['function balanceOf(address) view returns (uint256)', 'function borrowBalanceOf(address) view returns (uint256)', 'function accrueAccount(address)']);
+const balanceAbi = parseAbi(['function getUtilization() view returns (uint256)', 'function balanceOf(address) view returns (uint256)', 'function borrowBalanceOf(address) view returns (uint256)', 'function accrueAccount(address)']);
 it('simulates accrual before balances, uses liquidation factors, and pins all reads', async () => {
   let simulations = 0;
   const blocks: bigint[] = [];
@@ -15,6 +15,10 @@ it('simulates accrual before balances, uses liquidation factors, and pins all re
       const batch = decodeFunctionData({ abi: multiAbi, data });
       const calls = batch.args[0];
       const methods = calls.map(c => decodeFunctionData({ abi: balanceAbi, data: c.callData }).functionName);
+      if (methods.length === 2) {
+        expect(methods).toEqual(['accrueAccount', 'getUtilization']);
+        return { data: encodeFunctionResult({ abi: multiAbi, functionName: 'aggregate3', result: [{ success: true, returnData: '0x' }, { success: true, returnData: encodeFunctionResult({ abi: balanceAbi, functionName: 'getUtilization', result: 500000000000000000n }) }] }) };
+      }
       expect(methods).toEqual(['accrueAccount', 'balanceOf', 'borrowBalanceOf']);
       expect(calls.every(c => !c.allowFailure)).toBe(true);
       return { data: encodeFunctionResult({ abi: multiAbi, functionName: 'aggregate3', result: [
@@ -26,6 +30,8 @@ it('simulates accrual before balances, uses liquidation factors, and pins all re
     readContract: async ({ functionName, blockNumber }: { functionName: string; blockNumber: bigint }) => {
       blocks.push(blockNumber);
       switch (functionName) {
+        case 'getSupplyRate': return 1000000000n;
+        case 'getBorrowRate': return 2000000000n;
         case 'baseToken': case 'baseTokenPriceFeed': return token;
         case 'numAssets': return 1;
         case 'symbol': return 'TEST';
@@ -38,11 +44,13 @@ it('simulates accrual before balances, uses liquidation factors, and pins all re
     },
   } as unknown as ChainClient;
   const result = await readCompound(client, wallet, 500n);
-  expect(simulations).toBe(2);
+  expect(simulations).toBe(4);
   expect(result.positions).toHaveLength(2);
   expect(result.positions[0].suppliedUsd).toBe(2000);
   expect(result.positions[0].debtUsd).toBe(1000);
   expect(result.positions[0].healthFactor).toBeCloseTo(1.6);
   expect(result.positions[0].assets.find(a => a.collateral)?.liquidationPriceUsd).toBeCloseTo(.625);
+  expect(result.positions[0].assets.find(a => a.borrowed > 0)?.borrowRate?.apr).toBeCloseTo(0.063072);
+  expect(result.positions[0].assets.find(a => a.collateral)?.supplyRate?.apr).toBe(0);
   expect(blocks.every(b => b === 500n)).toBe(true);
 });

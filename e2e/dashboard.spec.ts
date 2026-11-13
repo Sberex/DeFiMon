@@ -311,3 +311,34 @@ test('keeps unpriced and receipt-token amounts out of wallet net value while sho
   await expect(section.getByText(/Lending receipt token/)).toBeVisible();
   await expect(page.getByText(/Wallet totals exclude 1 unpriced/)).toBeVisible();
 });
+
+test('shows current supply and borrow APR by asset, including genuine zero collateral interest', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  const aave = page.locator('article.aave-v3[data-chain="Ethereum"]');
+  await expect(aave.getByRole('columnheader', { name: 'Supply APR', exact: true })).toBeVisible();
+  await expect(aave.getByRole('columnheader', { name: 'Borrow APR', exact: true })).toBeVisible();
+  await expect(aave.getByText('3.50%', { exact: false })).toBeVisible();
+  await expect(aave.getByText('5.50%', { exact: false })).toBeVisible();
+  const compound = page.locator('article.compound');
+  await expect(compound.getByText('0.00%', { exact: false })).toBeVisible();
+  await expect(page.getByText(/Example only — all balances/)).toBeVisible();
+});
+
+test('labels estimated and unavailable rates without hiding supplied values or risk', async ({ page }) => {
+  const fixture = structuredClone(combinedExample);
+  const fluid = fixture.protocols.find(p => p.id === 'fluid' && p.chain === 'Plasma')!;
+  fluid.positions[0].assets[0].supplyRate = { apr: -0.01, estimated: true, note: 'Interest component only; excludes pool trading income.' };
+  fluid.positions[0].assets[1].borrowRate = { apr: null, note: 'Rate lookup unavailable.' };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.fluid[data-chain="Plasma"]');
+  await expect(card.getByText('≈ -1.00%', { exact: false })).toBeVisible();
+  await expect(card.getByText('Unavailable', { exact: true })).toBeVisible();
+  await expect(card.getByText('$1,500.00', { exact: true })).toBeVisible();
+  await expect(card.getByText('3.20', { exact: true })).toBeVisible();
+  await card.getByText('Estimate details', { exact: true }).click();
+  await expect(card.getByText('Interest component only; excludes pool trading income.', { exact: true })).toBeVisible();
+});

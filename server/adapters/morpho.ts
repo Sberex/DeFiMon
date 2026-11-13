@@ -2,6 +2,8 @@ import { decodeFunctionResult, encodeAbiParameters, encodeFunctionData, formatUn
 import type { Asset, Position, ProtocolResult } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
 import { MorphoDiscoveryUnavailable } from '../morpho-errors.js';
+import { createMorphoRates } from '../morpho-rates.js';
+import { rate, weightedRate } from '../rates.js';
 import { riskLevel } from '../risk.js';
 import { fetchMorphoDiscovery, MORPHO_BLUE, type MorphoDiscovery, type MorphoMarketRef, type MorphoToken, type MorphoVaultRef } from '../morpho-discovery.js';
 import { morphoCoreAbi as coreAbi, morphoFactoryAbi as factoryAbi, morphoMulticallAbi as multiAbi, morphoOracleAbi as oracleAbi, morphoVaultAbi as vaultAbi } from '../abis/morpho.js';
@@ -41,6 +43,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
   const discovery = await discover(wallet);
   if (!discovery.successfulFamilies) throw new MorphoDiscoveryUnavailable(discovery.failures ?? []);
   const warnings = new Set(discovery.warnings);
+  const interest = createMorphoRates(client, blockNumber);
   const metadata = new Map<string, Promise<{ symbol: string; decimals: number }>>();
   async function token(t: MorphoToken) {
     const key = t.address.toLowerCase();
@@ -87,18 +90,20 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
         catch { warnings.add('Some Morpho liquidation oracle data is unavailable. Those borrowing risks are unknown.'); }
       }
       const health = morphoHealth(position.collateral, borrowRaw, oraclePrice, params.lltv);
-      const loanAsset: Asset = { symbol: loan.symbol, address: loan.address, supplied: units(supplyRaw, loan.decimals), borrowed: units(borrowRaw, loan.decimals), priceUsd: loan.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null };
+      const currentRates = await interest.market(params, market);
+      const loanAsset: Asset = { ...currentRates, symbol: loan.symbol, address: loan.address, supplied: units(supplyRaw, loan.decimals), borrowed: units(borrowRaw, loan.decimals), priceUsd: loan.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null };
       const assets = [loanAsset];
       let collateralAsset: Asset | undefined;
       if (collateral) {
         const quantity = units(position.collateral, collateral.decimals);
         if (same(collateral.address, loan.address)) {
           collateralAsset = loanAsset;
+          loanAsset.supplyRate = weightedRate(loanAsset.supplyRate, loanAsset.supplied, rate(0, 'Morpho collateral itself earns no protocol lending interest.'), quantity);
           loanAsset.supplied += quantity;
           loanAsset.collateral = true;
           loanAsset.liquidationThreshold = loanAsset.supplied > 0 ? units(params.lltv, 18) * quantity / loanAsset.supplied : null;
         } else {
-          collateralAsset = { symbol: collateral.symbol, address: collateral.address, supplied: quantity, borrowed: 0, priceUsd: collateral.priceUsd, collateral: true, liquidationThreshold: units(params.lltv, 18), liquidationPriceUsd: null };
+          collateralAsset = { supplyRate: rate(0, 'Morpho collateral is not lent out and earns no protocol interest. Intrinsic token yield is separate.'), symbol: collateral.symbol, address: collateral.address, supplied: quantity, borrowed: 0, priceUsd: collateral.priceUsd, collateral: true, liquidationThreshold: units(params.lltv, 18), liquidationPriceUsd: null };
           assets.push(collateralAsset);
         }
       }
@@ -154,10 +159,11 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
         if (supply + virtual === 0n || shares > supply) throw new Error('Invalid vault accounting');
         raw = shares * (assets + 1n) / (supply + virtual);
       }
+      const supplyRate = await interest.vault(ref.address, ref.version, ref.asset.address);
       const underlyingToken = await token(ref.asset); const supplied = units(raw, underlyingToken.decimals);
       const suppliedUsd = underlyingToken.priceUsd === null ? null : supplied * underlyingToken.priceUsd;
       if (suppliedUsd === null) warnings.add('Some Morpho vaults have unavailable USD prices. Their underlying token quantities are still shown.');
-      return { id: `morpho-vault-${ref.address}`, label: `Morpho vault V${ref.version} · ${ref.name}`, suppliedUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ address: underlyingToken.address, symbol: underlyingToken.symbol, supplied, borrowed: 0, priceUsd: underlyingToken.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Vault shares are converted once to current underlying assets. The vault’s own loans are not added again as wallet deposits.', ref.version === 2 ? 'Vault V2 interest and fee-share minting are simulated in one read-only call before valuing this position.' : 'Vault V1 underlying value comes from its current ERC-4626 share conversion.', 'This is a deposit-only holding: there is no wallet borrowing balance or collateral liquidation price.'] };
+      return { id: `morpho-vault-${ref.address}`, label: `Morpho vault V${ref.version} · ${ref.name}`, suppliedUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ supplyRate, address: underlyingToken.address, symbol: underlyingToken.symbol, supplied, borrowed: 0, priceUsd: underlyingToken.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Vault shares are converted once to current underlying assets. The vault’s own loans are not added again as wallet deposits.', ref.version === 2 ? 'Vault V2 interest and fee-share minting are simulated in one read-only call before valuing this position.' : 'Vault V1 underlying value comes from its current ERC-4626 share conversion.', 'This is a deposit-only holding: there is no wallet borrowing balance or collateral liquidation price.'] };
     } catch {
       warnings.add('Some Morpho vault holdings could not be read or verified. Their balances are unknown.');
       return unknown(`morpho-vault-${ref.address}`, `Morpho vault · ${ref.name}`);

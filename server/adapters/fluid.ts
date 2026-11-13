@@ -1,6 +1,7 @@
 import { formatUnits, parseAbi, type Address, type ContractFunctionReturnType } from 'viem';
 import type { Asset, Position, ProtocolResult, NetworkId } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
+import { applyFluidRates, fluidLendingRate } from '../fluid-rates.js';
 import { networks } from '../networks.js';
 import { riskLevel } from '../risk.js';
 import { dexResolverAbi, lendingResolverAbi, vaultResolverAbi } from '../abis/fluid.js';
@@ -124,10 +125,11 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
         sideAssets(position.supply, vault.isSmartCol, c.supply, c.supplyToken, 'supplied'),
         sideAssets(position.borrow, vault.isSmartDebt, c.borrow, c.borrowToken, 'borrowed'),
       ]);
+      await applyFluidRates(client, deployment.fluid.dex, blockNumber, vault, supply, debt);
       const assets: Asset[] = [];
       for (const asset of [...supply, ...debt]) {
         const existing = assets.find(a => a.address.toLowerCase() === asset.address.toLowerCase());
-        if (existing) { existing.supplied += asset.supplied; existing.borrowed += asset.borrowed; existing.collateral ||= asset.collateral; }
+        if (existing) { existing.supplied += asset.supplied; existing.borrowed += asset.borrowed; existing.collateral ||= asset.collateral; if (asset.borrowed > 0) existing.borrowRate = asset.borrowRate; if (asset.supplied > 0) existing.supplyRate = asset.supplyRate; }
         else assets.push({ ...asset });
       }
       const threshold = vault.configs.liquidationThreshold;
@@ -183,9 +185,10 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
       ]);
       const token = await getToken(underlying);
       const supplied = amount(raw, token.decimals);
+      const supplyRate = await fluidLendingRate(client, deployment.fluid.lending, fToken, blockNumber);
       if (raw === 0n) throw new Error('Unexpected zero assets');
       if (token.priceUsd === null) warnings.add('Some lending deposits have no verified USD price. Their dollar values are unknown.');
-      return { id: `fluid-lending-${fToken}`, label: `${token.symbol} lending deposit`, suppliedUsd: token.priceUsd === null ? null : supplied * token.priceUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ symbol: token.symbol, address: token.address, supplied, borrowed: 0, priceUsd: token.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['fToken shares are converted to current underlying assets, including accrued interest. Shares are not added a second time.', 'This is a lending-only deposit. It has no borrowing position or collateral liquidation price.'] };
+      return { id: `fluid-lending-${fToken}`, label: `${token.symbol} lending deposit`, suppliedUsd: token.priceUsd === null ? null : supplied * token.priceUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ supplyRate, symbol: token.symbol, address: token.address, supplied, borrowed: 0, priceUsd: token.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['fToken shares are converted to current underlying assets, including accrued interest. Shares are not added a second time.', 'This is a lending-only deposit. It has no borrowing position or collateral liquidation price.'] };
     } catch {
       warnings.add('Some Fluid lending deposits could not be checked. Their balances are unknown.');
       return unknownPosition(`fluid-lending-${fToken}`, `Fluid lending · ${fToken.slice(0, 8)}…`);

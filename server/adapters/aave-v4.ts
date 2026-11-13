@@ -1,6 +1,8 @@
 import { formatUnits, type Address, type ContractFunctionReturnType } from 'viem';
 import type { Asset, Position, ProtocolResult } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
+import { readV4HubRates, v4BorrowRate } from '../aave-v4-rates.js';
+import { unavailableRate, weightedRate } from '../rates.js';
 import { liquidationPrices, riskLevel } from '../risk.js';
 import { aaveV4SpokeAbi as spokeAbi, aaveV4OracleAbi as oracleAbi, aaveV4TokenAbi as tokenAbi } from '../abis/aave-v4.js';
 import { AAVE_V4_SPOKES, AAVE_V4_TOKENIZATION_SPOKES } from '../deployments/aave-v4.js';
@@ -34,6 +36,8 @@ export function mergeV4Assets(assets: Asset[]): Asset[] {
     else {
       // Different oracle valuations for one token cannot be collapsed into one price scenario safely.
       if (existing.asset.priceUsd !== a.priceUsd) throw new Error('Inconsistent reserve prices for the same underlying');
+      existing.asset.supplyRate = weightedRate(existing.asset.supplyRate, existing.asset.supplied, a.supplyRate, a.supplied);
+      existing.asset.borrowRate = weightedRate(existing.asset.borrowRate, existing.asset.borrowed, a.borrowRate, a.borrowed);
       existing.asset.supplied += a.supplied;
       existing.asset.borrowed += a.borrowed;
       existing.asset.collateral ||= a.collateral;
@@ -46,6 +50,12 @@ export function mergeV4Assets(assets: Asset[]): Asset[] {
 export async function readAaveV4(client: ChainClient, wallet: Address, blockNumber: bigint, deployment: Deployment = deployed): Promise<ProtocolResult> {
   const warnings = new Set<string>();
   let verifiedChecks = 0;
+  const rateCache = new Map<string, ReturnType<typeof readV4HubRates>>();
+  function hubRates(hub: Address, assetId: bigint, underlying: Address) {
+    const key = `${hub.toLowerCase()}:${assetId}`;
+    if (!rateCache.has(key)) rateCache.set(key, readV4HubRates(client, hub, assetId, underlying, blockNumber));
+    return rateCache.get(key)!;
+  }
   const oracleCache = new Map<string, Promise<Address>>();
   const tokenCache = new Map<string, Promise<{ symbol: string; decimals: number }>>();
   function getOracle(market: Market): Promise<Address> {
@@ -100,7 +110,8 @@ export async function readAaveV4(client: ChainClient, wallet: Address, blockNumb
           const price = await client.readContract({ address: oracle, abi: oracleAbi, functionName: 'getReservePrice', args: [id], blockNumber });
           if (price > 0n) priceUsd = units(price, 8);
         } catch { /* Keep balances when a valuation feed is unavailable. */ }
-        return { address: reserve.underlying, symbol: token.symbol, supplied: units(supplied, reserve.decimals), borrowed: units(borrowed, reserve.decimals), priceUsd, collateral: status[0] && (config?.collateralFactor ?? 0) > 0, liquidationThreshold: config ? config.collateralFactor / 10000 : null, liquidationPriceUsd: null };
+        const interest = await hubRates(reserve.hub, BigInt(reserve.assetId), reserve.underlying);
+        return { supplyRate: interest?.supplyRate ?? unavailableRate(), borrowRate: v4BorrowRate(interest, user, borrowed), address: reserve.underlying, symbol: token.symbol, supplied: units(supplied, reserve.decimals), borrowed: units(borrowed, reserve.decimals), priceUsd, collateral: status[0] && (config?.collateralFactor ?? 0) > 0, liquidationThreshold: config ? config.collateralFactor / 10000 : null, liquidationPriceUsd: null };
       })).filter((a): a is Asset => a !== null));
       const [account, usdUnitsVerified] = await Promise.all([accountResult, oracleVerified]);
       if (!assets.length && account.ok && account.value.totalDebtValueRay === 0n) { verifiedChecks++; return null; }
@@ -155,7 +166,8 @@ export async function readAaveV4(client: ChainClient, wallet: Address, blockNumb
       if (priceUsd === null) warnings.add('Some Aave v4 tokenized deposits have no verified USD price. Their token balances are still shown.');
       verifiedChecks++;
       const quantity = units(supplied, token.decimals);
-      return { id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label} tokenized deposit`, suppliedUsd: priceUsd === null ? null : quantity * priceUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ address: underlying, symbol: token.symbol, supplied: quantity, borrowed: 0, priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Tokenized deposit shares are converted once to current underlying assets. The underlying is not counted a second time.', 'This deposit-only contract has no borrowing position or collateral liquidation price.', 'USD valuation uses an Aave v4 reserve for the same hub and asset; it is not a withdrawal guarantee.'] };
+      const interest = await hubRates(hub, assetId, underlying);
+      return { id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label} tokenized deposit`, suppliedUsd: priceUsd === null ? null : quantity * priceUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ supplyRate: interest?.supplyRate ?? unavailableRate(), address: underlying, symbol: token.symbol, supplied: quantity, borrowed: 0, priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Tokenized deposit shares are converted once to current underlying assets. The underlying is not counted a second time.', 'This deposit-only contract has no borrowing position or collateral liquidation price.', 'USD valuation uses an Aave v4 reserve for the same hub and asset; it is not a withdrawal guarantee.'] };
     } catch {
       warnings.add('Some Aave v4 tokenized-deposit contracts could not be checked. Their balances are unknown.');
       return unknownMarket(market, true);

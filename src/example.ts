@@ -59,3 +59,9 @@ export const combinedExample: Portfolio = {
     }];
   }),
 };
+
+// Fictional current APRs, never used by live readers.
+for (const portfolio of [example, combinedExample]) for (const protocol of portfolio.protocols) for (const position of protocol.positions) for (const asset of position.assets) {
+  if (asset.supplied > 0) asset.supplyRate = { apr: (protocol.id === 'compound' && asset.collateral) || (protocol.id === 'morpho' && asset.collateral) ? 0 : 0.035, note: 'Illustrative APR only; real rates are read on refresh.' };
+  if (asset.borrowed > 0) asset.borrowRate = { apr: 0.055, note: 'Illustrative APR only; real rates can change.' };
+}

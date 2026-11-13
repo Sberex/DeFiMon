@@ -50,3 +50,29 @@ it('uses the official Plasma addresses provider with balances and liquidation ca
   expect(result.positions[0].assets[0].liquidationPriceUsd).toBeCloseTo(1764.705882);
   expect(blocks.every(b => b === 777n)).toBe(true);
 });
+
+it('shows current supply APR and the wallet-weighted stable/variable borrowing APR', async () => {
+  const f = fixture();
+  const client = { ...f.client, readContract: async (args: any) => {
+    if (args.functionName === 'getUserReserveData') return [10n * 10n ** 18n, 2n * 10n ** 18n, 3n * 10n ** 18n, 0n, 0n, 4n * 10n ** 25n, 3n * 10n ** 25n, 0n, true];
+    if (args.functionName === 'getReserveData') return [0n, 0n, 0n, 0n, 0n, 3n * 10n ** 25n, 6n * 10n ** 25n, 0n, 0n, 0n, 0n, 1n];
+    return f.client.readContract(args);
+  } } as unknown as ChainClient;
+  const result = await readAave(client, wallet, 100n);
+  expect(result.positions[0].assets[0].supplyRate?.apr).toBeCloseTo(0.03);
+  expect(result.positions[0].assets[0].borrowRate?.apr).toBeCloseTo(0.052);
+});
+
+it('keeps borrowing balances and native risk when a current rate lookup fails', async () => {
+  const f = fixture();
+  const client = { ...f.client, readContract: async (args: any) => {
+    if (args.functionName === 'getUserReserveData') return [10n * 10n ** 18n, 0n, 5n * 10n ** 18n, 0n, 0n, 0n, 0n, 0n, true];
+    if (args.functionName === 'getReserveData') throw new Error('https://private-provider/api-key');
+    return f.client.readContract(args);
+  } } as unknown as ChainClient;
+  const result = await readAave(client, wallet, 100n);
+  expect(result.positions[0].assets[0].borrowed).toBe(5);
+  expect(result.positions[0].assets[0].borrowRate?.apr).toBeNull();
+  expect(result.positions[0].healthFactor).toBe(1.7);
+  expect(JSON.stringify(result)).not.toContain('api-key');
+});

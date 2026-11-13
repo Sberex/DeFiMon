@@ -10,10 +10,12 @@ export interface WalletBalances {
   pricedValueUsd: number | null; unpricedCount: number; coverage: string; message?: string;
 }
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
+export interface InterestRate { apr: number | null; note: string; estimated?: boolean }
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
   collateral: boolean; liquidationThreshold: number | null; liquidationPriceUsd: number | null;
   priceSource?: 'fluid-oracle';
+  supplyRate?: InterestRate; borrowRate?: InterestRate;
 }
 export interface Position {
   id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;
