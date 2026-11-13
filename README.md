@@ -60,6 +60,29 @@ The website requests `/api/portfolio/0xYourWalletAddress?chain=all`, which retur
 
 Validation: deterministic reader, network-routing, provider-selection, and browser checks cover Plasma. This cloud environment denied access to `rpc.plasma.to` (CONNECT 403), so a live Plasma wallet comparison is still required on a computer or host that can reach the provider. No cloud environment settings have been published by this change.
 
+## Wallet token balances
+
+The **Wallet tokens** section shows Ethereum first, then Plasma. It includes native **ETH** and **XPL**, the supported ERC-20 token list, and any additional token contracts you enter. Ethereum’s default list includes USDe, USDT, USDC, EUL, COMP, and the user-selected **WFRAX** at `0x04acaf8d2865c0714f79da09645c13fd2888977f`. WFRAX’s symbol and 18 decimals were checked on Ethereum and its address matches Frax’s official deployment list. Other symbols are read from their actual token contracts rather than guessed from names.
+
+**Net value = priced wallet tokens + priced lending deposits − borrowing.** The Total supplied and Total borrowed cards still describe lending positions; ordinary wallet holdings appear in the wallet section. These holdings do not change a borrowing position’s health factor or liquidation rules.
+
+The scanner checks a pinned list of common Ethereum tokens (Uniswap’s default list plus Aave underlyings and WFRAX) and Plasma assets from the official Aave/Fluid deployments. It is **not** an indexer that can discover every token ever sent to a wallet. Only nonzero ERC-20 balances are listed; native currency is always shown. To check another token, open **Add another token**, choose its network, paste its contract address, and select **Add token**. Up to 20 additional contracts are allowed per search. Adding/removing a token refreshes the currently displayed wallet; Refresh retains the added contracts. This list stays only in the open page and clears on a page reload.
+
+Balances and token decimals use the same per-network block as lending positions. Prices first use the selected network’s Aave oracle, then Ethereum’s Chainlink registry where available. A public DefiLlama Coins API lookup supplies remaining prices without an API key. That optional service needs outbound HTTPS access to **`coins.llama.fi`**; it receives network/token addresses, not the searched wallet or provider credentials. Quotes must have matching token decimals, confidence of at least 0.9, and a timestamp within the last hour (with at most five minutes of future clock tolerance). USD prices may update at a different time than the displayed block. No stablecoin is assumed to equal $1.
+
+If a balance, price, or token metadata cannot be read, it stays unknown and warnings identify incomplete coverage. Net value includes only known priced amounts. Lending receipt tokens represented by the supported protocol readers (Aave v3 aTokens, Aave v4 tokenized deposits, Compound v3 receipts, Fluid fTokens, and discovered Morpho vault shares) are excluded from wallet totals. If the receipt-token checks fail, ERC-20 values are excluded from the total until they can be checked; native currency remains independent.
+
+Token-list provenance is recorded in `server/deployments/wallet-tokens.ts`, with the upstream MIT license included alongside it. Live Ethereum validation read native ETH and ERC-20 balances and valued ETH, USDe, and COMP using on-chain prices. This cloud still blocks Plasma and the external fallback price service, so their live paths require validation on a host that can reach those services.
+
+A standalone balance diagnostic is available:
+
+```sh
+npm run check:wallet -- 0xYourWalletAddress ethereum
+npm run check:wallet -- 0xYourWalletAddress plasma
+```
+
+The API accepts extra contracts as `tokens=ethereum:0xTokenAddress,plasma:0xTokenAddress` alongside `chain=all` (or a per-network request). Contract inputs are validated and deduplicated; no provider URL can be supplied through this parameter.
+
 ## Hosting
 
 The simplest deployment for this implementation is one **Node web service**, for example on Render. A static-only host will not run the API.

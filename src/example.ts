@@ -34,6 +34,15 @@ export const example: Portfolio = {
 // Separate, explicitly fictional Plasma positions for the combined example.
 export const combinedExample: Portfolio = {
   ...example, chain: 'Ethereum + Plasma', blockNumber: null,
+  wallets: [
+    { chain: 'Ethereum', status: 'ok', pricedValueUsd: 6500, unpricedCount: 0, coverage: 'Illustrative wallet tokens only.', tokens: [
+      { address: 'native', symbol: 'ETH', balance: 2, priceUsd: 3000, valueUsd: 6000 },
+      { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', balance: 500, priceUsd: 1, valueUsd: 500 },
+    ] },
+    { chain: 'Plasma', status: 'ok', pricedValueUsd: 500, unpricedCount: 0, coverage: 'Illustrative wallet tokens only.', tokens: [
+      { address: 'native', symbol: 'XPL', balance: 1000, priceUsd: 0.5, valueUsd: 500 },
+    ] },
+  ],
   protocols: example.protocols.flatMap(protocol => {
     const ethereum = { ...protocol, chain: 'Ethereum' as const };
     if (protocol.id !== 'aave-v3' && protocol.id !== 'fluid') return [ethereum];

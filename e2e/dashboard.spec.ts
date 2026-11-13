@@ -5,7 +5,7 @@ test('shows clearly labeled example positions and partial protocol coverage', as
   await expect(page.getByRole('heading', { name: /Know where/ })).toBeVisible();
   await page.getByRole('button', { name: /Explore an example/ }).click();
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
-  await expect(page.getByText('$36,000.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('$43,000.00', { exact: true })).toBeVisible();
   await expect(page.getByText('Not connected', { exact: true })).toHaveCount(0);
   await expect(page.getByText('$2,117.65', { exact: true })).toBeVisible();
   await page.screenshot({ path: '/tmp/defimon-desktop.png', fullPage: true });
@@ -19,7 +19,7 @@ test('rejects invalid input and displays provider failures without example balan
   await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByRole('alert')).toContainText('Ethereum data is unavailable');
-  await expect(page.getByText('$36,000.00', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('$43,000.00', { exact: true })).toHaveCount(0);
 });
 test('searches and refreshes the displayed wallet rather than an edited address', async ({ page }) => {
   let reads = 0;
@@ -169,10 +169,10 @@ test('shows both networks grouped by protocol, refreshes both, and fits on mobil
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByText(/Coverage: 7 of 7 protocol readers completed on Ethereum \+ Plasma/)).toBeVisible();
   await expect(page.locator('article.protocol')).toHaveCount(7);
-  await expect(page.locator('.protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Compound · Ethereum', 'Fluid · Ethereum', 'Fluid · Plasma']);
+  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Compound · Ethereum', 'Fluid · Ethereum', 'Fluid · Plasma']);
   await expect(page.getByText(/Ethereum · Block 901/)).toBeVisible();
   await expect(page.getByText(/Plasma · Block 1901/)).toBeVisible();
-  await expect(page.getByText('$36,000.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('$43,000.00', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Refresh' }).click();
   await expect(page.getByText(/Ethereum · Block 902/)).toBeVisible();
   await expect(page.getByText(/Plasma · Block 1902/)).toBeVisible();
@@ -237,6 +237,7 @@ test('shows supplied and net USD estimates for Plasma sUSDai collateral with the
 test('keeps Ethereum results when Plasma fails and never calls unavailable Plasma balances zero', async ({ page }) => {
   const fixture = structuredClone(combinedExample);
   fixture.protocols = fixture.protocols.map(p => p.chain === 'Plasma' ? { ...p, status: 'error', positions: [], message: 'Plasma connection unavailable. Its balances and risk are unknown.' } : p);
+  fixture.wallets = fixture.wallets?.map(w => w.chain === 'Plasma' ? { ...w, status: 'error', tokens: [], pricedValueUsd: null, message: 'Wallet balances unknown.' } : w);
   fixture.networks = [
     { chain: 'Ethereum', status: 'ok', blockNumber: '101', updatedAt: new Date().toISOString() },
     { chain: 'Plasma', status: 'error', blockNumber: null, updatedAt: new Date().toISOString() },
@@ -245,7 +246,7 @@ test('keeps Ethereum results when Plasma fails and never calls unavailable Plasm
   await page.goto('/');
   await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.getByText('$31,500.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('$38,000.00', { exact: true })).toBeVisible();
   await expect(page.getByText('Plasma · Connection unavailable', { exact: true })).toBeVisible();
   const plasma = page.locator('article.fluid[data-chain="Plasma"]');
   await expect(plasma.getByText('Unavailable', { exact: true })).toBeVisible();
@@ -253,4 +254,60 @@ test('keeps Ethereum results when Plasma fails and never calls unavailable Plasm
   await expect(plasma.getByText(/No positions found/)).toHaveCount(0);
   await expect(plasma.getByText('$0.00', { exact: true })).toHaveCount(0);
   await expect(page.locator('article.fluid[data-chain="Ethereum"]').getByText('Checked', { exact: true })).toBeVisible();
+});
+
+test('adds wallet tokens to net value and groups them Ethereum then Plasma', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  await expect(page.locator('.wallet-network .protocol-name h2')).toHaveText(['Wallet tokens · Ethereum', 'Wallet tokens · Plasma']);
+  const ethereum = page.locator('.wallet-network[data-chain="Ethereum"]');
+  const plasma = page.locator('.wallet-network[data-chain="Plasma"]');
+  await expect(ethereum.getByText('ETH', { exact: true })).toBeVisible();
+  await expect(ethereum.getByText('$6,000.00', { exact: true })).toBeVisible();
+  await expect(plasma.getByText('XPL', { exact: true })).toBeVisible();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$43,000.00');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(plasma.getByText('XPL', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-wallet-tokens-mobile.png', fullPage: true });
+});
+
+test('adds and removes a token contract on its selected network and refreshes the displayed wallet', async ({ page }) => {
+  const queries: string[] = [];
+  await page.route('**/api/portfolio/*', route => {
+    const url = new URL(route.request().url());
+    expect(url.pathname).toContain(example.address);
+    queries.push(url.searchParams.get('tokens') ?? '');
+    return route.fulfill({ json: combinedExample });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.wallet-network')).toHaveCount(2);
+  await page.getByText('Add another token', { exact: true }).click();
+  await page.getByLabel('Token network').selectOption('plasma');
+  await page.getByLabel('Token contract address').fill('0x2222222222222222222222222222222222222222');
+  await page.getByRole('button', { name: 'Add token', exact: true }).click();
+  await expect(page.locator('.wallet-network')).toHaveCount(2);
+  expect(queries.at(-1)).toBe('plasma:0x2222222222222222222222222222222222222222');
+  await page.getByRole('button', { name: 'Remove', exact: true }).click();
+  await expect(page.locator('.wallet-network')).toHaveCount(2);
+  expect(queries.at(-1)).toBe('');
+});
+
+test('keeps unpriced and receipt-token amounts out of wallet net value while showing their balances', async ({ page }) => {
+  const fixture = structuredClone(combinedExample);
+  const wallet = fixture.wallets![0]; wallet.status = 'partial'; wallet.unpricedCount = 1;
+  wallet.message = 'Some wallet prices are unavailable; unpriced values are excluded.';
+  wallet.tokens.push({ address: '0x3333333333333333333333333333333333333333', symbol: 'EUL', balance: 5, priceUsd: null, valueUsd: null });
+  wallet.tokens.push({ address: '0x4444444444444444444444444444444444444444', symbol: 'aUSDC', balance: 10000, priceUsd: null, valueUsd: null, excludedReason: 'Lending receipt token: its underlying value belongs in the protocol section.' });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$43,000.00');
+  const section = page.locator('.wallet-network[data-chain="Ethereum"]');
+  await expect(section.getByText('EUL', { exact: true })).toBeVisible();
+  await expect(section.getByText(/Lending receipt token/)).toBeVisible();
+  await expect(page.getByText(/Wallet totals exclude 1 unpriced/)).toBeVisible();
 });

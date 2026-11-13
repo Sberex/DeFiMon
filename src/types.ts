@@ -1,5 +1,14 @@
 export type NetworkId = 'ethereum' | 'plasma';
 export type ChainName = 'Ethereum' | 'Plasma';
+export type ExtraTokens = Partial<Record<NetworkId, string[]>>;
+export interface WalletToken {
+  address: string; symbol: string; balance: number | null; priceUsd: number | null; valueUsd: number | null;
+  excludedReason?: string;
+}
+export interface WalletBalances {
+  chain: ChainName; status: 'ok' | 'partial' | 'error'; tokens: WalletToken[];
+  pricedValueUsd: number | null; unpricedCount: number; coverage: string; message?: string;
+}
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
@@ -19,5 +28,6 @@ export interface ProtocolResult {
 export interface Portfolio {
   address: string; chain: ChainName | 'Ethereum + Plasma'; blockNumber: string | null; updatedAt: string;
   protocols: ProtocolResult[];
+  wallets?: WalletBalances[];
   networks?: { chain: ChainName; blockNumber: string | null; updatedAt: string; status: 'ok' | 'error'; message?: string }[];
 }

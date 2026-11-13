@@ -53,3 +53,14 @@ it('retains partial Fluid estimates without changing their source or health on m
   expect(fluid.status).toBe('partial'); expect(fluid.positions[0].healthFactor).toBe(1.02);
   expect(fluid.positions[0].assets[0].priceSource).toBe('fluid-oracle');
 });
+
+it('preserves separate network wallet values and forwards added token contracts to both readers', async () => {
+  const watched = { plasma: ['0x2222222222222222222222222222222222222222'] };
+  const result = await getCombinedPortfolio(wallet, async (_address, network, extra) => {
+    expect(extra).toEqual(watched);
+    const data = snapshot(network);
+    data.wallets = [{ chain: network === 'plasma' ? 'Plasma' : 'Ethereum', status: 'ok', tokens: [], pricedValueUsd: network === 'plasma' ? 2 : 100, unpricedCount: 0, coverage: 'test' }];
+    return data;
+  }, watched);
+  expect(result.wallets?.map(w => [w.chain, w.pricedValueUsd])).toEqual([['Ethereum', 100], ['Plasma', 2]]);
+});

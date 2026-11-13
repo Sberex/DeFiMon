@@ -63,3 +63,12 @@ it('returns both networks grouped by protocol through the combined endpoint', as
   expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v4:Ethereum', 'morpho:Ethereum', 'compound:Ethereum', 'fluid:Ethereum', 'fluid:Plasma']);
   expect(chains.slice(before)).toEqual(['ethereum', 'plasma']);
 });
+
+it('rejects invalid, unsupported, zero, or excessive extra token contracts before blockchain reads', async () => {
+  const before = reads;
+  for (const tokens of ['ethereum:not-a-contract', 'solana:0x2222222222222222222222222222222222222222', 'ethereum:0x0000000000000000000000000000000000000000', Array(21).fill('ethereum:0x2222222222222222222222222222222222222222').join(',')]) {
+    const response = await fetch(`${base}/api/portfolio/${example.address}?chain=all&tokens=${encodeURIComponent(tokens)}`);
+    expect(response.status).toBe(400);
+  }
+  expect(reads).toBe(before);
+});
