@@ -4,17 +4,17 @@ A read-only Ethereum wallet dashboard for current lending positions and liquidat
 
 ## Current scope
 
-This is an **early implementation, not a complete five-protocol monitor**. Production build and deterministic tests run locally. Fluid and Aave v4 have been exercised against live Ethereum positions; Aave v3 and Compound still require live position comparisons before use for financial monitoring.
+This is an **early implementation with readers for all five protocol families**. Coverage is limited to the versions and products below; it is not a complete wallet balance. Production build and deterministic tests run locally. Fluid and Aave v4 have been exercised against live Ethereum positions; Aave v3 and Compound still require live position comparisons before use for financial monitoring.
 
 | Protocol | Implemented coverage | Limitations |
 | --- | --- | --- |
 | Aave v3 | Ethereum main market; deposits, debts, native health factor, oracle prices | Other deployments excluded. Per-asset liquidation prices withheld for efficiency mode. |
 | Compound | v3 USDC and WETH markets; base balances, collateral, liquidation factors | v2 and other v3 markets excluded. |
 | Aave v4 | 14 Ethereum lending markets plus 37 tokenized-deposit contracts; deposits, premium-inclusive debt, native health factor, and collateral liquidation estimates | Official address-book snapshot, direct ownership only; linked accounts and treasury infrastructure excluded. New deployments require a roster update. |
-| Morpho | Explicit “not connected” state | Market/vault discovery and reader required. |
+| Morpho | Ethereum Morpho Blue direct markets plus vault V1/V2 deposits; accrued balances, debt, net value, oracle health, and liquidation estimates | Requires the public Morpho API for discovery/prices. Indexing lag can omit newly opened positions. Legacy Optimizers, linked accounts, and unclaimed rewards excluded. Full live discovery is not yet verified in this cloud environment. |
 | Fluid | Ethereum T1–T4 vaults and ordinary fToken lending deposits; balances, debt, health estimate and liquidation boundary | Direct ownership only. Standalone DEX/smart-lending deposits and linked smart accounts excluded. Smart vaults show oracle-ratio boundaries rather than a single underlying token’s dollar liquidation price. |
 
-Unavailable protocols are **unknown**, never zero balances. Aave v4 and Fluid can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
+Unavailable protocols are **unknown**, never zero balances. Readers can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
 
 ## Run locally
 
@@ -71,6 +71,12 @@ No deployment or Git push is performed by the local build. Hosting/provider plan
 - Standard Fluid vaults show a dollar liquidation price assuming the debt token USD price is fixed. Smart vaults instead show current and threshold oracle ratios (debt token or debt pool shares per collateral token or collateral pool share). A pool share quote represents 10^18 raw shares. These are protocol ratios, not a prediction about one underlying token.
 - Fluid USD valuations use Aave’s oracle with a Chainlink USD Feed Registry fallback (positive, complete round, no more than 24 hours old at the selected block). Native ETH maps to WETH for Aave pricing. Unsupported prices remain null; stablecoins are never assumed to be worth $1. USD valuation does not determine Fluid’s health estimate.
 - Ordinary lending fToken shares are converted once to current underlying assets with `convertToAssets`; they have no borrowing or collateral-liquidation risk.
+- Morpho uses the public `https://api.morpho.org/graphql` API only for Ethereum market/vault discovery and indicative USD prices. Market and V1-vault results are paginated; V2 holdings come from the user entity’s unpaginated `vaultV2Positions` list. Failed queries, incomplete pages, duplicate rows, and malformed/wrong-wallet/wrong-chain records are explicit warnings, not a verified empty wallet. No API key is required. Newly created/changed positions may be missing until indexed.
+- Morpho identities and token decimals are rechecked on Ethereum. Market parameters are loaded from canonical Morpho Blue (`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`) and hashed back to the market ID. A vault must be recognized by the factory reported by the official API; V1 vaults must also point to this canonical core. This verifies data identities, not investment safety or curator quality.
+- One read-only multicall simulates Morpho market `accrueInterest` before reading market totals and user shares. Supply conversion rounds down; borrowing rounds up, using 1 virtual asset and 1,000,000 virtual shares. Collateral is counted separately from loan-token supply. Loan supply does **not** protect a borrowing position, even within the same market.
+- Morpho oracle prices use **1e36** raw-unit scaling. Health matches the protocol’s two floor divisions: `floor(floor(collateral × oraclePrice / 1e36) × LLTV / 1e18) / rounded-up debt`. A reverting oracle gives unknown risk; a successfully read zero price gives zero collateral capacity, as in the protocol. Currency conversion accounts for both tokens’ decimals.
+- Morpho vault shares are valued once, without adding their underlying market allocations again. V1 uses the current ERC-4626 conversion. V2 simulates accrual, then reads the user balance, total shares, stored assets, and virtual shares together so fee-share minting and current interest are included. Vault-only holdings have no wallet borrowing liquidation price.
+- Morpho USD prices are indicative API prices and may update at a different time than the pinned Ethereum block. They never determine health. Missing prices stay unknown; a token is never assumed to be worth $1. A liquidation USD estimate assumes the loan-token price and both balances stay fixed. The collateral/loan oracle ratio is also shown independently of USD valuation.
 - Display calculations use floating-point numbers after decoding integer balances. They are estimates and should not be used for transaction sizing at the liquidation boundary.
 
 Contract sources: [Aave address book](https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV3Ethereum.sol), [Aave data provider](https://github.com/aave/aave-v3-origin/blob/main/src/contracts/helpers/AaveProtocolDataProvider.sol), Compound [USDC](https://github.com/compound-finance/comet/blob/main/deployments/mainnet/usdc/roots.json) and [WETH](https://github.com/compound-finance/comet/blob/main/deployments/mainnet/weth/roots.json) deployments. Fluid’s selected ABI entries and deployment addresses come from [Instadapp/fluid-contracts-public at 404d73f](https://github.com/Instadapp/fluid-contracts-public/tree/404d73f91e6806f881f8dabeb30494f93f9e99b7/deployments/mainnet). The deployed ABI is pinned in `server/abis/fluid.ts`; current Solidity source has additional struct fields and must not be substituted without checking deployment compatibility.
@@ -87,7 +93,7 @@ npm run test:browser
 
 Unit/API tests cover price boundaries, debt in the same asset, efficiency mode, block consistency, simulated Compound accrual, input validation, and isolated failures. Browser tests cover search, example labeling, errors, refreshed responses, and mobile layout using controlled API fixtures. Browser fixtures do not establish live protocol accuracy.
 
-Fluid was also checked on Ethereum against live standard (T1), smart collateral (T2), and smart collateral/debt (T4) positions at blocks 26406819–26406833, plus a live fUSDC lending deposit at block 26406841. T3 behavior is covered by deterministic fixtures, not an active T3 wallet comparison. One live T2 position had an unsupported syrupUSDC dollar price; the reader correctly retained its balances and oracle health while marking its valuation incomplete. The two wallets in `TestCases` were also checked at blocks 26406856–26406857: the first returned one active T4 GHO/USDC position with a health estimate near 1.03; the second returned no directly held covered Fluid positions. These checks validate the data path and calculations, not exact liquidation execution at the boundary.
+Fluid was also checked on Ethereum against live standard (T1), smart collateral (T2), and smart collateral/debt (T4) positions at blocks 26406819–26406833, plus a live fUSDC lending deposit at block 26406841. T3 behavior is covered by deterministic fixtures, not an active T3 wallet comparison. One live T2 position had an unsupported syrupUSDC dollar price; the reader correctly retained its balances and oracle health while marking its valuation incomplete. The first two wallets in `TestCases` were also checked at blocks 26406856–26406857: the first returned one active T4 GHO/USDC position with a health estimate near 1.03; the second returned no directly held covered Fluid positions. These checks validate the data path and calculations, not exact liquidation execution at the boundary.
 
 To repeat a live check for a wallet with known Fluid positions:
 
@@ -109,8 +115,20 @@ npm run check:aave-v4 -- 0xYourEthereumWalletAddress
 
 Like the Fluid check, this reports the selected block and result and exits unsuccessfully for incomplete or empty portfolios. It does not store a balance history.
 
+Morpho interfaces, schema reference, share math, and deployment information follow [morpho-org/sdks at 56f1ed6](https://github.com/morpho-org/sdks/tree/56f1ed62827a7aab39d979c0143d1fbf970c37ca). Queries use the SDK’s current `marketId` field (aliased to `uniqueKey`) and support an older `uniqueKey` schema only after an explicit unknown-field response.
+
+Repeat a current-state Morpho check for a known active wallet:
+
+```sh
+npm run check:morpho -- 0xYourEthereumWalletAddress
+```
+
+Morpho validation so far: deterministic calculation/discovery/API/browser tests pass. A live Blue borrower at blocks 26407512–26407513 returned USDC debt and an apyUSD/USDC liquidation ratio, with health near 1.02133. A live V1 Steakhouse USDC holder at block 26407555 returned 48,209.191007 underlying USDC. These were diagnostic reads with manually selected references, **not** successful full official-API wallet discovery; diagnostic USD prices were absent or separately sourced on-chain. V2 behavior is fixture-tested against the official interface and accounting formula; an active Ethereum V2 holder was not verified.
+
+**Outstanding cloud requirement:** this instance denied access to `api.morpho.org`. A draft network addition was saved, preserving the existing Ethereum RPC destination. Review/save that addition in Environment settings and publish the environment as needed, then rerun a fresh live lookup. Until that is applied and the API path is tested, do not describe Morpho’s full live wallet discovery as verified. No wallet private key, API token, or new database is needed. Local hosting requires outbound HTTPS access to this API as well as its Ethereum provider.
+
 ## Privacy and operations
 
-The application does not persist wallet searches, balances, or history. Hosting access logs and your Ethereum provider may record requests. Results use `Cache-Control: no-store`. The server never returns raw provider errors or provider URLs. Keep `.env` out of Git.
+The application does not persist wallet searches, balances, or history. Hosting access logs, your Ethereum provider, and Morpho’s public lookup service may record requests. Morpho lookups send the searched wallet address to that service. Results use `Cache-Control: no-store`. The server never returns raw provider errors or provider URLs. Keep `.env` out of Git.
 
 The cloud environment permits `ethereum-rpc.publicnode.com` and live Fluid reads were verified. Hosting elsewhere requires configuring its own `ETHEREUM_RPC_URL`. Environment publication and website deployment are separate operations.

@@ -5,8 +5,8 @@ test('shows clearly labeled example positions and partial protocol coverage', as
   await expect(page.getByRole('heading', { name: /Know where/ })).toBeVisible();
   await page.getByRole('button', { name: /Explore an example/ }).click();
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
-  await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
-  await expect(page.getByText('Not connected', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('$31,500.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('Not connected', { exact: true })).toHaveCount(0);
   await expect(page.getByText('$2,117.65', { exact: true })).toBeVisible();
   await page.screenshot({ path: '/tmp/defimon-desktop.png', fullPage: true });
 });
@@ -19,7 +19,7 @@ test('rejects invalid input and displays provider failures without example balan
   await page.getByLabel('Ethereum wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByRole('alert')).toContainText('Ethereum data is unavailable');
-  await expect(page.getByText('$26,500.00', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('$31,500.00', { exact: true })).toHaveCount(0);
 });
 test('searches and refreshes the displayed wallet rather than an edited address', async ({ page }) => {
   let reads = 0;
@@ -32,7 +32,7 @@ test('searches and refreshes the displayed wallet rather than an edited address'
   await page.getByLabel('Ethereum wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByText(/Block 101/)).toBeVisible();
-  await expect(page.getByText(/Partial coverage: 4 of 5/)).toBeVisible();
+  await expect(page.getByText(/Coverage: 5 of 5/)).toBeVisible();
   await page.getByLabel('Ethereum wallet address').fill('0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: /Refresh/ }).click();
   await expect(page.getByText(/Block 102/)).toBeVisible();
@@ -63,7 +63,7 @@ test('shows Fluid liquidation ratios and excludes unpriced positions from dollar
   await expect(card.getByText(/Current: 3,000 USDC per ETH/)).toBeVisible();
   await expect(card.getByText(/Threshold: 1,902.17 USDC per ETH/)).toBeVisible();
   await expect(page.getByText(/Dollar totals exclude 1 positions/)).toBeVisible();
-  await expect(page.getByText('$24,000.00', { exact: true })).toBeVisible(); // Entire unpriced position excluded, including its debt.
+  await expect(page.getByText('$29,000.00', { exact: true })).toBeVisible(); // Entire unpriced position excluded, including its debt.
   await expect(card.getByText('$0.00', { exact: true })).toHaveCount(0);
 });
 
@@ -121,4 +121,35 @@ test('distinguishes an unavailable Aave v4 market from an empty market', async (
   await expect(card.getByText('Risk unavailable', { exact: true })).toBeVisible();
   await expect(card.getByText('No positions found', { exact: false })).toHaveCount(0);
   await expect(card.getByText('$0.00', { exact: true })).toHaveCount(0);
+});
+
+test('shows Morpho borrowing and vault deposits separately with an oracle liquidation boundary', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  const card = page.locator('article.morpho');
+  await expect(card.getByText('Checked', { exact: true })).toBeVisible();
+  await expect(card.getByRole('heading', { name: 'Morpho · WETH / USDC', exact: true })).toBeVisible();
+  await expect(card.getByRole('heading', { name: 'Morpho vault V1 · Example USDC vault', exact: true })).toBeVisible();
+  await expect(card.getByText(/Threshold: 1,453.49 USDC per WETH/)).toBeVisible();
+  await expect(card.getByText('No borrowing', { exact: true })).toBeVisible();
+  await expect(card.getByText('$6,500.00', { exact: true })).toBeVisible();
+  await expect(card.getByText('$2,500.00', { exact: true })).toBeVisible();
+});
+
+test('explains unavailable Morpho discovery and keeps other protocols visible without fake zero balances', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const morpho = fixture.protocols.find(p => p.id === 'morpho')!;
+  morpho.status = 'error'; morpho.positions = [];
+  morpho.message = 'Morpho lookup is unavailable. Check access to api.morpho.org and your Ethereum provider. Its balances are unknown.';
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
+  await page.goto('/');
+  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.morpho');
+  await expect(card.getByText('Unavailable', { exact: true })).toBeVisible();
+  await expect(card.getByText(/api.morpho.org/)).toBeVisible();
+  await expect(card.getByText(/No positions found/)).toHaveCount(0);
+  await expect(card.getByText('$0.00', { exact: true })).toHaveCount(0);
+  await expect(page.locator('article.fluid').getByText('Checked', { exact: true })).toBeVisible();
+  await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
 });
