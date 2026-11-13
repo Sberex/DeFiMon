@@ -40,7 +40,7 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
     return { symbol: reserve.symbol, address: reserve.tokenAddress, supplied: n(balances[0], Number(config[0])), borrowed: n(balances[1] + balances[2], Number(config[0])), priceUsd: Number(price) / Number(unit), collateral: balances[8] && config[2] > 0n, liquidationThreshold: emode === 0n ? Number(config[2]) / 1e4 : null, liquidationPriceUsd: null } satisfies Asset;
   }))).filter((asset): asset is NonNullable<typeof asset> => asset !== null);
   const debtUsd = Number(account[1]) / Number(unit);
-  const suppliedUsd = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd, 0);
+  const suppliedUsd = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd!, 0);
   const health = debtUsd > 0 ? n(account[5], 18) : null;
   const weighted = Number(account[0]) / Number(unit) * Number(account[3]) / 1e4;
   return {

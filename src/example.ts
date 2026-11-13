@@ -13,6 +13,9 @@ export const example: Portfolio = {
       { symbol: 'WETH', address: '', supplied: 4, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .895, liquidationPriceUsd: 5000 / (4 * .895) },
       { symbol: 'USDC', address: '', supplied: 0, borrowed: 5000, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null },
     ] }] },
-    { id: 'fluid', name: 'Fluid', status: 'not-integrated', coverage: 'Vault integration pending', positions: [] },
+    { id: 'fluid', name: 'Fluid', status: 'ok', coverage: 'Ethereum T1–T4 vaults and fToken lending deposits', positions: [{ id: 'example-fluid', label: 'Vault 11 · ETH / USDC · NFT example', suppliedUsd: 6000, debtUsd: 3500, healthFactor: 5520 / 3500, risk: 'lower', notes: ['Illustrative numbers only. The debt token price and balances stay fixed.'], liquidationQuote: { current: 3000, threshold: 3500 / (2 * .92), unit: 'USDC per ETH' }, assets: [
+      { symbol: 'ETH', address: '', supplied: 2, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .92, liquidationPriceUsd: 3500 / (2 * .92) },
+      { symbol: 'USDC', address: '', supplied: 0, borrowed: 3500, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null },
+    ] }] },
   ],
 };

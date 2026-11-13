@@ -56,9 +56,9 @@ async function readMarket(client: ChainClient, wallet: Address, blockNumber: big
   }));
   const assets = [baseAsset, ...collateral.filter((a): a is NonNullable<typeof a> => a !== null)].filter(a => a.supplied > 0 || a.borrowed > 0);
   if (!assets.length) return null;
-  const suppliedUsd = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd, 0);
-  const debtUsd = baseAsset.borrowed * baseAsset.priceUsd;
-  const weighted = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd * (a.liquidationThreshold ?? 0), 0);
+  const suppliedUsd = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd!, 0);
+  const debtUsd = baseAsset.borrowed * baseAsset.priceUsd!;
+  const weighted = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd! * (a.liquidationThreshold ?? 0), 0);
   const health = debtUsd > 0 ? weighted / debtUsd : null;
   return { id: address, label: market.label, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: liquidationPrices(assets, debtUsd, weighted), notes: ['Borrowing interest is simulated to the selected block without sending a transaction.', 'Liquidation prices use Compound’s liquidation collateral factors, not its borrowing limits. Each estimate holds other prices fixed.'] };
 }

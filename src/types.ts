@@ -1,14 +1,15 @@
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
 export interface Asset {
-  symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number;
+  symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
   collateral: boolean; liquidationThreshold: number | null; liquidationPriceUsd: number | null;
 }
 export interface Position {
-  id: string; label: string; suppliedUsd: number; debtUsd: number; healthFactor: number | null;
+  id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;
   risk: Risk; assets: Asset[]; notes: string[];
+  liquidationQuote?: { current: number; threshold: number; unit: string };
 }
 export interface ProtocolResult {
-  id: string; name: string; status: 'ok' | 'error' | 'not-integrated'; coverage: string;
+  id: string; name: string; status: 'ok' | 'partial' | 'error' | 'not-integrated'; coverage: string;
   message?: string; positions: Position[];
 }
 export interface Portfolio {

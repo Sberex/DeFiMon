@@ -3,11 +3,11 @@ import type { Portfolio, ProtocolResult } from '../src/types.js';
 import { makeClient } from './rpc.js';
 import { readAave } from './adapters/aave.js';
 import { readCompound } from './adapters/compound.js';
+import { readFluid, FLUID_COVERAGE } from './adapters/fluid.js';
 const planned = (id: string, name: string, coverage: string): ProtocolResult => ({ id, name, status: 'not-integrated', coverage, message: 'Not connected in this version. Positions and risk have not been checked.', positions: [] });
 export const unconnected = () => [
   planned('aave-v4', 'Aave v4', 'Deployment and position reader must be verified before enabling.'),
   planned('morpho', 'Morpho', 'Market and vault discovery, balances, and liquidation calculations pending.'),
-  planned('fluid', 'Fluid', 'Vault discovery and position-specific liquidation calculations pending.'),
 ];
 export async function isolateProtocol(id: string, name: string, coverage: string, run: () => Promise<ProtocolResult>): Promise<ProtocolResult> {
   try { return await run(); } catch {
@@ -20,9 +20,10 @@ export async function getPortfolio(wallet: Address): Promise<Portfolio> {
   const client = makeClient();
   const [chainId, blockNumber] = await Promise.all([client.getChainId(), client.getBlockNumber()]);
   if (chainId !== 1) throw new Error('The configured provider is not Ethereum mainnet.');
-  const [aave, compound] = await Promise.all([
+  const [aave, fluid, compound] = await Promise.all([
     isolateProtocol('aave-v3', 'Aave v3', 'Ethereum main market', () => readAave(client, address, blockNumber)),
+    isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE, () => readFluid(client, address, blockNumber)),
     isolateProtocol('compound', 'Compound', 'v3 USDC and WETH markets', () => readCompound(client, address, blockNumber)),
   ]);
-  return { address, chain: 'Ethereum', blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols: [aave, unconnected()[0], unconnected()[1], compound, unconnected()[2]] };
+  return { address, chain: 'Ethereum', blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols: [aave, unconnected()[0], unconnected()[1], compound, fluid] };
 }

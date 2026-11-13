@@ -14,7 +14,7 @@ export function riskLevel(debt: number, health: number | null): Risk {
 export function liquidationPrices(assets: Asset[], debtUsd: number, weightedCollateralUsd: number): Asset[] {
   return assets.map(asset => {
     const threshold = asset.liquidationThreshold;
-    if (!asset.collateral || threshold === null || debtUsd <= 0) return { ...asset, liquidationPriceUsd: null };
+    if (!asset.collateral || threshold === null || asset.priceUsd === null || debtUsd <= 0) return { ...asset, liquidationPriceUsd: null };
     const exposure = asset.supplied * threshold - asset.borrowed;
     const boundary = exposure > 0 ? asset.priceUsd + (debtUsd - weightedCollateralUsd) / exposure : null;
     return { ...asset, liquidationPriceUsd: boundary !== null && boundary > 0 && Number.isFinite(boundary) ? boundary : null };
