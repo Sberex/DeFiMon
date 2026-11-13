@@ -1,6 +1,6 @@
 # DeFiMon
 
-A read-only Ethereum wallet dashboard for current lending positions and liquidation risk. No wallet connection, transaction signing, database, or historical tracking.
+A read-only Ethereum and Plasma wallet dashboard for current lending positions and liquidation risk. No wallet connection, transaction signing, database, or historical tracking.
 
 ## Current scope
 
@@ -8,11 +8,11 @@ This is an **early implementation with readers for all five protocol families**.
 
 | Protocol | Implemented coverage | Limitations |
 | --- | --- | --- |
-| Aave v3 | Ethereum main market; deposits, debts, native health factor, oracle prices | Other deployments excluded. Per-asset liquidation prices withheld for efficiency mode. |
+| Aave v3 | Ethereum and Plasma main markets; deposits, debts, native health factor, oracle prices | Other deployments excluded. Per-asset liquidation prices withheld for efficiency mode. |
 | Compound | v3 USDC and WETH markets; base balances, collateral, liquidation factors | v2 and other v3 markets excluded. |
 | Aave v4 | 14 Ethereum lending markets plus 37 tokenized-deposit contracts; deposits, premium-inclusive debt, native health factor, and collateral liquidation estimates | Official address-book snapshot, direct ownership only; linked accounts and treasury infrastructure excluded. New deployments require a roster update. |
 | Morpho | Ethereum Morpho Blue direct markets plus vault V1/V2 deposits; accrued balances, debt, net value, oracle health, and liquidation estimates | Requires the public Morpho API for discovery/prices. Indexing lag can omit newly opened positions. Legacy Optimizers, linked accounts, and unclaimed rewards excluded. Full live discovery is not yet verified in this cloud environment. |
-| Fluid | Ethereum T1–T4 vaults and ordinary fToken lending deposits; balances, debt, health estimate and liquidation boundary | Direct ownership only. Standalone DEX/smart-lending deposits and linked smart accounts excluded. Smart vaults show oracle-ratio boundaries rather than a single underlying token’s dollar liquidation price. |
+| Fluid | Ethereum and Plasma T1–T4 vaults and ordinary fToken lending deposits; balances, debt, health estimate and liquidation boundary | Direct ownership only. Standalone DEX/smart-lending deposits and linked smart accounts excluded. Smart vaults show oracle-ratio boundaries rather than a single underlying token’s dollar liquidation price. |
 
 Unavailable protocols are **unknown**, never zero balances. Readers can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
 
@@ -37,6 +37,26 @@ npm start
 ```
 
 The production server serves both the website and API on `PORT` (default 3001). `/api/health` checks the web server and configuration presence; it does not prove Ethereum access. An actual wallet request is required to validate the connection.
+
+## Plasma support
+
+Choose **Plasma** in the Blockchain selector, enter your wallet address, and select **Check wallet**. Plasma currently checks **Aave v3 and Fluid**. Ethereum continues to show all five protocol families. Switching networks clears previous results; balances from different blockchains are never combined. Refresh stays on the selected network. The illustrative example remains explicitly fictional and uses Ethereum.
+
+Plasma uses chain ID **9745** and native currency **XPL**. The public `https://rpc.plasma.to` endpoint is the default. To use your own provider, add `PLASMA_RPC_URL=https://your-provider` to your existing `.env` file (or your host’s environment variables). Keep your existing `ETHEREUM_RPC_URL` for Ethereum; do not replace the whole `.env` file. Restart the server after changing it. No wallet connection or signing key is required.
+
+Both Plasma readers show current deposits, debt, net value, health, and applicable liquidation estimates with the same coverage limits as Ethereum. Aave efficiency mode retains its native health factor but withholds per-asset liquidation prices. Fluid covers T1–T4 vault NFTs and ordinary lending fTokens; smart vaults show a liquidation oracle ratio. Fluid uses Plasma’s Aave oracle for USD valuation, mapping native XPL to WXPL. Tokens without a supported price keep their quantities and oracle-based risk, with unknown dollar values. Ethereum’s Chainlink registry is never queried on Plasma.
+
+Deployment sources: [Aave Plasma address book](https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV3Plasma.sol) and [Fluid Plasma deployment artifacts](https://github.com/Instadapp/fluid-contracts-public/tree/404d73f91e6806f881f8dabeb30494f93f9e99b7/deployments/plasma). The used Fluid resolver interfaces were compared with the pinned Ethereum ABIs and match. A provider reporting another chain ID is rejected before reading protocols.
+
+Run a live local check with a public wallet address:
+
+```sh
+npm run check:plasma -- 0xYourWalletAddress
+```
+
+The API also accepts `/api/portfolio/0xYourWalletAddress?chain=plasma`; omitting `chain` continues to use Ethereum. Only `ethereum` and `plasma` are accepted. Health reports configuration presence, not successful blockchain access.
+
+Validation: deterministic reader, network-routing, provider-selection, and browser checks cover Plasma. This cloud environment denied access to `rpc.plasma.to` (CONNECT 403), so a live Plasma wallet comparison is still required on a computer or host that can reach the provider. No cloud environment settings have been published by this change.
 
 ## Hosting
 

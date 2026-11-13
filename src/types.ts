@@ -1,3 +1,4 @@
+export type NetworkId = 'ethereum' | 'plasma';
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
@@ -13,6 +14,6 @@ export interface ProtocolResult {
   message?: string; positions: Position[];
 }
 export interface Portfolio {
-  address: string; chain: 'Ethereum'; blockNumber: string | null; updatedAt: string;
+  address: string; chain: 'Ethereum' | 'Plasma'; blockNumber: string | null; updatedAt: string;
   protocols: ProtocolResult[];
 }

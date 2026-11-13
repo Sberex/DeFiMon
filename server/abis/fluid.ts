@@ -1,4 +1,5 @@
 // Selected ABI entries from official Fluid Ethereum deployments.
+// The used functions and tuple fields match the Plasma deployment ABIs at the same commit.
 // Source: https://github.com/Instadapp/fluid-contracts-public/tree/404d73f91e6806f881f8dabeb30494f93f9e99b7/deployments/mainnet
 // Use deployment ABIs, not current Solidity structs: current source has extra fields.
 export const vaultResolverAbi = [

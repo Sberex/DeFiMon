@@ -1,6 +1,7 @@
 import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
-import type { Portfolio, ProtocolResult } from '../src/types.js';
+import type { NetworkId, Portfolio, ProtocolResult } from '../src/types.js';
+import { networks } from './networks.js';
 import { makeClient } from './rpc.js';
 import { readAave } from './adapters/aave.js';
 import { readAaveV4, AAVE_V4_COVERAGE } from './adapters/aave-v4.js';
@@ -13,11 +14,20 @@ export async function isolateProtocol(id: string, name: string, coverage: string
     return { id, name, coverage, status: 'error', message: id === 'morpho' && error instanceof MorphoDiscoveryUnavailable ? error.publicMessage : failureMessage, positions: [] };
   }
 }
-export async function getPortfolio(wallet: Address): Promise<Portfolio> {
+export async function getPortfolio(wallet: Address, network: NetworkId = 'ethereum'): Promise<Portfolio> {
   const address = getAddress(wallet);
-  const client = makeClient();
+  const deployment = networks[network];
+  const client = makeClient(network);
   const [chainId, blockNumber] = await Promise.all([client.getChainId(), client.getBlockNumber()]);
-  if (chainId !== 1) throw new Error('The configured provider is not Ethereum mainnet.');
+  if (chainId !== deployment.id) throw new Error(`The configured provider is not ${deployment.name} mainnet.`);
+  if (network === 'plasma') {
+    const failure = 'Could not read this protocol on Plasma. Its balances are unknown. Check the Plasma provider connection and try again.';
+    const protocols = await Promise.all([
+      isolateProtocol('aave-v3', 'Aave v3', 'Plasma main market', () => readAave(client, address, blockNumber, network), failure),
+      isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', 'Plasma'), () => readFluid(client, address, blockNumber, network), failure),
+    ]);
+    return { address, chain: 'Plasma', blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
+  }
   const [aave, aaveV4, morpho, fluid, compound] = await Promise.all([
     isolateProtocol('aave-v3', 'Aave v3', 'Ethereum main market', () => readAave(client, address, blockNumber)),
     isolateProtocol('aave-v4', 'Aave v4', AAVE_V4_COVERAGE, () => readAaveV4(client, address, blockNumber)),

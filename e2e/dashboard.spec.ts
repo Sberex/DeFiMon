@@ -153,3 +153,51 @@ test('explains unavailable Morpho discovery and keeps other protocols visible wi
   await expect(page.locator('article.fluid').getByText('Checked', { exact: true })).toBeVisible();
   await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
 });
+
+test('selects Plasma, checks its two protocols, and refreshes on the same network', async ({ page }) => {
+  let reads = 0;
+  const fixture = { ...structuredClone(example), chain: 'Plasma', protocols: structuredClone(example.protocols.filter(p => p.id === 'aave-v3' || p.id === 'fluid')).map(p => ({ ...p, coverage: p.coverage.replaceAll('Ethereum', 'Plasma'), positions: p.positions.map(position => ({ ...position, label: position.label.replaceAll('Ethereum', 'Plasma') })) })) };
+  await page.route('**/api/portfolio/*', route => {
+    expect(new URL(route.request().url()).searchParams.get('chain')).toBe('plasma'); reads++;
+    return route.fulfill({ json: { ...fixture, blockNumber: String(900 + reads), updatedAt: new Date().toISOString() } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Blockchain').selectOption('plasma');
+  await expect(page.getByText('Aave v4', { exact: true })).toHaveCount(0);
+  await page.getByLabel('Plasma wallet address').fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.getByText(/Coverage: 2 of 2 protocol readers completed on Plasma/)).toBeVisible();
+  await expect(page.locator('article.protocol')).toHaveCount(2);
+  await expect(page.getByText(/Plasma · Checked.*Block 901/)).toBeVisible();
+  await page.getByRole('button', { name: 'Refresh' }).click();
+  await expect(page.getByText(/Block 902/)).toBeVisible();
+  expect(reads).toBe(2);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-plasma-mobile.png', fullPage: true });
+  await page.getByLabel('Blockchain').selectOption('ethereum');
+  await expect(page.getByRole('region', { name: 'Wallet results' })).toHaveCount(0);
+  await expect(page.getByLabel('Ethereum wallet address')).toBeVisible();
+});
+
+test('switching networks cancels an older lookup and an example resets to its labeled Ethereum network', async ({ page }) => {
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/portfolio/*', async route => {
+    await gate;
+    await route.fulfill({ json: { ...example, blockNumber: '111', updatedAt: new Date().toISOString() } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  const started = page.waitForRequest('**/api/portfolio/*');
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await started;
+  await page.getByLabel('Blockchain').selectOption('plasma');
+  release();
+  await expect(page.getByRole('button', { name: 'Check wallet' })).toBeEnabled();
+  await expect(page.getByRole('region', { name: 'Wallet results' })).toHaveCount(0);
+  await expect(page.getByLabel('Plasma wallet address')).toBeVisible();
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  await expect(page.getByLabel('Blockchain')).toHaveValue('ethereum');
+  await expect(page.getByText(/Example only — all balances/)).toBeVisible();
+});

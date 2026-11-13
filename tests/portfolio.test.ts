@@ -1,6 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
+const rpc = vi.hoisted(() => ({ chainId: 1 }));
 const readers = vi.hoisted(() => ({ aave: vi.fn(), aaveV4: vi.fn(), morpho: vi.fn(), compound: vi.fn(), fluid: vi.fn() }));
-vi.mock('../server/rpc', () => ({ makeClient: () => ({ getChainId: async () => 1, getBlockNumber: async () => 456n }) }));
+vi.mock('../server/rpc', () => ({ makeClient: () => ({ getChainId: async () => rpc.chainId, getBlockNumber: async () => 456n }) }));
 vi.mock('../server/adapters/aave', () => ({ readAave: readers.aave }));
 vi.mock('../server/adapters/aave-v4', () => ({ readAaveV4: readers.aaveV4, AAVE_V4_COVERAGE: 'V4 lending and tokenized deposits' }));
 vi.mock('../server/adapters/morpho', () => ({ readMorpho: readers.morpho, MORPHO_COVERAGE: 'Ethereum markets and vaults' }));
@@ -9,6 +10,7 @@ vi.mock('../server/adapters/fluid', () => ({ readFluid: readers.fluid, FLUID_COV
 import { getPortfolio } from '../server/portfolio';
 const wallet = '0x1111111111111111111111111111111111111111';
 beforeEach(() => {
+  rpc.chainId = 1;
   readers.aave.mockReset().mockResolvedValue({ id: 'aave-v3', name: 'Aave v3', status: 'ok', positions: [] });
   readers.aaveV4.mockReset().mockResolvedValue({ id: 'aave-v4', name: 'Aave v4', status: 'ok', positions: [] });
   readers.morpho.mockReset().mockResolvedValue({ id: 'morpho', name: 'Morpho', status: 'ok', positions: [] });
@@ -47,4 +49,24 @@ it('isolates unavailable Morpho discovery without losing other protocol balances
   expect(morpho.status).toBe('error'); expect(morpho.message).toContain('api.morpho.org');
   expect(result.protocols.find(p => p.id === 'fluid')?.status).toBe('ok');
   expect(JSON.stringify(result)).not.toContain('private-provider-details');
+});
+
+it('reads only Aave v3 and Fluid on Plasma at the same Plasma block', async () => {
+  rpc.chainId = 9745;
+  const result = await getPortfolio(wallet, 'plasma');
+  expect(result.chain).toBe('Plasma');
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'fluid']);
+  expect(readers.aave).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'plasma');
+  expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'plasma');
+  expect(readers.aaveV4).not.toHaveBeenCalled(); expect(readers.morpho).not.toHaveBeenCalled(); expect(readers.compound).not.toHaveBeenCalled();
+});
+it('rejects an Ethereum provider configured for Plasma before any protocol reads', async () => {
+  await expect(getPortfolio(wallet, 'plasma')).rejects.toThrow('not Plasma mainnet');
+  expect(readers.aave).not.toHaveBeenCalled(); expect(readers.fluid).not.toHaveBeenCalled();
+});
+it('keeps Plasma Aave results when Fluid fails, with a safe Plasma-specific error', async () => {
+  rpc.chainId = 9745; readers.fluid.mockRejectedValueOnce(new Error('private-provider-key'));
+  const result = await getPortfolio(wallet, 'plasma');
+  expect(result.protocols[0].status).toBe('ok'); expect(result.protocols[1].status).toBe('error');
+  expect(result.protocols[1].message).toContain('Plasma'); expect(JSON.stringify(result)).not.toContain('private-provider-key');
 });

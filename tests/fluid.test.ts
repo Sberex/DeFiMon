@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFluid, fluidHealth, FLUID_VAULT_RESOLVER } from '../server/adapters/fluid';
+import { networks } from '../server/networks';
 import type { ChainClient } from '../server/rpc';
 const wallet = '0x1111111111111111111111111111111111111111';
 const ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -21,15 +22,16 @@ const position = (id: bigint, type = 10000n) => {
 function mock(options: { types?: bigint[]; ids?: bigint[]; lending?: boolean; missingEthPrice?: boolean; missingDebtPrice?: boolean; failNft?: bigint; failDiscovery?: 'vault' | 'lending' | 'both'; zeroReserves?: boolean; zeroOracle?: boolean; liquidated?: boolean; closed?: boolean; sameToken?: boolean; chainlink?: boolean; staleRound?: boolean } = {}) {
   const blocks: bigint[] = [];
   const calls: string[] = [];
+  const contracts: { address: string; functionName: string; args: any[] }[] = [];
   let poolReads = 0;
   const client = {
-    simulateContract: async ({ blockNumber }: { blockNumber: bigint }) => {
-      blocks.push(blockNumber); poolReads++;
+    simulateContract: async ({ blockNumber, address }: { blockNumber: bigint; address: string }) => {
+      blocks.push(blockNumber); poolReads++; contracts.push({ address, functionName: 'getDexState', args: [] });
       return { result: { token0PerSupplyShare: options.zeroReserves ? 0n : E18, token1PerSupplyShare: options.zeroReserves ? 0n : 3000n * E6, token0PerBorrowShare: options.zeroReserves ? 0n : 5000n * E6, token1PerBorrowShare: options.zeroReserves ? 0n : 5000n * E6 } };
     },
     getBlock: async ({ blockNumber }: { blockNumber: bigint }) => { blocks.push(blockNumber); return { timestamp: 200000n }; },
     readContract: async ({ functionName, args, blockNumber, address }: { functionName: string; args: any[]; blockNumber: bigint; address: string }) => {
-      blocks.push(blockNumber); calls.push(functionName);
+      blocks.push(blockNumber); calls.push(functionName); contracts.push({ address, functionName, args });
       switch (functionName) {
         case 'positionsNftIdOfUser':
           if (options.failDiscovery === 'vault' || options.failDiscovery === 'both') throw new Error('secret RPC URL');
@@ -45,6 +47,8 @@ function mock(options: { types?: bigint[]; ids?: bigint[]; lending?: boolean; mi
         case 'getPriceOracle': return POOL;
         case 'BASE_CURRENCY_UNIT': return 100000000n;
         case 'getAssetPrice': {
+          const xpl = args[0].toLowerCase() === networks.plasma.wrappedNative.toLowerCase();
+          if (xpl) return options.missingEthPrice ? 0n : 50000000n;
           const eth = args[0].toLowerCase() === '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
           return eth ? (options.missingEthPrice ? 0n : 3000n * 100000000n) : (options.missingDebtPrice ? 0n : 100000000n);
         }
@@ -58,7 +62,7 @@ function mock(options: { types?: bigint[]; ids?: bigint[]; lending?: boolean; mi
       }
     },
   } as unknown as ChainClient;
-  return { client, blocks, calls, get poolReads() { return poolReads; } };
+  return { client, blocks, calls, contracts, get poolReads() { return poolReads; } };
 }
 describe('Fluid vaults', () => {
   it('uses current balances, token decimals, liquidation oracle, and LT instead of borrowing limit', async () => {
@@ -168,4 +172,33 @@ it('handles no debt and invalid oracle inputs without claiming known risk', () =
   expect(fluidHealth(E18, E6, E18, 0)).toBeNull();
   expect(fluidHealth(E18, E6, E18, 10001)).toBeNull();
   expect(FLUID_VAULT_RESOLVER).toMatch(/^0x[a-fA-F0-9]{40}$/);
+});
+
+describe('Fluid on Plasma', () => {
+  it('uses Plasma resolvers, XPL wrapping, and Plasma USD prices for vaults and lending', async () => {
+    const m = mock({ lending: true, types: [10000n, 20000n] });
+    const result = await readFluid(m.client, wallet, 9745n, 'plasma');
+    expect(result.status).toBe('ok'); expect(result.coverage).toContain('Plasma');
+    expect(result.positions[0].assets[0]).toMatchObject({ symbol: 'XPL', supplied: 10, priceUsd: 0.5 });
+    expect(result.positions[0].suppliedUsd).toBe(5);
+    expect(result.positions[0].healthFactor).toBeCloseTo(1.7); // Risk uses Fluid's ratio, not the independent USD value.
+    expect(result.positions.at(-1)?.suppliedUsd).toBe(100);
+    for (const [fn, address] of [['positionsNftIdOfUser', networks.plasma.fluid.vault], ['getDexState', networks.plasma.fluid.dex], ['getAllFTokens', networks.plasma.fluid.lending], ['getPriceOracle', networks.plasma.aaveProvider]]) {
+      expect(m.contracts.filter(c => c.functionName === fn).every(c => c.address === address)).toBe(true);
+      expect(m.contracts.some(c => c.functionName === fn)).toBe(true);
+    }
+    expect(m.contracts.some(c => c.functionName === 'getAssetPrice' && c.args[0] === networks.plasma.wrappedNative)).toBe(true);
+    expect(m.blocks.every(b => b === 9745n)).toBe(true);
+    expect(result.positions[0].notes.join(' ')).toContain('Plasma block');
+  });
+  it('keeps balances and risk with unknown prices and never calls the Ethereum Chainlink registry', async () => {
+    const m = mock({ missingEthPrice: true, missingDebtPrice: true, chainlink: true });
+    const result = await readFluid(m.client, wallet, 9745n, 'plasma');
+    expect(result.status).toBe('partial'); expect(result.positions[0].suppliedUsd).toBeNull();
+    expect(result.positions[0].debtUsd).toBeNull(); expect(result.positions[0].healthFactor).toBeCloseTo(1.7);
+    expect(result.positions[0].assets[0].liquidationPriceUsd).toBeNull();
+    expect(m.calls).not.toContain('latestRoundData');
+    expect(m.contracts.some(c => c.address === networks.ethereum.chainlinkRegistry)).toBe(false);
+    expect(m.contracts.some(c => c.address === networks.ethereum.aaveProvider)).toBe(false);
+  });
 });

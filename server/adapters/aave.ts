@@ -1,9 +1,8 @@
 import { formatUnits, parseAbi, type Address } from 'viem';
-import type { ProtocolResult, Asset } from '../../src/types.js';
+import type { ProtocolResult, Asset, NetworkId } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
+import { networks } from '../networks.js';
 import { liquidationPrices, riskLevel } from '../risk.js';
-// Deployment source: bgd-labs/aave-address-book, src/AaveV3Ethereum.sol.
-const provider = '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e';
 const providerAbi = parseAbi([
   'function getPool() view returns (address)',
   'function getPriceOracle() view returns (address)',
@@ -20,7 +19,9 @@ const dataAbi = parseAbi([
 ]);
 const oracleAbi = parseAbi(['function getAssetPrice(address asset) view returns (uint256)', 'function BASE_CURRENCY_UNIT() view returns (uint256)']);
 const n = (value: bigint, decimals: number) => Number(formatUnits(value, decimals));
-export async function readAave(client: ChainClient, wallet: Address, blockNumber: bigint): Promise<ProtocolResult> {
+export async function readAave(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId = 'ethereum'): Promise<ProtocolResult> {
+  const deployment = networks[network];
+  const provider = deployment.aaveProvider;
   const readProvider = (functionName: 'getPool' | 'getPriceOracle' | 'getPoolDataProvider') => client.readContract({ address: provider, abi: providerAbi, functionName, blockNumber });
   const [pool, oracle, data] = await Promise.all([readProvider('getPool'), readProvider('getPriceOracle'), readProvider('getPoolDataProvider')]);
   const [account, emode, reserves, unit] = await Promise.all([
@@ -44,8 +45,8 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
   const health = debtUsd > 0 ? n(account[5], 18) : null;
   const weighted = Number(account[0]) / Number(unit) * Number(account[3]) / 1e4;
   return {
-    id: 'aave-v3', name: 'Aave v3', status: 'ok', coverage: 'Ethereum main market; excludes other Aave markets and vaults.',
-    positions: assets.length ? [{ id: 'aave-main', label: 'Ethereum main market', suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
+    id: 'aave-v3', name: 'Aave v3', status: 'ok', coverage: `${deployment.name} main market; excludes other Aave markets and vaults.`,
+    positions: assets.length ? [{ id: 'aave-main', label: `${deployment.name} main market`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
       notes: [ 'Prices come from Aave’s own oracle. Each liquidation price assumes other prices and balances stay fixed.', ...(emode !== 0n ? ['Efficiency mode is enabled. Health factor is read directly; per-asset liquidation price estimates are unavailable for this mode.'] : [])] }] : [],
   };
 }

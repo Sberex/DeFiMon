@@ -6,8 +6,9 @@ import { example } from '../src/example';
 let server: Server;
 let base: string;
 let reads = 0;
+const chains: string[] = [];
 beforeAll(async () => {
-  server = createApp(async () => { reads++; return example; }).listen(0, '127.0.0.1');
+  server = createApp(async (_wallet, network) => { reads++; chains.push(network); return example; }).listen(0, '127.0.0.1');
   await new Promise<void>(resolve => server.once('listening', resolve));
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('No HTTP port');
@@ -39,4 +40,16 @@ it('isolates protocol errors without exposing RPC credentials or claiming empty 
   expect(failed.status).toBe('error');
   expect(failed.message).toContain('unknown');
   expect(JSON.stringify(failed)).not.toContain('key-private');
+});
+
+it('routes the selected network and rejects unsupported or ambiguous networks before any reads', async () => {
+  await fetch(`${base}/api/portfolio/${example.address}?chain=plasma`);
+  expect(chains.at(-1)).toBe('plasma');
+  await fetch(`${base}/api/portfolio/${example.address}`);
+  expect(chains.at(-1)).toBe('ethereum');
+  const before = reads;
+  for (const query of ['chain=unknown', 'chain=plasma&chain=ethereum', 'chain[network]=plasma']) {
+    expect((await fetch(`${base}/api/portfolio/${example.address}?${query}`)).status).toBe(400);
+  }
+  expect(reads).toBe(before);
 });

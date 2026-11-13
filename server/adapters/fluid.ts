@@ -1,6 +1,7 @@
 import { formatUnits, parseAbi, type Address, type ContractFunctionReturnType } from 'viem';
-import type { Asset, Position, ProtocolResult } from '../../src/types.js';
+import type { Asset, Position, ProtocolResult, NetworkId } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
+import { networks } from '../networks.js';
 import { riskLevel } from '../risk.js';
 import { dexResolverAbi, lendingResolverAbi, vaultResolverAbi } from '../abis/fluid.js';
 
@@ -10,7 +11,6 @@ export const FLUID_DEX_RESOLVER = '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07';
 export const FLUID_LENDING_RESOLVER = '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569';
 export const FLUID_COVERAGE = 'Ethereum T1–T4 vaults and fToken lending deposits held directly by this address. Excludes standalone DEX/smart-lending deposits and linked accounts.';
 const NATIVE = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const erc20Abi = parseAbi(['function symbol() view returns (string)', 'function decimals() view returns (uint8)', 'function balanceOf(address) view returns (uint256)', 'function asset() view returns (address)', 'function convertToAssets(uint256) view returns (uint256)']);
 const aaveProviderAbi = parseAbi(['function getPriceOracle() view returns (address)']);
 const aaveOracleAbi = parseAbi(['function getAssetPrice(address) view returns (uint256)', 'function BASE_CURRENCY_UNIT() view returns (uint256)']);
@@ -45,17 +45,19 @@ export function fluidHealth(supply: bigint, borrow: bigint, price: bigint, thres
   return Number(supply) * Number(price) / 1e27 * (threshold / 10000) / Number(borrow);
 }
 
-export async function readFluid(client: ChainClient, wallet: Address, blockNumber: bigint): Promise<ProtocolResult> {
+export async function readFluid(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId = 'ethereum'): Promise<ProtocolResult> {
+  const deployment = networks[network];
+  const wrappedNative = deployment.wrappedNative;
   const tokens = new Map<string, Promise<Token>>();
   const pools = new Map<string, Promise<DexState>>();
   const warnings = new Set<string>();
   let oraclePromise: Promise<{ address: Address; unit: bigint }> | undefined;
   let timestampPromise: Promise<bigint> | undefined;
   async function priceUsd(token: Address): Promise<number | null> {
-    const base = token.toLowerCase() === NATIVE ? WETH as Address : token;
+    const base = token.toLowerCase() === NATIVE ? wrappedNative : token;
     try {
       oraclePromise ??= (async () => {
-        const address = await client.readContract({ address: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e', abi: aaveProviderAbi, functionName: 'getPriceOracle', blockNumber });
+        const address = await client.readContract({ address: deployment.aaveProvider, abi: aaveProviderAbi, functionName: 'getPriceOracle', blockNumber });
         const unit = await client.readContract({ address, abi: aaveOracleAbi, functionName: 'BASE_CURRENCY_UNIT', blockNumber });
         return { address, unit };
       })();
@@ -64,9 +66,10 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
       if (raw > 0n && oracle.unit > 0n) return Number(raw) / Number(oracle.unit);
     } catch { /* Unsupported assets can still have a Chainlink USD feed. */ }
     try {
-      const registry = '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf';
+      const registry = deployment.chainlinkRegistry;
+      if (!registry) return null; // Never use an Ethereum feed registry on another chain.
       const quote = '0x0000000000000000000000000000000000000348'; // Chainlink USD denomination.
-      const feedBase = base.toLowerCase() === WETH ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : base;
+      const feedBase = base.toLowerCase() === wrappedNative.toLowerCase() ? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' : base;
       const [round, decimals] = await Promise.all([
         client.readContract({ address: registry, abi: registryAbi, functionName: 'latestRoundData', args: [feedBase, quote], blockNumber }),
         client.readContract({ address: registry, abi: registryAbi, functionName: 'decimals', args: [feedBase, quote], blockNumber }),
@@ -81,7 +84,7 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
     const key = address.toLowerCase();
     if (!tokens.has(key)) tokens.set(key, (async () => {
       const [symbol, decimals, price] = await Promise.all([
-        key === NATIVE ? Promise.resolve('ETH') : client.readContract({ address, abi: erc20Abi, functionName: 'symbol', blockNumber }),
+        key === NATIVE ? Promise.resolve(deployment.nativeSymbol) : client.readContract({ address, abi: erc20Abi, functionName: 'symbol', blockNumber }),
         key === NATIVE ? Promise.resolve(18) : client.readContract({ address, abi: erc20Abi, functionName: 'decimals', blockNumber }),
         priceUsd(address),
       ]);
@@ -92,7 +95,7 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
   }
   function getPool(address: Address): Promise<DexState> {
     const key = address.toLowerCase();
-    if (!pools.has(key)) pools.set(key, client.simulateContract({ address: FLUID_DEX_RESOLVER, abi: dexResolverAbi, functionName: 'getDexState', args: [address], blockNumber }).then(r => r.result));
+    if (!pools.has(key)) pools.set(key, client.simulateContract({ address: deployment.fluid.dex, abi: dexResolverAbi, functionName: 'getDexState', args: [address], blockNumber }).then(r => r.result));
     return pools.get(key)!;
   }
   async function sideAssets(raw: bigint, smart: boolean, pool: Address, pair: { token0: Address; token1: Address }, side: 'supplied' | 'borrowed'): Promise<Asset[]> {
@@ -112,7 +115,7 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
   }
   async function vaultPosition(id: bigint): Promise<Position | null> {
     try {
-      const [position, vault]: ResolvedPosition = await client.readContract({ address: FLUID_VAULT_RESOLVER, abi: vaultResolverAbi, functionName: 'positionByNftId', args: [id], blockNumber });
+      const [position, vault]: ResolvedPosition = await client.readContract({ address: deployment.fluid.vault, abi: vaultResolverAbi, functionName: 'positionByNftId', args: [id], blockNumber });
       if (position.owner.toLowerCase() !== wallet.toLowerCase()) throw new Error('Position owner mismatch');
       if (position.supply === 0n && position.borrow === 0n) return null; // Closed NFTs are not live positions.
       const c = vault.constantVariables;
@@ -130,7 +133,7 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
       const threshold = vault.configs.liquidationThreshold;
       const oracle = vault.configs.oraclePriceLiquidate;
       const health = fluidHealth(position.supply, position.borrow, oracle, threshold);
-      const notes = ['Balances include accrued interest and any completed liquidations at the displayed Ethereum block.', 'Health factor is an estimate from Fluid’s liquidation oracle and liquidation threshold, not the borrowing limit. Fluid liquidates in discrete price ticks, so execution can differ slightly.'];
+      const notes = [`Balances include accrued interest and any completed liquidations at the displayed ${deployment.name} block.`, 'Health factor is an estimate from Fluid’s liquidation oracle and liquidation threshold, not the borrowing limit. Fluid liquidates in discrete price ticks, so execution can differ slightly.'];
       let liquidationQuote: Position['liquidationQuote'];
       if (position.borrow > 0n && position.supply > 0n && oracle > 0n && threshold > 0 && threshold <= 10000) {
         const supplyToken = vault.isSmartCol ? null : await getToken(c.supplyToken.token0);
@@ -177,8 +180,8 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
   }
   // Discover both product families independently: a failure must not hide successful reads in the other.
   const [vaultDiscovery, lendingDiscovery] = await Promise.allSettled([
-    client.readContract({ address: FLUID_VAULT_RESOLVER, abi: vaultResolverAbi, functionName: 'positionsNftIdOfUser', args: [wallet], blockNumber }),
-    client.readContract({ address: FLUID_LENDING_RESOLVER, abi: lendingResolverAbi, functionName: 'getAllFTokens', blockNumber }),
+    client.readContract({ address: deployment.fluid.vault, abi: vaultResolverAbi, functionName: 'positionsNftIdOfUser', args: [wallet], blockNumber }),
+    client.readContract({ address: deployment.fluid.lending, abi: lendingResolverAbi, functionName: 'getAllFTokens', blockNumber }),
   ]);
   if (vaultDiscovery.status === 'rejected' && lendingDiscovery.status === 'rejected') throw new Error('Fluid discovery failed');
   if (vaultDiscovery.status === 'rejected') warnings.add('Fluid vault discovery failed. Vault balances and risk have not been checked.');
@@ -187,5 +190,5 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
     vaultDiscovery.status === 'fulfilled' ? mapLimited([...new Set(vaultDiscovery.value)], vaultPosition) : [],
     lendingDiscovery.status === 'fulfilled' ? mapLimited([...new Set(lendingDiscovery.value)], lendingPosition) : [],
   ]);
-  return { id: 'fluid', name: 'Fluid', status: warnings.size ? 'partial' : 'ok', coverage: FLUID_COVERAGE, message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...vaults, ...lending].filter((p): p is Position => p !== null) };
+  return { id: 'fluid', name: 'Fluid', status: warnings.size ? 'partial' : 'ok', coverage: FLUID_COVERAGE.replace('Ethereum', deployment.name), message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...vaults, ...lending].filter((p): p is Position => p !== null) };
 }
