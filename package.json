@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:browser": "playwright test",
-    "check:fluid": "tsx scripts/check-fluid.ts"
+    "check:fluid": "tsx scripts/check-fluid.ts",
+    "check:aave-v4": "tsx scripts/check-aave-v4.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

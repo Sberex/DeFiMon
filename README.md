@@ -4,17 +4,17 @@ A read-only Ethereum wallet dashboard for current lending positions and liquidat
 
 ## Current scope
 
-This is an **early implementation, not a complete five-protocol monitor**. Production build and deterministic tests run locally. Fluid has been exercised against live Ethereum positions; Aave and Compound still require live position comparisons before use for financial monitoring.
+This is an **early implementation, not a complete five-protocol monitor**. Production build and deterministic tests run locally. Fluid and Aave v4 have been exercised against live Ethereum positions; Aave v3 and Compound still require live position comparisons before use for financial monitoring.
 
 | Protocol | Implemented coverage | Limitations |
 | --- | --- | --- |
 | Aave v3 | Ethereum main market; deposits, debts, native health factor, oracle prices | Other deployments excluded. Per-asset liquidation prices withheld for efficiency mode. |
 | Compound | v3 USDC and WETH markets; base balances, collateral, liquidation factors | v2 and other v3 markets excluded. |
-| Aave v4 | Explicit “not connected” state | Deployment and reader verification required. |
+| Aave v4 | 14 Ethereum lending markets plus 37 tokenized-deposit contracts; deposits, premium-inclusive debt, native health factor, and collateral liquidation estimates | Official address-book snapshot, direct ownership only; linked accounts and treasury infrastructure excluded. New deployments require a roster update. |
 | Morpho | Explicit “not connected” state | Market/vault discovery and reader required. |
 | Fluid | Ethereum T1–T4 vaults and ordinary fToken lending deposits; balances, debt, health estimate and liquidation boundary | Direct ownership only. Standalone DEX/smart-lending deposits and linked smart accounts excluded. Smart vaults show oracle-ratio boundaries rather than a single underlying token’s dollar liquidation price. |
 
-Unavailable protocols are **unknown**, never zero balances. Fluid can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
+Unavailable protocols are **unknown**, never zero balances. Aave v4 and Fluid can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
 
 ## Run locally
 
@@ -60,6 +60,11 @@ No deployment or Git push is performed by the local build. Hosting/provider plan
 - For an individual asset, solve `weighted collateral = debt` while all other prices/balances stay fixed. If that asset is both supplied and borrowed, both sides move with its price.
 - Per-asset estimates are scenario calculations, not predictions. A dash means no positive downward boundary can be estimated, no debt, or an unsupported mode. They are not a promise that a position is safe.
 - Risk bands: health <= 1 threshold reached; below 1.1 high; below 1.3 watch; otherwise lower. These are display conventions. Protocol rounding, interest, changing prices, and special liquidation rules can affect execution.
+- Aave v4 reads each lending Spoke separately: a healthy position in one market does not protect debt in another. Reserve enumeration includes non-collateral deposits. Current underlying balances come from `getUserSuppliedAssets`; debt from `getUserTotalDebt` includes drawn and risk-premium debt.
+- V4 account Value units are **USD × 1e26**; `totalDebtValueRay` is **USD × 1e53**; health factor and average collateral factor are **1e18** scaled. These differ from v3. The reader checks that the market oracle uses the required 8-decimal USD precision before converting native USD account totals.
+- V4 liquidation estimates use `getDynamicReserveConfig(reserveId, userPosition.dynamicConfigKey)`, not the reserve’s newest configuration key. Repeated underlying assets are merged with enabled-only collateral weights, so price scenarios account for the token appearing on both sides of the position. Native health stays authoritative.
+- V4 tokenized-deposit balances use ERC-4626 `convertToAssets` once. A matching reserve for the exact Hub/asset pair supplies the USD oracle price. Deposit-only tokens have no borrowing or collateral liquidation risk. Missing feeds or failed market reads are explicit partial/unknown results, not zero balances.
+- V4 estimates assume prices of other tokens, balances, and the current premium debt stay fixed. Future interest, risk-premium changes, user actions that refresh settings, and protocol rounding can change the boundary.
 - Fluid discovers vault NFTs using the official VaultResolver and reads each NFT independently. Each NFT has separate risk, even when multiple NFTs use the same vault. Closed NFTs are omitted; balances after liquidation use the resolver’s remaining supply and debt.
 - Fluid T2/T3/T4 collateral and debt shares are expanded into underlying tokens using DexResolver per-share amounts from a read-only simulation. Its contracts catch some internal failures and return zeros; all-zero conversion results are treated as unavailable, not zero balances.
 - Fluid health = `current supply × liquidation oracle price / 1e27 × liquidation threshold / current debt`, in the resolver’s raw units. This uses the **liquidation** oracle, not the operating oracle or borrowing limit. Tick rounding can affect actual liquidation execution.
@@ -69,6 +74,8 @@ No deployment or Git push is performed by the local build. Hosting/provider plan
 - Display calculations use floating-point numbers after decoding integer balances. They are estimates and should not be used for transaction sizing at the liquidation boundary.
 
 Contract sources: [Aave address book](https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV3Ethereum.sol), [Aave data provider](https://github.com/aave/aave-v3-origin/blob/main/src/contracts/helpers/AaveProtocolDataProvider.sol), Compound [USDC](https://github.com/compound-finance/comet/blob/main/deployments/mainnet/usdc/roots.json) and [WETH](https://github.com/compound-finance/comet/blob/main/deployments/mainnet/weth/roots.json) deployments. Fluid’s selected ABI entries and deployment addresses come from [Instadapp/fluid-contracts-public at 404d73f](https://github.com/Instadapp/fluid-contracts-public/tree/404d73f91e6806f881f8dabeb30494f93f9e99b7/deployments/mainnet). The deployed ABI is pinned in `server/abis/fluid.ts`; current Solidity source has additional struct fields and must not be substituted without checking deployment compatibility.
+
+Aave v4 deployments are pinned from the [official address book at b8c801a](https://github.com/bgd-labs/aave-address-book/blob/b8c801a413c4b934afaf7976d2ddc5fbada6dce6/src/AaveV4Ethereum.sol). Interfaces and normalization follow [Aave v4 at 8be3e0d](https://github.com/aave/aave-v4/tree/8be3e0d59efc23cd1d4664a88743340533dd5a0c/src/spoke), especially `ISpoke.sol` and `libraries/SpokeUtils.sol`. Lists are checked into `server/deployments/aave-v4.ts`; the application never loads executable configuration from a remote source at runtime.
 
 ## Validation
 
@@ -91,6 +98,16 @@ npm run check:fluid -- 0xYourEthereumWalletAddress
 This reads the current block and prints the complete Fluid result. It exits unsuccessfully if any part is unknown or no positions are found; a zero-position lookup is not treated as a meaningful position check.
 
 Browser tests use `/usr/bin/chromium` when present; otherwise run `npx playwright install chromium` first. Override `CHROMIUM_PATH` to use another installed executable.
+
+Aave v4 live checks confirmed all 14 lending contracts and 37 tokenized-deposit balance readers on Ethereum. A live Main-market borrower at block 26407382 returned wstETH collateral, USDC/USDT debt, and a native health factor near 4.10645, with estimated collateral liquidation prices. The second wallet in `TestCases` had no covered direct v4 positions at block 26407366. Tokenized-deposit conversion/valuation interfaces were also checked against live contract-wide supply; an individual active tokenized holder was not independently validated. Historical transfer discovery was limited by the public provider’s archive policy; current-state wallet lookup does not require historical logs.
+
+Repeat a current-state check with a known active v4 wallet:
+
+```sh
+npm run check:aave-v4 -- 0xYourEthereumWalletAddress
+```
+
+Like the Fluid check, this reports the selected block and result and exits unsuccessfully for incomplete or empty portfolios. It does not store a balance history.
 
 ## Privacy and operations
 

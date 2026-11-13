@@ -5,8 +5,8 @@ test('shows clearly labeled example positions and partial protocol coverage', as
   await expect(page.getByRole('heading', { name: /Know where/ })).toBeVisible();
   await page.getByRole('button', { name: /Explore an example/ }).click();
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
-  await expect(page.getByText('$21,500.00', { exact: true })).toBeVisible();
-  await expect(page.getByText('Not connected', { exact: true })).toHaveCount(2);
+  await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('Not connected', { exact: true })).toHaveCount(1);
   await expect(page.getByText('$2,117.65', { exact: true })).toBeVisible();
   await page.screenshot({ path: '/tmp/defimon-desktop.png', fullPage: true });
 });
@@ -19,7 +19,7 @@ test('rejects invalid input and displays provider failures without example balan
   await page.getByLabel('Ethereum wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByRole('alert')).toContainText('Ethereum data is unavailable');
-  await expect(page.getByText('$21,500.00', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('$26,500.00', { exact: true })).toHaveCount(0);
 });
 test('searches and refreshes the displayed wallet rather than an edited address', async ({ page }) => {
   let reads = 0;
@@ -32,7 +32,7 @@ test('searches and refreshes the displayed wallet rather than an edited address'
   await page.getByLabel('Ethereum wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByText(/Block 101/)).toBeVisible();
-  await expect(page.getByText(/Partial coverage: 3 of 5/)).toBeVisible();
+  await expect(page.getByText(/Partial coverage: 4 of 5/)).toBeVisible();
   await page.getByLabel('Ethereum wallet address').fill('0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: /Refresh/ }).click();
   await expect(page.getByText(/Block 102/)).toBeVisible();
@@ -63,7 +63,7 @@ test('shows Fluid liquidation ratios and excludes unpriced positions from dollar
   await expect(card.getByText(/Current: 3,000 USDC per ETH/)).toBeVisible();
   await expect(card.getByText(/Threshold: 1,902.17 USDC per ETH/)).toBeVisible();
   await expect(page.getByText(/Dollar totals exclude 1 positions/)).toBeVisible();
-  await expect(page.getByText('$19,000.00', { exact: true })).toBeVisible(); // Entire unpriced position excluded, including its debt.
+  await expect(page.getByText('$24,000.00', { exact: true })).toBeVisible(); // Entire unpriced position excluded, including its debt.
   await expect(card.getByText('$0.00', { exact: true })).toHaveCount(0);
 });
 
@@ -80,4 +80,45 @@ test('shows Fluid oracle ratios for smart collateral without inventing a dollar 
   await expect(card.getByText('Checked', { exact: true })).toBeVisible();
   await expect(card.getByText(/Threshold: 0.3125 debt pool share per collateral pool share/)).toBeVisible();
   await expect(card.getByText('$1,902.17', { exact: true })).toHaveCount(0);
+});
+
+test('shows Aave v4 markets separately and does not offset an unhealthy market with another market', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const v4 = fixture.protocols.find(p => p.id === 'aave-v4')!;
+  const main = v4.positions[0];
+  main.debtUsd = 8000;
+  main.assets[1].borrowed = 8000;
+  main.healthFactor = .9;
+  main.risk = 'liquidatable';
+  main.assets[0].liquidationPriceUsd = 8000 / (3 * .8);
+  const other = structuredClone(main);
+  other.id = 'example-v4-bluechip'; other.label = 'Aave v4 · BLUECHIP';
+  other.suppliedUsd = 100000; other.debtUsd = 100; other.healthFactor = 800; other.risk = 'lower';
+  v4.positions.push(other);
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
+  await page.goto('/');
+  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.aave-v4');
+  await expect(card.getByRole('heading', { name: 'Aave v4 · MAIN', exact: true })).toBeVisible();
+  await expect(card.getByRole('heading', { name: 'Aave v4 · BLUECHIP', exact: true })).toBeVisible();
+  await expect(card.getByText('Liquidation threshold reached', { exact: true })).toBeVisible();
+  await expect(page.locator('.summary').filter({ hasText: 'Lowest health factor' }).locator('strong')).toContainText('0.90');
+});
+
+test('distinguishes an unavailable Aave v4 market from an empty market', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const v4 = fixture.protocols.find(p => p.id === 'aave-v4')!;
+  v4.status = 'partial';
+  v4.message = 'Some Aave v4 lending markets could not be checked.';
+  v4.positions = [{ id: 'unknown-v4', label: 'BLUECHIP market · unavailable', suppliedUsd: null, debtUsd: null, healthFactor: null, risk: 'unknown', assets: [], notes: ['Balances and risk are unknown.'] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
+  await page.goto('/');
+  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.aave-v4');
+  await expect(card.getByText('Partially checked', { exact: true })).toBeVisible();
+  await expect(card.getByText('Risk unavailable', { exact: true })).toBeVisible();
+  await expect(card.getByText('No positions found', { exact: false })).toHaveCount(0);
+  await expect(card.getByText('$0.00', { exact: true })).toHaveCount(0);
 });
