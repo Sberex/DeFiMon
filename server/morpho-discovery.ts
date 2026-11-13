@@ -23,10 +23,8 @@ export const MORPHO_VAULTS_QUERY = `query WalletVaults($wallet: String!, $first:
  }
 }`;
 export const MORPHO_V2_QUERY = `query WalletVaultsV2($wallet: String!) {
- users(first: 2, where: {chainId_in: [1], address_in: [$wallet]}) {
-  items { ${userFields} vaultV2Positions { user { ${userFields} } vault { address name chain { id } factory { address } asset { ${tokenFields} } } }
-  }
-  pageInfo { count countTotal skip limit }
+ userByAddress(address: $wallet, chainId: 1) {
+  ${userFields} vaultV2Positions { user { ${userFields} } vault { address name chain { id } factory { address } asset { ${tokenFields} } } }
  }
 }`;
 type Obj = Record<string, unknown>;
@@ -78,7 +76,16 @@ export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetc
       // Current SDK queries use marketId; older API schema snapshots expose uniqueKey.
       const oldSchema = Array.isArray(envelope.errors) && envelope.errors.some(e => e && typeof e === 'object' && typeof e.message === 'string' && /Cannot query field ["']marketId["']/.test(e.message));
       if (oldSchema && document.includes('uniqueKey: marketId')) return query(document.replace('uniqueKey: marketId', 'uniqueKey'), variables);
+      // Optional display prices must not prevent discovery of balances or oracle-based risk.
+      // oraclePriceUsd is a documented USD display price in the official Asset interface.
       const detail = safeSchemaDetail(envelope.errors);
+      if (detail === 'Unsupported field Asset.priceUsd' && /\bdecimals priceUsd\b/.test(document)) {
+        return query(document.replaceAll('decimals priceUsd', 'decimals priceUsd: oraclePriceUsd'), variables);
+      }
+      if (detail === 'Unsupported field Asset.oraclePriceUsd' && document.includes('priceUsd: oraclePriceUsd')) {
+        warnings.add('Morpho’s lookup service does not expose a supported USD price field. Token balances and oracle-based risk are still checked; dollar values are unavailable.');
+        return query(document.replaceAll('priceUsd: oraclePriceUsd', ''), variables);
+      }
       const validation = detail || (Array.isArray(envelope.errors) && envelope.errors.some(e => e?.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' || (typeof e?.message === 'string' && /^(Syntax Error|Unknown type|Variable |Value .* does not exist in)/.test(e.message))));
       throw new MorphoLookupError(validation ? 'schema' : response.ok ? 'response' : 'http', { httpStatus: response.status, schemaDetail: detail });
     }
@@ -117,12 +124,9 @@ export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetc
     pages('marketPositions', MORPHO_MARKETS_QUERY, row => marketRow(row, wallet), m => m.id),
     pages('vaultPositions', MORPHO_VAULTS_QUERY, row => vaultRow(row, wallet, 1), v => v.address),
     (async () => {
-      const data = await query(MORPHO_V2_QUERY, { wallet }); const container = object(data.users);
-      if (!Array.isArray(container.items)) throw new Error('Missing Morpho users');
-      const total = pageInfo(container.pageInfo, container.items, 0);
-      if (total > 1 || total !== container.items.length) throw new Error('Ambiguous Morpho user');
-      if (!total) return [] as MorphoVaultRef[];
-      const u = object(container.items[0]); user(u, wallet);
+      const data = await query(MORPHO_V2_QUERY, { wallet });
+      // A missing/null entity is not proof that all V2 holdings have been checked.
+      const u = object(data.userByAddress); user(u, wallet);
       if (!Array.isArray(u.vaultV2Positions)) throw new Error('Missing vault V2 positions');
       const vaults = new Map<string, MorphoVaultRef>();
       for (const row of u.vaultV2Positions) {
