@@ -1,3 +1,4 @@
+import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
 import type { Portfolio, ProtocolResult } from '../src/types.js';
 import { makeClient } from './rpc.js';
@@ -7,9 +8,9 @@ import { readCompound } from './adapters/compound.js';
 import { readFluid, FLUID_COVERAGE } from './adapters/fluid.js';
 import { readMorpho, MORPHO_COVERAGE } from './adapters/morpho.js';
 export async function isolateProtocol(id: string, name: string, coverage: string, run: () => Promise<ProtocolResult>, failureMessage = 'Could not read this protocol. Its balances are unknown. Check Ethereum provider access and try again.'): Promise<ProtocolResult> {
-  try { return await run(); } catch {
+  try { return await run(); } catch (error) {
     // Never send raw RPC errors: they can contain the server's provider URL / API key.
-    return { id, name, coverage, status: 'error', message: failureMessage, positions: [] };
+    return { id, name, coverage, status: 'error', message: id === 'morpho' && error instanceof MorphoDiscoveryUnavailable ? error.publicMessage : failureMessage, positions: [] };
   }
 }
 export async function getPortfolio(wallet: Address): Promise<Portfolio> {

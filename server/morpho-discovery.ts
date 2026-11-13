@@ -1,3 +1,4 @@
+import { MorphoLookupError, morphoNetworkError, safeSchemaDetail, toMorphoFailure, type MorphoFailure } from './morpho-errors.js';
 import { getAddress, isAddress, type Address, type Hex } from 'viem';
 // Schema/endpoint: morpho-org/sdks@56f1ed62827a7aab39d979c0143d1fbf970c37ca,
 // packages/liquidity-sdk-viem/src/api/types.ts and morpho-ts/src/urls.ts.
@@ -6,7 +7,7 @@ export const MORPHO_BLUE = '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb';
 export interface MorphoToken { address: Address; symbol: string; decimals: number; priceUsd: number | null }
 export interface MorphoMarketRef { id: Hex; loan: MorphoToken; collateral: MorphoToken | null }
 export interface MorphoVaultRef { address: Address; name: string; asset: MorphoToken; factory: Address; version: 1 | 2 }
-export interface MorphoDiscovery { markets: MorphoMarketRef[]; vaults: MorphoVaultRef[]; warnings: string[]; successfulFamilies: number }
+export interface MorphoDiscovery { markets: MorphoMarketRef[]; vaults: MorphoVaultRef[]; warnings: string[]; successfulFamilies: number; failures?: MorphoFailure[] }
 const tokenFields = 'address symbol decimals priceUsd';
 const userFields = 'address chain { id }';
 export const MORPHO_MARKETS_QUERY = `query WalletMarkets($wallet: String!, $first: Int!, $skip: Int!) {
@@ -66,17 +67,22 @@ function pageInfo(value: unknown, items: unknown[], skip: number) {
 export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetch = fetch): Promise<MorphoDiscovery> {
   const warnings = new Set<string>();
   async function query(document: string, variables: Record<string, unknown>): Promise<Obj> {
-    const response = await fetcher(MORPHO_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: document, variables }), signal: AbortSignal.timeout(15000), cache: 'no-store' });
-    if (!response.ok) throw new Error('Morpho lookup unavailable');
-    const text = await response.text();
-    if (text.length > 4_000_000) throw new Error('Morpho response too large');
-    const envelope = object(JSON.parse(text));
+    let response: Response;
+    try { response = await fetcher(MORPHO_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: document, variables }), signal: AbortSignal.timeout(15000), cache: 'no-store' }); } catch (error) { throw morphoNetworkError(error); }
+    if (!response.ok && ![400, 422].includes(response.status)) throw new MorphoLookupError('http', { httpStatus: response.status });
+    const text = await response.text().catch(error => { throw morphoNetworkError(error); });
+    if (text.length > 4_000_000) throw new MorphoLookupError('response');
+    let envelope: Obj;
+    try { envelope = object(JSON.parse(text)); } catch { throw new MorphoLookupError(response.ok ? 'response' : 'http', response.ok ? {} : { httpStatus: response.status }); }
     if (envelope.errors !== undefined && (!Array.isArray(envelope.errors) || envelope.errors.length > 0)) {
       // Current SDK queries use marketId; older API schema snapshots expose uniqueKey.
       const oldSchema = Array.isArray(envelope.errors) && envelope.errors.some(e => e && typeof e === 'object' && typeof e.message === 'string' && /Cannot query field ["']marketId["']/.test(e.message));
       if (oldSchema && document.includes('uniqueKey: marketId')) return query(document.replace('uniqueKey: marketId', 'uniqueKey'), variables);
-      throw new Error('Morpho GraphQL query failed');
+      const detail = safeSchemaDetail(envelope.errors);
+      const validation = detail || (Array.isArray(envelope.errors) && envelope.errors.some(e => e?.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' || (typeof e?.message === 'string' && /^(Syntax Error|Unknown type|Variable |Value .* does not exist in)/.test(e.message))));
+      throw new MorphoLookupError(validation ? 'schema' : response.ok ? 'response' : 'http', { httpStatus: response.status, schemaDetail: detail });
     }
+    if (!response.ok) throw new MorphoLookupError('http', { httpStatus: response.status });
     return object(envelope.data);
   }
   async function pages<T>(field: string, document: string, parse: (value: unknown) => T, key: (value: T) => string): Promise<T[]> {
@@ -128,5 +134,5 @@ export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetc
   ]);
   const names = ['market', 'vault V1', 'vault V2'];
   results.forEach((r, i) => { if (r.status === 'rejected') warnings.add(`Morpho ${names[i]} lookup is unavailable. Those positions and balances have not been checked.`); });
-  return { markets: results[0].status === 'fulfilled' ? results[0].value : [], vaults: [...(results[1].status === 'fulfilled' ? results[1].value : []), ...(results[2].status === 'fulfilled' ? results[2].value : [])], warnings: [...warnings], successfulFamilies: results.filter(r => r.status === 'fulfilled').length };
+  return { markets: results[0].status === 'fulfilled' ? results[0].value : [], vaults: [...(results[1].status === 'fulfilled' ? results[1].value : []), ...(results[2].status === 'fulfilled' ? results[2].value : [])], warnings: [...warnings], successfulFamilies: results.filter(r => r.status === 'fulfilled').length, failures: results.flatMap((r, i) => r.status === 'rejected' ? [toMorphoFailure(names[i], r.reason)] : []) };
 }

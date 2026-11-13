@@ -125,7 +125,15 @@ npm run check:morpho -- 0xYourEthereumWalletAddress
 
 Morpho validation so far: deterministic calculation/discovery/API/browser tests pass. A live Blue borrower at blocks 26407512–26407513 returned USDC debt and an apyUSD/USDC liquidation ratio, with health near 1.02133. A live V1 Steakhouse USDC holder at block 26407555 returned 48,209.191007 underlying USDC. These were diagnostic reads with manually selected references, **not** successful full official-API wallet discovery; diagnostic USD prices were absent or separately sourced on-chain. V2 behavior is fixture-tested against the official interface and accounting formula; an active Ethereum V2 holder was not verified.
 
-**Outstanding cloud requirement:** this instance denied access to `api.morpho.org`. A draft network addition was saved, preserving the existing Ethereum RPC destination. Review/save that addition in Environment settings and publish the environment as needed, then rerun a fresh live lookup. Until that is applied and the API path is tested, do not describe Morpho’s full live wallet discovery as verified. No wallet private key, API token, or new database is needed. Local hosting requires outbound HTTPS access to this API as well as its Ethereum provider.
+To diagnose a Morpho error on the computer hosting the website, run:
+
+```sh
+npm run diagnose:morpho -- 0xYourEthereumWalletAddress
+```
+
+This tests the same public API queries and proxy settings as the website, without using the Ethereum provider. It reports connection/timeouts, HTTP status, query compatibility, or unexpected responses separately. It does not print provider credentials, proxy credentials, or `.env` contents. The public wallet address is sent to Morpho. A successful test checks discovery only; Ethereum reads must still succeed. The website also distinguishes these failure categories. Older versions displayed one generic message for all of them. Compatibility retries now handle explicit unknown-field errors returned with HTTP 400/422 as well as HTTP 200.
+
+**Outstanding cloud requirement:** this instance denied access to `api.morpho.org`. A draft network addition was saved, preserving the existing Ethereum RPC destination, but applying it was rejected as exceeding the configured limit. This requires resolution of the environment’s permitted network limit; application code cannot raise that limit. Until the API path is allowed and tested, do not describe Morpho’s full live wallet discovery as verified. This cloud restriction does not establish the cause of a failure on another computer. No wallet private key, API token, or new database is needed. Local hosting requires outbound HTTPS access to this API as well as its Ethereum provider.
 
 ## Privacy and operations
 

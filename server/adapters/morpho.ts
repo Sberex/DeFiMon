@@ -1,6 +1,7 @@
 import { decodeFunctionResult, encodeAbiParameters, encodeFunctionData, formatUnits, keccak256, parseAbiParameters, type Address, type Hex } from 'viem';
 import type { Asset, Position, ProtocolResult } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
+import { MorphoDiscoveryUnavailable } from '../morpho-errors.js';
 import { riskLevel } from '../risk.js';
 import { fetchMorphoDiscovery, MORPHO_BLUE, type MorphoDiscovery, type MorphoMarketRef, type MorphoToken, type MorphoVaultRef } from '../morpho-discovery.js';
 import { morphoCoreAbi as coreAbi, morphoFactoryAbi as factoryAbi, morphoMulticallAbi as multiAbi, morphoOracleAbi as oracleAbi, morphoVaultAbi as vaultAbi } from '../abis/morpho.js';
@@ -38,7 +39,7 @@ function total(assets: Asset[], side: 'supplied' | 'borrowed') {
 }
 export async function readMorpho(client: ChainClient, wallet: Address, blockNumber: bigint, discover: (wallet: Address) => Promise<MorphoDiscovery> = fetchMorphoDiscovery): Promise<ProtocolResult> {
   const discovery = await discover(wallet);
-  if (!discovery.successfulFamilies) throw new Error('Morpho discovery unavailable');
+  if (!discovery.successfulFamilies) throw new MorphoDiscoveryUnavailable(discovery.failures ?? []);
   const warnings = new Set(discovery.warnings);
   const metadata = new Map<string, Promise<{ symbol: string; decimals: number }>>();
   async function token(t: MorphoToken) {

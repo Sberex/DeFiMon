@@ -93,3 +93,28 @@ it('supports older uniqueKey schemas only after an explicit unknown-marketId sch
   expect(result.markets).toHaveLength(1); expect(result.warnings).toEqual([]);
   expect(seen.filter(q => q.includes('query WalletMarkets('))).toHaveLength(2);
 });
+
+it('handles old-schema validation returned as HTTP 400 before treating it as a network failure', async () => {
+  const fetcher = (async (_url, init) => {
+    const { query } = JSON.parse(String(init?.body));
+    if (query.includes('uniqueKey: marketId')) return new Response(JSON.stringify({ errors: [{ message: 'Cannot query field "marketId" on type "Market".' }] }), { status: 400 });
+    const field = query.includes('query WalletMarkets(') ? 'marketPositions' : query.includes('query WalletVaults(') ? 'vaultPositions' : 'users';
+    return new Response(JSON.stringify({ data: { [field]: field === 'marketPositions' ? page([market()]) : page([]) } }));
+  }) as typeof fetch;
+  const result = await fetchMorphoDiscovery(wallet, fetcher);
+  expect(result.markets).toHaveLength(1); expect(result.failures).toEqual([]);
+});
+it('preserves sanitized reasons for network, HTTP, schema, and invalid-response failures', async () => {
+  const cases = [
+    { response: () => Promise.reject(Object.assign(new Error('https://private-provider/key'), { cause: { code: 'ENOTFOUND' } })), code: 'network' },
+    { response: async () => new Response('private detail', { status: 403 }), code: 'http' },
+    { response: async () => new Response(JSON.stringify({ errors: [{ message: 'Cannot query field "removedField" on type "Query".' }] }), { status: 400 }), code: 'schema' },
+    { response: async () => new Response('<html>private content</html>'), code: 'response' },
+  ];
+  for (const c of cases) {
+    const result = await fetchMorphoDiscovery(wallet, c.response as typeof fetch);
+    expect(result.successfulFamilies).toBe(0);
+    expect(result.failures?.every(f => f.code === c.code)).toBe(true);
+    expect(JSON.stringify(result)).not.toContain('private');
+  }
+});
