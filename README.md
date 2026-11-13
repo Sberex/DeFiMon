@@ -40,7 +40,9 @@ The production server serves both the website and API on `PORT` (default 3001). 
 
 ## Plasma support
 
-Choose **Plasma** in the Blockchain selector, enter your wallet address, and select **Check wallet**. Plasma currently checks **Aave v3 and Fluid**. Ethereum continues to show all five protocol families. Switching networks clears previous results; balances from different blockchains are never combined. Refresh stays on the selected network. The illustrative example remains explicitly fictional and uses Ethereum.
+Enter your wallet address and select **Check wallet** to read **Ethereum and Plasma together**. Results are grouped by protocol: Aave v3 on Ethereum followed by Aave v3 on Plasma, then Ethereum Aave v4, Morpho, and Compound, followed by Fluid on Ethereum and Fluid on Plasma. Each card labels its blockchain. No network selector is needed. Plasma currently checks Aave v3 and Fluid; Ethereum checks all five protocol families.
+
+The summary totals add the priced positions from both networks. Collateral, health factors, and liquidation estimates remain independent for each position; collateral on one network never protects borrowing on another. Each network has its own displayed block and check time. Refresh updates both networks for the displayed wallet. If one provider fails, the other network’s results remain visible and the failed network’s readers show unknown balances. The illustrative example includes explicitly fictional positions on both networks.
 
 Plasma uses chain ID **9745** and native currency **XPL**. The public `https://rpc.plasma.to` endpoint is the default. To use your own provider, add `PLASMA_RPC_URL=https://your-provider` to your existing `.env` file (or your host’s environment variables). Keep your existing `ETHEREUM_RPC_URL` for Ethereum; do not replace the whole `.env` file. Restart the server after changing it. No wallet connection or signing key is required.
 
@@ -54,7 +56,7 @@ Run a live local check with a public wallet address:
 npm run check:plasma -- 0xYourWalletAddress
 ```
 
-The API also accepts `/api/portfolio/0xYourWalletAddress?chain=plasma`; omitting `chain` continues to use Ethereum. Only `ethereum` and `plasma` are accepted. Health reports configuration presence, not successful blockchain access.
+The website requests `/api/portfolio/0xYourWalletAddress?chain=all`, which returns seven protocol/network readers in display order and a separate `networks` snapshot for each chain. A failed network has no block number and explicit error cards; it is not a verified empty wallet. Per-network API access remains available with `chain=ethereum` or `chain=plasma`; omitting `chain` continues to use Ethereum for compatibility. Health reports configuration presence, not successful blockchain access.
 
 Validation: deterministic reader, network-routing, provider-selection, and browser checks cover Plasma. This cloud environment denied access to `rpc.plasma.to` (CONNECT 403), so a live Plasma wallet comparison is still required on a computer or host that can reach the provider. No cloud environment settings have been published by this change.
 

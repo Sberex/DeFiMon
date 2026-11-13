@@ -8,7 +8,7 @@ let base: string;
 let reads = 0;
 const chains: string[] = [];
 beforeAll(async () => {
-  server = createApp(async (_wallet, network) => { reads++; chains.push(network); return example; }).listen(0, '127.0.0.1');
+  server = createApp(async (_wallet, network) => { reads++; chains.push(network); return network === 'plasma' ? { ...example, chain: 'Plasma', protocols: example.protocols.filter(p => p.id === 'aave-v3' || p.id === 'fluid') } : example; }).listen(0, '127.0.0.1');
   await new Promise<void>(resolve => server.once('listening', resolve));
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('No HTTP port');
@@ -52,4 +52,14 @@ it('routes the selected network and rejects unsupported or ambiguous networks be
     expect((await fetch(`${base}/api/portfolio/${example.address}?${query}`)).status).toBe(400);
   }
   expect(reads).toBe(before);
+});
+
+it('returns both networks grouped by protocol through the combined endpoint', async () => {
+  const before = chains.length;
+  const response = await fetch(`${base}/api/portfolio/${example.address}?chain=all`);
+  expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
+  const data = await response.json();
+  expect(data.chain).toBe('Ethereum + Plasma'); expect(data.blockNumber).toBeNull();
+  expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v4:Ethereum', 'morpho:Ethereum', 'compound:Ethereum', 'fluid:Ethereum', 'fluid:Plasma']);
+  expect(chains.slice(before)).toEqual(['ethereum', 'plasma']);
 });

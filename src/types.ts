@@ -1,4 +1,5 @@
 export type NetworkId = 'ethereum' | 'plasma';
+export type ChainName = 'Ethereum' | 'Plasma';
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
@@ -13,8 +14,10 @@ export interface Position {
 export interface ProtocolResult {
   id: string; name: string; status: 'ok' | 'partial' | 'error' | 'not-integrated'; coverage: string;
   message?: string; positions: Position[];
+  chain?: ChainName;
 }
 export interface Portfolio {
-  address: string; chain: 'Ethereum' | 'Plasma'; blockNumber: string | null; updatedAt: string;
+  address: string; chain: ChainName | 'Ethereum + Plasma'; blockNumber: string | null; updatedAt: string;
   protocols: ProtocolResult[];
+  networks?: { chain: ChainName; blockNumber: string | null; updatedAt: string; status: 'ok' | 'error'; message?: string }[];
 }

@@ -30,3 +30,23 @@ export const example: Portfolio = {
     ] }] },
   ],
 };
+
+// Separate, explicitly fictional Plasma positions for the combined example.
+export const combinedExample: Portfolio = {
+  ...example, chain: 'Ethereum + Plasma', blockNumber: null,
+  protocols: example.protocols.flatMap(protocol => {
+    const ethereum = { ...protocol, chain: 'Ethereum' as const };
+    if (protocol.id !== 'aave-v3' && protocol.id !== 'fluid') return [ethereum];
+    const aave = protocol.id === 'aave-v3';
+    return [ethereum, {
+      id: protocol.id, name: protocol.name, chain: 'Plasma' as const, status: 'ok' as const,
+      coverage: aave ? 'Plasma main market' : 'Plasma T1–T4 vaults and fToken lending deposits',
+      positions: [{ id: `example-plasma-${protocol.id}`, label: aave ? 'Plasma main market' : 'Plasma Fluid · illustrative vault',
+        suppliedUsd: aave ? 4000 : 2000, debtUsd: aave ? 1000 : 500, healthFactor: aave ? 2.8 : 3.2, risk: 'lower' as const,
+        assets: [{ symbol: 'WXPL', address: '', supplied: aave ? 8000 : 4000, borrowed: 0, priceUsd: 0.5, collateral: true, liquidationThreshold: aave ? 0.7 : 0.8, liquidationPriceUsd: aave ? 1000 / (8000 * 0.7) : 500 / (4000 * 0.8) },
+          { symbol: 'USDT0', address: '', supplied: 0, borrowed: aave ? 1000 : 500, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }],
+        notes: ['Illustrative numbers only. This Plasma position is independent of the Ethereum positions.'],
+      }],
+    }];
+  }),
+};

@@ -1,25 +1,25 @@
 import { test, expect } from '@playwright/test';
-import { example } from '../src/example';
+import { combinedExample, example } from '../src/example';
 test('shows clearly labeled example positions and partial protocol coverage', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Know where/ })).toBeVisible();
   await page.getByRole('button', { name: /Explore an example/ }).click();
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
-  await expect(page.getByText('$31,500.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('$36,000.00', { exact: true })).toBeVisible();
   await expect(page.getByText('Not connected', { exact: true })).toHaveCount(0);
   await expect(page.getByText('$2,117.65', { exact: true })).toBeVisible();
   await page.screenshot({ path: '/tmp/defimon-desktop.png', fullPage: true });
 });
 test('rejects invalid input and displays provider failures without example balances', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill('not-an-address');
+  await page.getByLabel('Wallet address').fill('not-an-address');
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.getByRole('alert')).toContainText('valid Ethereum address');
+  await expect(page.getByRole('alert')).toContainText('valid wallet address');
   await page.route('**/api/portfolio/*', route => route.fulfill({ status: 503, json: { error: 'Ethereum data is unavailable.' } }));
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByRole('alert')).toContainText('Ethereum data is unavailable');
-  await expect(page.getByText('$31,500.00', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('$36,000.00', { exact: true })).toHaveCount(0);
 });
 test('searches and refreshes the displayed wallet rather than an edited address', async ({ page }) => {
   let reads = 0;
@@ -29,11 +29,11 @@ test('searches and refreshes the displayed wallet rather than an edited address'
     return route.fulfill({ json: { ...example, blockNumber: String(100 + reads), updatedAt: new Date().toISOString() } });
   });
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByText(/Block 101/)).toBeVisible();
   await expect(page.getByText(/Coverage: 5 of 5/)).toBeVisible();
-  await page.getByLabel('Ethereum wallet address').fill('0x2222222222222222222222222222222222222222');
+  await page.getByLabel('Wallet address').fill('0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: /Refresh/ }).click();
   await expect(page.getByText(/Block 102/)).toBeVisible();
   expect(reads).toBe(2);
@@ -56,7 +56,7 @@ test('shows Fluid liquidation ratios and excludes unpriced positions from dollar
   fluid.positions[0].assets[0].priceUsd = null;
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const card = page.locator('article.fluid');
   await expect(card.getByText('Partially checked', { exact: true })).toBeVisible();
@@ -74,7 +74,7 @@ test('shows Fluid oracle ratios for smart collateral without inventing a dollar 
   p.assets.forEach(a => { a.liquidationPriceUsd = null; });
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const card = page.locator('article.fluid');
   await expect(card.getByText('Checked', { exact: true })).toBeVisible();
@@ -97,7 +97,7 @@ test('shows Aave v4 markets separately and does not offset an unhealthy market w
   v4.positions.push(other);
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const card = page.locator('article.aave-v4');
   await expect(card.getByRole('heading', { name: 'Aave v4 · MAIN', exact: true })).toBeVisible();
@@ -114,7 +114,7 @@ test('distinguishes an unavailable Aave v4 market from an empty market', async (
   v4.positions = [{ id: 'unknown-v4', label: 'BLUECHIP market · unavailable', suppliedUsd: null, debtUsd: null, healthFactor: null, risk: 'unknown', assets: [], notes: ['Balances and risk are unknown.'] }];
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const card = page.locator('article.aave-v4');
   await expect(card.getByText('Partially checked', { exact: true })).toBeVisible();
@@ -143,7 +143,7 @@ test('explains unavailable Morpho discovery and keeps other protocols visible wi
   morpho.message = 'Morpho lookup is unavailable. Check access to api.morpho.org and your Ethereum provider. Its balances are unknown.';
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const card = page.locator('article.morpho');
   await expect(card.getByText('Unavailable', { exact: true })).toBeVisible();
@@ -154,33 +154,36 @@ test('explains unavailable Morpho discovery and keeps other protocols visible wi
   await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
 });
 
-test('selects Plasma, checks its two protocols, and refreshes on the same network', async ({ page }) => {
+test('shows both networks grouped by protocol, refreshes both, and fits on mobile', async ({ page }) => {
   let reads = 0;
-  const fixture = { ...structuredClone(example), chain: 'Plasma', protocols: structuredClone(example.protocols.filter(p => p.id === 'aave-v3' || p.id === 'fluid')).map(p => ({ ...p, coverage: p.coverage.replaceAll('Ethereum', 'Plasma'), positions: p.positions.map(position => ({ ...position, label: position.label.replaceAll('Ethereum', 'Plasma') })) })) };
   await page.route('**/api/portfolio/*', route => {
-    expect(new URL(route.request().url()).searchParams.get('chain')).toBe('plasma'); reads++;
-    return route.fulfill({ json: { ...fixture, blockNumber: String(900 + reads), updatedAt: new Date().toISOString() } });
+    expect(new URL(route.request().url()).searchParams.get('chain')).toBe('all'); reads++;
+    return route.fulfill({ json: { ...combinedExample, updatedAt: new Date().toISOString(), networks: [
+      { chain: 'Ethereum', status: 'ok', blockNumber: String(900 + reads), updatedAt: new Date().toISOString() },
+      { chain: 'Plasma', status: 'ok', blockNumber: String(1900 + reads), updatedAt: new Date().toISOString() },
+    ] } });
   });
   await page.goto('/');
-  await page.getByLabel('Blockchain').selectOption('plasma');
-  await expect(page.getByText('Aave v4', { exact: true })).toHaveCount(0);
-  await page.getByLabel('Plasma wallet address').fill(example.address);
+  await expect(page.getByLabel('Blockchain')).toHaveCount(0);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.getByText(/Coverage: 2 of 2 protocol readers completed on Plasma/)).toBeVisible();
-  await expect(page.locator('article.protocol')).toHaveCount(2);
-  await expect(page.getByText(/Plasma · Checked.*Block 901/)).toBeVisible();
+  await expect(page.getByText(/Coverage: 7 of 7 protocol readers completed on Ethereum \+ Plasma/)).toBeVisible();
+  await expect(page.locator('article.protocol')).toHaveCount(7);
+  await expect(page.locator('.protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Compound · Ethereum', 'Fluid · Ethereum', 'Fluid · Plasma']);
+  await expect(page.getByText(/Ethereum · Block 901/)).toBeVisible();
+  await expect(page.getByText(/Plasma · Block 1901/)).toBeVisible();
+  await expect(page.getByText('$36,000.00', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Refresh' }).click();
-  await expect(page.getByText(/Block 902/)).toBeVisible();
+  await expect(page.getByText(/Ethereum · Block 902/)).toBeVisible();
+  await expect(page.getByText(/Plasma · Block 1902/)).toBeVisible();
   expect(reads).toBe(2);
+  await page.screenshot({ path: '/tmp/defimon-combined-networks.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await page.screenshot({ path: '/tmp/defimon-plasma-mobile.png', fullPage: true });
-  await page.getByLabel('Blockchain').selectOption('ethereum');
-  await expect(page.getByRole('region', { name: 'Wallet results' })).toHaveCount(0);
-  await expect(page.getByLabel('Ethereum wallet address')).toBeVisible();
+  await page.screenshot({ path: '/tmp/defimon-combined-networks-mobile.png', fullPage: true });
 });
 
-test('switching networks cancels an older lookup and an example resets to its labeled Ethereum network', async ({ page }) => {
+test('an example cancels an older lookup so its late response cannot replace the example', async ({ page }) => {
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
   await page.route('**/api/portfolio/*', async route => {
@@ -188,18 +191,15 @@ test('switching networks cancels an older lookup and an example resets to its la
     await route.fulfill({ json: { ...example, blockNumber: '111', updatedAt: new Date().toISOString() } });
   });
   await page.goto('/');
-  await page.getByLabel('Ethereum wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   const started = page.waitForRequest('**/api/portfolio/*');
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await started;
-  await page.getByLabel('Blockchain').selectOption('plasma');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
   release();
   await expect(page.getByRole('button', { name: 'Check wallet' })).toBeEnabled();
-  await expect(page.getByRole('region', { name: 'Wallet results' })).toHaveCount(0);
-  await expect(page.getByLabel('Plasma wallet address')).toBeVisible();
-  await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(page.getByLabel('Blockchain')).toHaveValue('ethereum');
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
+  await expect(page.locator('article.protocol')).toHaveCount(7);
 });
 
 test('shows supplied and net USD estimates for Plasma sUSDai collateral with the source labeled', async ({ page }) => {
@@ -223,8 +223,7 @@ test('shows supplied and net USD estimates for Plasma sUSDai collateral with the
   p.liquidationQuote = { current: 1.1255, threshold: 107213 / 108366 / 0.9, unit: 'USDT0 per sUSDai' };
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
   await page.goto('/');
-  await page.getByLabel('Blockchain').selectOption('plasma');
-  await page.getByLabel('Plasma wallet address').fill(example.address);
+  await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const card = page.locator('article.fluid');
   await expect(card.getByText('$121,843.97', { exact: true })).toBeVisible();
@@ -233,4 +232,25 @@ test('shows supplied and net USD estimates for Plasma sUSDai collateral with the
   await expect(card.getByText('1.02', { exact: true })).toBeVisible();
   await expect(card.getByText(/Supplied and net values include these estimates/)).toBeVisible();
   await page.screenshot({ path: '/tmp/defimon-plasma-fluid-price-fix.png', fullPage: true });
+});
+
+test('keeps Ethereum results when Plasma fails and never calls unavailable Plasma balances zero', async ({ page }) => {
+  const fixture = structuredClone(combinedExample);
+  fixture.protocols = fixture.protocols.map(p => p.chain === 'Plasma' ? { ...p, status: 'error', positions: [], message: 'Plasma connection unavailable. Its balances and risk are unknown.' } : p);
+  fixture.networks = [
+    { chain: 'Ethereum', status: 'ok', blockNumber: '101', updatedAt: new Date().toISOString() },
+    { chain: 'Plasma', status: 'error', blockNumber: null, updatedAt: new Date().toISOString() },
+  ];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address').fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.getByText('$31,500.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('Plasma · Connection unavailable', { exact: true })).toBeVisible();
+  const plasma = page.locator('article.fluid[data-chain="Plasma"]');
+  await expect(plasma.getByText('Unavailable', { exact: true })).toBeVisible();
+  await expect(plasma.getByText(/balances and risk are unknown/)).toBeVisible();
+  await expect(plasma.getByText(/No positions found/)).toHaveCount(0);
+  await expect(plasma.getByText('$0.00', { exact: true })).toHaveCount(0);
+  await expect(page.locator('article.fluid[data-chain="Ethereum"]').getByText('Checked', { exact: true })).toBeVisible();
 });

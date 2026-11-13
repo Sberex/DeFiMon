@@ -37,3 +37,32 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
   ]);
   return { address, chain: 'Ethereum', blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols: [aave, aaveV4, morpho, compound, fluid] };
 }
+
+export async function getCombinedPortfolio(wallet: Address, load: (wallet: Address, network: NetworkId) => Promise<Portfolio> = getPortfolio): Promise<Portfolio> {
+  const address = getAddress(wallet);
+  const networkIds: NetworkId[] = ['ethereum', 'plasma'];
+  // Each network pins its own block. One failed provider must not discard the
+  // other network or turn unchecked positions into a verified empty balance.
+  const results = await Promise.allSettled(networkIds.map(network => load(address, network)));
+  const snapshots: NonNullable<Portfolio['networks']> = [];
+  const protocols: ProtocolResult[] = [];
+  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid']];
+  results.forEach((result, i) => {
+    const network = networkIds[i];
+    const chain = networks[network].name;
+    if (result.status === 'fulfilled') {
+      snapshots.push({ chain, blockNumber: result.value.blockNumber, updatedAt: result.value.updatedAt, status: 'ok' });
+      protocols.push(...result.value.protocols.map(protocol => ({ ...protocol, chain })));
+    } else {
+      const message = `${chain} connection unavailable. Its balances and risk are unknown. Check the ${chain} provider connection and refresh.`;
+      snapshots.push({ chain, blockNumber: null, updatedAt: new Date().toISOString(), status: 'error', message });
+      for (const [id, name] of readers) {
+        if (network === 'plasma' && id !== 'aave-v3' && id !== 'fluid') continue;
+        protocols.push({ id, name, chain, coverage: `${chain} · supported markets could not be checked`, status: 'error', message, positions: [] });
+      }
+    }
+  });
+  const order = readers.map(([id]) => id);
+  protocols.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id) || (a.chain === 'Ethereum' ? 0 : 1) - (b.chain === 'Ethereum' ? 0 : 1));
+  return { address, chain: 'Ethereum + Plasma', blockNumber: null, updatedAt: new Date().toISOString(), networks: snapshots, protocols };
+}
