@@ -1,14 +1,16 @@
 import { MorphoLookupError, morphoNetworkError, safeSchemaDetail, toMorphoFailure, type MorphoFailure } from './morpho-errors.js';
 import { getAddress, isAddress, type Address, type Hex } from 'viem';
-// Schema/endpoint: morpho-org/sdks@56f1ed62827a7aab39d979c0143d1fbf970c37ca,
-// packages/liquidity-sdk-viem/src/api/types.ts and morpho-ts/src/urls.ts.
+// Deployment/reference schema: morpho-org/sdks@56f1ed62827a7aab39d979c0143d1fbf970c37ca.
+// Current Asset.price { usd timestamp } and userByAddress confirmed by public API
+// introspection supplied from the user's local diagnostic (2026-11-13).
 export const MORPHO_API = 'https://api.morpho.org/graphql';
 export const MORPHO_BLUE = '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb';
 export interface MorphoToken { address: Address; symbol: string; decimals: number; priceUsd: number | null }
 export interface MorphoMarketRef { id: Hex; loan: MorphoToken; collateral: MorphoToken | null }
 export interface MorphoVaultRef { address: Address; name: string; asset: MorphoToken; factory: Address; version: 1 | 2 }
 export interface MorphoDiscovery { markets: MorphoMarketRef[]; vaults: MorphoVaultRef[]; warnings: string[]; successfulFamilies: number; failures?: MorphoFailure[] }
-const tokenFields = 'address symbol decimals priceUsd';
+const currentPriceFields = 'price { usd timestamp }';
+const tokenFields = `address symbol decimals ${currentPriceFields}`;
 const userFields = 'address chain { id }';
 export const MORPHO_MARKETS_QUERY = `query WalletMarkets($wallet: String!, $first: Int!, $skip: Int!) {
  marketPositions(first: $first, skip: $skip, orderBy: SupplyShares, orderDirection: Desc, where: {chainId_in: [1], userAddress_in: [$wallet]}) {
@@ -44,7 +46,10 @@ function user(value: unknown, wallet: Address) {
 function token(value: unknown): MorphoToken {
   const t = object(value);
   if (!Number.isInteger(t.decimals) || Number(t.decimals) < 0 || Number(t.decimals) > 36 || typeof t.symbol !== 'string' || t.symbol.length > 128) throw new Error('Invalid Morpho token metadata');
-  return { address: address(t.address), symbol: t.symbol, decimals: Number(t.decimals), priceUsd: typeof t.priceUsd === 'number' && Number.isFinite(t.priceUsd) && t.priceUsd > 0 ? t.priceUsd : null };
+  // A present but null/invalid current price must stay unknown, even if an older
+  // price field also appears. USD display prices never determine liquidation health.
+  const price = t.price === undefined ? t.priceUsd : t.price && typeof t.price === 'object' && !Array.isArray(t.price) ? (t.price as Obj).usd : null;
+  return { address: address(t.address), symbol: t.symbol, decimals: Number(t.decimals), priceUsd: typeof price === 'number' && Number.isFinite(price) && price > 0 ? price : null };
 }
 function marketRow(value: unknown, wallet: Address): MorphoMarketRef {
   const row = object(value); user(row.user, wallet);
@@ -77,8 +82,11 @@ export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetc
       const oldSchema = Array.isArray(envelope.errors) && envelope.errors.some(e => e && typeof e === 'object' && typeof e.message === 'string' && /Cannot query field ["']marketId["']/.test(e.message));
       if (oldSchema && document.includes('uniqueKey: marketId')) return query(document.replace('uniqueKey: marketId', 'uniqueKey'), variables);
       // Optional display prices must not prevent discovery of balances or oracle-based risk.
-      // oraclePriceUsd is a documented USD display price in the official Asset interface.
+      // Older SDK schema snapshots expose scalar priceUsd/oraclePriceUsd instead.
       const detail = safeSchemaDetail(envelope.errors);
+      if (detail === 'Unsupported field Asset.price' && document.includes(currentPriceFields)) {
+        return query(document.replaceAll(currentPriceFields, 'priceUsd'), variables);
+      }
       if (detail === 'Unsupported field Asset.priceUsd' && /\bdecimals priceUsd\b/.test(document)) {
         return query(document.replaceAll('decimals priceUsd', 'decimals priceUsd: oraclePriceUsd'), variables);
       }

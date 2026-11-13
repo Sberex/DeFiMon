@@ -1,9 +1,9 @@
 import { expect, it } from 'vitest';
 import { fetchMorphoDiscovery, MORPHO_API, MORPHO_BLUE } from '../server/morpho-discovery';
 const wallet = '0x1111111111111111111111111111111111111111';
-const asset = { address: '0x2222222222222222222222222222222222222222', symbol: 'USDC', decimals: 6, priceUsd: 1 };
+const asset = { address: '0x2222222222222222222222222222222222222222', symbol: 'USDC', decimals: 6, price: { usd: 1, timestamp: '1794592800' } };
 const user = { address: wallet, chain: { id: 1 } };
-const market = (digit = 'a') => ({ user, market: { uniqueKey: `0x${digit.repeat(64)}`, morphoBlue: { address: MORPHO_BLUE, chain: { id: 1 } }, loanAsset: asset, collateralAsset: { ...asset, address: '0x3333333333333333333333333333333333333333', symbol: 'WETH', decimals: 18, priceUsd: 3000 } } });
+const market = (digit = 'a') => ({ user, market: { uniqueKey: `0x${digit.repeat(64)}`, morphoBlue: { address: MORPHO_BLUE, chain: { id: 1 } }, loanAsset: asset, collateralAsset: { ...asset, address: '0x3333333333333333333333333333333333333333', symbol: 'WETH', decimals: 18, price: { usd: 3000, timestamp: '1794592800' } } } });
 const vault = { address: '0x4444444444444444444444444444444444444444', name: 'Test vault', chain: { id: 1 }, factory: { address: '0x5555555555555555555555555555555555555555' }, asset };
 const page = (items: unknown[], total = items.length, skip = 0) => ({ items, pageInfo: { count: items.length, countTotal: total, skip, limit: 100 } });
 const empty = (field: string) => field === 'userByAddress' ? { ...user, vaultV2Positions: [] } : page([]);
@@ -24,6 +24,9 @@ it('discovers Ethereum market and V1/V2 vault references without trusting API ba
   const result = await fetchMorphoDiscovery(wallet, fetcher);
   expect(result.successfulFamilies).toBe(3); expect(result.warnings).toEqual([]);
   expect(result.markets).toHaveLength(1); expect(result.vaults.map(v => v.version)).toEqual([1, 2]);
+  expect(result.markets[0].loan.priceUsd).toBe(1);
+  expect(result.markets[0].collateral?.priceUsd).toBe(3000);
+  expect(result.vaults.map(v => v.asset.priceUsd)).toEqual([1, 1]);
   expect(requests.every(r => r.variables.wallet === wallet)).toBe(true);
   expect(requests.every(r => r.query.includes('chainId_in: [1]') || r.query.includes('chainId: 1'))).toBe(true);
   expect(requests.every(r => !r.query.includes('borrowAssets'))).toBe(true);
@@ -66,7 +69,7 @@ it('counts duplicate markets once and explicitly flags possible discovery incons
   expect(result.markets).toHaveLength(1); expect(result.warnings.join(' ')).toContain('duplicate');
 });
 it('does not assume a missing/invalid dollar price is a stablecoin peg', async () => {
-  const row = market(); row.market.loanAsset = { ...asset, priceUsd: null as unknown as number };
+  const row = market(); row.market.loanAsset = { ...asset, price: null as any };
   const { fetcher } = fake(field => ({ data: { [field]: field === 'marketPositions' ? page([row]) : empty(field) } }));
   const result = await fetchMorphoDiscovery(wallet, fetcher);
   expect(result.markets[0].loan.priceUsd).toBeNull();
@@ -121,39 +124,39 @@ it('preserves sanitized reasons for network, HTTP, schema, and invalid-response 
   }
 });
 
-it('recovers from the reported priceUsd and users schema incompatibilities across all families', async () => {
+it('uses the introspected current price and user query across all families without legacy retries', async () => {
   const requests: string[] = [];
   const fetcher = (async (_url, init) => {
     const { query } = JSON.parse(String(init?.body)); requests.push(query);
     // These are the exact field rejections reported by the user's live endpoint.
     if (/\busers\(/.test(query)) return new Response(JSON.stringify({ errors: [{ message: 'Cannot query field "users" on type "Query".' }] }), { status: 400 });
     if (/\bdecimals priceUsd\s*[}]/.test(query)) return new Response(JSON.stringify({ errors: [{ message: 'Cannot query field "priceUsd" on type "Asset".' }] }), { status: 400 });
-    expect(query).toContain('priceUsd: oraclePriceUsd');
+    expect(query).toContain('price { usd timestamp }');
     const field = query.includes('query WalletMarkets(') ? 'marketPositions' : query.includes('query WalletVaults(') ? 'vaultPositions' : 'userByAddress';
     return new Response(JSON.stringify({ data: { [field]: field === 'marketPositions' ? page([market()]) : field === 'vaultPositions' ? page([{ user, vault }]) : { ...user, vaultV2Positions: [{ user, vault }] } } }));
   }) as typeof fetch;
   const result = await fetchMorphoDiscovery(wallet, fetcher);
   expect(result.successfulFamilies).toBe(3); expect(result.failures).toEqual([]);
   expect(result.markets[0].loan.priceUsd).toBe(1); expect(result.vaults.map(v => v.version)).toEqual([1, 2]);
-  expect(requests).toHaveLength(6);
+  expect(requests).toHaveLength(3);
 });
 
-it('retains references with unknown USD values when both documented price fields are unsupported', async () => {
+it('retains references with unknown USD values when current and legacy price fields are unsupported', async () => {
   let calls = 0;
   const fetcher = (async (_url, init) => {
     calls++;
     const { query } = JSON.parse(String(init?.body));
-    const unsupported = query.includes('priceUsd: oraclePriceUsd') ? 'oraclePriceUsd' : query.includes('decimals priceUsd') ? 'priceUsd' : null;
+    const unsupported = query.includes('price { usd timestamp }') ? 'price' : query.includes('priceUsd: oraclePriceUsd') ? 'oraclePriceUsd' : query.includes('decimals priceUsd') ? 'priceUsd' : null;
     if (unsupported) return new Response(JSON.stringify({ errors: [{ message: `Cannot query field "${unsupported}" on type "Asset".` }] }), { status: 400 });
     const field = query.includes('query WalletMarkets(') ? 'marketPositions' : query.includes('query WalletVaults(') ? 'vaultPositions' : 'userByAddress';
     const row = market();
     row.market.loanAsset = { ...row.market.loanAsset };
-    delete (row.market.loanAsset as { priceUsd?: number }).priceUsd;
-    delete (row.market.collateralAsset as { priceUsd?: number }).priceUsd;
+    delete (row.market.loanAsset as { price?: unknown }).price;
+    delete (row.market.collateralAsset as { price?: unknown }).price;
     return new Response(JSON.stringify({ data: { [field]: field === 'marketPositions' ? page([row]) : empty(field) } }));
   }) as typeof fetch;
   const result = await fetchMorphoDiscovery(wallet, fetcher);
-  expect(result.successfulFamilies).toBe(3); expect(calls).toBe(9);
+  expect(result.successfulFamilies).toBe(3); expect(calls).toBe(12);
   expect(result.markets).toHaveLength(1); expect(result.markets[0].loan.priceUsd).toBeNull();
   expect(result.warnings.join(' ')).toContain('dollar values are unavailable');
 });
@@ -164,5 +167,32 @@ it('does not treat a null user, another wallet, or another network as verified e
     const result = await fetchMorphoDiscovery(wallet, fetcher);
     expect(result.successfulFamilies).toBe(2);
     expect(result.failures?.map(f => f.family)).toEqual(['vault V2']);
+  }
+});
+
+it('leaves missing, malformed, zero, negative, or nonnumeric nested prices unknown without losing balances', async () => {
+  for (const price of [null, {}, { usd: null }, { usd: 0 }, { usd: -1 }, { usd: '1' }, [], 1]) {
+    const row = market();
+    row.market.loanAsset = { ...asset, price, priceUsd: 123 } as any;
+    const { fetcher } = fake(field => ({ data: { [field]: field === 'marketPositions' ? page([row]) : empty(field) } }));
+    const result = await fetchMorphoDiscovery(wallet, fetcher);
+    expect(result.markets).toHaveLength(1); expect(result.markets[0].loan.priceUsd).toBeNull();
+  }
+});
+
+it('still supports documented older scalar USD fields after an explicit current-price rejection', async () => {
+  for (const scalar of ['priceUsd', 'oraclePriceUsd']) {
+    const fetcher = (async (_url, init) => {
+      const { query } = JSON.parse(String(init?.body));
+      const unsupported = query.includes('price { usd timestamp }') ? 'price' : scalar === 'oraclePriceUsd' && !query.includes('priceUsd: oraclePriceUsd') ? 'priceUsd' : null;
+      if (unsupported) return new Response(JSON.stringify({ errors: [{ message: `Cannot query field "${unsupported}" on type "Asset".` }] }), { status: 400 });
+      const field = query.includes('query WalletMarkets(') ? 'marketPositions' : query.includes('query WalletVaults(') ? 'vaultPositions' : 'userByAddress';
+      const row = market();
+      row.market.loanAsset = { ...asset, priceUsd: 0.98 } as any;
+      delete (row.market.loanAsset as { price?: unknown }).price;
+      return new Response(JSON.stringify({ data: { [field]: field === 'marketPositions' ? page([row]) : empty(field) } }));
+    }) as typeof fetch;
+    const result = await fetchMorphoDiscovery(wallet, fetcher);
+    expect(result.successfulFamilies).toBe(3); expect(result.markets[0].loan.priceUsd).toBe(0.98);
   }
 });
