@@ -3,7 +3,7 @@ import type { NetworkId } from '../../src/types.js';
 // FraxFinance/frax-oft-upgradeable@6964529b29b367d976d62a6df1efbbacb31d3205 README and live symbol()/decimals() check.
 // User-selected WRAX/WFRAX contract: 0x04acaf8d2865c0714f79da09645c13fd2888977f on Ethereum.
 // Reviewed discovery roster; metadata is re-read from token contracts for nonzero balances.
-// Uniswap/default-token-list@fc629302df08c20aa5ca368212b5e416b2299e27 src/tokens/mainnet.json (MIT).
+// Uniswap/default-token-list@fc629302df08c20aa5ca368212b5e416b2299e27 src/tokens/mainnet.json (GPL-3.0; upstream license included alongside this file).
 // Plus AaveV3Ethereum/Plasma address books and Fluid Plasma vault underlyings @404d73f.
 export const walletTokenCatalog: Record<NetworkId, { address: Address; symbol: string }[]> = {
   ethereum: [

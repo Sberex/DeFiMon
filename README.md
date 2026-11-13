@@ -72,7 +72,7 @@ Balances and token decimals use the same per-network block as lending positions.
 
 If a balance, price, or token metadata cannot be read, it stays unknown and warnings identify incomplete coverage. Net value includes only known priced amounts. Lending receipt tokens represented by the supported protocol readers (Aave v3 aTokens, Aave v4 tokenized deposits, Compound v3 receipts, Fluid fTokens, and discovered Morpho vault shares) are excluded from wallet totals. If the receipt-token checks fail, ERC-20 values are excluded from the total until they can be checked; native currency remains independent.
 
-Token-list provenance is recorded in `server/deployments/wallet-tokens.ts`, with the upstream MIT license included alongside it. Live Ethereum validation read native ETH and ERC-20 balances and valued ETH, USDe, and COMP using on-chain prices. This cloud still blocks Plasma and the external fallback price service, so their live paths require validation on a host that can reach those services.
+Token-list provenance is recorded in `server/deployments/wallet-tokens.ts`, with Uniswap’s upstream GPL-3.0 license included alongside it. Live Ethereum validation read native ETH and ERC-20 balances and valued ETH, USDe, and COMP using on-chain prices. This cloud still blocks Plasma and the external fallback price service, so their live paths require validation on a host that can reach those services.
 
 A standalone balance diagnostic is available:
 
