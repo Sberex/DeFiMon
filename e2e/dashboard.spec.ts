@@ -201,3 +201,36 @@ test('switching networks cancels an older lookup and an example resets to its la
   await expect(page.getByLabel('Blockchain')).toHaveValue('ethereum');
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
 });
+
+test('shows supplied and net USD estimates for Plasma sUSDai collateral with the source labeled', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.chain = 'Plasma';
+  fixture.protocols = fixture.protocols.filter(p => p.id === 'aave-v3' || p.id === 'fluid');
+  const fluid = fixture.protocols.find(p => p.id === 'fluid')!;
+  fluid.status = 'partial';
+  fluid.coverage = fluid.coverage.replace('Ethereum', 'Plasma');
+  fluid.message = 'Some collateral dollar values are estimated from Fluid’s liquidation oracle and a debt-token USD price. Supplied and net values include these estimates.';
+  const p = fluid.positions[0];
+  p.label = 'Vault 36 · sUSDai / USDT0 · NFT 3015';
+  p.assets = [
+    { symbol: 'sUSDai', address: '0x0B2b2B2076d95dda7817e785989fE353fe955ef9', supplied: 108366, borrowed: 0, priceUsd: 1.1255 * 0.999, priceSource: 'fluid-oracle', collateral: true, liquidationThreshold: 0.9, liquidationPriceUsd: 107213 / 108366 / 0.9 * 0.999 },
+    { symbol: 'USDT0', address: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb', supplied: 0, borrowed: 107213, priceUsd: 0.999, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null },
+  ];
+  p.suppliedUsd = 108366 * 1.1255 * 0.999;
+  p.debtUsd = 107213 * 0.999;
+  p.healthFactor = 108366 * 1.1255 * 0.9 / 107213;
+  p.risk = 'high';
+  p.liquidationQuote = { current: 1.1255, threshold: 107213 / 108366 / 0.9, unit: 'USDT0 per sUSDai' };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, blockNumber: '123', updatedAt: new Date().toISOString() } }));
+  await page.goto('/');
+  await page.getByLabel('Blockchain').selectOption('plasma');
+  await page.getByLabel('Plasma wallet address').fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.fluid');
+  await expect(card.getByText('$121,843.97', { exact: true })).toBeVisible();
+  await expect(card.getByText('$14,738.18', { exact: true })).toBeVisible();
+  await expect(card.getByText('Fluid oracle estimate', { exact: true })).toBeVisible();
+  await expect(card.getByText('1.02', { exact: true })).toBeVisible();
+  await expect(card.getByText(/Supplied and net values include these estimates/)).toBeVisible();
+  await page.screenshot({ path: '/tmp/defimon-plasma-fluid-price-fix.png', fullPage: true });
+});

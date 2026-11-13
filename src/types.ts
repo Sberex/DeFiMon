@@ -3,6 +3,7 @@ export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'un
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
   collateral: boolean; liquidationThreshold: number | null; liquidationPriceUsd: number | null;
+  priceSource?: 'fluid-oracle';
 }
 export interface Position {
   id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;

@@ -202,3 +202,47 @@ describe('Fluid on Plasma', () => {
     expect(m.contracts.some(c => c.address === networks.ethereum.aaveProvider)).toBe(false);
   });
 });
+
+it('values Plasma sUSDai collateral from the Fluid ratio and a non-$1 USDT0 price, restoring supplied and net values', async () => {
+  const sUsdai = '0x0B2b2B2076d95dda7817e785989fE353fe955ef9';
+  const usdt0 = '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb';
+  const base = mock();
+  const client = { ...base.client, readContract: async (args: any) => {
+    expect(args.blockNumber).toBe(123n);
+    if (args.functionName === 'positionByNftId') {
+      const [p, v] = position(3015n);
+      return [{ ...p, nftId: 3015n, supply: 108366n * E18, borrow: 107213n * E6 }, { ...v, configs: { ...v.configs, liquidationThreshold: 9000, oraclePriceLiquidate: 11255n * 10n ** 11n }, constantVariables: { ...v.constantVariables, vaultId: 36n, supplyToken: { token0: sUsdai, token1: ZERO }, borrowToken: { token0: usdt0, token1: ZERO } } }];
+    }
+    if (args.functionName === 'symbol') return args.address === sUsdai ? 'sUSDai' : 'USDT0';
+    if (args.functionName === 'decimals') return args.address === sUsdai ? 18 : 6;
+    if (args.functionName === 'getAssetPrice') return args.args[0] === sUsdai ? 0n : 99900000n;
+    return base.client.readContract(args);
+  } } as unknown as ChainClient;
+  const result = await readFluid(client, wallet, 123n, 'plasma');
+  const p = result.positions[0];
+  expect(p.label).toContain('Vault 36 · sUSDai / USDT0');
+  expect(p.assets[0]).toMatchObject({ symbol: 'sUSDai', supplied: 108366, priceSource: 'fluid-oracle' });
+  expect(p.assets[0].priceUsd).toBeCloseTo(1.1255 * 0.999, 10);
+  expect(p.suppliedUsd).toBeCloseTo(108366 * 1.1255 * 0.999, 6);
+  expect(p.debtUsd).toBeCloseTo(107213 * 0.999, 6);
+  expect(p.suppliedUsd! - p.debtUsd!).toBeCloseTo((108366 * 1.1255 - 107213) * 0.999, 6);
+  expect(p.healthFactor).toBeCloseTo(108366 * 1.1255 * 0.9 / 107213, 10);
+  expect(p.assets[0].liquidationPriceUsd).toBeCloseTo(107213 / 108366 / 0.9 * 0.999, 10);
+  expect(result.message).toContain('estimated from Fluid');
+});
+
+it('does not derive collateral prices from smart-pool ratios, a zero oracle, or a missing debt price', async () => {
+  for (const options of [
+    { missingEthPrice: true, zeroOracle: true },
+    { missingEthPrice: true, missingDebtPrice: true },
+    { missingEthPrice: true, types: [20000n] },
+    { missingEthPrice: true, types: [30000n] },
+  ]) {
+    const result = await readFluid(mock(options).client, wallet, 123n, 'plasma');
+    expect(result.positions[0].suppliedUsd).toBeNull();
+    expect(result.positions[0].assets.some(a => a.priceSource === 'fluid-oracle')).toBe(false);
+  }
+  const result = await readFluid(mock().client, wallet, 123n, 'plasma');
+  expect(result.positions[0].assets[0].priceUsd).toBe(0.5);
+  expect(result.positions[0].assets[0].priceSource).toBeUndefined();
+});

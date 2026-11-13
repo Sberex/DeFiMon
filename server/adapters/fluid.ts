@@ -145,6 +145,19 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
         if (!vault.isSmartCol && !vault.isSmartDebt && supplyToken && debtToken) {
           const a = assets.find(a => a.address.toLowerCase() === supplyToken.address.toLowerCase())!;
           a.liquidationThreshold = threshold / 10000;
+          // Plasma has no configured independent feed for some Fluid collateral
+          // (for example sUSDai). For T1 only, translate Fluid's token ratio using
+          // the independently priced debt asset. Never assume a stablecoin peg,
+          // apply a pool-share ratio to an underlying token, or overwrite a feed.
+          if (network === 'plasma' && a.priceUsd === null && debtToken.priceUsd !== null && supplyToken.address.toLowerCase() !== debtToken.address.toLowerCase()) {
+            const estimate = current * debtToken.priceUsd;
+            if (Number.isFinite(estimate) && estimate > 0) {
+              a.priceUsd = estimate;
+              a.priceSource = 'fluid-oracle';
+              notes.push('The collateral USD price is estimated from Fluid’s liquidation oracle ratio multiplied by the debt token’s independently sourced USD price. Supplied and net values include this protocol-based estimate; it is not a market-sale quote.');
+              warnings.add('Some collateral dollar values are estimated from Fluid’s liquidation oracle and a debt-token USD price. Supplied and net values include these estimates.');
+            }
+          }
           if (supplyToken.address.toLowerCase() !== debtToken.address.toLowerCase() && debtToken.priceUsd !== null) a.liquidationPriceUsd = boundary * debtToken.priceUsd;
           notes.push('The dollar liquidation price holds the debt token’s USD price and both balances fixed. Fluid’s collateral/debt oracle ratio determines liquidation; independent USD prices are for valuation only.');
         } else notes.push('Smart collateral/debt changes with the pool composition. A single underlying token’s dollar liquidation price is not reliable, so the actual oracle-ratio boundary is shown instead. Pool share quotes use 10^18 raw share units.');
