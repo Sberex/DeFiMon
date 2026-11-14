@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { combinedExample, example } from '../src/example';
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
+});
 test('shows clearly labeled example positions and partial protocol coverage', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Know where/ })).toBeVisible();
@@ -572,4 +575,71 @@ test('shows Fluid NPL separately for each vault and lending deposit, and keeps u
   await expect(vaults.nth(1).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: Unavailable');
   await expect(total.locator('strong')).toHaveText('Unavailable');
   await expect(total.getByText(/A complete total is unavailable/)).toBeVisible();
+});
+
+test('shows Merkl unclaimed and pending balances by network without changing net value or NPL', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  const section = page.getByRole('region', { name: 'Merkl rewards', exact: true });
+  await expect(section.getByText(/Illustrative Merkl rewards only/)).toBeVisible();
+  await expect(section.locator('.merkl-network h3')).toHaveText(['Merkl · Ethereum', 'Merkl · Plasma', 'Merkl · Arbitrum']);
+  const eth = section.locator('[data-chain="Ethereum"]');
+  await expect(eth.locator('tbody tr').first().locator('td').nth(1)).toHaveText('1.5');
+  await expect(eth.locator('tbody tr').first().locator('td').nth(2)).toHaveText('0.2');
+  await expect(eth.getByText('$75.00', { exact: true })).toBeVisible();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$47,000.00');
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ -$4.35');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await section.screenshot({ path: '/tmp/defimon-merkl-mobile.png' });
+});
+
+test('refreshes Merkl independently and explains failures without losing lending balances', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: example }));
+  await page.route('**/api/rewards/*', route => {
+    reads++;
+    return route.fulfill({ status: reads === 1 ? 200 : 503, json: reads === 1 ? { address: example.address, updatedAt: new Date().toISOString(), status: 'ok', networks: [{ chain: 'Ethereum', status: 'ok', rewards: [], unclaimedUsd: 0, pendingUsd: 0 }] } : { error: 'upstream failure' } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const section = page.getByRole('region', { name: 'Merkl rewards', exact: true });
+  await expect(section.getByText('No unclaimed or pending token rewards reported by Merkl.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(section.getByText(/Merkl rewards are unavailable/)).toBeVisible();
+  await expect(section.getByText('No unclaimed or pending token rewards reported by Merkl.', { exact: true })).toHaveCount(0);
+  await expect(page.locator('.summary.primary strong')).toHaveText('$31,500.00');
+  expect(reads).toBe(2);
+});
+
+test('late Merkl responses cannot replace an illustrative example', async ({ page }) => {
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: example }));
+  await page.route('**/api/rewards/*', async route => { await gate; await route.fulfill({ json: { address: example.address, updatedAt: new Date().toISOString(), status: 'error', networks: [], message: 'Old wallet Merkl failure' } }); });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  const started = page.waitForRequest('**/api/rewards/*');
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await started;
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  release();
+  const section = page.getByRole('region', { name: 'Merkl rewards', exact: true });
+  await expect(section.getByText(/Illustrative Merkl rewards only/)).toBeVisible();
+  await expect(section.getByText('Old wallet Merkl failure', { exact: true })).toHaveCount(0);
+  await expect(section.locator('.merkl-network')).toHaveCount(3);
+});
+
+test('Merkl balances remain visible when the lending provider fails', async ({ page }) => {
+  await page.route('**/api/portfolio/*', route => route.fulfill({ status: 503, json: { error: 'Ethereum data is unavailable.' } }));
+  await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: example.address, updatedAt: new Date().toISOString(), status: 'ok', networks: [{ chain: 'Plasma', status: 'partial', unclaimedUsd: null, pendingUsd: null, message: 'Some reward prices are unavailable.', rewards: [{ address: '0x2222222222222222222222222222222222222222', symbol: 'RWD', decimals: 18, unclaimed: 6, pending: 2, unclaimedRaw: '6000000000000000000', pendingRaw: '2000000000000000000', priceUsd: null, unclaimedUsd: null, pendingUsd: null }] }] } }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.getByRole('alert')).toContainText('Ethereum data is unavailable');
+  const section = page.getByRole('region', { name: 'Merkl rewards', exact: true });
+  await expect(section.getByText('RWD', { exact: true })).toBeVisible();
+  await expect(section.locator('tbody tr').first().locator('td').nth(1)).toHaveText('6');
+  await expect(section.locator('tbody tr').first().locator('td').nth(4)).toHaveText('Unavailable');
 });

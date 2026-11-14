@@ -174,6 +174,22 @@ npm run check:wallet -- 0xYourWalletAddress arbitrum
 
 The API accepts extra contracts as `tokens=ethereum:0xTokenAddress,plasma:0xTokenAddress,arbitrum:0xTokenAddress` alongside `chain=all` (or a per-network request). Contract inputs are validated and deduplicated; no provider URL can be supplied through this parameter.
 
+## Merkl rewards
+
+The **Merkl rewards** section shows the searched wallet’s **unclaimed** and **pending** token rewards, grouped Ethereum, Plasma, then Arbitrum. It is a separate balance section: reward amounts do not change Net value, supply/borrow APR, monthly NPL, health or collateral. Already-claimed rewards are excluded because those tokens may already be represented in wallet balances. Ordinary token rewards from any Merkl campaign on these three networks are included; they are not restricted to the lending protocols above. Campaign-level/protocol attribution is not inferred from token symbols. Points, pre-token allocations, test rewards, unsupported networks, linked accounts and smart-account ownership discovery are excluded.
+
+The server uses Merkl’s public `GET https://api.merkl.xyz/v4/users/{address}/rewards/summary` endpoint. The response follows the published `@merkl/api` **1.20.21** `UserController` / `UserRewardsSummaryResourceDto` declarations ([package](https://www.npmjs.com/package/@merkl/api/v/1.20.21)); the SDK itself is not installed as a runtime dependency. The complete per-wallet summary is filtered locally to the three supported networks, avoiding incomplete campaign breakdown pagination. Quantities use raw cumulative token amounts: `unclaimed = max(amount − claimed, 0)`, with `pending` displayed separately. Token decimals, contracts, chain IDs and unsigned integer amounts are validated; duplicate token/network records make complete totals unknown. The application does not use the API’s aggregate USD totals to infer missing token data.
+
+USD values use positive numeric Merkl token quotes only when the token is marked verified by Merkl and the quote timestamp is within one hour (allowing five minutes of future clock tolerance). Merkl’s verified flag is a token metadata flag, not an investment-safety assessment. Missing/stale prices keep USD values unknown while preserving token quantities. Fully claimed zero-balance rewards are omitted. A successful empty report means no unclaimed/pending token rewards were reported; connection errors, throttling, malformed responses or unsupported schemas mean **unknown**, never a verified empty wallet. Recent claims and earnings can lag Merkl indexing. An indicated dispute window is shown, and “unclaimed” is not a guarantee that every published reward is immediately claimable. Claiming is handled on Merkl’s own website; this dashboard never connects a wallet or signs a claim.
+
+Rewards load through `/api/rewards/0xYourWalletAddress` independently of lending and wallet balance lookups. Wallet searches and Refresh update both; stale/canceled responses cannot replace a newer wallet or the synthetic example. A Merkl outage does not hide lending positions, and a lending-provider outage does not discard successfully read rewards. No wallet searches, rewards history, Merkle proofs or signing keys are stored. The server sends the public wallet address to Merkl, but never provider credentials. The illustrative example contains explicitly fictional reward amounts and prices.
+
+Hosting needs outbound HTTPS access to **`api.merkl.xyz`**; no API key, new environment variable, or browser CORS configuration is required. This cloud currently rejects that domain (CONNECT 403), so **full live Merkl discovery remains unverified here**. The implementation is checked against the published API schema and controlled parser/API/browser fixtures; no cloud environment settings were changed or published. On a computer/host that can reach Merkl, compare the results with Merkl’s website using:
+
+```sh
+npm run check:merkl -- 0xYourWalletAddress
+```
+
 ## Hosting
 
 The simplest deployment for this implementation is one **Node web service**, for example on Render. A static-only host will not run the API.
@@ -275,6 +291,6 @@ For an endpoint exposing the newer `Asset.price` field, `npm run diagnose:morpho
 
 ## Privacy and operations
 
-The application does not persist wallet searches, balances, or history. Hosting access logs, your Ethereum provider, and Morpho’s public lookup service may record requests. Morpho lookups send the searched wallet address to that service. Results use `Cache-Control: no-store`. The server never returns raw provider errors or provider URLs. Keep `.env` out of Git.
+The application does not persist wallet searches, balances, or history. Hosting access logs, your blockchain providers, Morpho’s public lookup service, and Merkl’s public rewards service may record requests. Morpho and Merkl lookups send the searched wallet address to their respective services. Results use `Cache-Control: no-store`. The server never returns raw provider errors or provider URLs. Keep `.env` out of Git.
 
 The cloud environment permits `ethereum-rpc.publicnode.com` and live Fluid reads were verified. Hosting elsewhere requires configuring its own `ETHEREUM_RPC_URL`. Environment publication and website deployment are separate operations.

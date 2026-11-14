@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { InterestRate, IntrinsicRate, ChainName, NetworkId, Portfolio, Position, ProtocolResult, Risk, WalletBalances } from './types';
+import type { InterestRate, IntrinsicRate, MerklRewards, ChainName, NetworkId, Portfolio, Position, ProtocolResult, Risk, WalletBalances } from './types';
 import { assetMonthlyInterest, positionMonthlyInterest, protocolMonthlyInterest, totalMonthlyInterest, supplyApr } from './monthly-interest';
 import { networkNames, networkOrder } from './networks';
 import { collateralAssets, liquidationScenario, calculateLiquidation } from './liquidation';
+import { MerklRewardsView } from './MerklRewards';
+import { merklExample } from './merkl-example';
 import { combinedExample } from './example';
 import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/manrope';
@@ -82,6 +84,8 @@ function App() {
   const [tokenNetwork, setTokenNetwork] = useState<NetworkId>('ethereum');
   const [tokenInput, setTokenInput] = useState('');
   const [tokenError, setTokenError] = useState('');
+  const [rewards, setRewards] = useState<MerklRewards | null>(null);
+  const [rewardsLoading, setRewardsLoading] = useState(false);
   const [data, setData] = useState<Portfolio | null>(null);
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -103,7 +107,7 @@ function App() {
     setCustomTokens(next); setTokenInput(''); setTokenError('');
     if (data && !demo) void searchAddress(data.address, next);
   }
-  function showExample() { controller.current?.abort(); setLoading(false); setData(combinedExample); setDemo(true); setError(''); }
+  function showExample() { controller.current?.abort(); setLoading(false); setData(combinedExample); setRewardsLoading(false); setRewards({ ...merklExample, updatedAt: new Date().toISOString() }); setDemo(true); setError(''); }
   const positions = data?.protocols.filter(p => p.status === 'ok' || p.status === 'partial').flatMap(p => p.positions) || [];
   const pricedPositions = positions.filter(p => p.suppliedUsd !== null && p.debtUsd !== null);
   const missingValuations = positions.length - pricedPositions.length;
@@ -125,16 +129,29 @@ function App() {
       <div className="section-label"><h2>Protocol breakdown</h2><span>Current annual rates (APR) · Risk is separate for each position</span></div><div className="protocol-list">{data.protocols.map(p => <ProtocolCard key={`${p.id}:${p.chain ?? data.chain}`} result={p} chain={p.chain ?? (data.chain === 'Arbitrum' ? 'Arbitrum' : data.chain === 'Plasma' ? 'Plasma' : 'Ethereum')} />)}</div>
       {!!data.wallets?.length && <section className="wallet-section" aria-label="Wallet tokens"><div className="section-label"><h2>Wallet tokens</h2><span>Ethereum · Plasma · Arbitrum</span></div><div className="wallet-list">{data.wallets.map(wallet => <WalletView key={wallet.chain} wallet={wallet} />)}</div></section>}
     </section> : !loading && <section className="empty-state"><div className="section-label"><h2>Your DeFi, in one place</h2><span>Current state only</span></div><div className="protocol-tiles">{names.map(([id, name]) => <div key={id}><span className={`tile-logo ${id}`}>{name.startsWith('Aave') ? 'A' : name === 'Morpho' ? '⋈' : name === 'Fluid' ? '≈' : 'C'}</span><strong>{name}</strong><small>{['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid'].includes(id) ? (id === 'fluid' ? 'Vaults + lending deposits' : id === 'morpho' ? 'Markets + vault deposits' : id === 'aave-v4' ? 'Lending + tokenized deposits' : 'Reader built · verification pending') : 'Integration in progress'}</small></div>)}</div><div className="welcome-note"><span aria-hidden="true"><Arrow /></span><div><h3>Start with a wallet address</h3><p>We’ll read its supported lending positions, subtract debt from supplied assets, and estimate where liquidation could begin.</p></div></div></section>}
+    {(rewardsLoading || rewards) && <MerklRewardsView result={rewards} loading={rewardsLoading} demo={demo} />}
     <footer><span>DeFiMon <span className="footer-dot">/</span> Clarity for your on-chain positions.</span><span>Estimates can change. This monitor does not prevent liquidation.</span></footer></main></>;
   async function searchAddress(address: string, watchedTokens = customTokens) {
     // Refresh the displayed wallet even if the search input has been edited.
     controller.current?.abort(); const request = new AbortController(); controller.current = request;
-    setLoading(true); setError(''); setData(null); setDemo(false);
+    setLoading(true); setError(''); setData(null); setDemo(false); setRewards(null); setRewardsLoading(true);
+    const rewardsLookup = (async () => {
+      try {
+        const response = await fetch(`/api/rewards/${address}`, { signal: request.signal });
+        if (!response.ok) throw new Error('Rewards lookup unavailable');
+        const body: MerklRewards = await response.json();
+        if (body.address.toLowerCase() !== address.toLowerCase() || !Array.isArray(body.networks)) throw new Error('Unexpected rewards response');
+        if (!request.signal.aborted) setRewards(body);
+      } catch {
+        if (!request.signal.aborted) setRewards({ address, updatedAt: new Date().toISOString(), status: 'error', networks: [], message: 'Merkl rewards are unavailable. Check access to api.merkl.xyz and refresh. Reward balances are unknown.' });
+      } finally { if (!request.signal.aborted) setRewardsLoading(false); }
+    })();
     const query = new URLSearchParams({ chain: 'all' });
     if (watchedTokens.length) query.set('tokens', watchedTokens.map(t => `${t.network}:${t.address}`).join(','));
     try { const response = await fetch(`/api/portfolio/${address}?${query}`, { signal: request.signal }); const body = await response.json(); if (!response.ok) throw new Error(body.error || 'Refresh failed.'); if (!request.signal.aborted) setData(body); }
     catch (e) { if (!request.signal.aborted) setError(e instanceof Error ? e.message : 'Refresh failed.'); }
     finally { if (!request.signal.aborted) setLoading(false); }
+    await rewardsLookup;
   }
 }
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);

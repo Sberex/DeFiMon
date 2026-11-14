@@ -17,7 +17,8 @@
     "check:plasma": "tsx scripts/check-plasma.ts",
     "check:wallet": "tsx scripts/check-wallet.ts",
     "check:arbitrum": "tsx scripts/check-network.ts arbitrum",
-    "check:susdai-apr": "tsx scripts/check-susdai-apr.ts"
+    "check:susdai-apr": "tsx scripts/check-susdai-apr.ts",
+    "check:merkl": "tsx scripts/check-merkl.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

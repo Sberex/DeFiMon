@@ -39,3 +39,16 @@ export interface Portfolio {
   wallets?: WalletBalances[];
   networks?: { chain: ChainName; blockNumber: string | null; updatedAt: string; status: 'ok' | 'error'; message?: string }[];
 }
+export interface MerklTokenReward {
+  address: string; symbol: string; decimals: number;
+  unclaimed: number; pending: number; unclaimedRaw: string; pendingRaw: string;
+  priceUsd: number | null; unclaimedUsd: number | null; pendingUsd: number | null;
+}
+export interface MerklNetworkRewards {
+  chain: ChainName; status: 'ok' | 'partial' | 'error'; rewards: MerklTokenReward[];
+  unclaimedUsd: number | null; pendingUsd: number | null; message?: string; disputeUntil?: number;
+}
+export interface MerklRewards {
+  address: string; updatedAt: string; status: 'ok' | 'partial' | 'error';
+  networks: MerklNetworkRewards[]; message?: string;
+}
