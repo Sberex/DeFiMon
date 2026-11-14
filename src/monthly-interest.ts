@@ -2,11 +2,16 @@ import type { Asset, InterestRate, Position, ProtocolResult } from './types';
 export interface MonthlyInterest { earnedUsd: number | null; paidUsd: number | null; nplUsd: number | null }
 const finite = (value: number | null | undefined): value is number => typeof value === 'number' && Number.isFinite(value);
 /** Same supply APR used in the table, including sUSDai intrinsic yield exactly once. */
-export function supplyApr(quote?: InterestRate, intrinsic?: InterestRate): number | null {
+export function supplyApr(quote?: InterestRate, intrinsic?: InterestRate, merkl?: InterestRate): number | null {
   if (!finite(quote?.apr)) return null;
-  if (!intrinsic) return quote.apr;
-  if (!finite(intrinsic.apr)) return null;
-  const total = quote.apr + intrinsic.apr;
+  if (intrinsic && !finite(intrinsic.apr)) return null;
+  if (merkl && !finite(merkl.apr)) return null;
+  const total = quote.apr + (intrinsic?.apr ?? 0) + (merkl?.apr ?? 0);
+  return finite(total) ? total : null;
+}
+export function borrowApr(quote?: InterestRate, merkl?: InterestRate): number | null {
+  if (!finite(quote?.apr) || (merkl && !finite(merkl.apr))) return null;
+  const total = quote.apr - (merkl?.apr ?? 0);
   return finite(total) ? total : null;
 }
 function monthly(amount: number, apr: number | null | undefined): number | null {
@@ -27,8 +32,8 @@ function net(earnedUsd: number | null, paidUsd: number | null): MonthlyInterest 
   return { earnedUsd, paidUsd, nplUsd: finite(difference) ? difference : null };
 }
 export function assetMonthlyInterest(asset: Asset) {
-  const earnedTokens = monthly(asset.supplied, supplyApr(asset.supplyRate, asset.intrinsicSupplyRate));
-  const paidTokens = monthly(asset.borrowed, asset.borrowRate?.apr);
+  const earnedTokens = monthly(asset.supplied, supplyApr(asset.supplyRate, asset.intrinsicSupplyRate, asset.merklSupplyRate));
+  const paidTokens = monthly(asset.borrowed, borrowApr(asset.borrowRate, asset.merklBorrowRate));
   return { earnedTokens, paidTokens, ...net(usd(earnedTokens, asset.priceUsd), usd(paidTokens, asset.priceUsd)) };
 }
 function sum(values: (number | null)[]): number | null {

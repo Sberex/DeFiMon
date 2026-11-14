@@ -38,6 +38,7 @@ export function mergeV4Assets(assets: Asset[]): Asset[] {
       if (existing.asset.priceUsd !== a.priceUsd) throw new Error('Inconsistent reserve prices for the same underlying');
       existing.asset.supplyRate = weightedRate(existing.asset.supplyRate, existing.asset.supplied, a.supplyRate, a.supplied);
       existing.asset.borrowRate = weightedRate(existing.asset.borrowRate, existing.asset.borrowed, a.borrowRate, a.borrowed);
+      existing.asset.v4Reserves = [...(existing.asset.v4Reserves ?? []), ...(a.v4Reserves ?? [])];
       existing.asset.supplied += a.supplied;
       existing.asset.borrowed += a.borrowed;
       existing.asset.collateral ||= a.collateral;
@@ -111,7 +112,7 @@ export async function readAaveV4(client: ChainClient, wallet: Address, blockNumb
           if (price > 0n) priceUsd = units(price, 8);
         } catch { /* Keep balances when a valuation feed is unavailable. */ }
         const interest = await hubRates(reserve.hub, BigInt(reserve.assetId), reserve.underlying);
-        return { supplyRate: interest?.supplyRate ?? unavailableRate(), borrowRate: v4BorrowRate(interest, user, borrowed), address: reserve.underlying, symbol: token.symbol, supplied: units(supplied, reserve.decimals), borrowed: units(borrowed, reserve.decimals), priceUsd, collateral: status[0] && (config?.collateralFactor ?? 0) > 0, liquidationThreshold: config ? config.collateralFactor / 10000 : null, liquidationPriceUsd: null };
+        return { v4Reserves: [{ hub: reserve.hub, assetId: String(reserve.assetId), supplied: units(supplied, reserve.decimals), borrowed: units(borrowed, reserve.decimals) }], supplyRate: interest?.supplyRate ?? unavailableRate(), borrowRate: v4BorrowRate(interest, user, borrowed), address: reserve.underlying, symbol: token.symbol, supplied: units(supplied, reserve.decimals), borrowed: units(borrowed, reserve.decimals), priceUsd, collateral: status[0] && (config?.collateralFactor ?? 0) > 0, liquidationThreshold: config ? config.collateralFactor / 10000 : null, liquidationPriceUsd: null };
       })).filter((a): a is Asset => a !== null));
       const [account, usdUnitsVerified] = await Promise.all([accountResult, oracleVerified]);
       if (!assets.length && account.ok && account.value.totalDebtValueRay === 0n) { verifiedChecks++; return null; }
@@ -131,7 +132,7 @@ export async function readAaveV4(client: ChainClient, wallet: Address, blockNumb
       if (suppliedUsd === null || debtUsd === null || assets.some(a => a.priceUsd === null)) { warnings.add('Some Aave v4 assets have unavailable USD prices; their dollar values are unknown.'); notes.push('A dash is unknown, not zero. Positions with unknown dollar values are excluded from the combined dollar totals.'); }
       const estimated = account.ok && weightedCollateralUsd !== null && debtUsd !== null ? liquidationPrices(assets, debtUsd, weightedCollateralUsd) : assets;
       verifiedChecks++;
-      return { liquidationModel: account.ok && weightedCollateralUsd !== null ? 'linear' : 'unavailable', id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label}`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(hasDebt ? 1 : 0, health), assets: estimated, notes };
+      return { marketAddress: market.address, liquidationModel: account.ok && weightedCollateralUsd !== null ? 'linear' : 'unavailable', id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label}`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(hasDebt ? 1 : 0, health), assets: estimated, notes };
     } catch {
       warnings.add('Some Aave v4 lending markets could not be checked. Their positions, balances, and risk are unknown.');
       return unknownMarket(market);
@@ -167,7 +168,7 @@ export async function readAaveV4(client: ChainClient, wallet: Address, blockNumb
       verifiedChecks++;
       const quantity = units(supplied, token.decimals);
       const interest = await hubRates(hub, assetId, underlying);
-      return { id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label} tokenized deposit`, suppliedUsd: priceUsd === null ? null : quantity * priceUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ supplyRate: interest?.supplyRate ?? unavailableRate(), address: underlying, symbol: token.symbol, supplied: quantity, borrowed: 0, priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Tokenized deposit shares are converted once to current underlying assets. The underlying is not counted a second time.', 'This deposit-only contract has no borrowing position or collateral liquidation price.', 'USD valuation uses an Aave v4 reserve for the same hub and asset; it is not a withdrawal guarantee.'] };
+      return { id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label} tokenized deposit`, suppliedUsd: priceUsd === null ? null : quantity * priceUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ v4Reserves: [{ hub, assetId: String(assetId), supplied: quantity, borrowed: 0 }], supplyRate: interest?.supplyRate ?? unavailableRate(), address: underlying, symbol: token.symbol, supplied: quantity, borrowed: 0, priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Tokenized deposit shares are converted once to current underlying assets. The underlying is not counted a second time.', 'This deposit-only contract has no borrowing position or collateral liquidation price.', 'USD valuation uses an Aave v4 reserve for the same hub and asset; it is not a withdrawal guarantee.'] };
     } catch {
       warnings.add('Some Aave v4 tokenized-deposit contracts could not be checked. Their balances are unknown.');
       return unknownMarket(market, true);

@@ -9,5 +9,5 @@ if (!address || !isAddress(address, { strict: false }) || /^0x0{40}$/i.test(addr
 } else {
   const result = await readMerklRewards(address.toLowerCase() as `0x${string}`);
   console.log(JSON.stringify(result, null, 2));
-  if (result.status !== 'ok') process.exitCode = 1;
+  if (result.status !== 'ok' || result.aprStatus !== 'ok') process.exitCode = 1;
 }

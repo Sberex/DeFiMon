@@ -21,10 +21,13 @@ export interface Asset {
   lltv?: number; lltvNote?: string;
   priceSource?: 'fluid-oracle';
   supplyRate?: InterestRate; borrowRate?: InterestRate; intrinsicSupplyRate?: IntrinsicRate;
+  merklSupplyRate?: MerklAprQuote; merklBorrowRate?: MerklAprQuote;
+  v4Reserves?: { hub: string; assetId: string; supplied: number; borrowed: number }[];
 }
 export interface Position {
   id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;
   risk: Risk; assets: Asset[]; notes: string[];
+  marketAddress?: string;
   liquidationModel?: 'linear' | 'oracle-ratio' | 'unavailable';
   liquidationQuote?: { current: number; threshold: number; unit: string };
 }
@@ -51,4 +54,14 @@ export interface MerklNetworkRewards {
 export interface MerklRewards {
   address: string; updatedAt: string; status: 'ok' | 'partial' | 'error';
   networks: MerklNetworkRewards[]; message?: string;
+  aprStatus?: 'ok' | 'partial' | 'error'; opportunities?: MerklOpportunity[]; aprMessage?: string;
+}
+export interface MerklAprQuote extends InterestRate {
+  components: { id: string; name: string; listedApr: number; appliedApr: number; note: string }[];
+}
+export interface MerklOpportunity {
+  id: string; chainId: number; protocol: string; type: string; action: 'LEND' | 'BORROW' | 'OTHER';
+  name: string; identifier: string; tokens: string[]; apr: number;
+  status: 'ready' | 'unsupported'; reason?: string;
+  rules?: { kind: 'fluid-vault'; vault: string } | { kind: 'aave-v4-net-borrow'; hubs: { address: string; borrowAssets: { id: string; token: string }[]; supplyAssets: { id: string; token: string }[] }[] };
 }

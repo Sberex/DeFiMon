@@ -173,7 +173,7 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
       const debtUsd = value(assets, 'borrowed');
       if (suppliedUsd === null || debtUsd === null) { warnings.add('Some positions have no verified USD price. Their balances and oracle-based risk are shown, but dollar totals are incomplete.'); notes.push('An independent USD price is unavailable for one or more assets. A dash is unknown, not zero.'); }
       if (position.borrow > 0n && health === null) { warnings.add('Some borrowing positions have unavailable liquidation data.'); notes.push('Fluid’s liquidation oracle or threshold is unavailable. Risk and liquidation prices are unknown.'); }
-      return { liquidationModel: vault.isSmartCol || vault.isSmartDebt ? 'oracle-ratio' : 'linear', id: `fluid-nft-${id}`, label: `Vault ${c.vaultId} · ${supply.map(a => a.symbol).join('/')} / ${debt.map(a => a.symbol).join('/') || 'no debt'} · NFT ${id}`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(position.borrow > 0n ? 1 : 0, health), assets, notes, liquidationQuote };
+      return { marketAddress: vault.vault, liquidationModel: vault.isSmartCol || vault.isSmartDebt ? 'oracle-ratio' : 'linear', id: `fluid-nft-${id}`, label: `Vault ${c.vaultId} · ${supply.map(a => a.symbol).join('/')} / ${debt.map(a => a.symbol).join('/') || 'no debt'} · NFT ${id}`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(position.borrow > 0n ? 1 : 0, health), assets, notes, liquidationQuote };
     } catch {
       warnings.add('Some Fluid vault positions could not be read. Their balances and risk are unknown.');
       return unknownPosition(`fluid-nft-${id}`, `Fluid vault · NFT ${id}`);

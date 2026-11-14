@@ -68,6 +68,7 @@ describe('Fluid vaults', () => {
   it('uses current balances, token decimals, liquidation oracle, and LT instead of borrowing limit', async () => {
     const m = mock(); const result = await readFluid(m.client, wallet, 123n); const p = result.positions[0];
     expect(result.status).toBe('ok');
+    expect(p.marketAddress).toBe(POOL);
     expect(p.suppliedUsd).toBe(30000); expect(p.debtUsd).toBe(15000);
     expect(p.assets[0].symbol).toBe('ETH'); expect(p.assets[0].supplied).toBe(10);
     expect(p.healthFactor).toBeCloseTo(1.7); expect(p.risk).toBe('lower');

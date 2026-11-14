@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { combinedExample, example } from '../src/example';
+import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtures/merkl-apr';
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
@@ -642,4 +643,87 @@ test('Merkl balances remain visible when the lending provider fails', async ({ p
   await expect(section.getByText('RWD', { exact: true })).toBeVisible();
   await expect(section.locator('tbody tr').first().locator('td').nth(1)).toHaveText('6');
   await expect(section.locator('tbody tr').first().locator('td').nth(4)).toHaveText('Unavailable');
+});
+
+
+test('applies live Merkl supply and borrow APR to matching Fluid vaults and net-borrowing Aave positions', async ({ page }) => {
+  const fixture = aprPortfolio();
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/rewards/*', route => route.fulfill({ json: aprRewards() }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const fluid = page.locator('article.fluid');
+  const gho = fluid.locator('tbody tr').first();
+  await expect(gho.locator('td').nth(2).locator('.asset-rate')).toContainText('≈ 5.32%');
+  await expect(gho.locator('td').nth(2).getByText('Merkl: +1.32%', { exact: true })).toBeVisible();
+  await expect(gho.locator('td').nth(4).locator('.asset-rate')).toContainText('≈ 4.55%');
+  await expect(gho.locator('td').nth(4).getByText('Protocol: 6.00%', { exact: true })).toBeVisible();
+  await expect(gho.locator('td').nth(4).getByText('Merkl rebate: −1.45%', { exact: true })).toBeVisible();
+  await expect(fluid.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $13.16 / month');
+  const aaveBorrow = page.locator('article.aave-v4 tbody tr').first().locator('td').nth(4);
+  await expect(aaveBorrow.locator('.asset-rate')).toContainText('≈ 4.95%');
+  await expect(aaveBorrow.getByText('Merkl rebate: −1.05%', { exact: true })).toBeVisible();
+  await aaveBorrow.getByText('Merkl reward details', { exact: true }).click();
+  await expect(aaveBorrow.getByText(/Estimated eligible share: 60.00%/)).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ -$21.43');
+  await expect(page.locator('.summary.primary strong')).toHaveText('-$4,000.00');
+  const opportunities = page.getByRole('table', { name: 'Merkl APR opportunities and position matching' });
+  await expect(opportunities.getByText('Applied to 1 position', { exact: true })).toHaveCount(3);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await fluid.screenshot({ path: '/tmp/defimon-merkl-apr-mobile.png' });
+});
+
+test('Merkl APR failures preserve base rates and clearly exclude unverified incentives from NPL', async ({ page }) => {
+  let reads = 0; const fixture = aprPortfolio();
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/rewards/*', route => { reads++; return route.fulfill({ json: reads === 1 ? aprRewards() : { ...aprRewards(), aprStatus: 'error', aprMessage: 'Merkl APR lookup is unavailable. Displayed rates and NPL exclude unverified Merkl incentives.', opportunities: [] } }); });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const total = page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong');
+  await expect(total).toHaveText('≈ -$21.43');
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(total).toHaveText('≈ -$50.83');
+  await expect(page.locator('.merkl-apr-notice')).toContainText('exclude unverified Merkl incentives');
+  await expect(page.locator('article.fluid tbody tr').first().locator('td').nth(4).locator('.asset-rate')).toContainText('6.00%');
+  await expect(page.locator('.summary.primary strong')).toHaveText('-$4,000.00');
+});
+
+test('Merkl vault rewards do not leak into a different Fluid vault', async ({ page }) => {
+  const fixture = aprPortfolio();
+  const other = structuredClone(fixture.protocols[1].positions[0]); other.id = 'fluid-nft-other'; other.marketAddress = '0x1111111111111111111111111111111111111111'; other.label = 'Other Fluid vault';
+  fixture.protocols[1].positions.push(other);
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/rewards/*', route => route.fulfill({ json: aprRewards() }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const positions = page.locator('article.fluid > .position');
+  await expect(positions.nth(0).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $13.16 / month');
+  await expect(positions.nth(1).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ -$7.50 / month');
+  await expect(positions.nth(1).getByText('Merkl reward details', { exact: true })).toHaveCount(0);
+});
+
+
+test('a late Merkl APR lookup preserves liquidation scenario inputs and calculated prices', async ({ page }) => {
+  const fixture = aprPortfolio(); const pos = fixture.protocols[0].positions[0];
+  pos.suppliedUsd = 10000;
+  pos.assets.push({ address: '0x2222222222222222222222222222222222222222', symbol: 'WETH', supplied: 2, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .85, liquidationPriceUsd: null, supplyRate: { apr: .03, note: '' } });
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/rewards/*', async route => { await gate; await route.fulfill({ json: aprRewards() }); });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const aave = page.locator('article.aave-v4');
+  await aave.getByLabel('USDT liquidation price (USD)').fill('0.8');
+  await aave.getByRole('button', { name: 'Calculate', exact: true }).click();
+  await expect(aave.locator('.calculated-price strong')).toHaveText('$4,188.24');
+  release();
+  await expect(aave.locator('tbody tr').first().locator('td').nth(4).getByText('Merkl rebate: −1.05%', { exact: true })).toBeVisible();
+  await expect(aave.getByLabel('USDT liquidation price (USD)')).toHaveValue('0.8');
+  await expect(aave.locator('.calculated-price strong')).toHaveText('$4,188.24');
 });

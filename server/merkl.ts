@@ -1,6 +1,7 @@
 import { formatUnits, getAddress, isAddress, type Address } from 'viem';
 import type { MerklNetworkRewards, MerklRewards, MerklTokenReward } from '../src/types.js';
 import { networkOrder } from '../src/networks.js';
+import { readMerklApr } from './merkl-apr.js';
 import { networks } from './networks.js';
 // Public @merkl/api@1.20.21: UserController rewards.summary GET and UserRewardsSummaryResourceDto.
 export const MERKL_API = 'https://api.merkl.xyz/v4';
@@ -35,7 +36,7 @@ function tokenReward(value: unknown, chainId: number, now: number): MerklTokenRe
   return { address: getAddress(token.address.toLowerCase()), symbol: token.symbol, decimals, unclaimed, pending, unclaimedRaw: String(unclaimedRaw), pendingRaw: String(pendingRaw), priceUsd, unclaimedUsd: usd(unclaimed), pendingUsd: usd(pending) };
 }
 export function unavailableMerkl(address: string, message = 'Merkl rewards are unavailable. Check access to api.merkl.xyz and refresh. Reward balances are unknown.'): MerklRewards {
-  return { address, updatedAt: new Date().toISOString(), status: 'error', message, networks: networkOrder.map(id => ({ chain: networks[id].name, status: 'error', rewards: [], unclaimedUsd: null, pendingUsd: null, message })) };
+  return { address, updatedAt: new Date().toISOString(), status: 'error', message, aprStatus: 'error', opportunities: [], aprMessage: 'Merkl APR lookup is unavailable. Displayed rates and NPL exclude unverified Merkl incentives.', networks: networkOrder.map(id => ({ chain: networks[id].name, status: 'error', rewards: [], unclaimedUsd: null, pendingUsd: null, message })) };
 }
 export function parseMerklRewards(address: Address, value: unknown, now = Date.now() / 1000): MerklRewards {
   if (!Array.isArray(value) || value.length > 1000) throw new Error('Invalid Merkl response');
@@ -76,7 +77,7 @@ export function parseMerklRewards(address: Address, value: unknown, now = Date.n
   });
   return { address: getAddress(address), updatedAt: new Date(now * 1000).toISOString(), status: result.some(n => n.status !== 'ok') ? 'partial' : 'ok', networks: result };
 }
-export async function readMerklRewards(address: Address, fetcher: typeof fetch = fetch): Promise<MerklRewards> {
+async function readMerklBalances(address: Address, fetcher: typeof fetch = fetch): Promise<MerklRewards> {
   try {
     const wallet = getAddress(address);
     const response = await fetcher(`${MERKL_API}/users/${wallet}/rewards/summary`, { signal: AbortSignal.timeout(12000), cache: 'no-store', redirect: 'error', headers: { Accept: 'application/json' } });
@@ -84,4 +85,9 @@ export async function readMerklRewards(address: Address, fetcher: typeof fetch =
     const text = await response.text(); if (text.length > 2000000) throw new Error('Merkl response too large');
     return parseMerklRewards(wallet, JSON.parse(text));
   } catch { return unavailableMerkl(address); }
+}
+
+export async function readMerklRewards(address: Address, fetcher: typeof fetch = fetch): Promise<MerklRewards> {
+  const [balances, apr] = await Promise.all([readMerklBalances(address, fetcher), readMerklApr(address, fetcher)]);
+  return { ...balances, ...apr };
 }
