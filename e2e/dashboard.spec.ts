@@ -103,7 +103,8 @@ test('shows Aave v4 markets separately and does not offset an unhealthy market w
   await expect(card.getByRole('heading', { name: 'Aave v4 · MAIN', exact: true })).toBeVisible();
   await expect(card.getByRole('heading', { name: 'Aave v4 · BLUECHIP', exact: true })).toBeVisible();
   await expect(card.getByText('Liquidation threshold reached', { exact: true })).toBeVisible();
-  await expect(page.locator('.summary').filter({ hasText: 'Lowest health factor' }).locator('strong')).toContainText('0.90');
+  await expect(card.locator('.position-stats').first().getByText('0.90', { exact: true })).toBeVisible();
+  await expect(page.getByText('Lowest health factor', { exact: true })).toHaveCount(0);
 });
 
 test('distinguishes an unavailable Aave v4 market from an empty market', async ({ page }) => {
@@ -521,13 +522,16 @@ test('shows monthly token interest with unavailable USD totals when a token pric
 });
 
 
-test('puts total monthly NPL first on the page and sums all networks once', async ({ page }) => {
+test('puts total monthly NPL in the fourth summary card and sums all networks once', async ({ page }) => {
   await page.goto('/');
   const total = page.getByRole('region', { name: 'Total monthly NPL', exact: true });
-  await expect(page.locator('main > section').first()).toHaveAttribute('aria-label', 'Total monthly NPL');
-  await expect(total.locator('strong')).toHaveText('—');
+  await expect(total).toHaveCount(0);
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(total.locator('strong')).toHaveText('≈ -$4.35 / month');
+  await expect(page.locator('.summary-grid > *')).toHaveCount(4);
+  await expect(page.locator('.summary-grid > *').nth(3)).toHaveAttribute('aria-label', 'Total monthly NPL');
+  await expect(page.getByText('Lowest health factor', { exact: true })).toHaveCount(0);
+  await expect(total).toHaveCount(1);
+  await expect(total.locator('strong')).toHaveText('≈ -$4.35');
   await expect(total.getByText('Earned: ≈ $160.42 / month · Paid: ≈ $164.77 / month', { exact: true })).toBeVisible();
   await expect(total.getByText(/Illustrative example/)).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
@@ -562,7 +566,7 @@ test('shows Fluid NPL separately for each vault and lending deposit, and keeps u
   await expect(vaults.nth(1).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ -$20.00 / month');
   await expect(card.getByRole('region', { name: 'Fluid deposit monthly interest', exact: true }).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $30.00 / month');
   const total = page.getByRole('region', { name: 'Total monthly NPL', exact: true });
-  await expect(total.locator('strong')).toHaveText('≈ $11.46 / month');
+  await expect(total.locator('strong')).toHaveText('≈ $11.46');
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(vaults.nth(0).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $1.46 / month');
   await expect(vaults.nth(1).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: Unavailable');
