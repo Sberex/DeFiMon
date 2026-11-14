@@ -1,4 +1,6 @@
 import { MorphoLookupError, morphoNetworkError, safeSchemaDetail, toMorphoFailure, type MorphoFailure } from './morpho-errors.js';
+import type { NetworkId } from '../src/types.js';
+import { networks } from './networks.js';
 import { getAddress, isAddress, type Address, type Hex } from 'viem';
 // Deployment/reference schema: morpho-org/sdks@56f1ed62827a7aab39d979c0143d1fbf970c37ca.
 // Current Asset.price { usd timestamp } and userByAddress confirmed by public API
@@ -39,9 +41,9 @@ function address(value: unknown): Address {
   return getAddress(value.toLowerCase());
 }
 function same(a: Address, b: Address) { return a.toLowerCase() === b.toLowerCase(); }
-function user(value: unknown, wallet: Address) {
+function user(value: unknown, wallet: Address, chainId: number) {
   const u = object(value);
-  if (!same(address(u.address), wallet) || object(u.chain).id !== 1) throw new Error('Morpho returned another wallet or network');
+  if (!same(address(u.address), wallet) || object(u.chain).id !== chainId) throw new Error('Morpho returned another wallet or network');
 }
 function token(value: unknown): MorphoToken {
   const t = object(value);
@@ -51,15 +53,15 @@ function token(value: unknown): MorphoToken {
   const price = t.price === undefined ? t.priceUsd : t.price && typeof t.price === 'object' && !Array.isArray(t.price) ? (t.price as Obj).usd : null;
   return { address: address(t.address), symbol: t.symbol, decimals: Number(t.decimals), priceUsd: typeof price === 'number' && Number.isFinite(price) && price > 0 ? price : null };
 }
-function marketRow(value: unknown, wallet: Address): MorphoMarketRef {
-  const row = object(value); user(row.user, wallet);
+function marketRow(value: unknown, wallet: Address, chainId: number, morphoBlue: Address): MorphoMarketRef {
+  const row = object(value); user(row.user, wallet, chainId);
   const m = object(row.market); const core = object(m.morphoBlue);
-  if (!same(address(core.address), MORPHO_BLUE) || object(core.chain).id !== 1 || typeof m.uniqueKey !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(m.uniqueKey)) throw new Error('Invalid Morpho market');
+  if (!same(address(core.address), morphoBlue) || object(core.chain).id !== chainId || typeof m.uniqueKey !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(m.uniqueKey)) throw new Error('Invalid Morpho market');
   return { id: m.uniqueKey as Hex, loan: token(m.loanAsset), collateral: m.collateralAsset === null ? null : token(m.collateralAsset) };
 }
-function vaultRow(value: unknown, wallet: Address, version: 1 | 2): MorphoVaultRef {
-  const row = object(value); user(row.user, wallet); const v = object(row.vault);
-  if (object(v.chain).id !== 1 || typeof v.name !== 'string' || v.name.length > 256) throw new Error('Invalid Morpho vault');
+function vaultRow(value: unknown, wallet: Address, version: 1 | 2, chainId: number): MorphoVaultRef {
+  const row = object(value); user(row.user, wallet, chainId); const v = object(row.vault);
+  if (object(v.chain).id !== chainId || typeof v.name !== 'string' || v.name.length > 256) throw new Error('Invalid Morpho vault');
   return { address: address(v.address), name: v.name, asset: token(v.asset), factory: address(object(v.factory).address), version };
 }
 function pageInfo(value: unknown, items: unknown[], skip: number) {
@@ -67,9 +69,13 @@ function pageInfo(value: unknown, items: unknown[], skip: number) {
   if (![p.count, p.countTotal, p.skip, p.limit].every(n => Number.isSafeInteger(n) && Number(n) >= 0) || p.skip !== skip || p.count !== items.length || Number(p.countTotal) < items.length + skip) throw new Error('Incomplete Morpho pagination');
   return Number(p.countTotal);
 }
-export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetch = fetch): Promise<MorphoDiscovery> {
+export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetch = fetch, network: NetworkId = 'ethereum'): Promise<MorphoDiscovery> {
+  const chainId = networks[network].id;
+  const morphoBlue = networks[network].morphoBlue;
+  if (!morphoBlue) throw new Error('Morpho is not supported on this network.');
   const warnings = new Set<string>();
   async function query(document: string, variables: Record<string, unknown>): Promise<Obj> {
+    document = document.replaceAll('chainId_in: [1]', `chainId_in: [${chainId}]`).replaceAll('chainId: 1)', `chainId: ${chainId})`);
     let response: Response;
     try { response = await fetcher(MORPHO_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: document, variables }), signal: AbortSignal.timeout(15000), cache: 'no-store' }); } catch (error) { throw morphoNetworkError(error); }
     if (!response.ok && ![400, 422].includes(response.status)) throw new MorphoLookupError('http', { httpStatus: response.status });
@@ -129,16 +135,16 @@ export async function fetchMorphoDiscovery(wallet: Address, fetcher: typeof fetc
     return [...items.values()];
   }
   const results = await Promise.allSettled([
-    pages('marketPositions', MORPHO_MARKETS_QUERY, row => marketRow(row, wallet), m => m.id),
-    pages('vaultPositions', MORPHO_VAULTS_QUERY, row => vaultRow(row, wallet, 1), v => v.address),
+    pages('marketPositions', MORPHO_MARKETS_QUERY, row => marketRow(row, wallet, chainId, morphoBlue), m => m.id),
+    pages('vaultPositions', MORPHO_VAULTS_QUERY, row => vaultRow(row, wallet, 1, chainId), v => v.address),
     (async () => {
       const data = await query(MORPHO_V2_QUERY, { wallet });
       // A missing/null entity is not proof that all V2 holdings have been checked.
-      const u = object(data.userByAddress); user(u, wallet);
+      const u = object(data.userByAddress); user(u, wallet, chainId);
       if (!Array.isArray(u.vaultV2Positions)) throw new Error('Missing vault V2 positions');
       const vaults = new Map<string, MorphoVaultRef>();
       for (const row of u.vaultV2Positions) {
-        try { const v = vaultRow(row, wallet, 2); vaults.set(v.address.toLowerCase(), v); }
+        try { const v = vaultRow(row, wallet, 2, chainId); vaults.set(v.address.toLowerCase(), v); }
         catch { warnings.add('Some Morpho vault V2 lookup results were invalid; coverage is incomplete.'); }
       }
       return [...vaults.values()];

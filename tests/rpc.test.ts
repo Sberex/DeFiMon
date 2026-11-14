@@ -17,3 +17,13 @@ it('rejects insecure remote RPC URLs and never includes provider credentials in 
   vi.stubEnv('PLASMA_RPC_URL', 'http://127.0.0.1:8545');
   expect(makeClient('plasma').chain.id).toBe(9745);
 });
+
+it('uses Arbitrum One and its own default or configured provider without reusing Ethereum', () => {
+  vi.stubEnv('ETHEREUM_RPC_URL', 'https://ethereum.example');
+  vi.stubEnv('ARBITRUM_RPC_URL', '');
+  const client = makeClient('arbitrum');
+  expect(client.chain.id).toBe(42161); expect(client.chain.nativeCurrency.symbol).toBe('ETH');
+  expect(client.transport.url).toBe('https://arb1.arbitrum.io/rpc');
+  vi.stubEnv('ARBITRUM_RPC_URL', 'https://arbitrum.example');
+  expect(makeClient('arbitrum').transport.url).toBe('https://arbitrum.example');
+});

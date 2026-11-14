@@ -1,11 +1,12 @@
 import { decodeFunctionResult, encodeAbiParameters, encodeFunctionData, formatUnits, keccak256, parseAbiParameters, type Address, type Hex } from 'viem';
-import type { Asset, Position, ProtocolResult } from '../../src/types.js';
+import type { Asset, Position, ProtocolResult, NetworkId } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
 import { MorphoDiscoveryUnavailable } from '../morpho-errors.js';
 import { createMorphoRates } from '../morpho-rates.js';
 import { rate, weightedRate } from '../rates.js';
+import { networks } from '../networks.js';
 import { riskLevel } from '../risk.js';
-import { fetchMorphoDiscovery, MORPHO_BLUE, type MorphoDiscovery, type MorphoMarketRef, type MorphoToken, type MorphoVaultRef } from '../morpho-discovery.js';
+import { fetchMorphoDiscovery, type MorphoDiscovery, type MorphoMarketRef, type MorphoToken, type MorphoVaultRef } from '../morpho-discovery.js';
 import { morphoCoreAbi as coreAbi, morphoFactoryAbi as factoryAbi, morphoMulticallAbi as multiAbi, morphoOracleAbi as oracleAbi, morphoVaultAbi as vaultAbi } from '../abis/morpho.js';
 export const MORPHO_COVERAGE = 'Ethereum Morpho Blue direct markets and vault V1/V2 deposits. New positions may take time to appear in Morpho’s lookup service. Excludes legacy Optimizers and linked accounts.';
 const MULTICALL = '0xcA11bde05977b3631167028862bE2a173976CA11';
@@ -39,11 +40,14 @@ function total(assets: Asset[], side: 'supplied' | 'borrowed') {
   if (assets.some(a => a[side] > 0 && a.priceUsd === null)) return null;
   return assets.reduce((sum, a) => sum + a[side] * (a.priceUsd ?? 0), 0);
 }
-export async function readMorpho(client: ChainClient, wallet: Address, blockNumber: bigint, discover: (wallet: Address) => Promise<MorphoDiscovery> = fetchMorphoDiscovery): Promise<ProtocolResult> {
-  const discovery = await discover(wallet);
+export async function readMorpho(client: ChainClient, wallet: Address, blockNumber: bigint, discover?: (wallet: Address) => Promise<MorphoDiscovery>, network: NetworkId = 'ethereum'): Promise<ProtocolResult> {
+  const deployment = networks[network];
+  if (!deployment.morphoBlue) throw new Error('Unsupported Morpho network');
+  const morphoBlue = deployment.morphoBlue;
+  const discovery = await (discover ? discover(wallet) : fetchMorphoDiscovery(wallet, fetch, network));
   if (!discovery.successfulFamilies) throw new MorphoDiscoveryUnavailable(discovery.failures ?? []);
   const warnings = new Set(discovery.warnings);
-  const interest = createMorphoRates(client, blockNumber);
+  const interest = createMorphoRates(client, blockNumber, morphoBlue);
   const metadata = new Map<string, Promise<{ symbol: string; decimals: number }>>();
   async function token(t: MorphoToken) {
     const key = t.address.toLowerCase();
@@ -68,13 +72,13 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
   }
   async function readMarket(ref: MorphoMarketRef): Promise<Position | null> {
     try {
-      const params = await client.readContract({ address: MORPHO_BLUE, abi: coreAbi, functionName: 'idToMarketParams', args: [ref.id], blockNumber });
+      const params = await client.readContract({ address: morphoBlue, abi: coreAbi, functionName: 'idToMarketParams', args: [ref.id], blockNumber });
       const id = keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [params.loanToken, params.collateralToken, params.oracle, params.irm, params.lltv]));
       if (!same(id, ref.id) || !same(params.loanToken, ref.loan.address) || (ref.collateral ? !same(params.collateralToken, ref.collateral.address) : !same(params.collateralToken, ZERO)) || params.lltv > WAD) throw new Error('Morpho market identity mismatch');
       const data = await simulate([
-        { target: MORPHO_BLUE, callData: encodeFunctionData({ abi: coreAbi, functionName: 'accrueInterest', args: [params] }) },
-        { target: MORPHO_BLUE, callData: encodeFunctionData({ abi: coreAbi, functionName: 'market', args: [ref.id] }) },
-        { target: MORPHO_BLUE, callData: encodeFunctionData({ abi: coreAbi, functionName: 'position', args: [ref.id, wallet] }) },
+        { target: morphoBlue, callData: encodeFunctionData({ abi: coreAbi, functionName: 'accrueInterest', args: [params] }) },
+        { target: morphoBlue, callData: encodeFunctionData({ abi: coreAbi, functionName: 'market', args: [ref.id] }) },
+        { target: morphoBlue, callData: encodeFunctionData({ abi: coreAbi, functionName: 'position', args: [ref.id, wallet] }) },
       ]);
       const market = decodeFunctionResult({ abi: coreAbi, functionName: 'market', data: data[1] });
       const position = decodeFunctionResult({ abi: coreAbi, functionName: 'position', data: data[2] });
@@ -119,7 +123,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       if (borrowRaw > 0n && oraclePrice === 0n) warnings.add('A Morpho liquidation oracle reports zero: the protocol values that collateral at zero for borrowing risk.');
       return { id: `morpho-market-${ref.id}`, label: `Morpho · ${collateral?.symbol ?? 'no collateral'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(borrowRaw > 0n ? 1 : 0, health), assets: assets.filter(a => a.supplied > 0 || a.borrowed > 0), liquidationQuote, notes: [
         'Each Morpho market has separate collateral and debt. Loan-token lending deposits do not protect a borrowing position, even in this same market.',
-        'Interest is simulated to the displayed Ethereum block without sending a transaction. Supply rounds down and debt rounds up using Morpho’s virtual assets and shares.',
+        `Interest is simulated to the displayed ${deployment.name} block without sending a transaction. Supply rounds down and debt rounds up using Morpho’s virtual assets and shares.`,
         'Health uses the market’s own liquidation oracle and loan-to-value limit. Dollar liquidation estimates assume the debt token price and both balances stay fixed; protocol rounding may shift the exact boundary.',
         'USD prices are indicative prices from Morpho’s lookup service and may update at a different time from the Ethereum balances. Oracle prices determine risk, not the indicative dollar prices.',
       ] };
@@ -137,7 +141,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       let raw: bigint;
       if (ref.version === 1) {
         const core = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'MORPHO', blockNumber });
-        if (!same(core, MORPHO_BLUE)) throw new Error('Wrong Morpho deployment');
+        if (!same(core, morphoBlue)) throw new Error('Wrong Morpho deployment');
         const shares = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'balanceOf', args: [wallet], blockNumber });
         if (shares === 0n) return null;
         raw = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'convertToAssets', args: [shares], blockNumber });
@@ -173,5 +177,5 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
   const uniqueVaults = [...new Map(discovery.vaults.map(v => [v.address.toLowerCase(), v])).values()];
   if (uniqueMarkets.length !== discovery.markets.length || uniqueVaults.length !== discovery.vaults.length) warnings.add('Duplicate Morpho entries were counted once; complete lookup coverage could not be confirmed.');
   const [markets, vaults] = await Promise.all([mapLimited(uniqueMarkets, readMarket), mapLimited(uniqueVaults, readVault)]);
-  return { id: 'morpho', name: 'Morpho', status: warnings.size ? 'partial' : 'ok', coverage: MORPHO_COVERAGE, message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...markets, ...vaults].filter((p): p is Position => p !== null) };
+  return { id: 'morpho', name: 'Morpho', status: warnings.size ? 'partial' : 'ok', coverage: MORPHO_COVERAGE.replace('Ethereum', deployment.name), message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...markets, ...vaults].filter((p): p is Position => p !== null) };
 }

@@ -1,3 +1,4 @@
+import { combinedNetworkName, networkOrder, networkNames } from './networks';
 import type { Portfolio } from './types';
 // Deliberately synthetic. Never used as a fallback for a failed live request.
 export const example: Portfolio = {
@@ -33,7 +34,7 @@ export const example: Portfolio = {
 
 // Separate, explicitly fictional Plasma positions for the combined example.
 export const combinedExample: Portfolio = {
-  ...example, chain: 'Ethereum + Plasma', blockNumber: null,
+  ...example, chain: combinedNetworkName, blockNumber: null,
   wallets: [
     { chain: 'Ethereum', status: 'ok', pricedValueUsd: 6500, unpricedCount: 0, coverage: 'Illustrative wallet tokens only.', tokens: [
       { address: 'native', symbol: 'ETH', balance: 2, priceUsd: 3000, valueUsd: 6000 },
@@ -59,6 +60,25 @@ export const combinedExample: Portfolio = {
     }];
   }),
 };
+
+// Explicitly fictional Arbitrum positions; no live lookup uses this data.
+for (const [id, quantity, borrowed] of [['aave-v3', 0.5, 500], ['morpho', 0.25, 250], ['compound', 0.4, 400], ['fluid', 1 / 3, 300]] as const) {
+  const protocol = example.protocols.find(p => p.id === id)!;
+  const suppliedUsd = quantity * 3000;
+  combinedExample.protocols.push({ id, name: protocol.name, chain: 'Arbitrum', status: 'ok', coverage: 'Illustrative Arbitrum market only', positions: [{
+    id: `example-arbitrum-${id}`, label: `${protocol.name} · Arbitrum example`, suppliedUsd, debtUsd: borrowed, healthFactor: suppliedUsd * 0.8 / borrowed, risk: 'lower', notes: ['Illustrative values only. Positions on other networks do not protect this debt.'],
+    assets: [
+      { address: '', symbol: 'WETH', supplied: quantity, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: 0.8, liquidationPriceUsd: borrowed / quantity / 0.8 },
+      { address: '', symbol: 'USDC', supplied: 0, borrowed, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null },
+    ],
+  }] });
+}
+combinedExample.wallets!.push({ chain: 'Arbitrum', status: 'ok', pricedValueUsd: 1000, unpricedCount: 0, coverage: 'Illustrative wallet tokens only.', tokens: [
+  { address: 'native', symbol: 'ETH', balance: 0.1, priceUsd: 3000, valueUsd: 300 },
+  { address: '0xaf88d065e77c8cc2239327c5edb3a432268e5831', symbol: 'USDC', balance: 700, priceUsd: 1, valueUsd: 700 },
+] });
+const protocolOrder = example.protocols.map(p => p.id);
+combinedExample.protocols.sort((a, b) => protocolOrder.indexOf(a.id) - protocolOrder.indexOf(b.id) || networkOrder.findIndex(id => networkNames[id] === a.chain) - networkOrder.findIndex(id => networkNames[id] === b.chain));
 
 // Fictional current APRs, never used by live readers.
 for (const portfolio of [example, combinedExample]) for (const protocol of portfolio.protocols) for (const position of protocol.positions) for (const asset of position.assets) {

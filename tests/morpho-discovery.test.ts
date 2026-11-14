@@ -196,3 +196,25 @@ it('still supports documented older scalar USD fields after an explicit current-
     expect(result.successfulFamilies).toBe(3); expect(result.markets[0].loan.priceUsd).toBe(0.98);
   }
 });
+
+it('filters all Morpho lookup families to Arbitrum and rejects an Ethereum core or chain in its results', async () => {
+  const arbCore = '0x6c247b1F6182318877311737BaC0844bAa518F5e';
+  const arbUser = { ...user, chain: { id: 42161 } };
+  let wrongCore = false;
+  const fetcher = (async (_url, init) => {
+    const { query } = JSON.parse(String(init?.body));
+    expect(query.includes('chainId_in: [42161]') || query.includes('chainId: 42161)')).toBe(true);
+    expect(query).not.toContain('chainId_in: [1]'); expect(query).not.toContain('chainId: 1)');
+    const field = query.includes('query WalletMarkets(') ? 'marketPositions' : query.includes('query WalletVaults(') ? 'vaultPositions' : 'userByAddress';
+    const row = market(); row.user = arbUser;
+    row.market.morphoBlue = { address: wrongCore ? MORPHO_BLUE : arbCore, chain: { id: 42161 } };
+    const arbVault = { ...vault, chain: { id: 42161 } };
+    return new Response(JSON.stringify({ data: { [field]: field === 'marketPositions' ? page([row]) : field === 'vaultPositions' ? page([{ user: arbUser, vault: arbVault }]) : { ...arbUser, vaultV2Positions: [] } } }));
+  }) as typeof fetch;
+  const valid = await fetchMorphoDiscovery(wallet, fetcher, 'arbitrum');
+  expect(valid.successfulFamilies).toBe(3); expect(valid.markets).toHaveLength(1); expect(valid.vaults).toHaveLength(1);
+  expect(valid.warnings).toEqual([]);
+  wrongCore = true;
+  const invalid = await fetchMorphoDiscovery(wallet, fetcher, 'arbitrum');
+  expect(invalid.markets).toHaveLength(0); expect(invalid.warnings.join(' ')).toContain('could not be verified');
+});

@@ -49,7 +49,7 @@ function mock(options: { types?: bigint[]; ids?: bigint[]; lending?: boolean; mi
         case 'getAssetPrice': {
           const xpl = args[0].toLowerCase() === networks.plasma.wrappedNative.toLowerCase();
           if (xpl) return options.missingEthPrice ? 0n : 50000000n;
-          const eth = args[0].toLowerCase() === '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+          const eth = args[0].toLowerCase() === '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' || args[0].toLowerCase() === networks.arbitrum.wrappedNative.toLowerCase();
           return eth ? (options.missingEthPrice ? 0n : 3000n * 100000000n) : (options.missingDebtPrice ? 0n : 100000000n);
         }
         case 'latestRoundData': if (options.chainlink) return [10n, 100000000n, 199000n, options.staleRound ? 1000n : 199900n, 10n]; else throw new Error('No feed');
@@ -246,4 +246,20 @@ it('does not derive collateral prices from smart-pool ratios, a zero oracle, or 
   const result = await readFluid(mock().client, wallet, 123n, 'plasma');
   expect(result.positions[0].assets[0].priceUsd).toBe(0.5);
   expect(result.positions[0].assets[0].priceSource).toBeUndefined();
+});
+
+it('reads Fluid vaults, lending, and current rates through Arbitrum contracts and prices ETH as Arbitrum WETH', async () => {
+  const m = mock({ lending: true, types: [10000n, 20000n] });
+  const result = await readFluid(m.client, wallet, 42161n, 'arbitrum');
+  expect(result.coverage).toContain('Arbitrum');
+  expect(result.positions[0].assets[0]).toMatchObject({ symbol: 'ETH', supplied: 10, priceUsd: 3000 });
+  expect(result.positions[0].assets[0].supplyRate?.apr).toBe(0.03);
+  expect(result.positions[0].healthFactor).toBeCloseTo(1.7);
+  expect(result.positions.at(-1)?.suppliedUsd).toBe(100);
+  expect(m.contracts.find(c => c.functionName === 'positionsNftIdOfUser')?.address).toBe(networks.arbitrum.fluid.vault);
+  expect(m.contracts.find(c => c.functionName === 'getDexState')?.address).toBe(networks.arbitrum.fluid.dex);
+  expect(m.contracts.find(c => c.functionName === 'getPriceOracle')?.address).toBe(networks.arbitrum.aaveProvider);
+  expect(m.contracts.some(c => c.functionName === 'getAssetPrice' && c.args[0] === networks.arbitrum.wrappedNative)).toBe(true);
+  expect(m.contracts.some(c => c.address === networks.ethereum.aaveProvider)).toBe(false);
+  expect(m.blocks.every(block => block === 42161n)).toBe(true);
 });

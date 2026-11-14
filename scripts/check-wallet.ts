@@ -2,12 +2,13 @@ import 'dotenv/config';
 import { isAddress } from 'viem';
 import { EnvHttpProxyAgent, setGlobalDispatcher } from 'undici';
 import { makeClient } from '../server/rpc.js';
+import { isNetworkId } from '../src/networks.js';
 import { networks } from '../server/networks.js';
 import { readWallet } from '../server/wallet.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy) setGlobalDispatcher(new EnvHttpProxyAgent());
 const [wallet, network = 'ethereum', ...extra] = process.argv.slice(2);
-if (!wallet || !isAddress(wallet) || (network !== 'ethereum' && network !== 'plasma') || extra.length > 20 || extra.some(t => !isAddress(t, { strict: false }))) {
-  console.error('Usage: npm run check:wallet -- 0xWalletAddress ethereum|plasma [0xExtraTokenAddress ...]'); process.exitCode = 1;
+if (!wallet || !isAddress(wallet) || !isNetworkId(network) || extra.length > 20 || extra.some(t => !isAddress(t, { strict: false }))) {
+  console.error('Usage: npm run check:wallet -- 0xWalletAddress ethereum|plasma|arbitrum [0xExtraTokenAddress ...]'); process.exitCode = 1;
 } else {
   try {
     const client = makeClient(network);

@@ -147,11 +147,11 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
         if (!vault.isSmartCol && !vault.isSmartDebt && supplyToken && debtToken) {
           const a = assets.find(a => a.address.toLowerCase() === supplyToken.address.toLowerCase())!;
           a.liquidationThreshold = threshold / 10000;
-          // Plasma has no configured independent feed for some Fluid collateral
+          // Some networks have no configured independent feed for Fluid collateral
           // (for example sUSDai). For T1 only, translate Fluid's token ratio using
           // the independently priced debt asset. Never assume a stablecoin peg,
           // apply a pool-share ratio to an underlying token, or overwrite a feed.
-          if (network === 'plasma' && a.priceUsd === null && debtToken.priceUsd !== null && supplyToken.address.toLowerCase() !== debtToken.address.toLowerCase()) {
+          if (network !== 'ethereum' && a.priceUsd === null && debtToken.priceUsd !== null && supplyToken.address.toLowerCase() !== debtToken.address.toLowerCase()) {
             const estimate = current * debtToken.priceUsd;
             if (Number.isFinite(estimate) && estimate > 0) {
               a.priceUsd = estimate;

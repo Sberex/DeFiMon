@@ -2,7 +2,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 const rpc = vi.hoisted(() => ({ chainId: 1 }));
 const readers = vi.hoisted(() => ({ aave: vi.fn(), aaveV4: vi.fn(), morpho: vi.fn(), compound: vi.fn(), fluid: vi.fn() }));
 vi.mock('../server/rpc', () => ({ makeClient: () => ({ getChainId: async () => rpc.chainId, getBlockNumber: async () => 456n }) }));
-vi.mock('../server/wallet', () => ({ readWallet: async (_client: unknown, _wallet: unknown, _block: unknown, network: string) => ({ chain: network === 'plasma' ? 'Plasma' : 'Ethereum', status: 'ok', tokens: [], pricedValueUsd: 0, unpricedCount: 0, coverage: 'test' }), unavailableWallet: () => ({ status: 'error' }) }));
+vi.mock('../server/wallet', () => ({ readWallet: async (_client: unknown, _wallet: unknown, _block: unknown, network: string) => ({ chain: network === 'arbitrum' ? 'Arbitrum' : network === 'plasma' ? 'Plasma' : 'Ethereum', status: 'ok', tokens: [], pricedValueUsd: 0, unpricedCount: 0, coverage: 'test' }), unavailableWallet: () => ({ status: 'error' }) }));
 vi.mock('../server/adapters/aave', () => ({ readAave: readers.aave }));
 vi.mock('../server/adapters/aave-v4', () => ({ readAaveV4: readers.aaveV4, AAVE_V4_COVERAGE: 'V4 lending and tokenized deposits' }));
 vi.mock('../server/adapters/morpho', () => ({ readMorpho: readers.morpho, MORPHO_COVERAGE: 'Ethereum markets and vaults' }));
@@ -20,12 +20,12 @@ beforeEach(() => {
 });
 it('includes the live Fluid reader at the same wallet and block as other protocols', async () => {
   const result = await getPortfolio(wallet);
-  expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n);
+  expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
   expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid']);
   expect(result.protocols.find(p => p.id === 'fluid')?.status).toBe('ok');
   expect(result.protocols.filter(p => p.status === 'not-integrated')).toHaveLength(0);
   expect(readers.aaveV4).toHaveBeenCalledWith(expect.anything(), wallet, 456n);
-  expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n);
+  expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'ethereum');
 });
 it('isolates Fluid discovery failure without losing other protocols or exposing provider details', async () => {
   readers.fluid.mockRejectedValueOnce(new Error('secret-provider-key'));
@@ -70,4 +70,20 @@ it('keeps Plasma Aave results when Fluid fails, with a safe Plasma-specific erro
   const result = await getPortfolio(wallet, 'plasma');
   expect(result.protocols[0].status).toBe('ok'); expect(result.protocols[1].status).toBe('error');
   expect(result.protocols[1].message).toContain('Plasma'); expect(JSON.stringify(result)).not.toContain('private-provider-key');
+});
+
+it('reads exactly the four requested Arbitrum protocols at one block and skips Aave v4', async () => {
+  rpc.chainId = 42161;
+  const result = await getPortfolio(wallet, 'arbitrum');
+  expect(result.chain).toBe('Arbitrum');
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'morpho', 'compound', 'fluid']);
+  expect(readers.aave).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
+  expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'arbitrum');
+  expect(readers.compound).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
+  expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
+  expect(readers.aaveV4).not.toHaveBeenCalled();
+});
+it('rejects a provider on the wrong chain before attempting Arbitrum reads', async () => {
+  await expect(getPortfolio(wallet, 'arbitrum')).rejects.toThrow('not Arbitrum mainnet');
+  expect(readers.aave).not.toHaveBeenCalled(); expect(readers.fluid).not.toHaveBeenCalled();
 });

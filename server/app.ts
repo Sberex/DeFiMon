@@ -2,18 +2,19 @@ import express from 'express';
 import { getAddress, isAddress, type Address } from 'viem';
 import { getCombinedPortfolio, getPortfolio } from './portfolio.js';
 import type { ExtraTokens, NetworkId, Portfolio } from '../src/types.js';
+import { isNetworkId } from '../src/networks.js';
 import { networks } from './networks.js';
 export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio) {
   const app = express();
   app.disable('x-powered-by');
-  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc) }));
+  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc) }));
   // Bound concurrent work; wallet addresses and results are not stored or logged.
   let active = 0;
   app.get('/api/portfolio/:address', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const network = req.query.chain ?? 'ethereum';
-    if (Object.keys(req.query).some(key => key !== 'chain' && key !== 'tokens') || (network !== 'ethereum' && network !== 'plasma' && network !== 'all')) {
-      res.status(400).json({ error: 'Choose a supported blockchain: ethereum, plasma, or all.' }); return;
+    if (Object.keys(req.query).some(key => key !== 'chain' && key !== 'tokens') || (!isNetworkId(network) && network !== 'all')) {
+      res.status(400).json({ error: 'Choose a supported blockchain: ethereum, plasma, arbitrum, or all.' }); return;
     }
     const extraTokens: ExtraTokens = {};
     if (req.query.tokens !== undefined) {
@@ -22,8 +23,8 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
       if (entries.length > 20) { res.status(400).json({ error: 'Add no more than 20 token contracts per search.' }); return; }
       for (const entry of entries) {
         const [chain, token, extra] = entry.split(':');
-        if ((chain !== 'ethereum' && chain !== 'plasma') || extra !== undefined || !isAddress(token ?? '', { strict: false }) || /^0x0{40}$/i.test(token)) {
-          res.status(400).json({ error: 'Each added token needs an Ethereum or Plasma network and a valid token contract address.' }); return;
+        if (!isNetworkId(chain) || extra !== undefined || !isAddress(token ?? '', { strict: false }) || /^0x0{40}$/i.test(token)) {
+          res.status(400).json({ error: 'Each added token needs an Ethereum, Plasma, or Arbitrum network and a valid token contract address.' }); return;
         }
         const address = getAddress(token.toLowerCase());
         extraTokens[chain] = [...new Set([...(extraTokens[chain] ?? []), address])];

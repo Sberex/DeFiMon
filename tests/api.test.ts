@@ -2,13 +2,14 @@ import { afterAll, beforeAll, expect, it } from 'vitest';
 import type { Server } from 'node:http';
 import { createApp } from '../server/app';
 import { isolateProtocol } from '../server/portfolio';
+import { networks } from '../server/networks';
 import { example } from '../src/example';
 let server: Server;
 let base: string;
 let reads = 0;
 const chains: string[] = [];
 beforeAll(async () => {
-  server = createApp(async (_wallet, network) => { reads++; chains.push(network); return network === 'plasma' ? { ...example, chain: 'Plasma', protocols: example.protocols.filter(p => p.id === 'aave-v3' || p.id === 'fluid') } : example; }).listen(0, '127.0.0.1');
+  server = createApp(async (_wallet, network) => { reads++; chains.push(network); return { ...example, chain: networks[network].name, protocols: example.protocols.filter(p => networks[network].protocolIds.includes(p.id)) }; }).listen(0, '127.0.0.1');
   await new Promise<void>(resolve => server.once('listening', resolve));
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('No HTTP port');
@@ -59,9 +60,9 @@ it('returns both networks grouped by protocol through the combined endpoint', as
   const response = await fetch(`${base}/api/portfolio/${example.address}?chain=all`);
   expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
   const data = await response.json();
-  expect(data.chain).toBe('Ethereum + Plasma'); expect(data.blockNumber).toBeNull();
-  expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v4:Ethereum', 'morpho:Ethereum', 'compound:Ethereum', 'fluid:Ethereum', 'fluid:Plasma']);
-  expect(chains.slice(before)).toEqual(['ethereum', 'plasma']);
+  expect(data.chain).toBe('Ethereum + Plasma + Arbitrum'); expect(data.blockNumber).toBeNull();
+  expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'compound:Ethereum', 'compound:Arbitrum', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum']);
+  expect(chains.slice(before)).toEqual(['ethereum', 'plasma', 'arbitrum']);
 });
 
 it('rejects invalid, unsupported, zero, or excessive extra token contracts before blockchain reads', async () => {

@@ -75,3 +75,14 @@ it('does not count an added Aave debt-accounting token as a positive wallet asse
   expect(result.tokens.find(t => t.address.toLowerCase() === eul)?.excludedReason).toContain('debt accounting');
   expect(result.pricedValueUsd).toBeCloseTo(6004.9);
 });
+
+it('keeps Arbitrum native ETH and excludes Arbitrum Compound receipt shares from wallet totals', async () => {
+  const f = fixture();
+  const prices = async () => new Map([[networks.arbitrum.wrappedNative.toLowerCase(), 3000], [usdc, 0.98], [eul, 2]]);
+  const comet = networks.arbitrum.compoundMarkets[0].address;
+  const result = await readWallet(f.client, wallet, 42161n, 'arbitrum', [], [], [...catalog, { address: comet, symbol: 'cUSDC' }], prices);
+  expect(result.chain).toBe('Arbitrum');
+  expect(result.tokens.find(t => t.address === 'native')).toMatchObject({ symbol: 'ETH', balance: 2, valueUsd: 6000 });
+  expect(result.tokens.find(t => t.address.toLowerCase() === comet.toLowerCase())?.excludedReason).toContain('receipt');
+  expect(result.pricedValueUsd).toBeCloseTo(6010.9);
+});

@@ -1,13 +1,11 @@
 import { decodeFunctionResult, encodeFunctionData, formatUnits, parseAbi, type Address } from 'viem';
 import type { ChainClient } from '../rpc.js';
-import type { Asset, Position, ProtocolResult } from '../../src/types.js';
+import type { Asset, Position, ProtocolResult, NetworkId } from '../../src/types.js';
 import { perSecondApr, rate, unavailableRate } from '../rates.js';
+import { networks } from '../networks.js';
 import { liquidationPrices, riskLevel } from '../risk.js';
 // Official deployments: compound-finance/comet/deployments/mainnet/{usdc,weth}/roots.json.
-const markets = [
-  { address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3' as Address, label: 'USDC market' },
-  { address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94' as Address, label: 'WETH market' },
-];
+type Market = { address: Address; label: string };
 const abi = parseAbi([
   'function getUtilization() view returns (uint256)',
   'function getSupplyRate(uint256 utilization) view returns (uint64)',
@@ -26,7 +24,7 @@ const erc20 = parseAbi(['function decimals() view returns (uint8)', 'function sy
 const multiAbi = parseAbi(['function aggregate3((address target, bool allowFailure, bytes callData)[] calls) payable returns ((bool success, bytes returnData)[] returnData)']);
 const multicall = '0xcA11bde05977b3631167028862bE2a173976CA11';
 const n = (value: bigint, decimals: number) => Number(formatUnits(value, decimals));
-async function readMarket(client: ChainClient, wallet: Address, blockNumber: bigint, market: typeof markets[number]): Promise<Position | null> {
+async function readMarket(client: ChainClient, wallet: Address, blockNumber: bigint, market: Market): Promise<Position | null> {
   const address = market.address;
   // One eth_call simulates accrual before reading both balances; no transaction or wallet signature.
   const calls = (['accrueAccount', 'balanceOf', 'borrowBalanceOf'] as const).map(functionName => ({ target: address, allowFailure: false, callData: encodeFunctionData({ abi, functionName, args: [wallet] }) }));
@@ -84,7 +82,16 @@ async function readMarket(client: ChainClient, wallet: Address, blockNumber: big
   const health = debtUsd > 0 ? weighted / debtUsd : null;
   return { id: address, label: market.label, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: liquidationPrices(assets, debtUsd, weighted), notes: ['Borrowing interest is simulated to the selected block without sending a transaction.', 'Liquidation prices use Compound’s liquidation collateral factors, not its borrowing limits. Each estimate holds other prices fixed.'] };
 }
-export async function readCompound(client: ChainClient, wallet: Address, blockNumber: bigint): Promise<ProtocolResult> {
-  const positions = await Promise.all(markets.map(m => readMarket(client, wallet, blockNumber, m)));
-  return { id: 'compound', name: 'Compound', status: 'ok', coverage: 'Compound v3 USDC and WETH markets only. Excludes v2 and other v3 markets.', positions: positions.filter((p): p is Position => p !== null) };
+export async function readCompound(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId = 'ethereum'): Promise<ProtocolResult> {
+  const deployment = networks[network];
+  const markets = deployment.compoundMarkets;
+  if (!markets.length) throw new Error('Compound is not supported on this network.');
+  const results = await Promise.allSettled(markets.map(m => readMarket(client, wallet, blockNumber, m)));
+  if (results.every(r => r.status === 'rejected')) throw new Error('Compound markets unavailable');
+  const incomplete = results.some(r => r.status === 'rejected');
+  const positions: (Position | null)[] = results.map((result, i) => result.status === 'fulfilled' ? result.value : {
+    id: markets[i].address, label: `${markets[i].label} · unavailable`, suppliedUsd: null, debtUsd: null,
+    healthFactor: null, risk: 'unknown', assets: [], notes: ['This market could not be checked. Its balances and risk are unknown.'],
+  });
+  return { id: 'compound', name: 'Compound', status: incomplete ? 'partial' : 'ok', message: incomplete ? 'Some Compound markets could not be checked. Their balances and risk are unknown; other markets are retained.' : undefined, coverage: `${deployment.name} Compound v3: ${markets.map(m => m.label.replace(' market', '')).join(', ')} markets. Excludes v2 and other deployments.`, positions: positions.filter((p): p is Position => p !== null) };
 }

@@ -1,3 +1,5 @@
+import { networks } from '../server/networks';
+import type { NetworkId } from '../src/types';
 import { describe, expect, it } from 'vitest';
 import { decodeFunctionData, encodeAbiParameters, encodeFunctionResult, keccak256, parseAbiParameters, type Address, type Hex } from 'viem';
 import { morphoHealth, morphoSharesToAssets, readMorpho } from '../server/adapters/morpho';
@@ -15,7 +17,8 @@ const FACTORY = '0x8888888888888888888888888888888888888888';
 const E18 = 10n ** 18n; const E6 = 10n ** 6n;
 const loan: MorphoToken = { address: USDC, symbol: 'USDC', decimals: 6, priceUsd: 1 };
 const collateral: MorphoToken = { address: ETH, symbol: 'WETH', decimals: 18, priceUsd: 3000 };
-function fixture(options: { vaults?: boolean; market?: boolean; noDebt?: boolean; closed?: boolean; oracleFail?: boolean; oracleZero?: boolean; loanSupply?: bigint; missingLoanPrice?: boolean; missingCollateralPrice?: boolean; sameAsset?: boolean; unregistered?: boolean; invalidId?: boolean; metadataMismatch?: boolean; failSimulation?: boolean; loanPrice?: number } = {}) {
+function fixture(options: { network?: NetworkId; vaults?: boolean; market?: boolean; noDebt?: boolean; closed?: boolean; oracleFail?: boolean; oracleZero?: boolean; loanSupply?: bigint; missingLoanPrice?: boolean; missingCollateralPrice?: boolean; sameAsset?: boolean; unregistered?: boolean; invalidId?: boolean; metadataMismatch?: boolean; failSimulation?: boolean; loanPrice?: number } = {}) {
+  const coreAddress = networks[options.network ?? 'ethereum'].morphoBlue!;
   const params = { loanToken: USDC, collateralToken: options.sameAsset ? USDC : ETH, oracle: ORACLE, irm: IRM, lltv: 860000000000000000n } as const;
   const id = keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [params.loanToken, params.collateralToken, params.oracle, params.irm, params.lltv]));
   const marketRef: MorphoMarketRef = { id: options.invalidId ? `0x${'a'.repeat(64)}` : id, loan: { ...loan, priceUsd: options.missingLoanPrice ? null : options.loanPrice ?? 1 }, collateral: options.sameAsset ? { ...loan } : { ...collateral, priceUsd: options.missingCollateralPrice ? null : 3000 } };
@@ -32,7 +35,7 @@ function fixture(options: { vaults?: boolean; market?: boolean; noDebt?: boolean
         case 'decimals': return options.metadataMismatch ? 8 : address === ETH ? 18 : 6;
         case 'price': if (options.oracleFail) throw new Error('secret provider details'); return options.oracleZero ? 0n : options.sameAsset ? 10n ** 36n : 3000n * 10n ** 24n;
         case 'isMetaMorpho': case 'isVaultV2': return !options.unregistered;
-        case 'MORPHO': return MORPHO_BLUE;
+        case 'MORPHO': return coreAddress;
         case 'asset': return USDC;
         case 'balanceOf': return options.closed ? 0n : 2n * E18;
         case 'convertToAssets': return 120n * E6;
@@ -46,7 +49,7 @@ function fixture(options: { vaults?: boolean; market?: boolean; noDebt?: boolean
       expect(decoded.functionName).toBe('aggregate3');
       const batch = decoded.args[0]; expect(batch.every(c => c.allowFailure === false)).toBe(true);
       let output: Hex[];
-      if (batch[0].target.toLowerCase() === MORPHO_BLUE.toLowerCase()) {
+      if (batch[0].target.toLowerCase() === coreAddress.toLowerCase()) {
         const names = batch.map(c => decodeFunctionData({ abi: coreAbi, data: c.callData }).functionName);
         simulated.push(names); expect(names).toEqual(['accrueInterest', 'market', 'position']);
         const market = { totalSupplyAssets: 1_000_000n * E6, totalSupplyShares: 1_000_000n * E6 * 1_000_000n, totalBorrowAssets: 500_000n * E6, totalBorrowShares: 500_000n * E6 * 1_000_000n, lastUpdate: 123n, fee: 0n };
@@ -60,7 +63,7 @@ function fixture(options: { vaults?: boolean; market?: boolean; noDebt?: boolean
       return { data: encodeFunctionResult({ abi: multiAbi, functionName: 'aggregate3', result: output.map(returnData => ({ success: true, returnData })) }) };
     },
   } as unknown as ChainClient;
-  return { client, discovery, blocks, simulated, calls, read: () => readMorpho(client, wallet, 123n, async () => discovery) };
+  return { client, discovery, blocks, simulated, calls, read: () => readMorpho(client, wallet, 123n, async () => discovery, options.network) };
 }
 describe('Morpho Blue markets', () => {
   it('simulates interest before reading shares and uses raw oracle scaling for risk and liquidation boundaries', async () => {
@@ -161,4 +164,14 @@ it('matches both protocol floor operations rather than overstating dust collater
   expect(morphoHealth(3n, 1n, 5n * 10n ** 35n, 800000000000000000n)).toBe(0);
   expect(morphoHealth(2n * E18, 2000n * E6, 3000n * 10n ** 24n, 860000000000000000n)).toBe(2.58);
   expect(morphoHealth(E18, 0n, null, E18)).toBeNull();
+});
+
+it('uses Arbitrum’s distinct Morpho core for market and vault verification, without reading Ethereum core data', async () => {
+  const m = fixture({ network: 'arbitrum', vaults: true });
+  const result = await m.read();
+  expect(result.coverage).toContain('Arbitrum'); expect(result.positions).toHaveLength(3);
+  expect(result.positions[0].healthFactor).toBe(2.58);
+  expect(m.calls.some(call => call.startsWith(`${networks.arbitrum.morphoBlue}:idToMarketParams`))).toBe(true);
+  expect(m.calls.some(call => call.startsWith(`${MORPHO_BLUE}:`))).toBe(false);
+  expect(m.blocks.every(block => block === 123n)).toBe(true);
 });

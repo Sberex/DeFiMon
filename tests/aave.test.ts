@@ -76,3 +76,13 @@ it('keeps borrowing balances and native risk when a current rate lookup fails', 
   expect(result.positions[0].healthFactor).toBe(1.7);
   expect(JSON.stringify(result)).not.toContain('api-key');
 });
+
+it('resolves Aave v3 through the official Arbitrum provider while preserving balances and risk', async () => {
+  const { client, addresses, blocks } = fixture();
+  const result = await readAave(client, wallet, 777n, 'arbitrum');
+  expect(addresses.slice(0, 3)).toEqual(Array(3).fill('0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb'));
+  expect(addresses).not.toContain('0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e');
+  expect(result.coverage).toContain('Arbitrum'); expect(result.positions[0].label).toContain('Arbitrum');
+  expect(result.positions[0].suppliedUsd).toBe(30000); expect(result.positions[0].healthFactor).toBe(1.7);
+  expect(blocks.every(block => block === 777n)).toBe(true);
+});

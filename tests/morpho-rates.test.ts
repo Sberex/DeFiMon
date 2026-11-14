@@ -85,3 +85,14 @@ it('supports a V2 adapter allocating to V1 without requiring the V1 adapter to e
   } } as unknown as ChainClient;
   expect((await createMorphoRates(wrapped, 123n).vault(address, 2, address)).apr).toBeCloseTo(0.0102278918919);
 });
+
+it('keeps Arbitrum rate accrual on its own Morpho deployment', async () => {
+  const arbCore = '0x6c247b1F6182318877311737BaC0844bAa518F5e';
+  const base = client();
+  const wrapped = { ...base, call: async (args: any) => {
+    const calls = decodeFunctionData({ abi: multi, data: args.data }).args[0];
+    expect(calls[0].target.toLowerCase()).toBe(arbCore.toLowerCase());
+    return { data: encodeFunctionResult({ abi: multi, functionName: 'aggregate3', result: [{ success: true, returnData: '0x' }, { success: true, returnData: encodeFunctionResult({ abi: irmAbi, functionName: 'borrowRateView', result: 1000000000n }) }] }) };
+  } } as unknown as ChainClient;
+  expect((await createMorphoRates(wrapped, 123n, arbCore).market(params, market)).borrowRate.apr).toBeCloseTo(0.031536);
+});

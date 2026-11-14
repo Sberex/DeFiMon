@@ -32,11 +32,11 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
   if (fTokens.status === 'fulfilled') fTokens.value.forEach(t => excluded.add(t.toLowerCase()));
   if (network === 'ethereum') {
     AAVE_V4_TOKENIZATION_SPOKES.forEach(t => excluded.add(t.address.toLowerCase()));
-    ['0xc3d688b66703497daa19211eedff47f25384cdc3', '0xa17581a9e3356d9a858b789d68b4d866e593ae94'].forEach(t => excluded.add(t));
-    protocols.filter(p => p.id === 'morpho').flatMap(p => p.positions).forEach(p => {
+  }
+  config.compoundMarkets.forEach(m => excluded.add(m.address.toLowerCase()));
+  protocols.filter(p => p.id === 'morpho').flatMap(p => p.positions).forEach(p => {
       const match = p.id.match(/^morpho-vault-(0x[0-9a-fA-F]{40})$/); if (match) excluded.add(match[1].toLowerCase());
     });
-  }
   const receiptsVerified = aTokens.status === 'fulfilled' && fTokens.status === 'fulfilled' && aavePool.status === 'fulfilled';
   const rows: (WalletToken & { decimals: number; priceAddress: Address })[] = [];
   const warnings = new Set<string>();

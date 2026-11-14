@@ -2,6 +2,7 @@ import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
 import type { ExtraTokens, NetworkId, Portfolio, ProtocolResult, WalletBalances } from '../src/types.js';
 import { readWallet, unavailableWallet } from './wallet.js';
+import { networkOrder, combinedNetworkName } from '../src/networks.js';
 import { networks } from './networks.js';
 import { makeClient } from './rpc.js';
 import { readAave } from './adapters/aave.js';
@@ -21,29 +22,22 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
   const client = makeClient(network);
   const [chainId, blockNumber] = await Promise.all([client.getChainId(), client.getBlockNumber()]);
   if (chainId !== deployment.id) throw new Error(`The configured provider is not ${deployment.name} mainnet.`);
-  if (network === 'plasma') {
-    const failure = 'Could not read this protocol on Plasma. Its balances are unknown. Check the Plasma provider connection and try again.';
-    const protocols = await Promise.all([
-      isolateProtocol('aave-v3', 'Aave v3', 'Plasma main market', () => readAave(client, address, blockNumber, network), failure),
-      isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', 'Plasma'), () => readFluid(client, address, blockNumber, network), failure),
-    ]);
-    const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
-    return { wallets: [walletBalances], address, chain: 'Plasma', blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
-  }
-  const [aave, aaveV4, morpho, fluid, compound] = await Promise.all([
-    isolateProtocol('aave-v3', 'Aave v3', 'Ethereum main market', () => readAave(client, address, blockNumber)),
-    isolateProtocol('aave-v4', 'Aave v4', AAVE_V4_COVERAGE, () => readAaveV4(client, address, blockNumber)),
-    isolateProtocol('morpho', 'Morpho', MORPHO_COVERAGE, () => readMorpho(client, address, blockNumber), 'Morpho lookup is unavailable. Check access to api.morpho.org and your Ethereum provider. Its balances are unknown.'),
-    isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE, () => readFluid(client, address, blockNumber)),
-    isolateProtocol('compound', 'Compound', 'v3 USDC and WETH markets', () => readCompound(client, address, blockNumber)),
-  ]);
-  const walletBalances = await readWallet(client, address, blockNumber, network, [aave, aaveV4, morpho, compound, fluid], extraTokens[network]).catch(() => unavailableWallet(network));
-  return { wallets: [walletBalances], address, chain: 'Ethereum', blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols: [aave, aaveV4, morpho, compound, fluid] };
+  const failure = `Could not read this protocol on ${deployment.name}. Its balances are unknown. Check the ${deployment.name} provider connection and try again.`;
+  const readers: Record<string, () => Promise<ProtocolResult>> = {
+    'aave-v3': () => isolateProtocol('aave-v3', 'Aave v3', `${deployment.name} main market`, () => readAave(client, address, blockNumber, network), failure),
+    'aave-v4': () => isolateProtocol('aave-v4', 'Aave v4', AAVE_V4_COVERAGE, () => readAaveV4(client, address, blockNumber), failure),
+    morpho: () => isolateProtocol('morpho', 'Morpho', MORPHO_COVERAGE.replace('Ethereum', deployment.name), () => readMorpho(client, address, blockNumber, undefined, network), `Morpho lookup is unavailable on ${deployment.name}. Check access to api.morpho.org and this network’s provider. Its balances are unknown.`),
+    compound: () => isolateProtocol('compound', 'Compound', `${deployment.name} Compound v3 markets`, () => readCompound(client, address, blockNumber, network), failure),
+    fluid: () => isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', deployment.name), () => readFluid(client, address, blockNumber, network), failure),
+  };
+  const protocols = await Promise.all(deployment.protocolIds.map(id => readers[id]()));
+  const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
+  return { wallets: [walletBalances], address, chain: deployment.name, blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
 }
 
 export async function getCombinedPortfolio(wallet: Address, load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, extraTokens: ExtraTokens = {}): Promise<Portfolio> {
   const address = getAddress(wallet);
-  const networkIds: NetworkId[] = ['ethereum', 'plasma'];
+  const networkIds = networkOrder;
   // Each network pins its own block. One failed provider must not discard the
   // other network or turn unchecked positions into a verified empty balance.
   const results = await Promise.allSettled(networkIds.map(network => load(address, network, extraTokens)));
@@ -63,12 +57,12 @@ export async function getCombinedPortfolio(wallet: Address, load: (wallet: Addre
       const message = `${chain} connection unavailable. Its balances and risk are unknown. Check the ${chain} provider connection and refresh.`;
       snapshots.push({ chain, blockNumber: null, updatedAt: new Date().toISOString(), status: 'error', message });
       for (const [id, name] of readers) {
-        if (network === 'plasma' && id !== 'aave-v3' && id !== 'fluid') continue;
+        if (!networks[network].protocolIds.includes(id)) continue;
         protocols.push({ id, name, chain, coverage: `${chain} · supported markets could not be checked`, status: 'error', message, positions: [] });
       }
     }
   });
   const order = readers.map(([id]) => id);
-  protocols.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id) || (a.chain === 'Ethereum' ? 0 : 1) - (b.chain === 'Ethereum' ? 0 : 1));
-  return { address, chain: 'Ethereum + Plasma', blockNumber: null, updatedAt: new Date().toISOString(), networks: snapshots, protocols, wallets };
+  protocols.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id) || networkIds.findIndex(id => networks[id].name === a.chain) - networkIds.findIndex(id => networks[id].name === b.chain));
+  return { address, chain: combinedNetworkName, blockNumber: null, updatedAt: new Date().toISOString(), networks: snapshots, protocols, wallets };
 }

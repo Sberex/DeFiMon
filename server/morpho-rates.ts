@@ -29,7 +29,7 @@ export function morphoSupplyApr(borrowApr: number, supply: bigint, borrow: bigin
   if (fee > 10n ** 18n) throw new Error('Invalid market fee');
   return supply === 0n ? 0 : borrowApr * Number(borrow) / Number(supply) * (1 - Number(fee) / 1e18);
 }
-export function createMorphoRates(client: ChainClient, blockNumber: bigint) {
+export function createMorphoRates(client: ChainClient, blockNumber: bigint, morphoBlue: Address = MORPHO_BLUE) {
   async function market(params: Params, state: Market) {
     try {
       let borrowApr = 0;
@@ -38,7 +38,7 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint) {
         // rate in that same simulation, rather than mixing an accrued market
         // with the IRM's old rate-at-target or showing the past interval's average.
         const calls = [
-          { target: MORPHO_BLUE as Address, allowFailure: false, callData: encodeFunctionData({ abi: core, functionName: 'accrueInterest', args: [params] }) },
+          { target: morphoBlue, allowFailure: false, callData: encodeFunctionData({ abi: core, functionName: 'accrueInterest', args: [params] }) },
           { target: params.irm, allowFailure: false, callData: encodeFunctionData({ abi: irmAbi, functionName: 'borrowRateView', args: [params, state] }) },
         ];
         const response = await client.call({ to: MULTICALL, data: encodeFunctionData({ abi: multi, functionName: 'aggregate3', args: [calls] }), blockNumber });
@@ -53,10 +53,10 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint) {
   const markets = new Map<string, Promise<{ params: Params; state: Market; apr: number }>>();
   function marketData(id: Hex) {
     if (!markets.has(id)) markets.set(id, (async () => {
-      const params = await client.readContract({ address: MORPHO_BLUE, abi: core, functionName: 'idToMarketParams', args: [id], blockNumber });
+      const params = await client.readContract({ address: morphoBlue, abi: core, functionName: 'idToMarketParams', args: [id], blockNumber });
       if (!same(keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [params.loanToken, params.collateralToken, params.oracle, params.irm, params.lltv])), id)) throw new Error('Market identity mismatch');
       const calls = [encodeFunctionData({ abi: core, functionName: 'accrueInterest', args: [params] }), encodeFunctionData({ abi: core, functionName: 'market', args: [id] })];
-      const response = await client.call({ to: MULTICALL, data: encodeFunctionData({ abi: multi, functionName: 'aggregate3', args: [calls.map(callData => ({ target: MORPHO_BLUE as Address, allowFailure: false, callData }))] }), blockNumber });
+      const response = await client.call({ to: MULTICALL, data: encodeFunctionData({ abi: multi, functionName: 'aggregate3', args: [calls.map(callData => ({ target: morphoBlue, allowFailure: false, callData }))] }), blockNumber });
       if (!response.data) throw new Error('Missing accrued market');
       const results = decodeFunctionResult({ abi: multi, functionName: 'aggregate3', data: response.data });
       if (results.length !== 2 || results.some(r => !r.success)) throw new Error('Market simulation failed');
@@ -85,12 +85,12 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint) {
         client.readContract({ address, abi: vaultAbi, functionName: 'withdrawQueueLength', blockNumber }),
         client.readContract({ address, abi: vaultAbi, functionName: 'fee', blockNumber }),
       ]);
-      if (!same(morpho, MORPHO_BLUE) || length > 64n || fee > 10n ** 18n) throw new Error('Unsupported vault');
+      if (!same(morpho, morphoBlue) || length > 64n || fee > 10n ** 18n) throw new Error('Unsupported vault');
       const seen = new Set<string>();
       for (let i = 0n; i < length; i++) {
         const id = await client.readContract({ address, abi: vaultAbi, functionName: 'withdrawQueue', args: [i], blockNumber });
         if (seen.has(id)) throw new Error('Duplicate market'); seen.add(id);
-        const position = await client.readContract({ address: MORPHO_BLUE, abi: core, functionName: 'position', args: [id, address], blockNumber });
+        const position = await client.readContract({ address: morphoBlue, abi: core, functionName: 'position', args: [id, address], blockNumber });
         if (!position.supplyShares) continue;
         const entry = await marketData(id);
         if (!same(entry.params.loanToken, asset)) throw new Error('Wrong market asset');
@@ -125,7 +125,7 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint) {
           client.readContract({ address: adapter, abi: adapterAbi, functionName: 'marketIdsLength', blockNumber }),
           client.readContract({ address: adapter, abi: adapterAbi, functionName: 'asset', blockNumber }),
         ]);
-        if (!same(morpho, MORPHO_BLUE) || !same(adapterAsset, asset) || count > 64n) throw new Error('Unsupported active adapter');
+        if (!same(morpho, morphoBlue) || !same(adapterAsset, asset) || count > 64n) throw new Error('Unsupported active adapter');
         let verifiedAllocation = 0n;
         const seen = new Set<string>();
         for (let j = 0n; j < count; j++) {
