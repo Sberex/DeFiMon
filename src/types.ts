@@ -11,13 +11,16 @@ export interface WalletBalances {
 }
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
 export interface InterestRate { apr: number | null; note: string; estimated?: boolean }
+export interface IntrinsicRate extends InterestRate {
+  source: { chain: 'Ethereum'; oracle: string; blockNumber?: string; startRound?: string; endRound?: string; startTimestamp?: number; endTimestamp?: number; startRate?: number; endRate?: number };
+}
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
   collateral: boolean; liquidationThreshold: number | null; liquidationPriceUsd: number | null;
   /** Actual protocol LLTV when the calculation factor is weighted across balances. */
   lltv?: number; lltvNote?: string;
   priceSource?: 'fluid-oracle';
-  supplyRate?: InterestRate; borrowRate?: InterestRate;
+  supplyRate?: InterestRate; borrowRate?: InterestRate; intrinsicSupplyRate?: IntrinsicRate;
 }
 export interface Position {
   id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;

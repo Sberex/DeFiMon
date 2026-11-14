@@ -4,6 +4,7 @@ import type { ExtraTokens, NetworkId, Portfolio, ProtocolResult, WalletBalances 
 import { readWallet, unavailableWallet } from './wallet.js';
 import { networkOrder, combinedNetworkName } from '../src/networks.js';
 import { networks } from './networks.js';
+import { applyIntrinsicRates } from './intrinsic-rates.js';
 import { makeClient } from './rpc.js';
 import { readAave } from './adapters/aave.js';
 import { readAaveV4, AAVE_V4_COVERAGE } from './adapters/aave-v4.js';
@@ -30,7 +31,7 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
     compound: () => isolateProtocol('compound', 'Compound', `${deployment.name} Compound v3 markets`, () => readCompound(client, address, blockNumber, network), failure),
     fluid: () => isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', deployment.name), () => readFluid(client, address, blockNumber, network), failure),
   };
-  const protocols = await Promise.all(deployment.protocolIds.map(id => readers[id]()));
+  const protocols = await applyIntrinsicRates(await Promise.all(deployment.protocolIds.map(id => readers[id]())), network);
   const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
   return { wallets: [walletBalances], address, chain: deployment.name, blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
 }

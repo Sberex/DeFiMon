@@ -412,3 +412,53 @@ test('shows smart-vault LLTV but keeps its oracle boundary instead of independen
   await expect(page.getByText('Liquidation boundary · oracle ratio', { exact: true })).toBeVisible();
   await expect(page.locator('tbody tr').first().locator('td').nth(6)).toHaveText('92.00%');
 });
+
+test('shows sUSDai past-month intrinsic APR separately and adds it to protocol interest across all families', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => {
+    reads++;
+    const fixture = structuredClone(example);
+    for (const protocol of fixture.protocols) {
+      const asset = protocol.positions[0].assets[0];
+      asset.symbol = 'sUSDai'; asset.address = '0x0b2b2b2076d95dda7817e785989fe353fe955ef9';
+      asset.supplyRate = { apr: ['compound', 'morpho'].includes(protocol.id) ? 0 : .02, note: 'Current protocol interest only.' };
+      asset.intrinsicSupplyRate = { apr: reads === 1 ? .0756 : .08, estimated: true, note: 'Past-month intrinsic APR estimate. Simple annualization, not compounded APY.', source: { chain: 'Ethereum', oracle: '0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a', blockNumber: '26414491', startTimestamp: 1792040027, endTimestamp: 1794632711 } };
+    }
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  for (const id of ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid']) {
+    const cell = page.locator(`article.${id}`).locator('tbody tr').first().locator('td').nth(2);
+    await expect(cell.getByText('Intrinsic (30d): 7.56%', { exact: true })).toBeVisible();
+    await expect(cell.getByText(['compound', 'morpho'].includes(id) ? '≈ 7.56%' : '≈ 9.56%', { exact: false })).toBeVisible();
+    await expect(cell.getByText(['compound', 'morpho'].includes(id) ? 'Protocol: 0.00%' : 'Protocol: 2.00%', { exact: true })).toBeVisible();
+  }
+  const cell = page.locator('article.aave-v3').locator('tbody tr').first().locator('td').nth(2);
+  await cell.getByText('Intrinsic yield details', { exact: true }).click();
+  await expect(cell.getByText(/Oracle observations:/)).toBeVisible();
+  await expect(cell.getByRole('link', { name: 'View oracle' })).toHaveAttribute('href', 'https://etherscan.io/address/0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a#readContract');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(cell.getByText('Intrinsic (30d): 8.00%', { exact: true })).toBeVisible();
+  await expect(cell.getByText('≈ 10.00%', { exact: false })).toBeVisible();
+});
+
+test('keeps sUSDai lending rates and balances when intrinsic oracle data is unavailable', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const asset = fixture.protocols[0].positions[0].assets[0];
+  asset.symbol = 'sUSDai'; asset.address = '0x0b2b2b2076d95dda7817e785989fe353fe955ef9';
+  asset.intrinsicSupplyRate = { apr: null, estimated: true, note: 'The past-month sUSDai intrinsic APR could not be verified.', source: { chain: 'Ethereum', oracle: '0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a' } };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.aave-v3');
+  const cell = card.locator('tbody tr').first().locator('td').nth(2);
+  await expect(cell.getByText('Intrinsic (30d): Unavailable', { exact: true })).toBeVisible();
+  await expect(cell.getByText('Protocol: 3.50%', { exact: true })).toBeVisible();
+  await expect(card.locator('.position-stats strong').first()).toHaveText('$30,000.00');
+  await expect(page.locator('.summary.primary strong')).toHaveText('$31,500.00');
+});

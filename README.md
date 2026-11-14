@@ -97,7 +97,7 @@ Fluid smart collateral/debt uses pool-share oracle rules. Its collateral rows di
 
 ## Current interest rates
 
-Every supplied/borrowed asset row has **Supply APR** and **Borrow APR**. APR is the current interest rate expressed per year, without assuming compounding. Rates refresh with the wallet and use the same selected network block as its balances. These are current quotes, not past-day averages or a promise of future returns. The example’s rates are fictional.
+Every supplied/borrowed asset row has **Supply APR** and **Borrow APR**. APR is the current interest rate expressed per year, without assuming compounding. Protocol rates refresh with the wallet and use the same selected network block as its balances. sUSDai additionally shows a separately labeled past-month intrinsic estimate from an Ethereum oracle, with its own reference block and observation dates (see below). These are current quotes, not past-day averages or a promise of future returns. The example’s rates are fictional.
 
 A dash means that the wallet has no balance on that side. **Unavailable** means a current rate could not be verified; balances and liquidation risk remain visible. A genuine zero-interest rate shows **0.00%**. **≈** marks an estimate or an incomplete income component; open **Rate details / Estimate details** beside the rate for its scope. Negative supply APR means a charge; negative borrow APR means a net incentive within the quoted components. Cash wallet balances have no lending APR merely because they are held.
 
@@ -109,6 +109,29 @@ A dash means that the wallet has no balance on that side. **Unavailable** means 
 - **Morpho vaults:** V1 estimates weight current market lending APRs and idle cash and subtract the performance fee. V2 estimates support direct-market adapters and V1-vault adapters, with current allocation checks, the distribution cap, and enabled performance/management fees. An unsupported funded adapter or an unreadable allocation makes the rate unavailable. No historical APY is substituted.
 
 Rate checks have deterministic coverage for units, weights, fees, adaptive-state simulation, true zero, negative adjustments, and missing data. Live Ethereum checks at block 26408160 read Fluid smart-leg rates, a Morpho market’s current rates, a V1 vault allocation estimate, and an interest-free Aave v4 Hub. Plasma and Arbitrum remain blocked by this cloud’s network policy; local live comparison is still needed. Rate reading needs no new API key or outbound destination beyond the existing network providers.
+
+## sUSDai intrinsic yield
+
+Supplied **sUSDai** includes a separately labeled **Intrinsic (30d)** APR across all protocol families on Ethereum, Plasma, and Arbitrum. Matching uses the deployed token contract `0x0B2b2B2076d95dda7817e785989fE353fe955ef9`, not a token symbol. Other assets and borrow APR remain unchanged.
+
+The source is Ethereum’s [sUSDai/USDai exchange-rate feed](https://etherscan.io/address/0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a#readContract). Its address is the raw rate source in [Fluid’s pinned Ethereum CappedRateChainlink_SUSDAI deployment](https://github.com/Instadapp/fluid-contracts-public/blob/404d73f91e6806f881f8dabeb30494f93f9e99b7/deployments/mainnet/CappedRateChainlink_SUSDAI.json). The reader verifies Ethereum chain ID, feed description and decimals, and valid positive oracle rounds. It never uses the capped oracle’s maximum permitted APR as earned interest.
+
+```text
+intrinsic_APR = (end_exchange_rate / start_exchange_rate - 1)
+                × seconds_in_365_days / elapsed_seconds
+```
+
+“Last month” means a trailing **30-day lookback**, not the previous calendar month. The reader selects the last oracle observation at or before 30 days ago and the latest available observation, annualizing their actual elapsed time. Oracle updates are discrete: the current reading and the old boundary may each lag by up to three days, and accepted observation windows must span 27–33 days. Details show the actual observation dates, source, and Ethereum reference block. The feed’s existing round records are queried at one current block, including previous aggregator phases when necessary; no archive-node subscription, USD.ai API access, wallet history collection, or database is required. Missing/gapped rounds, stale prices, incompatible feeds, or failed provider reads produce **Unavailable**, never an invented zero. No new domain or key is required beyond the configured Ethereum provider.
+
+The supply cell shows **Estimated total APR**, consisting of current protocol lending APR plus this annualized past-month intrinsic return. This is an approximate combination of different observation periods, not a current combined quote, compounded APY, or USD.ai’s advertised dashboard APY. Share-rate performance can include losses and differs from the USD market price or bridge premium. If either component is unknown, the total stays unavailable while verified components remain visible. Balances, net value, borrowing rates, health and liquidation prices are not changed by the yield estimate.
+
+The oracle quote is shared across protocol/network lookups and cached for five minutes; unavailable quotes retry after one minute. No wallet address is sent to the oracle. Live verification at Ethereum block **26414491** found sUSDai/USDai rates of about **1.11884234** and **1.12579575** over **30.008 days**, yielding an estimated intrinsic APR of **7.5594%**. This is a verification snapshot, not a hardcoded rate.
+
+To repeat the public check on your host:
+
+```sh
+npm run check:susdai-apr
+```
 
 ## Wallet token balances
 
