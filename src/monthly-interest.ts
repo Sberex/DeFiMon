@@ -48,3 +48,8 @@ export function protocolMonthlyInterest(protocol: ProtocolResult): MonthlyIntere
   const netValueUsd = sum(protocol.positions.map(p => p.suppliedUsd !== null && p.debtUsd !== null ? p.suppliedUsd - p.debtUsd : null));
   return { ...net(sum(positions.map(p => p.earnedUsd)), sum(positions.map(p => p.paidUsd))), netValueUsd };
 }
+/** Sum each protocol/network once; Fluid's vault rows are already inside its protocol total. */
+export function totalMonthlyInterest(protocols: ProtocolResult[]): MonthlyInterest & { partial: boolean } {
+  const totals = protocols.map(protocolMonthlyInterest);
+  return { ...net(sum(totals.map(p => p.earnedUsd)), sum(totals.map(p => p.paidUsd))), partial: protocols.some(p => p.status !== 'ok') };
+}

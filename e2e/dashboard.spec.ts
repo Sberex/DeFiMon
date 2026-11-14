@@ -466,7 +466,7 @@ test('keeps sUSDai lending rates and balances when intrinsic oracle data is unav
 test('shows monthly token interest and USD NPL after protocol net value across networks', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(11);
+  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(8);
   const card = page.locator('article.aave-v3[data-chain="Ethereum"]');
   const summary = card.getByRole('region', { name: 'Protocol monthly interest', exact: true });
   await expect(summary.locator('.protocol-interest-totals > p')).toHaveText(['Net value: $12,000.00', 'Monthly NPL: ≈ $5.00 / month']);
@@ -498,7 +498,7 @@ test('uses sUSDai combined supply APR for monthly NPL and preserves unknown intr
   await page.goto('/');
   await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  const summary = page.getByRole('region', { name: 'Protocol monthly interest', exact: true });
+  const summary = page.getByRole('region', { name: 'Fluid vault monthly interest', exact: true });
   await expect(summary.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $4.52 / month');
   await expect(summary.getByText('Earned: ≈ $10.52 / month · Paid: ≈ $6.00 / month', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
@@ -518,4 +518,54 @@ test('shows monthly token interest with unavailable USD totals when a token pric
   await expect(page.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: Unavailable');
   await expect(page.locator('tbody tr').first().locator('td').nth(8)).toHaveText('≈ 0.0291667 WETH / monthUnavailable');
   await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true }).getByText('Earned: Unavailable · Paid: ≈ $82.50 / month', { exact: true })).toBeVisible();
+});
+
+
+test('puts total monthly NPL first on the page and sums all networks once', async ({ page }) => {
+  await page.goto('/');
+  const total = page.getByRole('region', { name: 'Total monthly NPL', exact: true });
+  await expect(page.locator('main > section').first()).toHaveAttribute('aria-label', 'Total monthly NPL');
+  await expect(total.locator('strong')).toHaveText('—');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  await expect(total.locator('strong')).toHaveText('≈ -$4.35 / month');
+  await expect(total.getByText('Earned: ≈ $160.42 / month · Paid: ≈ $164.77 / month', { exact: true })).toBeVisible();
+  await expect(total.getByText(/Illustrative example/)).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await total.screenshot({ path: '/tmp/defimon-total-npl-mobile.png' });
+});
+
+test('shows Fluid NPL separately for each vault and lending deposit, and keeps unreadable costs out of totals', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => {
+    reads++;
+    const fixture = structuredClone(example);
+    const fluid = fixture.protocols.find(p => p.id === 'fluid')!; fixture.protocols = [fluid];
+    const second = structuredClone(fluid.positions[0]);
+    second.id = 'fluid-nft-second'; second.label = 'Vault 22'; second.suppliedUsd = 3000; second.debtUsd = 6000;
+    Object.assign(second.assets[0], { supplied: 1, supplyRate: { apr: .04, note: '' } });
+    Object.assign(second.assets[1], { borrowed: 6000, borrowRate: reads === 1 ? { apr: .06, note: '' } : undefined });
+    const deposit = structuredClone(fluid.positions[0]);
+    deposit.id = 'fluid-lending-example'; deposit.label = 'ETH lending deposit'; deposit.debtUsd = 0;
+    deposit.assets = [deposit.assets[0]]; deposit.assets[0].supplyRate = { apr: .06, note: '' };
+    fluid.positions.push(second, deposit);
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.fluid');
+  await expect(card.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(0);
+  const vaults = card.getByRole('region', { name: 'Fluid vault monthly interest', exact: true });
+  await expect(vaults).toHaveCount(2);
+  await expect(vaults.nth(0).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $1.46 / month');
+  await expect(vaults.nth(1).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ -$20.00 / month');
+  await expect(card.getByRole('region', { name: 'Fluid deposit monthly interest', exact: true }).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $30.00 / month');
+  const total = page.getByRole('region', { name: 'Total monthly NPL', exact: true });
+  await expect(total.locator('strong')).toHaveText('≈ $11.46 / month');
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(vaults.nth(0).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $1.46 / month');
+  await expect(vaults.nth(1).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: Unavailable');
+  await expect(total.locator('strong')).toHaveText('Unavailable');
+  await expect(total.getByText(/A complete total is unavailable/)).toBeVisible();
 });

@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import type { Asset, Position, ProtocolResult } from '../src/types';
-import { assetMonthlyInterest, positionMonthlyInterest, protocolMonthlyInterest, supplyApr } from '../src/monthly-interest';
+import { assetMonthlyInterest, positionMonthlyInterest, protocolMonthlyInterest, totalMonthlyInterest, supplyApr } from '../src/monthly-interest';
 const asset = (changes: Partial<Asset> = {}): Asset => ({ address: 'eth', symbol: 'ETH', supplied: 10, borrowed: 2, priceUsd: 3000, collateral: true, liquidationThreshold: .8, liquidationPriceUsd: 1500, supplyRate: { apr: .06, note: '' }, borrowRate: { apr: .12, note: '' }, ...changes });
 const position = (assets: Asset[] = [asset()]): Position => ({ id: 'loan', label: 'Loan', assets, suppliedUsd: 30000, debtUsd: 6000, healthFactor: 4, risk: 'lower', notes: [] });
 const protocol = (positions: Position[] = [position()]): ProtocolResult => ({ id: 'aave-v3', name: 'Aave v3', coverage: '', status: 'ok', positions });
@@ -69,4 +69,24 @@ it('rejects nonfinite calculations rather than displaying NaN or infinity', () =
   expect(assetMonthlyInterest(asset({ supplyRate: { apr: Infinity, note: '' } })).earnedUsd).toBeNull();
   expect(assetMonthlyInterest(asset({ supplied: 1e308, priceUsd: 1e308 })).earnedUsd).toBeNull();
   expect(supplyApr({ apr: 1e308, note: '' }, { apr: 1e308, note: '' })).toBeNull();
+});
+
+it('totals each protocol and network once, including all Fluid vaults and deposits once', () => {
+  const fluid = { ...protocol([position(), position()]), id: 'fluid', chain: 'Ethereum' as const };
+  const aave = { ...protocol(), chain: 'Plasma' as const };
+  const compound = { ...protocol(), id: 'compound', chain: 'Arbitrum' as const };
+  const total = totalMonthlyInterest([fluid, aave, compound]);
+  expect(total.earnedUsd).toBeCloseTo(600);
+  expect(total.paidUsd).toBeCloseTo(240);
+  expect(total.nplUsd).toBeCloseTo(360);
+  expect(total.partial).toBe(false);
+});
+it('withholds total NPL for a failed reader or missing active rate rather than omitting borrowing costs', () => {
+  expect(totalMonthlyInterest([protocol(), { ...protocol(), status: 'error' }]).nplUsd).toBeNull();
+  const missing = protocol([position([asset({ borrowRate: undefined })])]);
+  expect(totalMonthlyInterest([protocol(), missing])).toMatchObject({ earnedUsd: 300, paidUsd: null, nplUsd: null });
+});
+it('labels totals from partial coverage and preserves a genuine zero portfolio', () => {
+  expect(totalMonthlyInterest([{ ...protocol(), status: 'partial' }])).toMatchObject({ nplUsd: 90, partial: true });
+  expect(totalMonthlyInterest([protocol([])])).toMatchObject({ earnedUsd: 0, paidUsd: 0, nplUsd: 0, partial: false });
 });
