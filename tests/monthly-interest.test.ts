@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import type { Asset, Position, ProtocolResult } from '../src/types';
-import { assetMonthlyInterest, positionMonthlyInterest, protocolMonthlyInterest, totalMonthlyInterest, supplyApr, borrowApr } from '../src/monthly-interest';
+import { assetMonthlyInterest, positionMonthlyInterest, protocolMonthlyInterest, totalMonthlyInterest, supplyApr, borrowApr, annualizedNplApr } from '../src/monthly-interest';
 const asset = (changes: Partial<Asset> = {}): Asset => ({ address: 'eth', symbol: 'ETH', supplied: 10, borrowed: 2, priceUsd: 3000, collateral: true, liquidationThreshold: .8, liquidationPriceUsd: 1500, supplyRate: { apr: .06, note: '' }, borrowRate: { apr: .12, note: '' }, ...changes });
 const position = (assets: Asset[] = [asset()]): Position => ({ id: 'loan', label: 'Loan', assets, suppliedUsd: 30000, debtUsd: 6000, healthFactor: 4, risk: 'lower', notes: [] });
 const protocol = (positions: Position[] = [position()]): ProtocolResult => ({ id: 'aave-v3', name: 'Aave v3', coverage: '', status: 'ok', positions });
@@ -95,4 +95,13 @@ it('combines protocol interest, intrinsic yield and Merkl APR once while subtrac
   expect(supplyApr({ apr: .02, note: '' }, { apr: .0756, note: '' }, { apr: .0132, note: '' })).toBeCloseTo(.1088);
   expect(borrowApr({ apr: .04, note: '' }, { apr: .05, note: '' })).toBeCloseTo(-.01);
   expect(borrowApr({ apr: null, note: '' }, { apr: .02, note: '' })).toBeNull();
+});
+
+it('annualizes NPL over net value with signed results and guards zero, unknown and nonfinite values', () => {
+  expect(annualizedNplApr(100, 10000)).toBeCloseTo(.12);
+  expect(annualizedNplApr(-50, 10000)).toBeCloseTo(-.06);
+  expect(annualizedNplApr(0, 10000)).toBe(0);
+  expect(annualizedNplApr(100, -10000)).toBeCloseTo(-.12);
+  expect(annualizedNplApr(-50, -10000)).toBeCloseTo(.06);
+  for (const [npl, value] of [[100, 0], [null, 100], [100, null], [Infinity, 100], [100, Infinity], [1e308, 1]]) expect(annualizedNplApr(npl, value)).toBeNull();
 });

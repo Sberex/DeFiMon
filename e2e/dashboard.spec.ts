@@ -388,7 +388,7 @@ test('calculates only the largest collateral using manual prices and clears stal
   await card.getByRole('button', { name: 'Calculate', exact: true }).click();
   await expect(result).toHaveText('$993.75');
   await expect(card.locator('.position-stats strong').nth(1)).toHaveText('$30,000.00');
-  await expect(card.locator('.position-stats strong').nth(3)).toHaveText('1.80');
+  await expect(card.locator('.position-stats strong').nth(4)).toHaveText('1.80');
   await card.getByLabel('USDT liquidation price (USD)').fill('0');
   await expect(result).toHaveText('—');
   await card.getByRole('button', { name: 'Calculate', exact: true }).click();
@@ -474,7 +474,7 @@ test('shows monthly token interest and USD NPL after protocol net value across n
   await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(8);
   const card = page.locator('article.aave-v3[data-chain="Ethereum"]');
   const summary = card.getByRole('region', { name: 'Protocol monthly interest', exact: true });
-  await expect(summary.locator('.protocol-interest-totals > p')).toHaveText(['Net value: $12,000.00', 'Monthly NPL: ≈ $5.00 / month']);
+  await expect(summary.locator('.protocol-interest-totals > p')).toHaveText(['Net value: $12,000.00', 'APR: ≈ 0.50%', 'Monthly NPL: ≈ $5.00 / month']);
   await expect(summary.getByText('Earned: ≈ $87.50 / month · Paid: ≈ $82.50 / month', { exact: true })).toBeVisible();
   await expect(card.getByRole('columnheader', { name: 'Monthly interest earned', exact: true })).toBeVisible();
   await expect(card.locator('tbody tr').first().locator('td').nth(8)).toHaveText('≈ 0.0291667 WETH / month≈ $87.50 / month');
@@ -661,6 +661,7 @@ test('applies live Merkl supply and borrow APR to matching Fluid vaults and net-
   await expect(gho.locator('td').nth(4).getByText('Protocol: 6.00%', { exact: true })).toBeVisible();
   await expect(gho.locator('td').nth(4).getByText('Merkl rebate: −1.45%', { exact: true })).toBeVisible();
   await expect(fluid.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $13.16 / month');
+  await expect(fluid.locator('.position-net-apr strong')).toHaveText('≈ 7.89%');
   const aaveBorrow = page.locator('article.aave-v4 tbody tr').first().locator('td').nth(4);
   await expect(aaveBorrow.locator('.asset-rate')).toContainText('≈ 4.95%');
   await expect(aaveBorrow.getByText('Merkl rebate: −1.05%', { exact: true })).toBeVisible();
@@ -726,4 +727,32 @@ test('a late Merkl APR lookup preserves liquidation scenario inputs and calculat
   await expect(aave.locator('tbody tr').first().locator('td').nth(4).getByText('Merkl rebate: −1.05%', { exact: true })).toBeVisible();
   await expect(aave.getByLabel('USDT liquidation price (USD)')).toHaveValue('0.8');
   await expect(aave.locator('.calculated-price strong')).toHaveText('$4,188.24');
+});
+
+
+test('shows annualized NPL APR between net value and health for each protocol and Fluid vault', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  for (const [id, value] of [['aave-v3', '≈ 0.50%'], ['aave-v4', '≈ 1.90%'], ['morpho', '≈ -3.00%'], ['compound', '≈ -3.93%'], ['fluid', '≈ 0.70%']]) {
+    const stats = page.locator(`article.${id}[data-chain="Ethereum"] .position-stats`).first();
+    await expect(stats.locator(':scope > div > span')).toHaveText(['Supplied', 'Borrowed', 'Net value', 'APR ⓘ', 'Health factor ⓘ']);
+    await expect(stats.locator('.position-net-apr strong')).toHaveText(value);
+  }
+  await expect(page.locator('article.morpho[data-chain="Ethereum"] .protocol-net-apr')).toHaveText('APR: ≈ -1.70%');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.locator('article.fluid[data-chain="Ethereum"] .position-stats').screenshot({ path: '/tmp/defimon-net-apr-mobile.png' });
+});
+
+test('keeps NPL APR unavailable for zero net value or unknown monthly interest', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = fixture.protocols.filter(p => ['aave-v3', 'fluid'].includes(p.id));
+  fixture.protocols[0].positions[0].suppliedUsd = fixture.protocols[0].positions[0].debtUsd;
+  fixture.protocols[1].positions[0].assets[1].borrowRate = { apr: null, note: 'Unknown borrowing APR' };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('article.aave-v3 .position-net-apr strong')).toHaveText('Unavailable');
+  await expect(page.locator('article.fluid .position-net-apr strong')).toHaveText('Unavailable');
+  await expect(page.locator('article.fluid .position-stats strong').nth(2)).toHaveText('$2,500.00');
 });

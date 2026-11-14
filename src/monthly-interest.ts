@@ -58,3 +58,9 @@ export function totalMonthlyInterest(protocols: ProtocolResult[]): MonthlyIntere
   const totals = protocols.map(protocolMonthlyInterest);
   return { ...net(sum(totals.map(p => p.earnedUsd)), sum(totals.map(p => p.paidUsd))), partial: protocols.some(p => p.status !== 'ok') };
 }
+/** Annualized NPL as a fraction of net value. Negative equity retains the user's signed formula. */
+export function annualizedNplApr(monthlyNplUsd: number | null, netValueUsd: number | null): number | null {
+  if (!finite(monthlyNplUsd) || !finite(netValueUsd) || netValueUsd === 0) return null;
+  const apr = monthlyNplUsd * 12 / netValueUsd;
+  return finite(apr) ? apr : null;
+}
