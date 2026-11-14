@@ -86,3 +86,19 @@ it('resolves Aave v3 through the official Arbitrum provider while preserving bal
   expect(result.positions[0].suppliedUsd).toBe(30000); expect(result.positions[0].healthFactor).toBe(1.7);
   expect(blocks.every(block => block === 777n)).toBe(true);
 });
+
+it('shows verified eMode LLTV only for category members and keeps native risk', async () => {
+  const f = fixture(1n);
+  for (const member of [true, false]) {
+    const client = { ...f.client, readContract: async (args: any) => {
+      if (args.functionName === 'getEModeCategoryCollateralConfig') return { liquidationThreshold: 9300, ltv: 9000, liquidationBonus: 10100 };
+      if (args.functionName === 'getEModeCategoryCollateralBitmap') return member ? 8n : 0n;
+      if (args.functionName === 'getReserveData') return { id: 3 };
+      return f.client.readContract(args);
+    } } as unknown as ChainClient;
+    const p = (await readAave(client, wallet, 100n)).positions[0];
+    expect(p.assets[0].lltv).toBe(member ? .93 : .85);
+    expect(p.healthFactor).toBe(1.7);
+    expect(p.assets[0].liquidationPriceUsd).toBeNull();
+  }
+});

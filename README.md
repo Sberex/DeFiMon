@@ -77,6 +77,24 @@ npm run diagnose:morpho -- 0xYourWalletAddress arbitrum
 
 Deterministic tests cover all four readers, selected-chain contracts, balances/rates/risk, receipt exclusions, wrong-chain rejection, partial failures, and the combined page. This cloud denied the public Arbitrum endpoint (CONNECT 403); live balances and full Morpho API discovery must still be compared locally with the protocol websites. No cloud environment settings were changed or published.
 
+## Collateral LLTV and liquidation scenarios
+
+Every protocol asset table includes **LLTV**: the percentage of collateral value counted toward the liquidation boundary, rather than the maximum initial borrowing limit. Aave v3 uses its liquidation threshold; Compound uses `liquidateCollateralFactor`; Morpho uses the market LLTV; Fluid uses the vault liquidation threshold; Aave v4 uses the wallet’s stored collateral settings. Aave v4 combines same-token reserves using the effective balance-weighted factor, excluding disabled collateral, and labels it accordingly. Morpho displays actual market LLTV even when lent and pledged balances of the same token are merged. Deposits that are not pledged show a dash. Unverified effective LLTV shows **Unavailable**, never a guessed percentage. Modern Aave v3 efficiency-mode LLTV is read from category settings and verified reserve bitmap membership; older/incompatible deployments remain unknown. Efficiency-mode token liquidation estimates continue to be withheld.
+
+For a loan with two or more supplied collateral assets, the table calculates a liquidation price for **only the largest holding by current supplied USD value**. Enter a non-negative USD liquidation price for each other collateral token in its row, then press **Calculate**. For three assets the calculation is:
+
+```text
+price_1 = (borrowed_USD - price_2 × LLTV_2 × supplied_2
+                        - price_3 × LLTV_3 × supplied_3)
+          / (LLTV_1 × supplied_1)
+```
+
+Percentages are converted to fractions (80% = 0.8). The same sum extends to any number of collateral assets within that loan. Borrowed USD, supplied quantities, and effective factors stay fixed, including any debt denominated in a collateral token. This is a scenario based on your entered prices; it does not predict that the tokens will reach those prices together or change the current health factor, balances, or net value. A single-collateral loan retains its existing estimate, including its existing same-token debt treatment.
+
+All other collateral prices must be entered before a result is calculated. Editing a price clears the previous result; refreshing or loading another wallet clears all inputs and results. Zero is allowed. If the other collateral alone exceeds the fixed borrowed USD amount, the result explains that there is no non-negative price boundary rather than displaying a negative token price. Missing debt valuation, collateral prices needed for ranking, or effective LLTV prevents calculation. Independent loans, networks, and protocol positions are never combined for liquidation calculations. Manual prices stay in the open page and are not sent to a server or saved.
+
+Fluid smart collateral/debt uses pool-share oracle rules. Its collateral rows display the vault LLTV, but independent token-price calculations remain unavailable; the existing oracle-ratio boundary is retained. Missing or unsupported liquidation rules are identified explicitly.
+
 ## Current interest rates
 
 Every supplied/borrowed asset row has **Supply APR** and **Borrow APR**. APR is the current interest rate expressed per year, without assuming compounding. Rates refresh with the wallet and use the same selected network block as its balances. These are current quotes, not past-day averages or a promise of future returns. The example’s rates are fictional.

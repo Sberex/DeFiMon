@@ -114,6 +114,7 @@ describe('Morpho Blue markets', () => {
   });
   it('merges identical collateral/loan tokens without counting the loan deposit as extra collateral', async () => {
     const p = (await fixture({ sameAsset: true }).read()).positions[0];
+    expect(p.assets[0].lltv).toBe(.86);
     expect(p.assets).toHaveLength(1); expect(p.suppliedUsd).toBe(10500); expect(p.debtUsd).toBe(2000); expect(p.healthFactor).toBe(4.3);
     expect(p.assets[0].liquidationThreshold).toBeCloseTo(8600 / 10500);
     expect(p.assets[0].liquidationPriceUsd).toBeNull();

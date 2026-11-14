@@ -105,6 +105,8 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
           loanAsset.supplyRate = weightedRate(loanAsset.supplyRate, loanAsset.supplied, rate(0, 'Morpho collateral itself earns no protocol lending interest.'), quantity);
           loanAsset.supplied += quantity;
           loanAsset.collateral = true;
+          loanAsset.lltv = units(params.lltv, 18);
+          loanAsset.lltvNote = 'Protocol LLTV applies only to pledged collateral; lending deposits of the same token are excluded from collateral capacity.';
           loanAsset.liquidationThreshold = loanAsset.supplied > 0 ? units(params.lltv, 18) * quantity / loanAsset.supplied : null;
         } else {
           collateralAsset = { supplyRate: rate(0, 'Morpho collateral is not lent out and earns no protocol interest. Intrinsic token yield is separate.'), symbol: collateral.symbol, address: collateral.address, supplied: quantity, borrowed: 0, priceUsd: collateral.priceUsd, collateral: true, liquidationThreshold: units(params.lltv, 18), liquidationPriceUsd: null };

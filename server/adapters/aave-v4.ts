@@ -44,7 +44,7 @@ export function mergeV4Assets(assets: Asset[]): Asset[] {
       existing.weightedCollateral += weighted;
     }
   }
-  return [...merged.values()].map(({ asset, weightedCollateral }) => ({ ...asset, liquidationThreshold: asset.collateral && asset.supplied > 0 ? weightedCollateral / asset.supplied : null }));
+  return [...merged.values()].map(({ asset, weightedCollateral }) => ({ ...asset, liquidationThreshold: asset.collateral && asset.supplied > 0 ? weightedCollateral / asset.supplied : null, lltvNote: asset.collateral ? 'Effective liquidation factor weighted by supplied balances across this token’s reserves; excludes disabled collateral.' : undefined }));
 }
 
 export async function readAaveV4(client: ChainClient, wallet: Address, blockNumber: bigint, deployment: Deployment = deployed): Promise<ProtocolResult> {
@@ -131,7 +131,7 @@ export async function readAaveV4(client: ChainClient, wallet: Address, blockNumb
       if (suppliedUsd === null || debtUsd === null || assets.some(a => a.priceUsd === null)) { warnings.add('Some Aave v4 assets have unavailable USD prices; their dollar values are unknown.'); notes.push('A dash is unknown, not zero. Positions with unknown dollar values are excluded from the combined dollar totals.'); }
       const estimated = account.ok && weightedCollateralUsd !== null && debtUsd !== null ? liquidationPrices(assets, debtUsd, weightedCollateralUsd) : assets;
       verifiedChecks++;
-      return { id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label}`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(hasDebt ? 1 : 0, health), assets: estimated, notes };
+      return { liquidationModel: account.ok && weightedCollateralUsd !== null ? 'linear' : 'unavailable', id: `aave-v4-${market.address}`, label: `Aave v4 · ${market.label}`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(hasDebt ? 1 : 0, health), assets: estimated, notes };
     } catch {
       warnings.add('Some Aave v4 lending markets could not be checked. Their positions, balances, and risk are unknown.');
       return unknownMarket(market);

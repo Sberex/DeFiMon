@@ -263,3 +263,14 @@ it('reads Fluid vaults, lending, and current rates through Arbitrum contracts an
   expect(m.contracts.some(c => c.address === networks.ethereum.aaveProvider)).toBe(false);
   expect(m.blocks.every(block => block === 42161n)).toBe(true);
 });
+
+it('exposes vault LLTV for all collateral legs including no-debt and smart pools', async () => {
+  const simple = mock({ closed: false, lending: true });
+  const p = (await readFluid(simple.client, wallet, 123n)).positions;
+  expect(p[0].assets.filter(a => a.collateral).every(a => a.liquidationThreshold === .85)).toBe(true);
+  expect(p.find(p => p.id.startsWith('fluid-lending'))!.assets[0].liquidationThreshold).toBeNull();
+  const smart = mock({ types: [20000n] });
+  const vault = (await readFluid(smart.client, wallet, 123n)).positions[0];
+  expect(vault.liquidationModel).toBe('oracle-ratio');
+  expect(vault.assets.filter(a => a.collateral).every(a => a.liquidationThreshold === .8)).toBe(true);
+});

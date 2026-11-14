@@ -14,12 +14,15 @@ export interface InterestRate { apr: number | null; note: string; estimated?: bo
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
   collateral: boolean; liquidationThreshold: number | null; liquidationPriceUsd: number | null;
+  /** Actual protocol LLTV when the calculation factor is weighted across balances. */
+  lltv?: number; lltvNote?: string;
   priceSource?: 'fluid-oracle';
   supplyRate?: InterestRate; borrowRate?: InterestRate;
 }
 export interface Position {
   id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;
   risk: Risk; assets: Asset[]; notes: string[];
+  liquidationModel?: 'linear' | 'oracle-ratio' | 'unavailable';
   liquidationQuote?: { current: number; threshold: number; unit: string };
 }
 export interface ProtocolResult {

@@ -345,3 +345,70 @@ test('labels estimated and unavailable rates without hiding supplied values or r
   await card.getByText('Estimate details', { exact: true }).click();
   await expect(card.getByText('Interest component only; excludes pool trading income.', { exact: true })).toBeVisible();
 });
+
+test('shows LLTV for collateral across every protocol and a dash for unpledged assets', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  for (const id of ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid']) {
+    const card = page.locator(`article.${id}[data-chain="Ethereum"]`);
+    await expect(card.getByRole('columnheader', { name: 'LLTV', exact: true }).first()).toBeVisible();
+    const collateral = card.locator('tbody tr').filter({ hasText: 'Collateral' }).first();
+    await expect(collateral.locator('td').nth(6)).toHaveText(/\d+\.\d{2}%/);
+    const debtOnly = card.locator('tbody tr').filter({ has: page.getByText('USDC', { exact: true }) }).first();
+    await expect(debtOnly.locator('td').nth(6)).toHaveText('—');
+  }
+});
+
+test('calculates only the largest collateral using manual prices and clears stale results on edit and refresh', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const protocol = fixture.protocols.find(p => p.id === 'aave-v3')!;
+  fixture.protocols = [protocol];
+  const p = protocol.positions[0];
+  p.debtUsd = 30000; p.suppliedUsd = 70000; p.healthFactor = 1.8;
+  const eth = p.assets[0]; eth.address = 'eth'; eth.liquidationThreshold = .8;
+  p.assets.push({ ...eth, address: 'btc', symbol: 'WBTC', supplied: .5, priceUsd: 50000, liquidationThreshold: .75 });
+  p.assets.push({ ...eth, address: 'usdt', symbol: 'USDT', supplied: 15000, priceUsd: 1, liquidationThreshold: .9 });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.aave-v3');
+  const result = card.locator('.calculated-price strong');
+  await expect(card.getByLabel('WETH liquidation price (USD)')).toHaveCount(0);
+  await expect(result).toHaveText('—');
+  await card.getByRole('button', { name: 'Calculate', exact: true }).click();
+  await expect(card.getByRole('status')).toHaveText(/Enter a valid USD liquidation price/);
+  await card.getByLabel('WBTC liquidation price (USD)').fill('30000');
+  await card.getByLabel('USDT liquidation price (USD)').fill('0.8');
+  await card.getByRole('button', { name: 'Calculate', exact: true }).click();
+  await expect(result).toHaveText('$993.75');
+  await expect(card.locator('.position-stats strong').nth(1)).toHaveText('$30,000.00');
+  await expect(card.locator('.position-stats strong').nth(3)).toHaveText('1.80');
+  await card.getByLabel('USDT liquidation price (USD)').fill('0');
+  await expect(result).toHaveText('—');
+  await card.getByRole('button', { name: 'Calculate', exact: true }).click();
+  await expect(result).toHaveText('$2,343.75');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-liquidation-calculator-mobile.png', fullPage: true });
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(result).toHaveText('—');
+  await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('');
+});
+
+test('shows smart-vault LLTV but keeps its oracle boundary instead of independent token prices', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const fluid = fixture.protocols.find(p => p.id === 'fluid')!;
+  fixture.protocols = [fluid];
+  const p = fluid.positions[0]; p.liquidationModel = 'oracle-ratio';
+  p.assets[0].address = 'eth';
+  p.assets.push({ ...p.assets[0], address: 'btc', symbol: 'WBTC', supplied: .1, priceUsd: 50000 });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.getByRole('button', { name: 'Calculate', exact: true })).toHaveCount(0);
+  await expect(page.getByText(/This vault uses pool shares/)).toBeVisible();
+  await expect(page.getByText('Liquidation boundary · oracle ratio', { exact: true })).toBeVisible();
+  await expect(page.locator('tbody tr').first().locator('td').nth(6)).toHaveText('92.00%');
+});
