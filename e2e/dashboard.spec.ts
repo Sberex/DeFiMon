@@ -339,7 +339,7 @@ test('labels estimated and unavailable rates without hiding supplied values or r
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const card = page.locator('article.fluid[data-chain="Plasma"]');
   await expect(card.getByText('≈ -1.00%', { exact: false })).toBeVisible();
-  await expect(card.getByText('Unavailable', { exact: true })).toBeVisible();
+  await expect(card.locator('tbody tr').nth(1).locator('td').nth(4)).toHaveText('Unavailable');
   await expect(card.getByText('$1,500.00', { exact: true })).toBeVisible();
   await expect(card.getByText('3.20', { exact: true })).toBeVisible();
   await card.getByText('Estimate details', { exact: true }).click();
@@ -461,4 +461,61 @@ test('keeps sUSDai lending rates and balances when intrinsic oracle data is unav
   await expect(cell.getByText('Protocol: 3.50%', { exact: true })).toBeVisible();
   await expect(card.locator('.position-stats strong').first()).toHaveText('$30,000.00');
   await expect(page.locator('.summary.primary strong')).toHaveText('$31,500.00');
+});
+
+test('shows monthly token interest and USD NPL after protocol net value across networks', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(11);
+  const card = page.locator('article.aave-v3[data-chain="Ethereum"]');
+  const summary = card.getByRole('region', { name: 'Protocol monthly interest', exact: true });
+  await expect(summary.locator('.protocol-interest-totals > p')).toHaveText(['Net value: $12,000.00', 'Monthly NPL: ≈ $5.00 / month']);
+  await expect(summary.getByText('Earned: ≈ $87.50 / month · Paid: ≈ $82.50 / month', { exact: true })).toBeVisible();
+  await expect(card.getByRole('columnheader', { name: 'Monthly interest earned', exact: true })).toBeVisible();
+  await expect(card.locator('tbody tr').first().locator('td').nth(8)).toHaveText('≈ 0.0291667 WETH / month≈ $87.50 / month');
+  await expect(card.locator('tbody tr').nth(1).locator('td').nth(9)).toHaveText('≈ 82.5 USDC / month≈ $82.50 / month');
+  await expect(page.locator('article.aave-v3[data-chain="Plasma"] .protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $7.08 / month');
+  await expect(page.locator('article.aave-v3[data-chain="Arbitrum"] .protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $2.08 / month');
+  await expect(page.locator('article.compound[data-chain="Ethereum"] .protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ -$22.92 / month');
+  // Morpho has both a direct loan and a separate vault holding; both count once.
+  await expect(page.locator('article.morpho[data-chain="Ethereum"] .protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ -$7.08 / month');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await card.getByRole('region', { name: 'Protocol monthly interest', exact: true }).screenshot({ path: '/tmp/defimon-monthly-interest-mobile.png' });
+});
+
+test('uses sUSDai combined supply APR for monthly NPL and preserves unknown intrinsic data after refresh', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => {
+    reads++;
+    const fixture = structuredClone(example);
+    const fluid = fixture.protocols.find(p => p.id === 'fluid')!; fixture.protocols = [fluid];
+    const p = fluid.positions[0]; p.suppliedUsd = 1320; p.debtUsd = 1200;
+    Object.assign(p.assets[0], { symbol: 'sUSDai', address: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', supplied: 1200, priceUsd: 1.1, supplyRate: { apr: .02, note: '' }, intrinsicSupplyRate: { apr: reads === 1 ? .0756 : null, estimated: true, note: '', source: { chain: 'Ethereum', oracle: '0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a' } } });
+    Object.assign(p.assets[1], { borrowed: 1200, borrowRate: { apr: .06, note: '' } });
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const summary = page.getByRole('region', { name: 'Protocol monthly interest', exact: true });
+  await expect(summary.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $4.52 / month');
+  await expect(summary.getByText('Earned: ≈ $10.52 / month · Paid: ≈ $6.00 / month', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(summary.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: Unavailable');
+  await expect(summary.getByText('Earned: Unavailable · Paid: ≈ $6.00 / month', { exact: true })).toBeVisible();
+  await expect(summary.locator('.protocol-net-value')).toHaveText('Net value: $120.00');
+});
+
+test('shows monthly token interest with unavailable USD totals when a token price is missing', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.protocols = [fixture.protocols[0]];
+  const p = fixture.protocols[0].positions[0]; p.assets[0].priceUsd = null; p.suppliedUsd = null;
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: Unavailable');
+  await expect(page.locator('tbody tr').first().locator('td').nth(8)).toHaveText('≈ 0.0291667 WETH / monthUnavailable');
+  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true }).getByText('Earned: Unavailable · Paid: ≈ $82.50 / month', { exact: true })).toBeVisible();
 });

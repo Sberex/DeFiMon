@@ -110,6 +110,23 @@ A dash means that the wallet has no balance on that side. **Unavailable** means 
 
 Rate checks have deterministic coverage for units, weights, fees, adaptive-state simulation, true zero, negative adjustments, and missing data. Live Ethereum checks at block 26408160 read Fluid smart-leg rates, a Morpho market’s current rates, a V1 vault allocation estimate, and an interest-free Aave v4 Hub. Plasma and Arbitrum remain blocked by this cloud’s network policy; local live comparison is still needed. Rate reading needs no new API key or outbound destination beyond the existing network providers.
 
+## Monthly interest and NPL
+
+Every supplied/borrowed asset row shows **Monthly interest earned** and **Monthly interest paid**, in token units and in USD where a price is known. Calculations use full-precision values before display rounding:
+
+```text
+monthly earned tokens = supplied tokens × supply APR / 12
+monthly paid tokens   = borrowed tokens × borrow APR / 12
+monthly USD amount    = monthly token amount × current USD price
+monthly NPL           = total monthly interest earned USD − total monthly interest paid USD
+```
+
+APR values are fractions (6% = 0.06). sUSDai uses the same estimated total supply APR shown in its row, including its intrinsic component exactly once. Supply and borrow rates can be signed: a negative earned amount is a supply charge; a negative paid amount is a borrowing incentive/credit. Zero-interest collateral earns zero protocol interest.
+
+Each protocol/network card shows its combined **Net value**, followed by **Monthly NPL** and the earned/paid USD breakdown, summing every checked position in that card. Networks and unrelated protocols remain independent. NPL means the projected net monthly interest result; it does not include token-price gains/losses, gas, liquidation charges, or other unlisted fees/rewards, and it does not change current Net value or health.
+
+These are estimates for one-twelfth of a year, assuming unchanged balances, APRs and USD prices, without compounding. They refresh with the displayed wallet. The sUSDai intrinsic component retains its past-month observation basis rather than becoming a guaranteed next-month rate. Missing active rates or required USD prices make the affected totals and NPL **Unavailable**; token interest can still be shown when only its USD price is missing. Zero balances require no rate or price to contribute zero. Explicit unreadable positions prevent a complete total; partial coverage is labeled and any displayed subtotal covers checked positions only. All calculations happen in the page using the existing response, without additional network requests or history storage.
+
 ## sUSDai intrinsic yield
 
 Supplied **sUSDai** includes a separately labeled **Intrinsic (30d)** APR across all protocol families on Ethereum, Plasma, and Arbitrum. Matching uses the deployed token contract `0x0B2b2B2076d95dda7817e785989fE353fe955ef9`, not a token symbol. Other assets and borrow APR remain unchanged.
