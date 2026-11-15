@@ -831,3 +831,30 @@ test('shows Morpho creator/curator/owner vaults with zero deposits without addin
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await empty.screenshot({ path: '/tmp/defimon-morpho-zero-vault-mobile.png' });
 });
+
+test('explains unavailable total NPL and Portfolio APR with protocol, network, vault and missing rate', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => {
+    const fixture = structuredClone(example);
+    const fluid = fixture.protocols.find(p => p.id === 'fluid')!;
+    fluid.chain = 'Plasma'; fluid.positions = [fluid.positions[0]];
+    if (reads++ === 0) fluid.positions[0].assets[1].borrowRate = undefined;
+    fixture.protocols = [fluid];
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill('0x5929D94eb4C41D91955154465a58a531Ad4CF7b8');
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const issues = page.getByRole('region', { name: 'Missing interest data', exact: true });
+  await expect(issues.getByText(/Fluid · Plasma/)).toBeVisible();
+  await expect(issues.getByText(/Borrow APR unavailable/)).toBeVisible();
+  await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
+  await expect(page.locator('.portfolio-apr > strong')).toHaveText('Unavailable');
+  await expect(page.locator('.summary.primary > strong')).not.toHaveText('—');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(issues).toHaveCount(0);
+  await expect(page.locator('.total-npl > strong')).not.toHaveText('Unavailable');
+  await expect(page.locator('.portfolio-apr > strong')).not.toHaveText('Unavailable');
+});

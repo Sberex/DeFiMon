@@ -13,6 +13,7 @@
     "check:fluid": "tsx scripts/check-fluid.ts",
     "check:aave-v4": "tsx scripts/check-aave-v4.ts",
     "check:morpho": "tsx scripts/check-morpho.ts",
+    "diagnose:npl": "tsx scripts/diagnose-npl.ts",
     "diagnose:morpho": "tsx scripts/diagnose-morpho.ts",
     "check:plasma": "tsx scripts/check-plasma.ts",
     "check:wallet": "tsx scripts/check-wallet.ts",

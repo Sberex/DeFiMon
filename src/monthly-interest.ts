@@ -53,10 +53,50 @@ export function protocolMonthlyInterest(protocol: ProtocolResult): MonthlyIntere
   const netValueUsd = sum(protocol.positions.map(p => p.suppliedUsd !== null && p.debtUsd !== null ? p.suppliedUsd - p.debtUsd : null));
   return { ...net(sum(positions.map(p => p.earnedUsd)), sum(positions.map(p => p.paidUsd))), netValueUsd };
 }
+export interface InterestIssue { protocol: string; chain?: string; position?: string; asset?: string; reason: string }
+/** Explain unknown inputs without replacing unread borrowing costs with zero. */
+export function monthlyInterestIssues(protocols: ProtocolResult[]): InterestIssue[] {
+  const issues: InterestIssue[] = [];
+  for (const protocol of protocols) {
+    const context = { protocol: protocol.name, chain: protocol.chain };
+    if (!['ok', 'partial'].includes(protocol.status) || (protocol.status === 'partial' && !protocol.positions.length)) {
+      issues.push({ ...context, reason: 'Positions could not be fully checked. Refresh and check this protocol’s connection message below.' });
+      continue;
+    }
+    for (const position of protocol.positions) {
+      const location = { ...context, position: position.label };
+      const interest = positionMonthlyInterest(position);
+      if (interest.nplUsd !== null) continue;
+      if (!position.assets.length) {
+        issues.push({ ...location, reason: 'Asset balances could not be read.' });
+        continue;
+      }
+      const start = issues.length;
+      for (const asset of position.assets) {
+        const row = assetMonthlyInterest(asset);
+        for (const side of ['supply', 'borrow'] as const) {
+          if ((side === 'supply' ? row.earnedUsd : row.paidUsd) !== null) continue;
+          const reasons: string[] = [];
+          const amount = side === 'supply' ? asset.supplied : asset.borrowed;
+          const rate = side === 'supply' ? asset.supplyRate : asset.borrowRate;
+          const merkl = side === 'supply' ? asset.merklSupplyRate : asset.merklBorrowRate;
+          if (!finite(amount) || amount < 0) reasons.push('balance unavailable');
+          if (!finite(rate?.apr)) reasons.push(`${side === 'supply' ? 'Supply' : 'Borrow'} APR unavailable`);
+          if (side === 'supply' && asset.intrinsicSupplyRate && !finite(asset.intrinsicSupplyRate.apr)) reasons.push('intrinsic (30-day) APR unavailable');
+          if (merkl && !finite(merkl.apr)) reasons.push('Merkl APR unavailable');
+          if (!finite(asset.priceUsd) || asset.priceUsd < 0) reasons.push('USD price unavailable');
+          issues.push({ ...location, asset: asset.symbol, reason: reasons.length ? reasons.join('; ') : 'Interest calculation exceeds supported values.' });
+        }
+      }
+      if (issues.length === start) issues.push({ ...location, reason: 'Interest total exceeds supported values.' });
+    }
+  }
+  return issues;
+}
 /** Sum each protocol/network once; Fluid's vault rows are already inside its protocol total. */
-export function totalMonthlyInterest(protocols: ProtocolResult[]): MonthlyInterest & { partial: boolean } {
+export function totalMonthlyInterest(protocols: ProtocolResult[]): MonthlyInterest & { partial: boolean; issues: InterestIssue[] } {
   const totals = protocols.map(protocolMonthlyInterest);
-  return { ...net(sum(totals.map(p => p.earnedUsd)), sum(totals.map(p => p.paidUsd))), partial: protocols.some(p => p.status !== 'ok') };
+  return { ...net(sum(totals.map(p => p.earnedUsd)), sum(totals.map(p => p.paidUsd))), partial: protocols.some(p => p.status !== 'ok'), issues: monthlyInterestIssues(protocols) };
 }
 /** Annualized NPL as a fraction of net value. Negative equity retains the user's signed formula. */
 export function annualizedNplApr(monthlyNplUsd: number | null, netValueUsd: number | null): number | null {

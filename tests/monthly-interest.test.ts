@@ -105,3 +105,22 @@ it('annualizes NPL over net value with signed results and guards zero, unknown a
   expect(annualizedNplApr(-50, -10000)).toBeCloseTo(.06);
   for (const [npl, value] of [[100, 0], [null, 100], [100, null], [Infinity, 100], [100, Infinity], [1e308, 1]]) expect(annualizedNplApr(npl, value)).toBeNull();
 });
+
+it('identifies the protocol, network, vault and missing active rate that block total NPL', () => {
+  const broken = { ...protocol([position([asset({ borrowRate: undefined })])]), name: 'Fluid', chain: 'Plasma' as const };
+  const result = totalMonthlyInterest([protocol(), broken]);
+  expect(result.nplUsd).toBeNull();
+  expect(result.issues).toEqual([{ protocol: 'Fluid', chain: 'Plasma', position: 'Loan', asset: 'ETH', reason: 'Borrow APR unavailable' }]);
+});
+it('explains failed discovery separately from missing intrinsic APR and USD prices without flagging zero deposits', () => {
+  const result = totalMonthlyInterest([
+    { ...protocol([]), name: 'Morpho', chain: 'Arbitrum', status: 'partial' },
+    protocol([position([asset({ symbol: 'sUSDai', intrinsicSupplyRate: { apr: null, note: '', source: { chain: 'Ethereum', oracle: 'feed' } } })])]),
+    protocol([position([asset({ supplied: 0, borrowed: 0, priceUsd: null, supplyRate: undefined, borrowRate: undefined })])]),
+    protocol([position([asset({ priceUsd: null, borrowed: 0 })])]),
+  ]);
+  expect(result.issues).toHaveLength(3);
+  expect(result.issues[0]).toMatchObject({ protocol: 'Morpho', chain: 'Arbitrum', reason: expect.stringContaining('Positions') });
+  expect(result.issues[1]).toMatchObject({ asset: 'sUSDai', reason: 'intrinsic (30-day) APR unavailable' });
+  expect(result.issues[2]).toMatchObject({ asset: 'ETH', reason: 'USD price unavailable' });
+});
