@@ -879,3 +879,45 @@ test('keeps total NPL and Portfolio APR available when only Arbitrum managed-vau
   await expect(morpho.locator('.protocol-warning')).toContainText('curator vault discovery is unavailable');
   await expect(morpho.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $0.00 / month');
 });
+
+test('shows Morpho vault supply interest without loan fields and counts own V1/V2 deposits once across networks', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => {
+    const fixture = structuredClone(example);
+    const morpho = fixture.protocols.find(p => p.id === 'morpho')!;
+    const v1 = structuredClone(morpho.positions[1]);
+    v1.id = 'morpho-vault-v1'; v1.label = 'Morpho vault V1 · Own Ethereum deposit'; v1.suppliedUsd = 2400;
+    Object.assign(v1.assets[0], { address: '0x1111111111111111111111111111111111111111', supplied: 1200, priceUsd: 2, supplyRate: { apr: .12, note: '' } });
+    v1.vault = { address: '0x2222222222222222222222222222222222222222', version: 1, roles: [], totalAssets: 1000000, totalAssetsUsd: 2000000 };
+    const v2 = structuredClone(v1); v2.id = 'morpho-vault-v2'; v2.label = 'Morpho vault V2 · Own Arbitrum deposit'; v2.suppliedUsd = 600;
+    Object.assign(v2.assets[0], { supplied: 600, priceUsd: 1, supplyRate: reads++ === 0 ? { apr: .06, note: '' } : undefined });
+    v2.vault = { ...v1.vault, address: '0x3333333333333333333333333333333333333333', version: 2 };
+    const managed = structuredClone(v1); managed.id = 'morpho-vault-managed'; managed.label = 'Morpho vault V1 · Managed only'; managed.suppliedUsd = 0;
+    Object.assign(managed.assets[0], { supplied: 0, supplyRate: undefined, priceUsd: null });
+    managed.vault = { ...v1.vault, roles: [{ role: 'curator', source: 'onchain' }] };
+    fixture.protocols = [{ ...morpho, chain: 'Ethereum', positions: [v1, managed] }, { ...morpho, chain: 'Arbitrum', positions: [v2] }];
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const vaults = page.locator('.morpho-vault-position');
+  await expect(vaults).toHaveCount(3);
+  for (const vault of await vaults.all()) {
+    await expect(vault.getByText('Borrowed', { exact: true })).toHaveCount(0);
+    await expect(vault.getByText('Net value', { exact: true })).toHaveCount(0);
+    await expect(vault.getByRole('columnheader', { name: 'Monthly interest earned', exact: true })).toBeVisible();
+    await expect(vault.getByRole('columnheader', { name: 'Borrow APR', exact: true })).toHaveCount(0);
+  }
+  await expect(vaults.nth(0).locator('tbody td').last()).toHaveText('≈ 12 USDC / month≈ $24.00 / month');
+  await expect(vaults.nth(1).locator('tbody td').last()).toHaveText('≈ 0 USDC / month≈ $0.00 / month');
+  await expect(vaults.nth(2).locator('tbody td').last()).toHaveText('≈ 3 USDC / month≈ $3.00 / month');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $27.00');
+  await expect(page.locator('.summary.primary > strong')).toHaveText('$3,000.00');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await vaults.first().screenshot({ path: '/tmp/defimon-morpho-vault-interest-mobile.png' });
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(vaults.nth(2).locator('tbody td').last()).toHaveText('Unavailable');
+  await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
+});

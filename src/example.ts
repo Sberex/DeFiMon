@@ -17,7 +17,7 @@ export const example: Portfolio = {
         { symbol: 'WETH', address: '', supplied: 2, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .86, liquidationPriceUsd: 2500 / (2 * .86) },
         { symbol: 'USDC', address: '', supplied: 500, borrowed: 2500, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null },
       ], liquidationQuote: { current: 3000, threshold: 2500 / (2 * .86), unit: 'USDC per WETH' }, notes: ['Illustrative numbers only. Lending USDC does not protect the collateralized borrowing position.'] },
-      { id: 'example-morpho-vault', label: 'Morpho vault V1 · Example USDC vault', suppliedUsd: 1000, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [
+      { id: 'morpho-vault-example', label: 'Morpho vault V1 · Example USDC vault', suppliedUsd: 1000, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [
         { symbol: 'USDC', address: '', supplied: 1000, borrowed: 0, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null },
       ], notes: ['Illustrative numbers only. The vault deposit is counted once; its underlying market allocations are not added again.'] },
     ] },

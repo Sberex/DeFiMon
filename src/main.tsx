@@ -36,12 +36,12 @@ function BorrowRateView({ quote, merkl, active }: { quote?: InterestRate; merkl?
   return <div className="supply-components"><small>Net borrow APR</small><RateView quote={effective} active /><small>Protocol: {quote?.apr == null ? 'Unavailable' : `${(quote.apr * 100).toFixed(2)}%`}</small><small>Merkl rebate: −{merkl.apr === null ? 'Unavailable' : `${(merkl.apr * 100).toFixed(2)}%`}</small><MerklRateDetails quote={merkl} /></div>;
 }
 const monthlyMoney = (value: number | null) => value === null ? 'Unavailable' : `≈ ${money(value)} / month`;
-function MonthlyAssetInterest({ asset, side }: { asset: Position['assets'][number]; side: 'earned' | 'paid' }) {
+function MonthlyAssetInterest({ asset, side, showZero = false }: { asset: Position['assets'][number]; side: 'earned' | 'paid'; showZero?: boolean }) {
   const interest = assetMonthlyInterest(asset);
   const tokens = side === 'earned' ? interest.earnedTokens : interest.paidTokens;
   const value = side === 'earned' ? interest.earnedUsd : interest.paidUsd;
   const active = side === 'earned' ? asset.supplied > 0 : asset.borrowed > 0;
-  if (!active) return <span className="muted">—</span>;
+  if (!active && !showZero) return <span className="muted">—</span>;
   return <div className="monthly-asset-interest">{tokens === null ? <span className="muted">Unavailable</span> : <><span>≈ {quantity(tokens)} {asset.symbol} / month</span><small>{monthlyMoney(value)}</small>{(side === 'earned' ? asset.merklSupplyRate : asset.merklBorrowRate) && <small>After Merkl · token equivalent</small>}</>}</div>;
 }
 const netAprText = (apr: number | null) => apr === null ? 'Unavailable' : `≈ ${(apr * 100).toFixed(2)}%`;
@@ -60,7 +60,18 @@ function MorphoVaultContext({ position: p }: { position: Position }) {
   if (!p.vault) return null;
   const token = p.assets[0];
   const names = { creator: 'Creator', curator: 'Curator', owner: 'Owner' };
-  return <section className="vault-context" aria-label="Morpho vault information"><p>Vault contract: <code>{p.vault.address}</code></p>{p.vault.roles.length > 0 && <p className="vault-roles">Your roles: {p.vault.roles.map(r => `${names[r.role]}${r.source === 'api' ? ' (API record)' : ''}`).join(' · ')}</p>}<p>Vault assets · all depositors: {p.vault.totalAssets === null ? 'Unavailable' : `${quantity(p.vault.totalAssets)} ${token?.symbol ?? ''}`} · {money(p.vault.totalAssetsUsd)}</p><small>Only your own vault shares are counted in Supplied, Net value and NPL. Vault-wide assets are shown for context.</small>{token && token.supplied === 0 && <div>Your supplied balance is zero. Vault lending APR: <RateView quote={token.supplyRate} active /></div>}</section>;
+  return <section className="vault-context" aria-label="Morpho vault information"><p>Vault contract: <code>{p.vault.address}</code></p>{p.vault.roles.length > 0 && <p className="vault-roles">Your roles: {p.vault.roles.map(r => `${names[r.role]}${r.source === 'api' ? ' (API record)' : ''}`).join(' · ')}</p>}<p>Vault assets · all depositors: {p.vault.totalAssets === null ? 'Unavailable' : `${quantity(p.vault.totalAssets)} ${token?.symbol ?? ''}`} · {money(p.vault.totalAssetsUsd)}</p><small>Only your own vault shares are counted in Supplied and portfolio totals, including monthly interest. Vault-wide assets are shown for context.</small>{token && token.supplied === 0 && <div>Your supplied balance is zero. Vault lending APR: <RateView quote={token.supplyRate} active /></div>}</section>;
+}
+function MorphoVaultView({ position: p }: { position: Position }) {
+  const monthly = positionMonthlyInterest(p);
+  return <div className="position morpho-vault-position">
+    <div className="position-title"><h3>{p.label}</h3><span className={`risk ${p.risk}`}>{riskNames[p.risk]}</span></div>
+    <div className="position-stats vault-stats"><div><span>Supplied</span><strong>{money(p.suppliedUsd)}</strong></div><div><span title="Annualized interest earned on your own deposited assets">APR ⓘ</span><strong>{netAprText(annualizedNplApr(monthly.earnedUsd, p.suppliedUsd))}</strong></div><div><span>Monthly interest earned</span><strong>{monthlyMoney(monthly.earnedUsd)}</strong></div></div>
+    {p.vault && <MorphoVaultContext position={p} />}
+    <p className="table-scroll-hint">Swipe to see monthly interest <Arrow /></p><div className="table-wrap"><table><caption className="sr-only">Your deposited assets and interest for {p.label}</caption><thead><tr><th>Asset</th><th>Supplied</th><th title="Protocol supply APR plus separately labeled intrinsic yield and matched Merkl incentives">Supply APR</th><th>Current price</th><th title="Your supplied token balance × Supply APR ÷ 12; USD value uses the current token price">Monthly interest earned</th></tr></thead><tbody>{p.assets.map(a => <tr key={a.address || a.symbol}><td><strong>{a.symbol}</strong></td><td>{quantity(a.supplied)}</td><td><SupplyRateView quote={a.supplyRate} intrinsic={a.intrinsicSupplyRate} merkl={a.merklSupplyRate} active={a.supplied > 0} /></td><td>{money(a.priceUsd)}</td><td><MonthlyAssetInterest asset={a} side="earned" showZero /></td></tr>)}</tbody></table></div>
+    <p className="vault-interest-note">Your supplied balance × Supply APR ÷ 12. The USD amount is included once in Total NPL. Assumes unchanged balances, rates and prices.</p>
+    <details><summary>How these estimates work</summary>{p.notes.map(n => <p key={n}>{n}</p>)}</details>
+  </div>;
 }
 function PositionView({ position: p, fluid = false, lookupSnapshot }: { position: Position; fluid?: boolean; lookupSnapshot: object }) {
   const [snapshot, setSnapshot] = useState(lookupSnapshot);
@@ -87,7 +98,7 @@ function ProtocolCard({ result, chain, lookupSnapshot }: { result: ProtocolResul
   return <article className={`protocol ${result.id}`} data-chain={chain}><div className="protocol-heading"><div className="protocol-name"><span className="protocol-logo" aria-hidden="true">{result.name === 'Compound' ? 'C' : result.name === 'Morpho' ? '⋈' : result.name === 'Fluid' ? '≈' : 'A'}</span><div><h2>{result.name}<span className="chain-badge"> · {chain}</span></h2><p>{result.coverage}</p></div></div><span className={`status ${result.status}`}>{result.status === 'ok' ? 'Checked' : result.status === 'partial' ? 'Partially checked' : result.status === 'error' ? 'Unavailable' : 'Not connected'}</span></div>
     {result.id !== 'fluid' && (result.status === 'ok' || result.status === 'partial') && <ProtocolInterest result={result} />}
     {result.status === 'partial' && <div className="notice protocol-warning" role="status">{result.message}</div>}
-    {result.status !== 'ok' && result.status !== 'partial' ? <div className="protocol-empty"><span aria-hidden="true">{result.status === 'error' ? '!' : '+'}</span><p>{result.message || 'This integration is still being built. Positions and risk have not been checked.'}</p></div> : result.positions.length ? result.positions.map(p => <PositionView key={p.id} position={p} fluid={result.id === 'fluid'} lookupSnapshot={lookupSnapshot} />) : result.status === 'partial' ? null : <div className="protocol-empty"><span aria-hidden="true">✓</span><p>No positions found in the markets listed above.</p></div>}
+    {result.status !== 'ok' && result.status !== 'partial' ? <div className="protocol-empty"><span aria-hidden="true">{result.status === 'error' ? '!' : '+'}</span><p>{result.message || 'This integration is still being built. Positions and risk have not been checked.'}</p></div> : result.positions.length ? result.positions.map(p => result.id === 'morpho' && (p.vault || p.id.startsWith('morpho-vault-')) ? <MorphoVaultView key={p.id} position={p} /> : <PositionView key={p.id} position={p} fluid={result.id === 'fluid'} lookupSnapshot={lookupSnapshot} />) : result.status === 'partial' ? null : <div className="protocol-empty"><span aria-hidden="true">✓</span><p>No positions found in the markets listed above.</p></div>}
   </article>;
 }
 function WalletView({ wallet }: { wallet: WalletBalances }) {
