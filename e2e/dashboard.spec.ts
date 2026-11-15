@@ -1010,7 +1010,7 @@ test('finds lower borrow APRs and higher Morpho vault supply APRs without changi
     await route.fulfill({ json: {
       targetIds: targets.map((t: any) => t.id), checkedAt: '2026-11-15T12:00:00Z',
       coverage: [{ protocol: 'Aave v3', network: 'ethereum', status: 'ok' }, { protocol: 'Fluid', network: 'plasma', status: 'error', message: 'Provider unavailable' }],
-      alternatives: targets.flatMap((t: any) => [{ targetId: t.id, protocol: t.borrowed ? 'Morpho' : 'Fluid', network: 'arbitrum', market: '0x2222222222222222222222222222222222222222', label: 'Better verified market', liquidity: t.borrowed ? (marketReads === 1 ? { amount: 123456.789, symbol: 'GHO', token: t.borrowed, note: 'Morpho total available liquidity from supplied assets minus borrowed assets.' } : marketReads === 2 ? { amount: 0, symbol: 'GHO', token: t.borrowed, note: 'Borrowing capacity exhausted.' } : null) : null, supplyApr: t.borrowed ? 0 : .07, borrowApr: t.borrowed ? (marketReads === 1 ? .03 : .02) : null, lltv: .8, block: '100', url: 'https://app.morpho.org/', note: 'Instant protocol rate.' }, { targetId: t.id, protocol: 'Compound', network: 'ethereum', market: '0x3333333333333333333333333333333333333333', label: 'Worse rate', supplyApr: .02, borrowApr: t.borrowed ? .06 : null, lltv: .75, block: '100', url: 'https://app.compound.finance/', note: '' }, { targetId: t.id, protocol: 'Fluid', network: 'arbitrum', market: '0x4444444444444444444444444444444444444444', label: 'Liquidity unknown', supplyApr: .02, borrowApr: t.borrowed ? .035 : null, lltv: .8, block: '100', url: 'https://fluid.instadapp.io/', note: '', liquidity: null }]),
+      alternatives: targets.flatMap((t: any) => [{ targetId: t.id, protocol: t.borrowed ? 'Morpho' : 'Fluid', network: 'arbitrum', market: '0x2222222222222222222222222222222222222222', label: 'Better verified market', liquidity: t.borrowed ? (marketReads === 1 ? { amount: 123456.789, symbol: 'GHO', token: t.borrowed, note: 'Morpho total available liquidity from supplied assets minus borrowed assets.' } : marketReads === 2 ? { amount: 0, symbol: 'GHO', token: t.borrowed, note: 'Borrowing capacity exhausted.' } : null) : null, supplyApr: t.borrowed ? 0 : .07, borrowApr: t.borrowed ? (marketReads === 1 ? .03 : .02) : null, lltv: .8, block: '100', url: 'https://app.morpho.org/', note: 'Instant protocol rate.' }, { targetId: t.id, protocol: 'Compound', network: 'ethereum', market: '0x3333333333333333333333333333333333333333', label: 'Worse rate', supplyApr: .02, borrowApr: t.borrowed ? .06 : null, lltv: .75, block: '100', url: 'https://app.compound.finance/', note: '' }, { targetId: t.id, protocol: 'Fluid', network: 'arbitrum', market: '0x4444444444444444444444444444444444444444', label: 'Liquidity unknown', supplyApr: .02, borrowApr: t.borrowed ? .035 : null, lltv: .8, block: '100', url: 'https://fluid.instadapp.io/', note: '', liquidity: null }, { targetId: t.id, protocol: 'Aave v4', network: 'ethereum', market: '0x5555555555555555555555555555555555555555', label: 'Higher liquidity market', supplyApr: .02, borrowApr: t.borrowed ? .04 : null, lltv: .8, block: '100', url: 'https://app.aave.com/', note: '', liquidity: { amount: 200000, symbol: 'GHO', token: t.borrowed, note: 'Borrowable pool cash.' } }]),
     } });
   });
   await page.goto('/');
@@ -1022,10 +1022,14 @@ test('finds lower borrow APRs and higher Morpho vault supply APRs without changi
   await expect(loan.getByText('Morpho · Arbitrum', { exact: true })).toBeVisible();
   await expect(loan.getByText('≈ 3.00%', { exact: true })).toBeVisible();
   await expect(loan.getByText('1.50 percentage points', { exact: true })).toBeVisible();
-  await expect(loan.getByRole('columnheader')).toHaveText(['Alternative market', 'Supply APR', 'Borrow APR', 'Available Liquidity', 'LLTV', 'Borrow APR reduction']);
+  await expect(loan.getByRole('columnheader')).toHaveText(['Alternative market', 'Supply APR', 'Borrow APR', 'Available Liquidity ↓', 'LLTV', 'Borrow APR reduction']);
   await expect(loan.getByText('123,457 GHO', { exact: true })).toBeVisible();
   await expect(loan.getByText('Total liquidity', { exact: true })).toBeVisible();
   await expect(loan.getByText('Unavailable', { exact: true })).toBeVisible();
+  await expect(loan.locator('tbody tr').first()).toContainText('Higher liquidity market');
+  await expect(loan.locator('tbody tr').nth(1)).toContainText('Better verified market');
+  await expect(loan.locator('tbody tr').last()).toContainText('Liquidity unknown');
+  await expect(loan.locator('.best-alternative-rate strong')).toHaveText('Best verified Borrow APR: ≈ 3.00%');
   await expect(loan.getByText('Worse rate', { exact: true })).toHaveCount(0);
   const vault = page.getByRole('region', { name: 'Alternatives for USDC', exact: true });
   await expect(vault.getByText('≈ 7.00%', { exact: true })).toBeVisible();
@@ -1037,7 +1041,7 @@ test('finds lower borrow APRs and higher Morpho vault supply APRs without changi
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
   expect(marketReads).toBe(1);
   await page.getByRole('button', { name: 'Refresh alternative rates', exact: true }).click();
-  await expect(loan.getByText('≈ 2.00%', { exact: true })).toBeVisible();
+  await expect(loan.locator('tbody tr').filter({ hasText: 'Better verified market' }).locator('td').nth(2)).toHaveText('≈ 2.00%');
   await expect(loan.getByText('0 GHO', { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

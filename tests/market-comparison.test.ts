@@ -60,3 +60,16 @@ it('distinguishes Aave v4 hub routes within one Spoke and excludes only the held
   ]));
   expect(result).toHaveLength(1); expect(result[0].route).toBe('hub/3:hub/4');
 });
+it('sorts borrowing alternatives by descending liquidity, keeps zero above unknown, and uses APR only for ties', () => {
+  const p = position(), id = comparisonTargets([p])[0].id;
+  const liquidity = (amount: number) => ({ amount, symbol: 'GHO', token: p.rows[0].borrowed!.address, note: '' });
+  const result = betterAlternatives(p, 0, search([
+    candidate(id, { market: 'unknown', borrowApr: .001 }),
+    candidate(id, { market: 'smaller', borrowApr: .02, liquidity: liquidity(100) }),
+    candidate(id, { market: 'largest', borrowApr: .04, liquidity: liquidity(1000) }),
+    candidate(id, { market: 'zero', borrowApr: .03, liquidity: liquidity(0) }),
+    candidate(id, { market: 'same-liquidity-cheaper', borrowApr: .03, liquidity: liquidity(1000) }),
+    candidate(id, { market: 'invalid', borrowApr: .002, liquidity: liquidity(NaN) }),
+  ]));
+  expect(result.map(c => c.market)).toEqual(['same-liquidity-cheaper', 'largest', 'smaller', 'zero', 'unknown', 'invalid']);
+});

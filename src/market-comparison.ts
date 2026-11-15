@@ -31,5 +31,13 @@ export function betterAlternatives(position: RecommendationPosition, index: numb
     const key = `${candidate.protocol}:${candidate.network}:${candidate.market.toLowerCase()}:${candidate.route ?? ''}`;
     if (seen.has(key)) return []; seen.add(key);
     return [{ ...candidate, comparedApr: apr, difference: row.borrowed ? baseline - apr : apr - baseline }];
-  }).sort((a, b) => row.borrowed ? a.comparedApr - b.comparedApr : b.comparedApr - a.comparedApr);
+  }).sort((a, b) => {
+    if (row.borrowed) {
+      const liquidity = (value: MarketAlternative) => value.liquidity && Number.isFinite(value.liquidity.amount) && value.liquidity.amount >= 0 ? value.liquidity.amount : -1;
+      const byLiquidity = liquidity(b) - liquidity(a);
+      if (byLiquidity !== 0) return byLiquidity;
+      return a.comparedApr - b.comparedApr;
+    }
+    return b.comparedApr - a.comparedApr;
+  });
 }
