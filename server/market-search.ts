@@ -1,6 +1,7 @@
 import type { ComparisonTarget, MarketSearch } from '../src/market-comparison.js';
 import { networkOrder } from '../src/networks.js';
 import type { NetworkId } from '../src/types.js';
+import { resolveTokenMatches } from './token-discovery.js';
 import { networks } from './networks.js';
 import { makeClient, type ChainClient } from './rpc.js';
 import { expandTargets, readAaveMarkets, readCompoundMarkets, type Reader } from './market-readers.js';
@@ -11,10 +12,11 @@ const readers: Record<string, { name: string; read: Reader }> = {
  'aave-v3': { name: 'Aave v3', read: readAaveMarkets }, 'aave-v4': { name: 'Aave v4', read: readV4Markets },
  compound: { name: 'Compound', read: readCompoundMarkets }, morpho: { name: 'Morpho', read: readMorphoMarkets }, fluid: { name: 'Fluid', read: readFluidMarkets },
 };
-export async function searchMarkets(targets: ComparisonTarget[], clientFor: (network: NetworkId) => ChainClient = makeClient, sources = readers): Promise<MarketSearch> {
+export async function searchMarkets(targets: ComparisonTarget[], clientFor: (network: NetworkId) => ChainClient = makeClient, sources = readers, discover = resolveTokenMatches): Promise<MarketSearch> {
+  const tokenMatches = await discover(targets);
   const results = await Promise.all(networkOrder.map(async network => {
     const coverage: MarketSearch['coverage'] = [], alternatives: MarketSearch['alternatives'] = [];
-    const expanded = expandTargets(targets, network);
+    const expanded = expandTargets(targets, network, tokenMatches.matches);
     if (!expanded.length) return { coverage, alternatives };
     try {
       const client = clientFor(network);
@@ -33,5 +35,5 @@ export async function searchMarkets(targets: ComparisonTarget[], clientFor: (net
     }
     return { coverage, alternatives };
   }));
-  return { targetIds: targets.map(t => t.id), checkedAt: new Date().toISOString(), alternatives: results.flatMap(r => r.alternatives), coverage: results.flatMap(r => r.coverage) };
+  return { tokenDiscovery: tokenMatches.reports, targetIds: targets.map(t => t.id), checkedAt: new Date().toISOString(), alternatives: results.flatMap(r => r.alternatives), coverage: results.flatMap(r => r.coverage) };
 }

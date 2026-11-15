@@ -5,7 +5,14 @@ export interface MarketAlternative {
   targetId: string; protocol: string; network: NetworkId; market: string; route?: string; label: string;
   liquidity?: MarketLiquidity | null; supplyApr: number; borrowApr: number | null; lltv: number | null; block: string; url: string; note: string;
 }
-export interface MarketSearch { targetIds?: string[]; checkedAt: string; alternatives: MarketAlternative[]; coverage: { protocol: string; network: NetworkId; status: 'ok' | 'partial' | 'error'; message?: string }[] }
+export interface TokenDiscoveryReport {
+  network: NetworkId; token: string; label?: string;
+  status: 'manual' | 'found' | 'not-found' | 'unavailable' | 'conflict';
+  matches: Partial<Record<NetworkId, string>>;
+  sources: { provider: 'CoinGecko' | 'CoinMarketCap'; assetId: string; url: string }[];
+  warnings: string[];
+}
+export interface MarketSearch { tokenDiscovery?: TokenDiscoveryReport[]; targetIds?: string[]; checkedAt: string; alternatives: MarketAlternative[]; coverage: { protocol: string; network: NetworkId; status: 'ok' | 'partial' | 'error'; message?: string }[] }
 
 import type { RecommendationPosition } from './recommendations';
 import { supplyApr, borrowApr } from './monthly-interest';

@@ -1050,3 +1050,36 @@ test('finds lower borrow APRs and higher Morpho vault supply APRs without changi
   await expect(loan.getByText('Market search is unavailable. Refresh alternative rates to retry.', { exact: true })).toBeVisible();
   await expect(page.locator('.recommendation-card').first().locator('tbody tr').first().locator('td').last()).toContainText('4.50%');
 });
+
+test('shows automatic token-match provenance, manual priority and lookup failures without losing current rates', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = [fixture.protocols[0]];
+  const assets = fixture.protocols[0].positions[0].assets;
+  const weth = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', gho = '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', unlisted = '0x0000000000000000000000000000000000000123';
+  assets[0].address = weth; assets[1].address = gho; assets[1].symbol = 'GHO';
+  assets.push({ ...assets[0], address: unlisted, symbol: 'UNLISTED', supplied: 10 });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => route.fulfill({ json: {
+    checkedAt: '2026-11-15T12:00:00Z', alternatives: [], coverage: [], tokenDiscovery: [
+      { network: 'ethereum', token: weth, label: 'wrapped-ether', status: 'found', matches: { ethereum: weth, arbitrum: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1' }, sources: [{ provider: 'CoinGecko', assetId: 'weth', url: 'https://www.coingecko.com/en/coins/weth' }, { provider: 'CoinMarketCap', assetId: '2396', url: 'https://coinmarketcap.com/currencies/weth/' }], warnings: [] },
+      { network: 'ethereum', token: gho, label: 'GHO', status: 'manual', matches: { ethereum: gho, plasma: '0xb77e872a68c62cfc0dfb02c067ecc3da23b4bbf3' }, sources: [], warnings: [] },
+      { network: 'ethereum', token: unlisted, status: 'unavailable', matches: { ethereum: unlisted }, sources: [], warnings: ['CoinGecko lookup could not be completed.'] },
+    ],
+  } }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const total = await page.locator('.total-npl > strong').textContent();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await page.getByText('Token matching · 1 automatic · 1 manual', { exact: true }).click();
+  const details = page.locator('.token-discovery');
+  await expect(details.getByRole('link', { name: /View CoinGecko record/ })).toHaveAttribute('href', 'https://www.coingecko.com/en/coins/weth');
+  await expect(details.getByRole('link', { name: /View CoinMarketCap record/ })).toHaveAttribute('href', 'https://coinmarketcap.com/currencies/weth/');
+  await expect(details.getByText('Manual match', { exact: true })).toBeVisible();
+  await expect(details.getByText('Automatic lookup unavailable', { exact: true })).toBeVisible();
+  await expect(page.getByText(/Some automatic token matches could not be verified/)).toBeVisible();
+  await expect(page.locator('.recommendation-card').first().getByRole('columnheader', { name: 'Borrow APR', exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Wallet Overview', exact: true }).click();
+  await expect(page.locator('.total-npl > strong')).toHaveText(total!);
+});

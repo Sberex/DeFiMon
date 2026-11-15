@@ -21,13 +21,14 @@ export function parseTokenMatches(value: unknown): TokenMatches {
   }
   return result;
 }
-const tokenMatches = parseTokenMatches(JSON.parse(readFileSync(new URL('../config/token-matches.json', import.meta.url), 'utf8')));
-// The editable file is the sole cross-chain identity source. Never infer matches from API tickers.
-export function correspondingTokens(address: string, from: NetworkId, to: NetworkId, matches: TokenMatches = tokenMatches): string[] {
+export const manualTokenMatches = parseTokenMatches(JSON.parse(readFileSync(new URL('../config/token-matches.json', import.meta.url), 'utf8')));
+// Manual groups take precedence. Additional groups must be verified by source network/contract identity.
+export function correspondingTokens(address: string, from: NetworkId, to: NetworkId, matches: TokenMatches = manualTokenMatches): string[] {
   const key = normalizeMarketToken(address, from);
   if (from === to) return [key];
-  const group = Object.values(matches).find(addresses => addresses[from]?.toLowerCase() === key);
-  return group?.[to] ? [group[to]!.toLowerCase()] : [];
+  const groups = Object.values(matches).filter(addresses => addresses[from]?.toLowerCase() === key);
+  const destinations = [...new Set(groups.flatMap(group => group[to] ? [group[to]!.toLowerCase()] : []))];
+  return destinations.length === 1 ? destinations : [];
 }
 export function normalizeMarketToken(address: string, network: NetworkId) {
   return address.toLowerCase() === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' ? networks[network].wrappedNative.toLowerCase() : address.toLowerCase();

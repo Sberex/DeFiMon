@@ -3,13 +3,13 @@ import type { ComparisonTarget, MarketAlternative } from '../src/market-comparis
 import type { NetworkId } from '../src/types.js';
 import type { ChainClient } from './rpc.js';
 import { networks } from './networks.js';
-import { correspondingTokens, normalizeMarketToken } from './market-tokens.js';
+import { correspondingTokens, normalizeMarketToken, type TokenMatches } from './market-tokens.js';
 import { aaveLiquidity, compoundLiquidity } from './market-liquidity.js';
 import { perSecondApr, rayApr } from './rates.js';
 export type Target = ComparisonTarget & { supplies: string[]; borrows: string[]; allSupplies: string[]; allBorrows: string[] };
 export type Reader = (client: ChainClient, network: NetworkId, block: bigint, targets: Target[], warn: (message: string) => void) => Promise<MarketAlternative[]>;
-export function expandTargets(targets: ComparisonTarget[], network: NetworkId): Target[] {
-  return targets.map(t => ({ ...t, supplies: correspondingTokens(t.supplied, t.network, network), borrows: t.borrowed ? correspondingTokens(t.borrowed, t.network, network) : [], allSupplies: (t.supplyBasket ?? [t.supplied]).flatMap(a => correspondingTokens(a, t.network, network)), allBorrows: (t.borrowBasket ?? (t.borrowed ? [t.borrowed] : [])).flatMap(a => correspondingTokens(a, t.network, network)) })).filter(t => t.supplies.length && (!t.borrowed || t.borrows.length));
+export function expandTargets(targets: ComparisonTarget[], network: NetworkId, matches?: TokenMatches): Target[] {
+  return targets.map(t => ({ ...t, supplies: correspondingTokens(t.supplied, t.network, network, matches), borrows: t.borrowed ? correspondingTokens(t.borrowed, t.network, network, matches) : [], allSupplies: (t.supplyBasket ?? [t.supplied]).flatMap(a => correspondingTokens(a, t.network, network, matches)), allBorrows: (t.borrowBasket ?? (t.borrowed ? [t.borrowed] : [])).flatMap(a => correspondingTokens(a, t.network, network, matches)) })).filter(t => t.supplies.length && (!t.borrowed || t.borrows.length));
 }
 export function option(target: Target, protocol: string, network: NetworkId, block: bigint, market: string, label: string, supplyApr: number, borrowApr: number | null, lltv: number | null, note = ''): MarketAlternative {
   const url = protocol === 'Morpho' ? `https://app.morpho.org/${network}/market/${market}` : protocol === 'Fluid' ? 'https://fluid.instadapp.io/' : protocol === 'Compound' ? 'https://app.compound.finance/' : 'https://app.aave.com/';

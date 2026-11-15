@@ -12,7 +12,7 @@ it('uses the explicit USDT/USDT0 match in both directions without relying on mat
   expect(correspondingTokens(usdt0, 'plasma', 'arbitrum')).toEqual(['0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9']);
 });
 it('keeps unlisted chain deployments and different USDC wrappers out of cross-network searches', () => {
-  expect(correspondingTokens('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 'ethereum', 'plasma')).toEqual([]);
+  expect(correspondingTokens('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 'ethereum', 'plasma')).toEqual(['0x2d661c89d812261039af9764eceaaee884f5f67f']);
   expect(correspondingTokens('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', 'ethereum', 'plasma')).toEqual([]);
   expect(correspondingTokens('0xaf88d065e77c8cc2239327c5edb3a432268e5831', 'arbitrum', 'ethereum')).toEqual(['0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48']);
   expect(correspondingTokens('0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', 'arbitrum', 'ethereum')).toEqual([]);
