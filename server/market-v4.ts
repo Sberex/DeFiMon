@@ -1,9 +1,11 @@
 import { aaveV4SpokeAbi as spoke, aaveV4TokenAbi as token } from './abis/aave-v4.js';
 import { AAVE_V4_SPOKES, AAVE_V4_TOKENIZATION_SPOKES } from './deployments/aave-v4.js';
+import { v4Liquidity } from './market-liquidity.js';
 import { readV4HubRates } from './aave-v4-rates.js';
 import { limited, option, type Reader } from './market-readers.js';
 export const readV4Markets: Reader = async (client, network, block, targets, warn) => {
   const hubs = new Map<string, ReturnType<typeof readV4HubRates>>();
+  const liquidities = new Map<string, ReturnType<typeof v4Liquidity>>();
   const rates = (reserve: { hub: `0x${string}`; assetId: number; underlying: `0x${string}` }) => {
     const key = `${reserve.hub}:${reserve.assetId}`;
     if (!hubs.has(key)) hubs.set(key, readV4HubRates(client, reserve.hub, BigInt(reserve.assetId), reserve.underlying, block));
@@ -27,7 +29,10 @@ export const readV4Markets: Reader = async (client, network, block, targets, war
         for (const borrow of reserves.filter(r => target.borrows.includes(r.underlying.toLowerCase()) && (r.flags & 3) === 0 && (r.flags & 4) !== 0)) {
           const br = await rates(borrow);
           if (!br) { warn('Some Aave v4 rates are unavailable.'); continue; }
-          options.push({ ...option(target, 'Aave v4', network, block, market.address, `${market.label} · reserves ${supply.assetId}/${borrow.assetId}`, sr.supplyRate.apr, br.baseApr * (1 + supply.collateralRisk / 10000), config.collateralFactor / 10000, 'Estimated new-loan APR for this single collateral, including its current risk premium. A multi-collateral loan can have a different premium. Caps and available liquidity are not a transaction quote.'), route: `${supply.hub.toLowerCase()}/${supply.assetId}:${borrow.hub.toLowerCase()}/${borrow.assetId}` });
+          const liquidityKey = `${market.address}:${borrow.hub}:${borrow.assetId}`;
+          if (!liquidities.has(liquidityKey)) liquidities.set(liquidityKey, v4Liquidity(client, borrow.hub, BigInt(borrow.assetId), market.address, borrow.underlying, block));
+          const liquidity = await liquidities.get(liquidityKey)!;
+          options.push({ ...option(target, 'Aave v4', network, block, market.address, `${market.label} · reserves ${supply.assetId}/${borrow.assetId}`, sr.supplyRate.apr, br.baseApr * (1 + supply.collateralRisk / 10000), config.collateralFactor / 10000, 'Estimated new-loan APR for this single collateral, including its current risk premium. A multi-collateral loan can have a different premium. Caps and available liquidity are not a transaction quote.'), liquidity, route: `${supply.hub.toLowerCase()}/${supply.assetId}:${borrow.hub.toLowerCase()}/${borrow.assetId}` });
         }
       }
     }

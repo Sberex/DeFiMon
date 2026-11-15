@@ -2,6 +2,7 @@ import { isAddress, type Address, type Hex } from 'viem';
 import { createMorphoQuery } from './morpho-api.js';
 import { createMorphoRates } from './morpho-rates.js';
 import { morphoFactoryAbi } from './abis/morpho.js';
+import { liquidityQuote, tokenMetadata } from './market-liquidity.js';
 import { networks } from './networks.js';
 import { limited, option, type Reader } from './market-readers.js';
 type Obj = Record<string, unknown>;
@@ -36,7 +37,9 @@ export const readMorphoMarkets: Reader = async (client, network, block, targets,
       const entry = await rates.marketQuote(row.uniqueKey as Hex);
       if (target.borrowed) {
         if (!target.supplies.includes(entry.params.collateralToken.toLowerCase()) || !target.borrows.includes(entry.params.loanToken.toLowerCase()) || entry.params.lltv === 0n || entry.state.totalSupplyAssets <= entry.state.totalBorrowAssets || entry.borrowApr === null) return [];
-        return [option(target, 'Morpho', network, block, row.uniqueKey, `Blue market ${row.uniqueKey.slice(0, 10)}…`, 0, entry.borrowApr, Number(entry.params.lltv) / 1e18, 'Isolated collateral earns no protocol lending interest. Instant IRM rate after simulated accrual; excludes reward-token incentives.')];
+        let liquidity = null;
+        try { const metadata = await tokenMetadata(client, entry.params.loanToken, block); liquidity = liquidityQuote(entry.state.totalSupplyAssets - entry.state.totalBorrowAssets, metadata.decimals, metadata.symbol, entry.params.loanToken, 'Morpho total available market liquidity: accrued supplied loan assets minus accrued borrowed loan assets. Collateral TVL is not included.'); } catch { /* Keep verified rates when liquidity metadata is unavailable. */ }
+        return [{ ...option(target, 'Morpho', network, block, row.uniqueKey, `Blue market ${row.uniqueKey.slice(0, 10)}…`, 0, entry.borrowApr, Number(entry.params.lltv) / 1e18, 'Isolated collateral earns no protocol lending interest. Instant IRM rate after simulated accrual; excludes reward-token incentives.'), liquidity }];
       }
       if (!target.supplies.includes(entry.params.loanToken.toLowerCase())) return [];
       return [option(target, 'Morpho', network, block, row.uniqueKey, `Blue lending market ${row.uniqueKey.slice(0, 10)}…`, entry.apr, null, null, 'Direct lending into one isolated market, not a diversified vault. Rate excludes reward-token incentives.')];

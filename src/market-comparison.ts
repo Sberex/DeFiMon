@@ -1,8 +1,9 @@
 import type { NetworkId } from './types';
 export interface ComparisonTarget { id: string; network: NetworkId; supplied: string; borrowed?: string; supplyBasket?: string[]; borrowBasket?: string[] }
+export interface MarketLiquidity { amount: number; symbol: string; token: string; note: string }
 export interface MarketAlternative {
   targetId: string; protocol: string; network: NetworkId; market: string; route?: string; label: string;
-  supplyApr: number; borrowApr: number | null; lltv: number | null; block: string; url: string; note: string;
+  liquidity?: MarketLiquidity | null; supplyApr: number; borrowApr: number | null; lltv: number | null; block: string; url: string; note: string;
 }
 export interface MarketSearch { targetIds?: string[]; checkedAt: string; alternatives: MarketAlternative[]; coverage: { protocol: string; network: NetworkId; status: 'ok' | 'partial' | 'error'; message?: string }[] }
 

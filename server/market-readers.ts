@@ -4,6 +4,7 @@ import type { NetworkId } from '../src/types.js';
 import type { ChainClient } from './rpc.js';
 import { networks } from './networks.js';
 import { correspondingTokens, normalizeMarketToken } from './market-tokens.js';
+import { aaveLiquidity, compoundLiquidity } from './market-liquidity.js';
 import { perSecondApr, rayApr } from './rates.js';
 export type Target = ComparisonTarget & { supplies: string[]; borrows: string[]; allSupplies: string[]; allBorrows: string[] };
 export type Reader = (client: ChainClient, network: NetworkId, block: bigint, targets: Target[], warn: (message: string) => void) => Promise<MarketAlternative[]>;
@@ -39,12 +40,13 @@ export const readAaveMarkets: Reader = async (client, network, block, targets, w
       client.readContract({ address: data, abi: aaveAbi, functionName: 'getReserveData', args: [r.tokenAddress], blockNumber: block }),
       client.readContract({ address: pool, abi: poolAbi, functionName: 'getConfiguration', args: [r.tokenAddress], blockNumber: block }),
     ]);
-    return { address: r.tokenAddress.toLowerCase(), config, rates, bits: flags.data };
+    const liquidity = targets.some(t => t.borrows.includes(r.tokenAddress.toLowerCase())) ? await aaveLiquidity(client, data, pool, r.tokenAddress, flags.data, Number(config[0]), rates[3] + rates[4], block) : null;
+    return { address: r.tokenAddress.toLowerCase(), config, rates, bits: flags.data, liquidity };
   }, warn);
   return targets.flatMap(t => rows.filter(s => t.supplies.includes(s.address) && s.config[8] && !s.config[9] && (s.bits & (1n << 60n)) === 0n).flatMap(s => {
     if (!t.borrowed) return [option(t, 'Aave v3', network, block, pool, 'Main market', rayApr(s.rates[5]), null, null)];
     if (!s.config[5] || s.config[2] === 0n) return [];
-    return rows.filter(b => t.borrows.includes(b.address) && b.config[6] && b.config[8] && !b.config[9] && (b.bits & (1n << 60n)) === 0n && ((((s.bits >> 212n) & ((1n << 40n) - 1n)) === 0n) || (b.bits & (1n << 61n)) !== 0n)).map(b => option(t, 'Aave v3', network, block, pool, 'Main market', rayApr(s.rates[5]), rayApr(b.rates[6]), Number(s.config[2]) / 10000, 'Variable borrowing APR; standard collateral configuration. Caps, eMode and available liquidity must be checked before moving a loan.'));
+    return rows.filter(b => t.borrows.includes(b.address) && b.config[6] && b.config[8] && !b.config[9] && (b.bits & (1n << 60n)) === 0n && ((((s.bits >> 212n) & ((1n << 40n) - 1n)) === 0n) || (b.bits & (1n << 61n)) !== 0n)).map(b => ({ ...option(t, 'Aave v3', network, block, pool, 'Main market', rayApr(s.rates[5]), rayApr(b.rates[6]), Number(s.config[2]) / 10000, 'Variable borrowing APR; standard collateral configuration. Caps, eMode and available liquidity must be checked before moving a loan.'), liquidity: b.liquidity }));
   }));
 };
 const comet = parseAbi([
@@ -68,11 +70,12 @@ export const readCompoundMarkets: Reader = async (client, network, block, target
       client.readContract({ address: market.address, abi: comet, functionName: 'isSupplyPaused', blockNumber: block }),
       client.readContract({ address: market.address, abi: comet, functionName: 'isWithdrawPaused', blockNumber: block }),
     ]);
+    const liquidity = targets.some(t => t.borrowed && t.borrows.includes(base.toLowerCase())) ? await compoundLiquidity(client, market.address, base, block) : null;
     return targets.flatMap(t => {
       if (supplyPaused || (t.borrowed && borrowPaused)) return [];
       if (!t.borrowed) return t.supplies.includes(base.toLowerCase()) ? [option(t, 'Compound', network, block, market.address, market.label, perSecondApr(supply), null, null)] : [];
       if (!t.borrows.includes(base.toLowerCase())) return [];
-      return collateral.filter(c => t.supplies.includes(c.asset.toLowerCase()) && c.borrowCollateralFactor > 0n && c.supplyCap > 0n).map(c => option(t, 'Compound', network, block, market.address, market.label, 0, perSecondApr(borrow), Number(c.liquidateCollateralFactor) / 1e18, 'Collateral earns no protocol lending interest. Rates exclude COMP incentives; supply caps and available liquidity may limit entry.'));
+      return collateral.filter(c => t.supplies.includes(c.asset.toLowerCase()) && c.borrowCollateralFactor > 0n && c.supplyCap > 0n).map(c => ({ ...option(t, 'Compound', network, block, market.address, market.label, 0, perSecondApr(borrow), Number(c.liquidateCollateralFactor) / 1e18, 'Collateral earns no protocol lending interest. Rates exclude COMP incentives; supply caps and available liquidity may limit entry.'), liquidity }));
     });
   }, warn);
   return rows.flat();

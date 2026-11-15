@@ -27,13 +27,15 @@ it('Aave v4 includes single-collateral risk premium and rejects paused or non-bo
 });
 it('Fluid smart vaults require the entire source basket and select the correct token component rate', async () => {
   const client = { readContract: async ({ functionName }: any) => {
+    if (functionName === 'decimals') return 6;
+    if (functionName === 'symbol') return 'USDT';
     if (functionName === 'getAllVaultsAddresses') return [vault];
-    if (functionName === 'getVaultEntireData') return { vault, isSmartCol: true, isSmartDebt: false, constantVariables: { vaultId: 10n, supply: vault, borrow: vault, supplyToken: { token0: other, token1: supply }, borrowToken: { token0: debt } }, configs: { collateralFactor: 8000, liquidationThreshold: 8500 }, exchangePricesAndRates: { supplyRateVault: 0n, borrowRateVault: 0n } };
+    if (functionName === 'getVaultEntireData') return { vault, isSmartCol: true, isSmartDebt: false, constantVariables: { vaultId: 10n, supply: vault, borrow: vault, supplyToken: { token0: other, token1: supply }, borrowToken: { token0: debt } }, configs: { collateralFactor: 8000, liquidationThreshold: 8500 }, limitsAndAvailability: { borrowable: 700000000n }, exchangePricesAndRates: { supplyRateVault: 0n, borrowRateVault: 0n } };
     throw new Error('Unexpected read');
   } } as unknown as ChainClient;
   expect(await readFluidMarkets(client, 'ethereum', 100n, expandTargets([baseTarget], 'ethereum'), () => {})).toEqual([]);
   const result = await readFluidMarkets(client, 'ethereum', 100n, expandTargets([{ ...baseTarget, supplyBasket: [supply, other], borrowBasket: [debt] }], 'ethereum'), () => {});
-  expect(result).toHaveLength(1); expect(result[0]).toMatchObject({ supplyApr: .02, borrowApr: .03, lltv: .85 });
+  expect(result).toHaveLength(1); expect(result[0]).toMatchObject({ supplyApr: .02, borrowApr: .03, lltv: .85, liquidity: { amount: 700, symbol: 'USDT', token: debt } });
 });
 it('Morpho vault searches survive a failed direct-market query and reject wrong-asset metadata', async () => {
   vi.stubGlobal('fetch', async (_url: string, options: RequestInit) => {
@@ -47,4 +49,21 @@ it('Morpho vault searches survive a failed direct-market query and reject wrong-
   const result = await readMorphoMarkets(client, 'ethereum', 100n, expandTargets([{ id: 'deposit', network: 'ethereum', supplied: supply }], 'ethereum'), m => warnings.push(m));
   expect(result).toHaveLength(2); expect(result.every(c => c.supplyApr === .07 && c.borrowApr === null)).toBe(true);
   expect(warnings.some(w => w.includes('direct-market discovery'))).toBe(true);
+});
+it('Morpho reports accrued supply minus borrow as total liquidity and retains rates if liquidity metadata fails', async () => {
+  vi.stubGlobal('fetch', async () => new Response(JSON.stringify({ data: { markets: { items: [{ uniqueKey: `0x${'ab'.repeat(32)}` }], pageInfo: { count: 1, countTotal: 1, skip: 0, limit: 100 } } } })));
+  let failed = false;
+  const client = { readContract: async ({ functionName }: any) => {
+    if (failed) throw new Error('secret-provider');
+    if (functionName === 'decimals') return 6;
+    if (functionName === 'symbol') return 'USDC';
+    throw new Error('Unexpected read');
+  } } as unknown as ChainClient;
+  const target = expandTargets([baseTarget], 'ethereum');
+  const rows = await readMorphoMarkets(client, 'ethereum', 100n, target, () => {});
+  expect(rows).toHaveLength(1); expect(rows[0].liquidity).toMatchObject({ amount: .00005, symbol: 'USDC', token: debt });
+  expect(rows[0].liquidity?.note).toContain('minus accrued borrowed');
+  failed = true;
+  const unknown = await readMorphoMarkets(client, 'ethereum', 100n, target, () => {});
+  expect(unknown).toHaveLength(1); expect(unknown[0].borrowApr).toBe(.03); expect(unknown[0].liquidity).toBeNull();
 });

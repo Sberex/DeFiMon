@@ -1,4 +1,5 @@
 import { parseAbi, type Address } from 'viem';
+import { fluidMarketLiquidity } from './fluid-market-liquidity.js';
 import { fluidMarketAbi } from './abis/fluid-markets.js';
 import { lendingResolverAbi } from './abis/fluid.js';
 import { networks } from './networks.js';
@@ -21,11 +22,12 @@ export const readFluidMarkets: Reader = async (client, network, block, targets, 
     const makeAsset = (address: string, supplied: number, borrowed: number): Asset => ({ address, symbol: '', supplied, borrowed, priceUsd: null, collateral: supplied > 0, liquidationThreshold: null, liquidationPriceUsd: null });
     const supplies = suppliesRequired.map(a => makeAsset(a, 1, 0)), borrows = borrowsRequired.map(a => makeAsset(a, 0, 1));
     await applyFluidRates(client, config.dex, block, vault, supplies, borrows);
+    const liquidity = await fluidMarketLiquidity(client, network, block, vault);
     return relevant.flatMap(t => {
       const sr = supplies.find(a => t.supplies.includes(a.address))?.supplyRate?.apr;
       const br = borrows.find(a => t.borrows.includes(a.address))?.borrowRate?.apr;
       if (sr == null || br == null) { warn('Some Fluid vault rates are unavailable.'); return []; }
-      return [option(t, 'Fluid', network, block, address, `Vault ${vault.constantVariables.vaultId}`, sr, br, vault.configs.liquidationThreshold / 10000, vault.isSmartCol || vault.isSmartDebt ? 'Smart-pool per-token interest component; excludes trading income. All required pool tokens must be maintained; only baskets present in the source loan are matched. Borrow fees, limits and liquidity can affect entry.' : 'Current T1 vault rates after magnifiers. Borrow fees, vault limits and available liquidity must be checked before moving a loan.')];
+      return [{ ...option(t, 'Fluid', network, block, address, `Vault ${vault.constantVariables.vaultId}`, sr, br, vault.configs.liquidationThreshold / 10000, vault.isSmartCol || vault.isSmartDebt ? 'Smart-pool per-token interest component; excludes trading income. All required pool tokens must be maintained; only baskets present in the source loan are matched. Borrow fees, limits and liquidity can affect entry.' : 'Current T1 vault rates after magnifiers. Borrow fees, vault limits and available liquidity must be checked before moving a loan.'), liquidity: liquidity.get(borrows.find(a => t.borrows.includes(a.address))!.address) ?? null }];
     });
   }, warn) : [];
   const deposits = targets.filter(t => !t.borrowed);
