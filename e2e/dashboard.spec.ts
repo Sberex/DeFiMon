@@ -990,3 +990,54 @@ test('recommendations follow refreshed wallet data, retain unknown rates, and om
   await expect(section.locator('.vault-recommendation tbody td').last()).toHaveText('Unavailable');
   await expect(page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('finds lower borrow APRs and higher Morpho vault supply APRs without changing the wallet totals', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const aave = fixture.protocols[0];
+  Object.assign(aave.positions[0].assets[0], { symbol: 'wstETH', address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0' });
+  Object.assign(aave.positions[0].assets[1], { symbol: 'GHO', address: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', borrowRate: { apr: .045, note: '' } });
+  const morpho = fixture.protocols.find(p => p.id === 'morpho')!;
+  morpho.positions = [morpho.positions[1]];
+  Object.assign(morpho.positions[0].assets[0], { address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', supplyRate: { apr: .04, note: '' } });
+  fixture.protocols = [aave, morpho];
+  let marketReads = 0;
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', async route => {
+    const { targets } = route.request().postDataJSON(); marketReads++;
+    expect(targets).toHaveLength(2);
+    expect(targets[0]).not.toHaveProperty('wallet');
+    if (marketReads === 3) { await route.fulfill({ status: 503, json: { error: 'Market source unavailable' } }); return; }
+    await route.fulfill({ json: {
+      targetIds: targets.map((t: any) => t.id), checkedAt: '2026-11-15T12:00:00Z',
+      coverage: [{ protocol: 'Aave v3', network: 'ethereum', status: 'ok' }, { protocol: 'Fluid', network: 'plasma', status: 'error', message: 'Provider unavailable' }],
+      alternatives: targets.flatMap((t: any) => [{ targetId: t.id, protocol: t.borrowed ? 'Morpho' : 'Fluid', network: 'arbitrum', market: '0x2222222222222222222222222222222222222222', label: 'Better verified market', supplyApr: t.borrowed ? 0 : .07, borrowApr: t.borrowed ? (marketReads === 1 ? .03 : .02) : null, lltv: .8, block: '100', url: 'https://app.morpho.org/', note: 'Instant protocol rate.' }, { targetId: t.id, protocol: 'Compound', network: 'ethereum', market: '0x3333333333333333333333333333333333333333', label: 'Worse rate', supplyApr: .02, borrowApr: t.borrowed ? .06 : null, lltv: .75, block: '100', url: 'https://app.compound.finance/', note: '' }]),
+    } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const totalBefore = await page.locator('.total-npl > strong').textContent();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  const loan = page.getByRole('region', { name: 'Alternatives for wstETH - GHO', exact: true });
+  await expect(loan.getByText('Morpho · Arbitrum', { exact: true })).toBeVisible();
+  await expect(loan.getByText('≈ 3.00%', { exact: true })).toBeVisible();
+  await expect(loan.getByText('1.50 percentage points', { exact: true })).toBeVisible();
+  await expect(loan.getByText('Worse rate', { exact: true })).toHaveCount(0);
+  const vault = page.getByRole('region', { name: 'Alternatives for USDC', exact: true });
+  await expect(vault.getByText('≈ 7.00%', { exact: true })).toBeVisible();
+  await expect(vault.getByText('3.00 percentage points', { exact: true })).toBeVisible();
+  await page.getByText(/Market search coverage/).click();
+  await expect(page.getByText('Fluid · Plasma: Unavailable · Provider unavailable', { exact: true })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Wallet Overview', exact: true }).click();
+  await expect(page.locator('.total-npl > strong')).toHaveText(totalBefore!);
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  expect(marketReads).toBe(1);
+  await page.getByRole('button', { name: 'Refresh alternative rates', exact: true }).click();
+  await expect(loan.getByText('≈ 2.00%', { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-market-alternatives-mobile.png', fullPage: true });
+  await page.getByRole('button', { name: 'Refresh alternative rates', exact: true }).click();
+  await expect(loan.getByText('Market search is unavailable. Refresh alternative rates to retry.', { exact: true })).toBeVisible();
+  await expect(page.locator('.recommendation-card').first().locator('tbody tr').first().locator('td').last()).toContainText('4.50%');
+});

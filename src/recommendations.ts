@@ -2,7 +2,7 @@ import type { Asset, ChainName, Position, ProtocolResult } from './types';
 
 export const isMorphoVaultPosition = (position: Position) => !!position.vault || position.id.startsWith('morpho-vault-');
 export interface RecommendationPosition {
-  key: string; protocol: string; chain: ChainName; label: string; vault: boolean;
+  key: string; protocolId: string; market?: string; protocol: string; chain: ChainName; label: string; vault: boolean;
   rows: { supplied?: Asset; borrowed?: Asset }[];
 }
 /** Keep pairs inside their original loan; a multi-asset loan has no single allocated collateral/debt pair. */
@@ -18,7 +18,7 @@ export function recommendationPositions(protocols: ProtocolResult[], fallbackCha
         (supplied.length ? supplied : [undefined]).flatMap(supply =>
           (borrowed.length ? borrowed : [undefined]).map(borrow => ({ supplied: supply, borrowed: borrow })));
       const chain = protocol.chain ?? fallbackChain;
-      return [{ key: `${protocol.id}:${chain}:${position.id}`, protocol: protocol.name, chain, label: position.label, vault, rows }];
+      return [{ key: `${protocol.id}:${chain}:${position.id}`, protocolId: protocol.id, market: position.vault?.address ?? position.marketAddress ?? position.id.match(/0x[0-9a-f]{64}|0x[0-9a-f]{40}/i)?.[0], protocol: protocol.name, chain, label: position.label, vault, rows }];
     });
   });
 }

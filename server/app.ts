@@ -1,11 +1,13 @@
 import express from 'express';
+import { searchMarkets } from './market-search.js';
+import type { ComparisonTarget } from '../src/market-comparison.js';
 import { getAddress, isAddress, type Address } from 'viem';
 import { getCombinedPortfolio, getPortfolio } from './portfolio.js';
 import type { ExtraTokens, MerklRewards, NetworkId, Portfolio } from '../src/types.js';
 import { isNetworkId } from '../src/networks.js';
 import { readMerklRewards, unavailableMerkl } from './merkl.js';
 import { networks } from './networks.js';
-export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards) {
+export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets) {
   const app = express();
   app.disable('x-powered-by');
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc) }));
@@ -23,6 +25,19 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     try { res.json(await loadRewards(address)); }
     catch { res.json(unavailableMerkl(address)); }
     finally { activeRewards--; }
+  });
+  let activeMarkets = 0;
+  app.post('/api/recommendations', express.json({ limit: '96kb' }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const targets = req.body?.targets;
+    if (!req.body || Object.keys(req.body).some(k => k !== 'targets') || !Array.isArray(targets) || !targets.length || targets.length > 40 || targets.some(t => !t || typeof t !== 'object' || Object.keys(t).some(k => !['id', 'network', 'supplied', 'borrowed', 'supplyBasket', 'borrowBasket'].includes(k)) || ['supplyBasket', 'borrowBasket'].some(k => t[k] !== undefined && (!Array.isArray(t[k]) || t[k].length > 20 || t[k].some((a: unknown) => typeof a !== 'string' || !isAddress(a, { strict: false }) || /^0x0{40}$/i.test(a)))) || typeof t.id !== 'string' || t.id.length > 240 || !t.id.length || !isNetworkId(t.network) || typeof t.supplied !== 'string' || !isAddress(t.supplied ?? '', { strict: false }) || /^0x0{40}$/i.test(t.supplied) || (t.borrowed !== undefined && (typeof t.borrowed !== 'string' || !isAddress(t.borrowed, { strict: false }) || /^0x0{40}$/i.test(t.borrowed)))) || new Set(targets.map(t => t.id)).size !== targets.length) {
+      res.status(400).json({ error: 'Provide between 1 and 40 unique asset-pair targets with valid networks and token contract addresses.' }); return;
+    }
+    if (activeMarkets >= 2) { res.setHeader('Retry-After', '10'); res.status(429).json({ error: 'Market searches are busy. Try again shortly.' }); return; }
+    activeMarkets++;
+    try { res.json(await loadMarkets(targets as ComparisonTarget[])); }
+    catch { res.status(503).json({ error: 'Market search is unavailable. Current wallet balances are unchanged.' }); }
+    finally { activeMarkets--; }
   });
   app.get('/api/portfolio/:address', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');

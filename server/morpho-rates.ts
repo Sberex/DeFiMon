@@ -50,7 +50,7 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint, morp
       return { supplyRate: rate(morphoSupplyApr(borrowApr, state.totalSupplyAssets, state.totalBorrowAssets, state.fee), 'Current Morpho market APR after its fee; excludes reward incentives and the underlying token’s intrinsic yield.'), borrowRate: rate(borrowApr, 'Current Morpho IRM borrowing APR at the accrued market state; excludes reward incentives.') };
     } catch { return { supplyRate: unavailableRate(), borrowRate: unavailableRate() }; }
   }
-  const markets = new Map<string, Promise<{ params: Params; state: Market; apr: number }>>();
+  const markets = new Map<string, Promise<{ params: Params; state: Market; apr: number; borrowApr: number | null }>>();
   function marketData(id: Hex) {
     if (!markets.has(id)) markets.set(id, (async () => {
       const params = await client.readContract({ address: morphoBlue, abi: core, functionName: 'idToMarketParams', args: [id], blockNumber });
@@ -63,7 +63,7 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint, morp
       const state = decodeFunctionResult({ abi: core, functionName: 'market', data: results[1].returnData });
       const interest = await market(params, state);
       if (interest.supplyRate.apr === null) throw new Error('Market rate unavailable');
-      return { params, state, apr: interest.supplyRate.apr };
+      return { params, state, apr: interest.supplyRate.apr, borrowApr: interest.borrowRate.apr };
     })());
     return markets.get(id)!;
   }
@@ -155,5 +155,5 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint, morp
     const gross = realAssets > totalAssets ? cap : Math.min(interestPerYear / Number(totalAssets), cap);
     return rate(gross * (1 - (pFee ? Number(performance) / 1e18 : 0)) - (mFee ? perSecondApr(management) : 0), 'Current Morpho V2 allocation-based APR estimate after enabled performance/management fees and the distribution-rate cap. Unknown adapter types produce an unavailable rate; no historical average is used.', true);
   }
-  return { market, vault };
+  return { market, vault, marketQuote: marketData };
 }

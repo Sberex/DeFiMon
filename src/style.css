@@ -27,3 +27,7 @@ main{max-width:1600px}.dashboard-layout{display:grid;grid-template-columns:210px
 .vault-recommendation table{min-width:280px}@media(min-width:851px) and (max-width:1050px){.dashboard-content .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 @media(min-width:851px){header{max-width:1600px;padding:0 32px}}
+
+.market-alternatives{border-top:1px solid var(--border);background:#fafcf6;padding:0 20px 20px}.pair-alternatives h4{font-size:13px;margin:20px 0 12px}.pair-alternatives>p,.market-search-status p{font-size:12px;line-height:1.7;color:var(--muted)}.pair-alternatives .table-wrap{margin:0}.pair-alternatives table{min-width:650px}.pair-alternatives a{display:block;color:#45632e;margin:6px 0;font-size:12px}.rate-improvement{color:#39632e;font-weight:600}.market-search-status{margin-bottom:24px}.market-search-status details{font-size:12px;line-height:1.7}.pair-alternatives details p{white-space:normal;max-width:330px}.pair-alternatives td:first-child{min-width:220px;white-space:normal}.pair-alternatives td{white-space:nowrap}.pair-alternatives section+section{border-top:1px solid var(--border);margin-top:18px}
+
+.best-alternative-rate{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}.best-alternative-rate strong{color:#31572b;font-size:13px}.best-alternative-rate span{font-size:12px}.pair-alternatives a svg{width:12px;height:12px;vertical-align:middle}

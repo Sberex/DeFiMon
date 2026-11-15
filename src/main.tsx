@@ -1,9 +1,10 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { InterestRate, IntrinsicRate, MerklAprQuote, MerklRewards, ChainName, NetworkId, Portfolio, Position, ProtocolResult, Risk, WalletBalances } from './types';
 import { assetMonthlyInterest, positionMonthlyInterest, protocolMonthlyInterest, totalMonthlyInterest, supplyApr, borrowApr, annualizedNplApr } from './monthly-interest';
 import { networkNames, networkOrder } from './networks';
-import { isMorphoVaultPosition, recommendationPositions } from './recommendations';
+import { isMorphoVaultPosition, recommendationPositions, type RecommendationPosition } from './recommendations';
+import { betterAlternatives, comparisonId, comparisonTargets, type MarketSearch } from './market-comparison';
 import { collateralAssets, liquidationScenario, calculateLiquidation } from './liquidation';
 import { MerklRewardsView } from './MerklRewards';
 import { applyMerklApr } from './merkl-rates';
@@ -109,20 +110,37 @@ function WalletView({ wallet }: { wallet: WalletBalances }) {
     <p className="wallet-coverage">{wallet.coverage}</p>
   </article>;
 }
-function Recommendations({ portfolio, demo, loading }: { portfolio: Portfolio | null; demo: boolean; loading: boolean }) {
+function MarketAlternatives({ position, search, searching, error, demo }: { position: RecommendationPosition; search: MarketSearch | null; searching: boolean; error: string; demo: boolean }) {
+  return <div className="market-alternatives">{position.rows.map((row, index) => {
+    const candidates = betterAlternatives(position, index, search);
+    const baseline = row.borrowed ? borrowApr(row.borrowed.borrowRate, row.borrowed.merklBorrowRate) : supplyApr(row.supplied?.supplyRate, row.supplied?.intrinsicSupplyRate, row.supplied?.merklSupplyRate);
+    const incomplete = search?.coverage.some(c => c.status !== 'ok');
+    return <section className="pair-alternatives" key={index} aria-label={`Alternatives for ${row.supplied?.symbol ?? 'unknown supply'}${row.borrowed ? ` - ${row.borrowed.symbol}` : ''}`}><h4>{row.borrowed ? 'Lower borrowing APR' : 'Higher supply APR'} · {row.supplied?.symbol ?? '—'}{row.borrowed && ` – ${row.borrowed.symbol}`}</h4>
+      {!demo && !searching && !error && candidates.length > 0 && <p className="best-alternative-rate"><strong>Best verified {row.borrowed ? 'Borrow' : 'Supply'} APR: {netAprText(candidates[0].comparedApr)}</strong><span>{(candidates[0].difference * 100).toFixed(2)} percentage points {row.borrowed ? 'lower' : 'higher'}</span></p>}
+      {demo ? <p>Check a wallet to search live alternative markets.</p> : searching ? <p role="status">Searching supported markets on Ethereum, Plasma and Arbitrum…</p> : error ? <p>{error}</p> : baseline === null ? <p>The current {row.borrowed ? 'Borrow' : 'Supply'} APR is unavailable, so better rates cannot be ranked.</p> : !search ? <p>No market search is available for this pair.</p> : search.targetIds && !search.targetIds.includes(comparisonId(position, index)) ? <p>This pair was not searched. Verified supplied-token addresses are required, and each request supports up to 40 asset combinations.</p> : !candidates.length ? <p>No better APR found in the verified results.{incomplete && ' Search coverage is incomplete; more alternatives may exist.'}</p> : <div className="table-wrap"><table><caption className="sr-only">Better rates for {row.supplied?.symbol}{row.borrowed && ` - ${row.borrowed.symbol}`}</caption><thead><tr><th>Alternative market</th><th>Supply APR</th>{row.borrowed && <><th>Borrow APR</th><th>LLTV</th></>}<th>{row.borrowed ? 'Borrow APR reduction' : 'Supply APR increase'}</th></tr></thead><tbody>{candidates.map(c => <tr key={`${c.protocol}:${c.network}:${c.market}:${c.route ?? ''}`}><td><strong>{c.protocol} · {networkNames[c.network]}</strong><a href={c.url} target="_blank" rel="noreferrer">{c.label} <Arrow /></a><small title={c.market}>{c.market.slice(0, 10)}…{c.market.slice(-6)}</small><details><summary>Market details</summary><p>{c.note}</p><p>Block {c.block} · {search.checkedAt ? new Date(search.checkedAt).toLocaleTimeString() : ''}</p><p>Cross-network moves can require bridging or wrapping. This is a rate comparison; available liquidity, caps, access rules, collateral limits and migration costs are not guaranteed.</p></details></td><td>{netAprText(supplyApr({ apr: c.supplyApr, note: '' }, row.supplied?.intrinsicSupplyRate))}</td>{row.borrowed && <><td>{netAprText(c.borrowApr)}</td><td>{c.lltv === null ? '—' : `${(c.lltv * 100).toFixed(2)}%`}</td></>}<td className="rate-improvement">{(c.difference * 100).toFixed(2)} percentage points</td></tr>)}</tbody></table></div>}
+    </section>;
+  })}</div>;
+}
+function Recommendations({ portfolio, demo, loading, search, searching, searchError, retry }: { portfolio: Portfolio | null; demo: boolean; loading: boolean; search: MarketSearch | null; searching: boolean; searchError: string; retry: () => void }) {
   const positions = portfolio ? recommendationPositions(portfolio.protocols, portfolio.chain === 'Plasma' ? 'Plasma' : portfolio.chain === 'Arbitrum' ? 'Arbitrum' : 'Ethereum') : [];
   return <section className="recommendations" aria-label="Wallet recommendations"><div className="section-label"><h2>Recommendations</h2><span>Current positions and APRs</span></div><p className="recommendations-intro">Compare the supply and borrowing rates for positions in your Wallet Overview.</p>
     {!portfolio ? <div className="recommendations-empty">{loading ? 'Reading your positions…' : 'Check a wallet address or explore the example to see its lending pairs and Morpho vault deposits.'}</div> : <>
-      <div className="notice" role="status">{demo ? 'Example only — these positions and rates are fictional. ' : ''}Rates match Wallet Overview, including matched Merkl rewards and intrinsic yield. These are your current positions; they are not ranked suggestions for new investments.{portfolio.protocols.some(p => p.status !== 'ok') && ' Coverage is partial; unreadable positions are excluded.'}</div>
+      <div className="notice" role="status">{demo ? 'Example only — these positions and rates are fictional. ' : ''}Rates match Wallet Overview, including matched Merkl rewards and intrinsic yield. Alternatives below each position compare the same token pair or deposit token.{portfolio.protocols.some(p => p.status !== 'ok') && ' Coverage is partial; unreadable positions are excluded.'}</div>
+      {!!portfolio && !demo && <div className="market-search-status"><button type="button" className="secondary" disabled={searching} onClick={retry}>{searching ? 'Searching markets…' : 'Refresh alternative rates'}</button><p>Alternative rates include protocol fees and the same verified intrinsic token yield. External Merkl rewards are excluded from alternative rates; current rates retain your matched rewards.</p>{search && <details><summary>Market search coverage · {search.coverage.filter(c => c.status === 'ok').length} of {search.coverage.length} sources completed</summary><p>Aave v4: Ethereum. Aave v3 and Fluid: all three networks. Morpho and Compound: Ethereum and Arbitrum. Cross-network tokens use the reviewed contract list; similar tickers alone are not matched. Up to 40 asset combinations are searched per request.</p><ul>{search.coverage.map(c => <li key={`${c.protocol}:${c.network}`}>{c.protocol} · {networkNames[c.network]}: {c.status === 'ok' ? 'Checked' : c.status === 'partial' ? 'Partially checked' : 'Unavailable'}{c.message && ` · ${c.message}`}</li>)}</ul></details>}</div>}
       {!positions.length ? <div className="recommendations-empty">No supplied or borrowed balances were found in the positions that could be read. Morpho vaults with zero personal deposits are excluded.</div> : <div className="recommendation-list">{positions.map(position => <article className={`recommendation-card${position.vault ? ' vault-recommendation' : ''}`} key={position.key}><div className="recommendation-heading"><div><p>{position.protocol}<span className="chain-badge"> · {position.chain}</span></p><h3>{position.label}</h3></div><span className="recommendation-kind">{position.vault ? 'Vault deposit' : 'Lending position'}</span></div>
         {position.rows.length > 1 && !position.vault && <p className="recommendation-pair-note">Each row shows an asset combination within this same position; balances and interest are not counted again.</p>}
         <div className="table-wrap"><table><caption className="sr-only">{position.protocol} · {position.chain} · {position.label} rates</caption><thead><tr><th>Supplied asset</th><th>Supply APR</th>{!position.vault && <><th>Borrowed asset</th><th>Borrow APR</th></>}</tr></thead><tbody>{position.rows.map((row, index) => <tr key={index}><td>{row.supplied?.symbol ?? '—'}</td><td>{row.supplied ? <SupplyRateView quote={row.supplied.supplyRate} intrinsic={row.supplied.intrinsicSupplyRate} merkl={row.supplied.merklSupplyRate} active /> : '—'}</td>{!position.vault && <><td>{row.borrowed?.symbol ?? '—'}</td><td>{row.borrowed ? <BorrowRateView quote={row.borrowed.borrowRate} merkl={row.borrowed.merklBorrowRate} active /> : '—'}</td></>}</tr>)}</tbody></table></div>
+        <MarketAlternatives position={position} search={search} searching={searching} error={searchError} demo={demo} />
       </article>)}</div>}
     </>}
   </section>;
 }
 function App() {
   const [activeSection, setActiveSection] = useState<'overview' | 'recommendations'>('overview');
+  const [marketSearch, setMarketSearch] = useState<{ snapshot: Portfolio; revision: number; result: MarketSearch } | null>(null);
+  const [searchingMarkets, setSearchingMarkets] = useState(false);
+  const [marketSearchError, setMarketSearchError] = useState('');
+  const [marketRetry, setMarketRetry] = useState(0);
   const [input, setInput] = useState('');
   const [customTokens, setCustomTokens] = useState<{ network: NetworkId; address: string }[]>([]);
   const [tokenNetwork, setTokenNetwork] = useState<NetworkId>('ethereum');
@@ -135,6 +153,26 @@ function App() {
   const data = merklMatch?.portfolio ?? null;
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (activeSection !== 'recommendations' || !rawData || demo) return;
+    if (marketSearch?.snapshot === rawData && marketSearch.revision === marketRetry) return;
+    const targets = comparisonTargets(recommendationPositions(rawData.protocols, rawData.chain === 'Plasma' ? 'Plasma' : rawData.chain === 'Arbitrum' ? 'Arbitrum' : 'Ethereum')).slice(0, 40);
+    if (!targets.length) { setSearchingMarkets(false); setMarketSearchError('No verified token contract addresses are available for this search.'); return; }
+    const request = new AbortController();
+    setSearchingMarkets(true); setMarketSearchError(''); setMarketSearch(null);
+    void (async () => {
+      try {
+        const response = await fetch('/api/recommendations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targets }), signal: request.signal });
+        if (!response.ok) throw new Error('Market search is unavailable. Refresh alternative rates to retry.');
+        const result: MarketSearch = await response.json();
+        if (!Array.isArray(result.alternatives) || !Array.isArray(result.coverage)) throw new Error('Market search returned an unreadable result.');
+        if (!request.signal.aborted) setMarketSearch({ snapshot: rawData, revision: marketRetry, result });
+      } catch { if (!request.signal.aborted) setMarketSearchError('Market search is unavailable. Refresh alternative rates to retry.'); }
+      finally { if (!request.signal.aborted) setSearchingMarkets(false); }
+    })();
+    return () => request.abort();
+  }, [activeSection, rawData, demo, marketRetry]);
+
   const [error, setError] = useState('');
   const controller = useRef<AbortController | null>(null);
   async function search(event?: React.FormEvent) {
@@ -180,7 +218,7 @@ function App() {
       {!!data.wallets?.length && <section className="wallet-section" aria-label="Wallet tokens"><div className="section-label"><h2>Wallet tokens</h2><span>Ethereum · Plasma · Arbitrum</span></div><div className="wallet-list">{data.wallets.map(wallet => <WalletView key={wallet.chain} wallet={wallet} />)}</div></section>}
     </section> : !loading && <section className="empty-state"><div className="section-label"><h2>Your DeFi, in one place</h2><span>Current state only</span></div><div className="protocol-tiles">{names.map(([id, name]) => <div key={id}><span className={`tile-logo ${id}`}>{name.startsWith('Aave') ? 'A' : name === 'Morpho' ? '⋈' : name === 'Fluid' ? '≈' : 'C'}</span><strong>{name}</strong><small>{['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid'].includes(id) ? (id === 'fluid' ? 'Vaults + lending deposits' : id === 'morpho' ? 'Markets + vault deposits' : id === 'aave-v4' ? 'Lending + tokenized deposits' : 'Reader built · verification pending') : 'Integration in progress'}</small></div>)}</div><div className="welcome-note"><span aria-hidden="true"><Arrow /></span><div><h3>Start with a wallet address</h3><p>We’ll read its supported lending positions, subtract debt from supplied assets, and estimate where liquidation could begin.</p></div></div></section>}
     {(rewardsLoading || rewards) && <MerklRewardsView result={rewards} loading={rewardsLoading} demo={demo} matches={merklMatch?.matches} unapplied={merklMatch?.unapplied} />}
-    </div><div id="recommendations-panel" hidden={activeSection !== 'recommendations'}>{activeSection === 'recommendations' && <Recommendations portfolio={data} demo={demo} loading={loading} />}</div></div></div>
+    </div><div id="recommendations-panel" hidden={activeSection !== 'recommendations'}>{activeSection === 'recommendations' && <Recommendations portfolio={data} demo={demo} loading={loading} search={marketSearch?.snapshot === rawData ? marketSearch.result : null} searching={searchingMarkets} searchError={marketSearchError} retry={() => setMarketRetry(n => n + 1)} />}</div></div></div>
     <footer><span>DeFiMon <span className="footer-dot">/</span> Clarity for your on-chain positions.</span><span>Estimates can change. This monitor does not prevent liquidation.</span></footer></main></>;
   async function searchAddress(address: string, watchedTokens = customTokens) {
     // Refresh the displayed wallet even if the search input has been edited.
