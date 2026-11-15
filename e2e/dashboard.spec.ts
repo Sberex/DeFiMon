@@ -531,8 +531,10 @@ test('puts total monthly NPL in the fourth summary card and sums all networks on
   const total = page.getByRole('region', { name: 'Total monthly NPL', exact: true });
   await expect(total).toHaveCount(0);
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(page.locator('.summary-grid > *')).toHaveCount(4);
+  await expect(page.locator('.summary-grid > *')).toHaveCount(5);
   await expect(page.locator('.summary-grid > *').nth(3)).toHaveAttribute('aria-label', 'Total monthly NPL');
+  await expect(page.locator('.summary-grid > *').nth(4)).toHaveAttribute('aria-label', 'Portfolio APR');
+  await expect(page.getByRole('region', { name: 'Portfolio APR', exact: true }).locator('strong')).toHaveText('≈ -0.11%');
   await expect(page.getByText('Lowest health factor', { exact: true })).toHaveCount(0);
   await expect(total).toHaveCount(1);
   await expect(total.locator('strong')).toHaveText('≈ -$4.35');
@@ -755,4 +757,46 @@ test('keeps NPL APR unavailable for zero net value or unknown monthly interest',
   await expect(page.locator('article.aave-v3 .position-net-apr strong')).toHaveText('Unavailable');
   await expect(page.locator('article.fluid .position-net-apr strong')).toHaveText('Unavailable');
   await expect(page.locator('article.fluid .position-stats strong').nth(2)).toHaveText('$2,500.00');
+});
+
+
+test('portfolio APR uses displayed net value including wallet tokens and matches the supplied example', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = [fixture.protocols[0]];
+  fixture.protocols[0].status = 'partial';
+  const p = fixture.protocols[0].positions[0]; p.suppliedUsd = 1552965.90; p.debtUsd = 1273770.34;
+  p.assets = [{ ...p.assets[0], symbol: 'USDC', supplied: p.suppliedUsd, borrowed: p.debtUsd, priceUsd: 1, supplyRate: { apr: 6677.18 * 12 / p.suppliedUsd, note: '' }, borrowRate: { apr: 5622.42 * 12 / p.debtUsd, note: '' } }];
+  fixture.wallets = [{ chain: 'Ethereum', status: 'ok', pricedValueUsd: 900.58, unpricedCount: 0, tokens: [], coverage: 'Example wallet balance' }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$280,096.14');
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ $1,054.76');
+  const apr = page.getByRole('region', { name: 'Portfolio APR', exact: true });
+  await expect(apr.locator('strong')).toHaveText('≈ 4.52%');
+  await expect(apr.getByText('Checked assets only. Partial coverage.', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.locator('.summary-grid').screenshot({ path: '/tmp/defimon-portfolio-apr-desktop.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.locator('.summary-grid').screenshot({ path: '/tmp/defimon-portfolio-apr-mobile.png' });
+});
+
+test('portfolio APR remains unavailable when net value is zero or total NPL cannot be checked', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => {
+    reads++; const fixture = structuredClone(example); fixture.protocols = [fixture.protocols[0]];
+    const p = fixture.protocols[0].positions[0];
+    if (reads === 1) p.suppliedUsd = p.debtUsd;
+    else p.assets[1].borrowRate = { apr: null, note: 'Unknown borrowing interest' };
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const apr = page.getByRole('region', { name: 'Portfolio APR', exact: true });
+  await expect(apr.locator('strong')).toHaveText('Unavailable');
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('Unavailable');
+  await expect(apr.locator('strong')).toHaveText('Unavailable');
 });
