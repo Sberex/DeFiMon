@@ -77,6 +77,12 @@ npm run diagnose:morpho -- 0xYourWalletAddress arbitrum
 
 Deterministic tests cover all four readers, selected-chain contracts, balances/rates/risk, receipt exclusions, wrong-chain rejection, partial failures, and the combined page. This cloud denied the public Arbitrum endpoint (CONNECT 403); live balances and full Morpho API discovery must still be compared locally with the protocol websites. No cloud environment settings were changed or published.
 
+## Dashboard sections
+
+Below the shared wallet search, the desktop layout has a left navigation column and a right content column. **Wallet Overview** is selected initially and contains the existing balances, NPL/APR totals, risk, protocols, wallet tokens and Merkl rewards. **Recommendations** shows current lending positions as `Supplied asset — Supply APR — Borrowed asset — Borrow APR`, with protocol, network and original loan labels. Personal Morpho V1/V2 vault deposits greater than zero appear as `Supplied asset — Supply APR`; managed vaults with zero personal deposits are omitted. Other one-sided lending positions show a dash for the absent side.
+
+Rates reuse the same protocol, intrinsic and matched Merkl components as Wallet Overview. Unknown active rates stay unavailable. Multi-asset loans show asset combinations inside that loan; assets are never paired across unrelated positions, protocols or networks. This section lists the wallet's existing positions rather than ranking or inventing investment opportunities. Switching sections sends no new lookup requests, preserves overview scenario inputs, and does not change totals. A new wallet search or refresh updates both sections from the same response. On smaller screens the menu moves above the content, with wide tables scrolling inside their cards.
+
 ## Morpho vault deposits and associated vaults
 
 Morpho V1/V2 vault deposits are checked on **Ethereum and Arbitrum**, using the selected network’s contracts and block. In addition to the depositor lookups, the dashboard finds vaults associated with the searched address even if its vault share balance is zero or the entire vault has no deposits:

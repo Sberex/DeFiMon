@@ -387,6 +387,12 @@ test('calculates only the largest collateral using manual prices and clears stal
   await card.getByLabel('USDT liquidation price (USD)').fill('0.8');
   await card.getByRole('button', { name: 'Calculate', exact: true }).click();
   await expect(result).toHaveText('$993.75');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(card).toBeHidden();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Wallet Overview', exact: true }).click();
+  await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('30000');
+  await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('0.8');
+  await expect(result).toHaveText('$993.75');
   await expect(card.locator('.position-stats strong').nth(1)).toHaveText('$30,000.00');
   await expect(card.locator('.position-stats strong').nth(4)).toHaveText('1.80');
   await card.getByLabel('USDT liquidation price (USD)').fill('0');
@@ -920,4 +926,67 @@ test('shows Morpho vault supply interest without loan fields and counts own V1/V
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(vaults.nth(2).locator('tbody td').last()).toHaveText('Unavailable');
   await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
+});
+
+test('switches between a two-column overview and recommendations with matching lending rates and nonzero Morpho deposits', async ({ page }) => {
+  await page.goto('/');
+  const nav = page.getByRole('navigation', { name: 'Dashboard sections', exact: true });
+  const overview = nav.getByRole('button', { name: 'Wallet Overview', exact: true });
+  const recommendations = nav.getByRole('button', { name: 'Recommendations', exact: true });
+  await expect(overview).toHaveAttribute('aria-pressed', 'true');
+  await recommendations.click();
+  await expect(page.getByText(/Check a wallet address or explore the example/)).toBeVisible();
+  await page.getByRole('button', { name: /Explore an example/ }).click();
+  const section = page.getByRole('region', { name: 'Wallet recommendations', exact: true });
+  await expect(section).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Wallet results', exact: true })).toBeHidden();
+  await expect(section.locator('.recommendation-card')).not.toHaveCount(0);
+  const first = section.locator('.recommendation-card').first();
+  await expect(first.getByRole('columnheader')).toHaveText(['Supplied asset', 'Supply APR', 'Borrowed asset', 'Borrow APR']);
+  await expect(first.locator('tbody tr').first().locator('td')).toHaveText(['WETH', /^3\.50%Rate details/, 'USDC', /^5\.50%Rate details/]);
+  const vault = section.locator('.vault-recommendation').first();
+  await expect(vault.getByRole('columnheader')).toHaveText(['Supplied asset', 'Supply APR']);
+  await expect(vault.locator('tbody tr').first().locator('td').first()).toHaveText('USDC');
+  await expect(section.getByText(/Example only/)).toBeVisible();
+  const navBox = await nav.boundingBox(); const sectionBox = await section.boundingBox();
+  expect(navBox!.x + navBox!.width).toBeLessThan(sectionBox!.x);
+  await page.screenshot({ path: '/tmp/defimon-recommendations-desktop.png', fullPage: true });
+  await overview.click();
+  await expect(page.getByRole('region', { name: 'Wallet results', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Merkl rewards', exact: true })).toBeVisible();
+  await expect(section).toHaveCount(0);
+  await page.screenshot({ path: '/tmp/defimon-overview-sidebar-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await recommendations.click();
+  await expect(section).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-recommendations-mobile.png', fullPage: true });
+});
+
+test('recommendations follow refreshed wallet data, retain unknown rates, and omit managed-only vaults', async ({ page }) => {
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => {
+    const fixture = structuredClone(example);
+    const morpho = fixture.protocols.find(p => p.id === 'morpho')!;
+    const owned = structuredClone(morpho.positions[1]); owned.id = 'morpho-vault-owned-empty'; owned.label = 'Managed-only vault'; owned.suppliedUsd = 0;
+    owned.assets[0].supplied = 0;
+    owned.vault = { address: 'vault', version: 2, roles: [{ role: 'owner', source: 'api' }], totalAssets: 1000000, totalAssetsUsd: 1000000 };
+    morpho.positions.push(owned);
+    if (reads++ > 0) { morpho.positions[1].assets[0].symbol = 'USDT'; morpho.positions[1].assets[0].supplyRate = undefined; }
+    fixture.protocols = [morpho];
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const section = page.getByRole('region', { name: 'Wallet recommendations', exact: true });
+  await expect(section.locator('.vault-recommendation')).toHaveCount(1);
+  await expect(section.getByText('Managed-only vault', { exact: true })).toHaveCount(0);
+  await expect(section.locator('.vault-recommendation tbody td').first()).toHaveText('USDC');
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(section.locator('.vault-recommendation tbody td').first()).toHaveText('USDT');
+  await expect(section.locator('.vault-recommendation tbody td').last()).toHaveText('Unavailable');
+  await expect(page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });
