@@ -12,10 +12,10 @@ const position = () => {
 };
 const candidate = (targetId: string, changes: Partial<MarketAlternative> = {}): MarketAlternative => ({ targetId, protocol: 'Morpho', network: 'arbitrum', market: '0x2222222222222222222222222222222222222222', label: 'Test market', supplyApr: 0, borrowApr: .03, lltv: .8, block: '100', url: 'https://app.morpho.org/', note: '', ...changes });
 const search = (alternatives: MarketAlternative[]): MarketSearch => ({ checkedAt: '', coverage: [], alternatives });
-it('matches reviewed cross-network addresses, preserving distinct wrappers and unlisted assets', () => {
+it('matches the user-configured cross-network addresses, including USDT0, while excluding unlisted assets', () => {
   expect(correspondingTokens('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', 'ethereum', 'arbitrum')).toEqual(['0x5979d7b546e38e414f7e9822514be443a4800529']);
   expect(correspondingTokens('0x0000000000000000000000000000000000001234', 'ethereum', 'arbitrum')).toEqual([]);
-  expect(correspondingTokens('0xdac17f958d2ee523a2206206994597c13d831ec7', 'ethereum', 'plasma')).not.toContain('0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb');
+  expect(correspondingTokens('0xdac17f958d2ee523a2206206994597c13d831ec7', 'ethereum', 'plasma')).toEqual(['0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb']);
 });
 it('ranks strictly lower borrowing rates for the requested pair, excluding equal, unknown and current markets', () => {
   const p = position(), id = comparisonTargets([p])[0].id;
