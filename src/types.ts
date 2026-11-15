@@ -27,6 +27,7 @@ export interface Asset {
 export interface Position {
   id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;
   risk: Risk; assets: Asset[]; notes: string[];
+  vault?: { address: string; version: 1 | 2; roles: { role: 'creator' | 'curator' | 'owner'; source: 'onchain' | 'api' }[]; totalAssets: number | null; totalAssetsUsd: number | null };
   marketAddress?: string;
   liquidationModel?: 'linear' | 'oracle-ratio' | 'unavailable';
   liquidationQuote?: { current: number; threshold: number; unit: string };

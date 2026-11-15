@@ -800,3 +800,34 @@ test('portfolio APR remains unavailable when net value is zero or total NPL cann
   await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('Unavailable');
   await expect(apr.locator('strong')).toHaveText('Unavailable');
 });
+
+
+test('shows Morpho creator/curator/owner vaults with zero deposits without adding managed assets to portfolio totals', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const morpho = fixture.protocols.find(p => p.id === 'morpho')!; fixture.protocols = [morpho];
+  const depositor = structuredClone(morpho.positions[1]);
+  depositor.vault = { address: '0x2222222222222222222222222222222222222222', version: 1, roles: [], totalAssets: 500000, totalAssetsUsd: 500000 };
+  const created = structuredClone(depositor); created.id = 'morpho-vault-created'; created.label = 'Morpho vault V1 · Created zero deposit vault'; created.suppliedUsd = 0; created.assets[0].supplied = 0;
+  created.vault = { address: '0x3333333333333333333333333333333333333333', version: 1, roles: [{ role: 'creator', source: 'api' }, { role: 'curator', source: 'onchain' }], totalAssets: 1000000, totalAssetsUsd: 1000000 };
+  const owned = structuredClone(created); owned.id = 'morpho-vault-owned'; owned.label = 'Morpho vault V2 · Empty owned vault';
+  owned.vault = { address: '0x4444444444444444444444444444444444444444', version: 2, roles: [{ role: 'owner', source: 'onchain' }], totalAssets: 0, totalAssetsUsd: 0 };
+  morpho.positions = [depositor, created, owned];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.morpho');
+  await expect(card.getByRole('region', { name: 'Morpho vault information', exact: true })).toHaveCount(3);
+  await expect(card.getByText('Your roles: Creator (API record) · Curator', { exact: true })).toBeVisible();
+  await expect(card.getByText('Your roles: Owner', { exact: true })).toBeVisible();
+  await expect(card.getByText('Vault assets · all depositors: 1,000,000 USDC · $1,000,000.00', { exact: true })).toBeVisible();
+  const empty = card.locator('.position').filter({ has: page.getByRole('heading', { name: 'Morpho vault V2 · Empty owned vault', exact: true }) });
+  await expect(empty.locator('.position-stats strong').first()).toHaveText('$0.00');
+  await expect(empty.getByText('Vault assets · all depositors: 0 USDC · $0.00', { exact: true })).toBeVisible();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$1,000.00');
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ $2.92');
+  await expect(page.locator('.morpho-network-note')).toContainText('Plasma discovery is unsupported');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await empty.screenshot({ path: '/tmp/defimon-morpho-zero-vault-mobile.png' });
+});

@@ -2,7 +2,8 @@ import 'dotenv/config';
 import { isNetworkId } from '../src/networks.js';
 import { isAddress } from 'viem';
 import { EnvHttpProxyAgent, setGlobalDispatcher } from 'undici';
-import { fetchMorphoDiscovery, MORPHO_API } from '../server/morpho-discovery.js';
+import { MORPHO_API } from '../server/morpho-discovery.js';
+import { fetchMorphoPortfolioDiscovery } from '../server/morpho-associated-vaults.js';
 import { inspectMorphoPriceSchema } from './morpho-schema.js';
 import { toMorphoFailure } from '../server/morpho-errors.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy) setGlobalDispatcher(new EnvHttpProxyAgent());
@@ -16,7 +17,7 @@ if (wallet === '--schema') {
   process.exitCode = 1;
 } else {
   console.log('Testing public Morpho lookup only. No Ethereum-provider key or .env contents will be printed.');
-  const result = await fetchMorphoDiscovery(wallet, fetch, network);
-  console.log(JSON.stringify({ endpoint: MORPHO_API, network, successfulLookups: result.successfulFamilies, marketsFound: result.markets.length, vaultsFound: result.vaults.length, failures: result.failures, warnings: result.warnings }, null, 2));
+  const result = await fetchMorphoPortfolioDiscovery(wallet, fetch, network);
+  console.log(JSON.stringify({ endpoint: MORPHO_API, network, successfulLookups: result.successfulFamilies, marketsFound: result.markets.length, vaultsFound: result.vaults.length, associatedVaults: result.vaults.filter(v => v.roles?.length).map(v => ({ address: v.address, version: v.version, roles: v.roles })), failures: result.failures, warnings: result.warnings }, null, 2));
   if (result.failures?.length) process.exitCode = 1;
 }

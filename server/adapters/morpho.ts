@@ -3,12 +3,13 @@ import type { Asset, Position, ProtocolResult, NetworkId } from '../../src/types
 import type { ChainClient } from '../rpc.js';
 import { MorphoDiscoveryUnavailable } from '../morpho-errors.js';
 import { createMorphoRates } from '../morpho-rates.js';
+import { fetchMorphoPortfolioDiscovery } from '../morpho-associated-vaults.js';
 import { rate, weightedRate } from '../rates.js';
 import { networks } from '../networks.js';
 import { riskLevel } from '../risk.js';
-import { fetchMorphoDiscovery, type MorphoDiscovery, type MorphoMarketRef, type MorphoToken, type MorphoVaultRef } from '../morpho-discovery.js';
+import { type MorphoDiscovery, type MorphoMarketRef, type MorphoToken, type MorphoVaultRef } from '../morpho-discovery.js';
 import { morphoCoreAbi as coreAbi, morphoFactoryAbi as factoryAbi, morphoMulticallAbi as multiAbi, morphoOracleAbi as oracleAbi, morphoVaultAbi as vaultAbi } from '../abis/morpho.js';
-export const MORPHO_COVERAGE = 'Ethereum Morpho Blue direct markets and vault V1/V2 deposits. New positions may take time to appear in Morpho’s lookup service. Excludes legacy Optimizers and linked accounts.';
+export const MORPHO_COVERAGE = 'Ethereum Morpho Blue direct markets, vault V1/V2 deposits, and associated creator/curator/owner vaults including zero deposits. New positions may take time to appear in Morpho’s lookup service. Excludes legacy Optimizers and linked accounts.';
 const MULTICALL = '0xcA11bde05977b3631167028862bE2a173976CA11';
 const ZERO = '0x0000000000000000000000000000000000000000';
 const WAD = 10n ** 18n;
@@ -44,7 +45,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
   const deployment = networks[network];
   if (!deployment.morphoBlue) throw new Error('Unsupported Morpho network');
   const morphoBlue = deployment.morphoBlue;
-  const discovery = await (discover ? discover(wallet) : fetchMorphoDiscovery(wallet, fetch, network));
+  const discovery = await (discover ? discover(wallet) : fetchMorphoPortfolioDiscovery(wallet, fetch, network));
   if (!discovery.successfulFamilies) throw new MorphoDiscoveryUnavailable(discovery.failures ?? []);
   const warnings = new Set(discovery.warnings);
   const interest = createMorphoRates(client, blockNumber, morphoBlue);
@@ -140,13 +141,23 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       if (!registered) throw new Error('Vault not recognized by its factory');
       const underlying = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'asset', blockNumber });
       if (!same(underlying, ref.asset.address)) throw new Error('Vault underlying mismatch');
-      let raw: bigint;
+      const roles: NonNullable<Position['vault']>['roles'] = [];
+      for (const role of ref.roles ?? []) {
+        if (role === 'creator') { roles.push({ role, source: 'api' }); continue; }
+        try {
+          const current = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: role, blockNumber });
+          if (same(current, wallet)) roles.push({ role, source: 'onchain' });
+          else warnings.add('Some Morpho vault roles changed since indexing. Only roles confirmed at the displayed block are retained.');
+        } catch { roles.push({ role, source: 'api' }); warnings.add('Some Morpho vault roles could not be checked on-chain. Indexed roles are labeled separately.'); }
+      }
+      let raw: bigint; let vaultTotalRaw: bigint | null = null;
       if (ref.version === 1) {
         const core = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'MORPHO', blockNumber });
         if (!same(core, morphoBlue)) throw new Error('Wrong Morpho deployment');
         const shares = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'balanceOf', args: [wallet], blockNumber });
-        if (shares === 0n) return null;
-        raw = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'convertToAssets', args: [shares], blockNumber });
+        if (shares === 0n && !roles.length) return null;
+        raw = shares === 0n ? 0n : await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'convertToAssets', args: [shares], blockNumber });
+        try { vaultTotalRaw = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'totalAssets', blockNumber }); } catch { /* Vault-wide context is independent of the wallet's balance. */ }
       } else {
         // Read post-accrual shares, fees, and totals together. No dependent calls escape this eth_call.
         const calls = [
@@ -158,21 +169,25 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
         ];
         const data = await simulate(calls.map(callData => ({ target: ref.address, callData })));
         const shares = decodeFunctionResult({ abi: vaultAbi, functionName: 'balanceOf', data: data[1] });
-        if (shares === 0n) return null;
+        if (shares === 0n && !roles.length) return null;
         const supply = decodeFunctionResult({ abi: vaultAbi, functionName: 'totalSupply', data: data[2] });
         const assets = decodeFunctionResult({ abi: vaultAbi, functionName: '_totalAssets', data: data[3] });
         const virtual = decodeFunctionResult({ abi: vaultAbi, functionName: 'virtualShares', data: data[4] });
-        if (supply + virtual === 0n || shares > supply) throw new Error('Invalid vault accounting');
-        raw = shares * (assets + 1n) / (supply + virtual);
+        if ((shares > 0n && supply + virtual === 0n) || shares > supply) throw new Error('Invalid vault accounting');
+        vaultTotalRaw = assets;
+        raw = shares === 0n ? 0n : shares * (assets + 1n) / (supply + virtual);
       }
       const supplyRate = await interest.vault(ref.address, ref.version, ref.asset.address);
       const underlyingToken = await token(ref.asset); const supplied = units(raw, underlyingToken.decimals);
-      const suppliedUsd = underlyingToken.priceUsd === null ? null : supplied * underlyingToken.priceUsd;
+      const suppliedUsd = supplied === 0 ? 0 : underlyingToken.priceUsd === null ? null : supplied * underlyingToken.priceUsd;
+      const totalAssets = vaultTotalRaw === null ? null : units(vaultTotalRaw, underlyingToken.decimals);
+      const vaultAssetsUsd = totalAssets === 0 ? 0 : totalAssets === null || underlyingToken.priceUsd === null ? null : totalAssets * underlyingToken.priceUsd;
+      const vault = { address: ref.address, version: ref.version, roles, totalAssets, totalAssetsUsd: vaultAssetsUsd !== null && Number.isFinite(vaultAssetsUsd) ? vaultAssetsUsd : null };
       if (suppliedUsd === null) warnings.add('Some Morpho vaults have unavailable USD prices. Their underlying token quantities are still shown.');
-      return { id: `morpho-vault-${ref.address}`, label: `Morpho vault V${ref.version} · ${ref.name}`, suppliedUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ supplyRate, address: underlyingToken.address, symbol: underlyingToken.symbol, supplied, borrowed: 0, priceUsd: underlyingToken.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Vault shares are converted once to current underlying assets. The vault’s own loans are not added again as wallet deposits.', ref.version === 2 ? 'Vault V2 interest and fee-share minting are simulated in one read-only call before valuing this position.' : 'Vault V1 underlying value comes from its current ERC-4626 share conversion.', 'This is a deposit-only holding: there is no wallet borrowing balance or collateral liquidation price.'] };
+      return { vault, id: `morpho-vault-${ref.address}`, label: `Morpho vault V${ref.version} · ${ref.name}`, suppliedUsd, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ supplyRate, address: underlyingToken.address, symbol: underlyingToken.symbol, supplied, borrowed: 0, priceUsd: underlyingToken.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null }], notes: ['Vault shares are converted once to current underlying assets. The vault’s own loans are not added again as wallet deposits.', ref.version === 2 ? 'Vault V2 interest and fee-share minting are simulated in one read-only call before valuing this position.' : 'Vault V1 underlying value comes from its current ERC-4626 share conversion.', 'This is a deposit-only holding: there is no wallet borrowing balance or collateral liquidation price.', 'Vault-wide assets belong to all depositors and are never included as the wallet’s own balance. Creator roles use Morpho API creation records; owner/curator roles are rechecked on chain where available.'] };
     } catch {
       warnings.add('Some Morpho vault holdings could not be read or verified. Their balances are unknown.');
-      return unknown(`morpho-vault-${ref.address}`, `Morpho vault · ${ref.name}`);
+      return { ...unknown(`morpho-vault-${ref.address}`, `Morpho vault · ${ref.name}`), vault: { address: ref.address, version: ref.version, roles: [], totalAssets: null, totalAssetsUsd: null } };
     }
   }
   const uniqueMarkets = [...new Map(discovery.markets.map(m => [m.id.toLowerCase(), m])).values()];

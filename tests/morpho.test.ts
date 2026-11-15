@@ -17,7 +17,7 @@ const FACTORY = '0x8888888888888888888888888888888888888888';
 const E18 = 10n ** 18n; const E6 = 10n ** 6n;
 const loan: MorphoToken = { address: USDC, symbol: 'USDC', decimals: 6, priceUsd: 1 };
 const collateral: MorphoToken = { address: ETH, symbol: 'WETH', decimals: 18, priceUsd: 3000 };
-function fixture(options: { network?: NetworkId; vaults?: boolean; market?: boolean; noDebt?: boolean; closed?: boolean; oracleFail?: boolean; oracleZero?: boolean; loanSupply?: bigint; missingLoanPrice?: boolean; missingCollateralPrice?: boolean; sameAsset?: boolean; unregistered?: boolean; invalidId?: boolean; metadataMismatch?: boolean; failSimulation?: boolean; loanPrice?: number } = {}) {
+function fixture(options: { network?: NetworkId; emptyVault?: boolean; vaults?: boolean; market?: boolean; noDebt?: boolean; closed?: boolean; oracleFail?: boolean; oracleZero?: boolean; loanSupply?: bigint; missingLoanPrice?: boolean; missingCollateralPrice?: boolean; sameAsset?: boolean; unregistered?: boolean; invalidId?: boolean; metadataMismatch?: boolean; failSimulation?: boolean; loanPrice?: number } = {}) {
   const coreAddress = networks[options.network ?? 'ethereum'].morphoBlue!;
   const params = { loanToken: USDC, collateralToken: options.sameAsset ? USDC : ETH, oracle: ORACLE, irm: IRM, lltv: 860000000000000000n } as const;
   const id = keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [params.loanToken, params.collateralToken, params.oracle, params.irm, params.lltv]));
@@ -36,8 +36,10 @@ function fixture(options: { network?: NetworkId; vaults?: boolean; market?: bool
         case 'price': if (options.oracleFail) throw new Error('secret provider details'); return options.oracleZero ? 0n : options.sameAsset ? 10n ** 36n : 3000n * 10n ** 24n;
         case 'isMetaMorpho': case 'isVaultV2': return !options.unregistered;
         case 'MORPHO': return coreAddress;
+        case 'owner': case 'curator': return wallet;
+        case 'totalAssets': return options.emptyVault ? 0n : 1000n * E6;
         case 'asset': return USDC;
-        case 'balanceOf': return options.closed ? 0n : 2n * E18;
+        case 'balanceOf': return options.closed || options.emptyVault ? 0n : 2n * E18;
         case 'convertToAssets': return 120n * E6;
         default: throw new Error(functionName);
       }
@@ -58,7 +60,7 @@ function fixture(options: { network?: NetworkId; vaults?: boolean; market?: bool
       } else {
         const names = batch.map(c => decodeFunctionData({ abi: vaultAbi, data: c.callData }).functionName);
         simulated.push(names); expect(names).toEqual(['accrueInterest', 'balanceOf', 'totalSupply', '_totalAssets', 'virtualShares']);
-        output = ['0x', encodeFunctionResult({ abi: vaultAbi, functionName: 'balanceOf', result: options.closed ? 0n : 100n * E18 }), encodeFunctionResult({ abi: vaultAbi, functionName: 'totalSupply', result: 1000n * E18 }), encodeFunctionResult({ abi: vaultAbi, functionName: '_totalAssets', result: 1000n * E6 }), encodeFunctionResult({ abi: vaultAbi, functionName: 'virtualShares', result: 10n ** 12n })];
+        output = ['0x', encodeFunctionResult({ abi: vaultAbi, functionName: 'balanceOf', result: options.closed || options.emptyVault ? 0n : 100n * E18 }), encodeFunctionResult({ abi: vaultAbi, functionName: 'totalSupply', result: options.emptyVault ? 0n : 1000n * E18 }), encodeFunctionResult({ abi: vaultAbi, functionName: '_totalAssets', result: options.emptyVault ? 0n : 1000n * E6 }), encodeFunctionResult({ abi: vaultAbi, functionName: 'virtualShares', result: 10n ** 12n })];
       }
       return { data: encodeFunctionResult({ abi: multiAbi, functionName: 'aggregate3', result: output.map(returnData => ({ success: true, returnData })) }) };
     },
@@ -175,4 +177,45 @@ it('uses Arbitrum’s distinct Morpho core for market and vault verification, wi
   expect(m.calls.some(call => call.startsWith(`${networks.arbitrum.morphoBlue}:idToMarketParams`))).toBe(true);
   expect(m.calls.some(call => call.startsWith(`${MORPHO_BLUE}:`))).toBe(false);
   expect(m.blocks.every(block => block === 123n)).toBe(true);
+});
+
+
+describe('associated Morpho vaults with zero personal deposits', () => {
+  it('keeps both versions for creators/current curators/owners without counting managed assets as personal deposits on Ethereum and Arbitrum', async () => {
+    for (const network of ['ethereum', 'arbitrum'] as const) {
+      const m = fixture({ network, market: false, vaults: true, closed: true });
+      m.discovery.vaults[0].roles = ['creator', 'curator', 'owner']; m.discovery.vaults[1].roles = ['curator', 'owner'];
+      const result = await m.read();
+      expect(result.positions).toHaveLength(2);
+      expect(result.positions.every(p => p.suppliedUsd === 0 && p.debtUsd === 0 && p.assets[0].supplied === 0)).toBe(true);
+      expect(result.positions.map(p => p.vault?.totalAssets)).toEqual([1000, 1000]);
+      expect(result.positions[0].vault?.roles).toEqual([{ role: 'creator', source: 'api' }, { role: 'curator', source: 'onchain' }, { role: 'owner', source: 'onchain' }]);
+      expect(result.positions[1].vault?.roles).toEqual([{ role: 'curator', source: 'onchain' }, { role: 'owner', source: 'onchain' }]);
+    }
+  });
+  it('still omits zero-share vaults without an associated role and removes stale indexed roles that no longer match on chain', async () => {
+    expect((await fixture({ market: false, vaults: true, closed: true }).read()).positions).toEqual([]);
+    const m = fixture({ market: false, vaults: true, closed: true });
+    m.discovery.vaults.forEach(v => { v.roles = ['owner']; });
+    const client = { ...m.client, readContract: async (args: any) => args.functionName === 'owner' ? USDC : m.client.readContract(args) } as unknown as ChainClient;
+    const result = await readMorpho(client, wallet, 123n, async () => m.discovery);
+    expect(result.positions).toEqual([]); expect(result.status).toBe('partial'); expect(result.message).toContain('roles changed');
+  });
+  it('keeps a labeled indexed role when its on-chain lookup fails without turning personal zero balances into managed assets', async () => {
+    const m = fixture({ market: false, vaults: true, closed: true });
+    m.discovery.vaults.forEach(v => { v.roles = ['curator']; });
+    const client = { ...m.client, readContract: async (args: any) => { if (args.functionName === 'curator') throw new Error('private-provider-secret'); return m.client.readContract(args); } } as unknown as ChainClient;
+    const result = await readMorpho(client, wallet, 123n, async () => m.discovery);
+    expect(result.positions).toHaveLength(2); expect(result.status).toBe('partial');
+    expect(result.positions.every(p => p.vault?.roles[0].source === 'api' && p.suppliedUsd === 0)).toBe(true);
+    expect(JSON.stringify(result)).not.toContain('private-provider-secret');
+  });
+});
+
+it('shows associated vaults that have no deposits from anyone, with known zero personal balances', async () => {
+  const m = fixture({ market: false, vaults: true, emptyVault: true });
+  m.discovery.vaults.forEach(v => { v.roles = ['owner']; });
+  const result = await m.read();
+  expect(result.positions).toHaveLength(2);
+  expect(result.positions.every(p => p.suppliedUsd === 0 && p.vault?.totalAssets === 0 && p.vault?.totalAssetsUsd === 0)).toBe(true);
 });

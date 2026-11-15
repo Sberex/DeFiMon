@@ -10,6 +10,8 @@ export const morphoCoreAbi = parseAbi([
 export const morphoOracleAbi = parseAbi(['function price() view returns (uint256)']);
 export const morphoIrmAbi = parseAbi(['function borrowRateView((address loanToken,address collateralToken,address oracle,address irm,uint256 lltv) params,(uint128 totalSupplyAssets,uint128 totalSupplyShares,uint128 totalBorrowAssets,uint128 totalBorrowShares,uint128 lastUpdate,uint128 fee) market) view returns (uint256)']);
 export const morphoVaultAbi = parseAbi([
+ 'function owner() view returns (address)', 'function curator() view returns (address)',
+ 'function totalAssets() view returns (uint256)',
  'function asset() view returns (address)', 'function MORPHO() view returns (address)',
  'function balanceOf(address user) view returns (uint256)', 'function convertToAssets(uint256 shares) view returns (uint256)',
  'function accrueInterest()', 'function totalSupply() view returns (uint256)',
