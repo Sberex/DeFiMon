@@ -1,0 +1,17 @@
+import type { Address } from 'viem';
+import type { NetworkId } from '../../src/types.js';
+// euler-xyz/euler-interfaces@0ea27dcf23c31249857180a0753638c040c4df1b, addresses/{1,42161,9745}/CoreAddresses.json.
+export const eulerDeployments: Record<NetworkId, { evc: Address; eVaultFactory: Address }> = {
+  "ethereum": {
+    "evc": "0x0C9a3dd6b8F28529d72d7f9cE918D493519EE383",
+    "eVaultFactory": "0x29a56a1b8214D9Cf7c5561811750D5cBDb45CC8e"
+  },
+  "arbitrum": {
+    "evc": "0x6302ef0F34100CDDFb5489fbcB6eE1AA95CD1066",
+    "eVaultFactory": "0x78Df1CF5bf06a7f27f2ACc580B934238C1b80D50"
+  },
+  "plasma": {
+    "evc": "0x7bdbd0A7114aA42CA957F292145F6a931a345583",
+    "eVaultFactory": "0x42388213C6F56D7E1477632b58Ae6Bba9adeEeA3"
+  }
+};

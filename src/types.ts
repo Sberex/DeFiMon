@@ -19,7 +19,7 @@ export interface Asset {
   collateral: boolean; liquidationThreshold: number | null; liquidationPriceUsd: number | null;
   /** Actual protocol LLTV when the calculation factor is weighted across balances. */
   lltv?: number; lltvNote?: string;
-  priceSource?: 'fluid-oracle';
+  priceSource?: 'fluid-oracle' | 'euler-oracle';
   supplyRate?: InterestRate; borrowRate?: InterestRate; intrinsicSupplyRate?: IntrinsicRate;
   merklSupplyRate?: MerklAprQuote; merklBorrowRate?: MerklAprQuote;
   v4Reserves?: { hub: string; assetId: string; supplied: number; borrowed: number }[];
@@ -29,6 +29,7 @@ export interface Position {
   risk: Risk; assets: Asset[]; notes: string[];
   vault?: { address: string; version: 1 | 2; roles: { role: 'creator' | 'curator' | 'owner'; source: 'onchain' | 'api' }[]; totalAssets: number | null; totalAssetsUsd: number | null };
   marketAddress?: string;
+  receiptTokens?: string[];
   liquidationModel?: 'linear' | 'oracle-ratio' | 'unavailable';
   liquidationQuote?: { current: number; threshold: number; unit: string };
 }

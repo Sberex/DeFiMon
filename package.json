@@ -10,6 +10,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:browser": "playwright test",
+    "check:euler": "tsx scripts/check-euler.ts",
     "check:fluid": "tsx scripts/check-fluid.ts",
     "check:aave-v4": "tsx scripts/check-aave-v4.ts",
     "check:morpho": "tsx scripts/check-morpho.ts",

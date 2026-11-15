@@ -4,7 +4,7 @@ A read-only Ethereum, Plasma, and Arbitrum wallet dashboard for current lending 
 
 ## Current scope
 
-This is an **early implementation with readers for all five protocol families**. Coverage is limited to the versions and products below; it is not a complete wallet balance. Production build and deterministic tests run locally. Fluid and Aave v4 have been exercised against live Ethereum positions; Aave v3 and Compound still require live position comparisons before use for financial monitoring.
+This is an **early implementation with readers for six protocol families**. Coverage is limited to the versions and products below; it is not a complete wallet balance. Production build and deterministic tests run locally. Fluid and Aave v4 have been exercised against live Ethereum positions; Aave v3 and Compound still require live position comparisons before use for financial monitoring.
 
 | Protocol | Implemented coverage | Limitations |
 | --- | --- | --- |
@@ -13,6 +13,7 @@ This is an **early implementation with readers for all five protocol families**.
 | Aave v4 | 14 Ethereum lending markets plus 37 tokenized-deposit contracts; deposits, premium-inclusive debt, native health factor, and collateral liquidation estimates | Official address-book snapshot, direct ownership only; linked accounts and treasury infrastructure excluded. New deployments require a roster update. |
 | Morpho | Ethereum and Arbitrum Morpho Blue direct markets plus vault V1/V2 deposits and associated creator/curator/owner vaults, including zero deposits; accrued balances, debt, net value, oracle health, and liquidation estimates | Requires the public Morpho API for discovery/prices. Indexing lag can omit newly opened positions. Legacy Optimizers, linked accounts, and unclaimed rewards excluded. Full live discovery is not yet verified in this cloud environment. |
 | Fluid | Ethereum, Plasma, and Arbitrum T1–T4 vaults and ordinary fToken lending deposits; balances, debt, health estimate and liquidation boundary | Direct ownership only. Standalone DEX/smart-lending deposits and linked smart accounts excluded. Smart vaults show oracle-ratio boundaries rather than a single underlying token’s dollar liquidation price. |
+| Euler | V2 EVK vault deposits, isolated loans and enabled collateral in owned EVC subaccounts on Ethereum, Plasma and Arbitrum; rates, LLTV, native health, NPL and alternative markets | Legacy V1, Euler Earn aggregators, external smart-account ownership discovery and passive deposits in unenabled subaccounts are excluded. |
 
 Unavailable protocols are **unknown**, never zero balances. Readers can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
 
@@ -40,7 +41,7 @@ The production server serves both the website and API on `PORT` (default 3001). 
 
 ## Plasma support
 
-Enter your wallet address and select **Check wallet** to read **Ethereum, Plasma, and Arbitrum together**. Results are grouped by protocol, with networks ordered Ethereum, Plasma, then Arbitrum within each group. Ethereum checks all five protocol families, Plasma checks Aave v3 and Fluid, and Arbitrum checks Aave v3, Morpho, Compound, and Fluid. Each card labels its blockchain. No network selector is needed.
+Enter your wallet address and select **Check wallet** to read **Ethereum, Plasma, and Arbitrum together**. Results are grouped by protocol, with networks ordered Ethereum, Plasma, then Arbitrum within each group. Ethereum checks all six protocol families, Plasma checks Aave v3, Fluid and Euler, and Arbitrum checks Aave v3, Morpho, Compound, Fluid and Euler. Each card labels its blockchain. No network selector is needed.
 
 The summary totals add priced positions from all three networks. Collateral, health factors, and liquidation estimates remain independent for each position; collateral on one network never protects borrowing on another. Each network has its own displayed block and check time. Refresh updates all networks for the displayed wallet. If one provider fails, other networks remain visible and the failed network shows unknown balances. The illustrative example includes explicitly fictional positions on all three networks.
 
@@ -56,7 +57,7 @@ Run a live local check with a public wallet address:
 npm run check:plasma -- 0xYourWalletAddress
 ```
 
-The website requests `/api/portfolio/0xYourWalletAddress?chain=all`, which returns eleven protocol/network readers in display order and a separate `networks` snapshot for each chain. A failed network has no block number and explicit error cards; it is not a verified empty wallet. Per-network API access remains available with `chain=ethereum`, `chain=plasma`, or `chain=arbitrum`; omitting `chain` continues to use Ethereum for compatibility. Health reports configuration presence, not successful blockchain access.
+The website requests `/api/portfolio/0xYourWalletAddress?chain=all`, which returns fourteen protocol/network readers in display order and a separate `networks` snapshot for each chain. A failed network has no block number and explicit error cards; it is not a verified empty wallet. Per-network API access remains available with `chain=ethereum`, `chain=plasma`, or `chain=arbitrum`; omitting `chain` continues to use Ethereum for compatibility. Health reports configuration presence, not successful blockchain access.
 
 Validation: deterministic reader, network-routing, provider-selection, and browser checks cover Plasma. This cloud environment denied access to `rpc.plasma.to` (CONNECT 403), so a live Plasma wallet comparison is still required on a computer or host that can reach the provider. No cloud environment settings have been published by this change.
 
@@ -77,6 +78,26 @@ npm run diagnose:morpho -- 0xYourWalletAddress arbitrum
 
 Deterministic tests cover all four readers, selected-chain contracts, balances/rates/risk, receipt exclusions, wrong-chain rejection, partial failures, and the combined page. This cloud denied the public Arbitrum endpoint (CONNECT 403); live balances and full Morpho API discovery must still be compared locally with the protocol websites. No cloud environment settings were changed or published.
 
+## Euler V2 EVK
+
+The dashboard now checks **14 protocol/network readers**, including Euler on Ethereum, Plasma and Arbitrum. Euler contracts and selected ABIs are pinned to `euler-xyz/euler-interfaces@0ea27dcf23c31249857180a0753638c040c4df1b`. Core accounting was checked against `euler-vault-kit@93a1de491531e54cbbcf0e5c8cacfe558f924867` and the official EVK periphery lens/math references. No Euler API, subgraph key or new external host is required; reads use each configured network provider at the displayed block.
+
+The registry scan checks direct deposits held by the entered address in up to 4,096 factory EVaults. When the entered address is the registered EVC owner, its 256 same-prefix subaccounts are checked for enabled controllers and collateral. If the address is a subaccount owned by another address, only that entered account is checked. Each account's loan is isolated; collateral never protects debt in another account. A main-account receipt included in a loan is not included again as a passive deposit. Registered Euler receipt tokens are excluded from wallet token totals even if Euler's position reader fails. Failed registry pages, balance reads or missing account checks leave complete coverage unknown and block a complete NPL.
+
+Balances use `balanceOf` → `convertToAssets` and current rounded-up `debtOf` amounts. Borrow APR is the instantaneous per-second ray rate annualized without compounding; supply APR weights it by utilization and deducts the vault's interest fee. Current `LTVLiquidation` captures the vault's time-varying LTV ramp. Health uses `accountLiquidity(account, true)` from the debt controller. Dollar prices use the existing verified price readers; missing prices can use a labeled Euler oracle quote only when the controller explicitly uses Euler's USD unit of account (`0x...0348`, 18-decimal quotes). A missing route or feed stays unknown. Dollar liquidation scenarios are withheld when display-price collateral capacity differs by more than 5% from native oracle health, or a required factor is missing. Native health still determines the risk label.
+
+Euler deposits and loans participate in Recommendations with the existing manual/automatic cross-network token matching. Alternative loans require the exact underlying pair and an accepted collateral receipt vault with a nonzero borrowing LTV. Current supply/borrow interest rates, live liquidation LTV, receipt route and borrowing liquidity are included. Available liquidity is vault cash bounded by the remaining borrow cap; Euler's compact 16-bit cap is decoded in raw asset units, with raw zero meaning unlimited and zero-mantissa/nonzero-exponent meaning a real zero cap. Custom borrow hooks and custom collateral deposit hooks are excluded from loan alternatives because eligibility cannot be verified without an execution context. External Merkl incentives are not guessed for Euler alternatives. All recommendations remain read-only rate comparisons.
+
+This integration covers **EVK**, not legacy Euler V1 or Euler Earn strategy aggregators. Passive deposits in subaccounts without enabled collateral/controller, operator-linked smart wallets, and non-EVK collateral wrappers are outside the discovery/valuation scope. These exclusions are shown in the Euler card coverage. No history or transaction submission is required.
+
+```sh
+npm run check:euler -- 0x5929D94eb4C41D91955154465a58a531Ad4CF7b8 ethereum
+npm run check:euler -- 0xWalletAddress arbitrum
+npm run check:euler -- 0xWalletAddress plasma
+```
+
+The live Ethereum check at block **26422107** completed a registry/main-account scan for the test address and found no covered Euler positions. A live Ethereum market search at block **26422150** returned **109 alternatives**, including 13 accepted collateral/debt routes; individual read failures were reported as partial coverage. Subaccount loans, share conversion, rates, receipt exclusions, oracle failures, LLTV, NPL and market search are covered by deterministic tests on all three network configurations. Plasma and Arbitrum live RPC checks remain blocked by this cloud's existing network restrictions.
+
 ## Dashboard sections
 
 Below the shared wallet search, the desktop layout has a left navigation column and a right content column. **Wallet Overview** is selected initially and contains the existing balances, NPL/APR totals, risk, protocols, wallet tokens and Merkl rewards. **Recommendations** shows current lending positions as `Supplied asset — Supply APR — Borrowed asset — Borrow APR`, with protocol, network and original loan labels. Personal Morpho V1/V2 vault deposits greater than zero appear as `Supplied asset — Supply APR`; managed vaults with zero personal deposits are omitted. Other one-sided lending positions show a dash for the absent side.
@@ -93,6 +114,7 @@ Recommendations independently searches the supported market deployments for the 
 - Aave v4: the 14 supported Ethereum lending Spokes and 37 tokenized deposits. New single-collateral loan estimates include the reserve's risk premium; existing multi-collateral or stored premium shares can differ.
 - Compound v3: the supported Ethereum USDC/WETH and Arbitrum USDC/USDC.e/USDT/WETH deployments. Only the base token can be borrowed; configured collateral, supply caps and supply/withdraw pause flags are checked. Collateral protocol supply APR is zero.
 - Morpho: Ethereum and Arbitrum Blue markets, vault V1 and vault V2, discovered by token address with bounded pagination and then checked using the actual core/factory/underlying contracts. Instant IRM and allocation-weighted, fee-adjusted vault rates reuse the existing on-chain rate readers. Morpho Plasma is unsupported.
+- Euler: V2 EVK vaults and accepted collateral/debt pairs on Ethereum, Plasma and Arbitrum; receipt routes, current fee-adjusted interest and capped borrowing liquidity.
 - Fluid: T1–T4 vaults and ordinary fToken deposits across the three supported networks, using the published resolver registry and existing per-token rate readers. Smart-pool rates exclude trading income and retain their full required asset basket.
 
 Loan alternatives show **Available Liquidity** immediately after Borrow APR, in units of the destination market's debt token (for example GHO or USDT0). It is independent of the wallet's personal collateral capacity. Each amount uses the same network block as its rate quote. Aave v3 uses reserve cash capped by virtual liquidity and remaining borrow-cap headroom; minting GHO reserves instead use remaining facilitator capacity. Aave v4 uses Hub liquidity capped by the specific Spoke's remaining draw capacity, including owed debt and deficit. Compound uses the Comet's base-token cash. Fluid T1/T2 uses resolver-reported underlying borrowable capacity; smart-debt T3/T4 converts proportional shares into both debt tokens and limits them by vault/pool caps, per-token liquidity and utilization headroom. Smart-debt values are explicitly estimates requiring the paired token. Morpho shows **Total liquidity**: accrued total supplied loan assets minus accrued total borrowed loan assets, not collateral TVL or total supplied deposits. Verified zero is displayed as zero; unreadable amounts/decimals remain **Unavailable** and do not remove an otherwise verified rate recommendation. No dollar peg or balance approximation is used to invent liquidity.

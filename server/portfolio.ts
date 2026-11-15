@@ -6,6 +6,8 @@ import { networkOrder, combinedNetworkName } from '../src/networks.js';
 import { networks } from './networks.js';
 import { applyIntrinsicRates } from './intrinsic-rates.js';
 import { makeClient } from './rpc.js';
+import { readEuler } from './adapters/euler.js';
+import { EULER_COVERAGE } from './euler.js';
 import { readAave } from './adapters/aave.js';
 import { readAaveV4, AAVE_V4_COVERAGE } from './adapters/aave-v4.js';
 import { readCompound } from './adapters/compound.js';
@@ -29,6 +31,7 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
     'aave-v4': () => isolateProtocol('aave-v4', 'Aave v4', AAVE_V4_COVERAGE, () => readAaveV4(client, address, blockNumber), failure),
     morpho: () => isolateProtocol('morpho', 'Morpho', MORPHO_COVERAGE.replace('Ethereum', deployment.name), () => readMorpho(client, address, blockNumber, undefined, network), `Morpho lookup is unavailable on ${deployment.name}. Check access to api.morpho.org and this network’s provider. Its balances are unknown.`),
     compound: () => isolateProtocol('compound', 'Compound', `${deployment.name} Compound v3 markets`, () => readCompound(client, address, blockNumber, network), failure),
+    euler: () => isolateProtocol('euler', 'Euler', EULER_COVERAGE, () => readEuler(client, address, blockNumber, network), failure),
     fluid: () => isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', deployment.name), () => readFluid(client, address, blockNumber, network), failure),
   };
   const protocols = await applyIntrinsicRates(await Promise.all(deployment.protocolIds.map(id => readers[id]())), network);
@@ -45,7 +48,7 @@ export async function getCombinedPortfolio(wallet: Address, load: (wallet: Addre
   const snapshots: NonNullable<Portfolio['networks']> = [];
   const protocols: ProtocolResult[] = [];
   const wallets: WalletBalances[] = [];
-  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid']];
+  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid'], ['euler', 'Euler']];
   results.forEach((result, i) => {
     const network = networkIds[i];
     const chain = networks[network].name;

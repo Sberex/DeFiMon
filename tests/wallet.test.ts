@@ -86,3 +86,10 @@ it('keeps Arbitrum native ETH and excludes Arbitrum Compound receipt shares from
   expect(result.tokens.find(t => t.address.toLowerCase() === comet.toLowerCase())?.excludedReason).toContain('receipt');
   expect(result.pricedValueUsd).toBeCloseTo(6010.9);
 });
+it('excludes registered Euler receipt balances even when its position reader is unavailable', async () => {
+  const f = fixture(); const original = f.client.readContract;
+  f.client.readContract = (async (args: any) => args.functionName === 'isProxy' ? args.args[0].toLowerCase() === eul : original(args)) as typeof original;
+  const result = await readWallet(f.client, wallet, 123n, 'ethereum', [{ id: 'euler', name: 'Euler', coverage: '', status: 'error', positions: [] }], [], [...catalog], f.prices);
+  expect(result.tokens.find(t => t.address === eul)).toMatchObject({ valueUsd: null, excludedReason: expect.stringContaining('Euler') });
+  expect(result.pricedValueUsd).toBeCloseTo(6004.9);
+});

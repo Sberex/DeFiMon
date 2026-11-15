@@ -32,6 +32,8 @@ export const example: Portfolio = {
   ],
 };
 
+example.protocols.push({ id: 'euler', name: 'Euler', status: 'ok', coverage: 'Euler V2 EVK · illustrative empty account', positions: [] });
+
 // Separate, explicitly fictional Plasma positions for the combined example.
 export const combinedExample: Portfolio = {
   ...example, chain: combinedNetworkName, blockNumber: null,
@@ -46,6 +48,7 @@ export const combinedExample: Portfolio = {
   ],
   protocols: example.protocols.flatMap(protocol => {
     const ethereum = { ...protocol, chain: 'Ethereum' as const };
+    if (protocol.id === 'euler') return [ethereum, { ...ethereum, chain: 'Plasma' as const }];
     if (protocol.id !== 'aave-v3' && protocol.id !== 'fluid') return [ethereum];
     const aave = protocol.id === 'aave-v3';
     return [ethereum, {
@@ -77,6 +80,7 @@ combinedExample.wallets!.push({ chain: 'Arbitrum', status: 'ok', pricedValueUsd:
   { address: 'native', symbol: 'ETH', balance: 0.1, priceUsd: 3000, valueUsd: 300 },
   { address: '0xaf88d065e77c8cc2239327c5edb3a432268e5831', symbol: 'USDC', balance: 700, priceUsd: 1, valueUsd: 700 },
 ] });
+combinedExample.protocols.push({ id: 'euler', name: 'Euler', chain: 'Arbitrum', status: 'ok', coverage: 'Euler V2 EVK · illustrative empty account', positions: [] });
 const protocolOrder = example.protocols.map(p => p.id);
 combinedExample.protocols.sort((a, b) => protocolOrder.indexOf(a.id) - protocolOrder.indexOf(b.id) || networkOrder.findIndex(id => networkNames[id] === a.chain) - networkOrder.findIndex(id => networkNames[id] === b.chain));
 

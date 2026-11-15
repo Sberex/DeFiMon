@@ -36,7 +36,7 @@ test('searches and refreshes the displayed wallet rather than an edited address'
   await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByText(/Block 101/)).toBeVisible();
-  await expect(page.getByText(/Coverage: 5 of 5/)).toBeVisible();
+  await expect(page.getByText(/Coverage: 6 of 6/)).toBeVisible();
   await page.getByLabel('Wallet address').fill('0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: /Refresh/ }).click();
   await expect(page.getByText(/Block 102/)).toBeVisible();
@@ -173,9 +173,9 @@ test('shows all three networks grouped by protocol, refreshes all, and fits on m
   await expect(page.getByLabel('Blockchain')).toHaveCount(0);
   await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.getByText(/Coverage: 11 of 11 protocol readers completed on Ethereum \+ Plasma \+ Arbitrum/)).toBeVisible();
-  await expect(page.locator('article.protocol')).toHaveCount(11);
-  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v3 · Arbitrum', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Morpho · Arbitrum', 'Compound · Ethereum', 'Compound · Arbitrum', 'Fluid · Ethereum', 'Fluid · Plasma', 'Fluid · Arbitrum']);
+  await expect(page.getByText(/Coverage: 14 of 14 protocol readers completed on Ethereum \+ Plasma \+ Arbitrum/)).toBeVisible();
+  await expect(page.locator('article.protocol')).toHaveCount(14);
+  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v3 · Arbitrum', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Morpho · Arbitrum', 'Compound · Ethereum', 'Compound · Arbitrum', 'Fluid · Ethereum', 'Fluid · Plasma', 'Fluid · Arbitrum', 'Euler · Ethereum', 'Euler · Plasma', 'Euler · Arbitrum']);
   await expect(page.getByText(/Ethereum · Block 901/)).toBeVisible();
   await expect(page.getByText(/Plasma · Block 1901/)).toBeVisible();
   await expect(page.getByText(/Arbitrum · Block 2901/)).toBeVisible();
@@ -207,7 +207,7 @@ test('an example cancels an older lookup so its late response cannot replace the
   release();
   await expect(page.getByRole('button', { name: 'Check wallet' })).toBeEnabled();
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
-  await expect(page.locator('article.protocol')).toHaveCount(11);
+  await expect(page.locator('article.protocol')).toHaveCount(14);
 });
 
 test('shows supplied and net USD estimates for Plasma sUSDai collateral with the source labeled', async ({ page }) => {
@@ -430,6 +430,7 @@ test('shows sUSDai past-month intrinsic APR separately and adds it to protocol i
     reads++;
     const fixture = structuredClone(example);
     for (const protocol of fixture.protocols) {
+      if (!protocol.positions.length) continue;
       const asset = protocol.positions[0].assets[0];
       asset.symbol = 'sUSDai'; asset.address = '0x0b2b2b2076d95dda7817e785989fe353fe955ef9';
       asset.supplyRate = { apr: ['compound', 'morpho'].includes(protocol.id) ? 0 : .02, note: 'Current protocol interest only.' };
@@ -477,7 +478,7 @@ test('keeps sUSDai lending rates and balances when intrinsic oracle data is unav
 test('shows monthly token interest and USD NPL after protocol net value across networks', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(8);
+  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(11);
   const card = page.locator('article.aave-v3[data-chain="Ethereum"]');
   const summary = card.getByRole('region', { name: 'Protocol monthly interest', exact: true });
   await expect(summary.locator('.protocol-interest-totals > p')).toHaveText(['Net value: $12,000.00', 'APR: ≈ 0.50%', 'Monthly NPL: ≈ $5.00 / month']);
@@ -1125,4 +1126,43 @@ test('keeps same-two-token Fluid vaults in overview but excludes them from recom
   await expect(recommendations.getByText(/No eligible positions for recommendations/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Refresh alternative rates', exact: true })).toHaveCount(0);
   expect(marketReads).toBe(1);
+});
+
+test('shows Euler positions, rates, LLTV, NPL and market alternatives on all three networks', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const seed = structuredClone(fixture.protocols[0].positions[0]);
+  fixture.protocols = (['Ethereum', 'Plasma', 'Arbitrum'] as const).map((chain, index) => {
+    const position = structuredClone(seed);
+    position.id = `euler-loan-${index}`; position.label = `Euler loan · ${chain}`;
+    position.marketAddress = '0x3333333333333333333333333333333333333333';
+    position.suppliedUsd = 6000; position.debtUsd = 1000; position.healthFactor = 4.8; position.risk = 'lower';
+    Object.assign(position.assets[0], { symbol: chain === 'Plasma' ? 'WXPL' : 'WETH', address: chain === 'Ethereum' ? '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' : chain === 'Arbitrum' ? '0x82af49447d8a07e3bd95bd0d56f35241523fbab1' : '0x6100e367285b01f48d07953803a2d8dca5d19873', supplied: chain === 'Plasma' ? 12000 : 2, priceUsd: chain === 'Plasma' ? .5 : 3000, liquidationThreshold: .8, supplyRate: { apr: .02, note: 'Euler current lending APR.' }, priceSource: 'euler-oracle' });
+    Object.assign(position.assets[1], { symbol: chain === 'Plasma' ? 'USDT0' : 'USDC', address: chain === 'Ethereum' ? '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' : chain === 'Arbitrum' ? '0xaf88d065e77c8cc2239327c5edb3a432268e5831' : '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', borrowed: 1000, borrowRate: { apr: .06, note: 'Euler current borrow APR.' } });
+    return { id: 'euler', name: 'Euler', chain, status: 'ok', coverage: 'Euler V2 EVK and EVC subaccounts', balanceDiscoveryComplete: true, positions: [position] };
+  });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => {
+    const targets = route.request().postDataJSON().targets;
+    expect(targets).toHaveLength(3);
+    return route.fulfill({ json: { checkedAt: '2026-11-15T12:00:00Z', coverage: [{ protocol: 'Euler', network: 'arbitrum', status: 'ok' }], alternatives: [{ targetId: targets[0].id, protocol: 'Euler', network: 'arbitrum', market: '0x9999999999999999999999999999999999999999', route: '0x8888888888888888888888888888888888888888', label: 'Euler alternative USDC vault', supplyApr: .025, borrowApr: .03, lltv: .8, block: '321', url: 'https://app.euler.finance/', note: 'Euler EVK quote.', liquidity: { amount: 500000, symbol: 'USDC', token: fixture.protocols[0].positions[0].assets[1].address, note: 'Vault cash limited by borrowing cap.' } }] } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const cards = page.locator('article.euler');
+  await expect(cards).toHaveCount(3);
+  for (const card of await cards.all()) {
+    await expect(card.getByRole('columnheader', { name: 'Supply APR', exact: true })).toBeVisible();
+    await expect(card.locator('tbody tr').first().locator('td').nth(6)).toContainText('80.00%');
+    await expect(card.locator('.position-stats strong').last()).toHaveText('4.80');
+    await expect(card.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $5.00 / month');
+    await expect(card.getByText('Euler oracle estimate', { exact: true })).toBeVisible();
+  }
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $15.00');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  const alternatives = page.getByRole('region', { name: 'Alternatives for WETH - USDC', exact: true }).first();
+  await expect(alternatives.getByRole('link', { name: /Euler alternative USDC vault/ })).toBeVisible();
+  await expect(alternatives.getByText('500,000 USDC', { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

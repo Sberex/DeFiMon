@@ -41,9 +41,9 @@ it('Compound matches only base-token borrowing against configured collateral, no
 });
 it('isolates unavailable sources and networks while retaining verified alternatives with explicit coverage', async () => {
   const clientFor = (network: string) => ({ getChainId: async () => network === 'ethereum' ? 1 : network === 'plasma' ? 9745 : 42161, getBlockNumber: async () => 100n } as unknown as ChainClient);
-  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'compound', 'fluid', 'morpho'].map(id => [id, { name: id, read: async () => { if (id === 'morpho') throw new Error('private-provider-key'); return []; } }]));
+  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'compound', 'fluid', 'morpho', 'euler'].map(id => [id, { name: id, read: async () => { if (id === 'morpho') throw new Error('private-provider-key'); return []; } }]));
   const result = await searchMarkets([{ id: 'loan', network: 'ethereum', supplied: supply, borrowed: borrow }], clientFor, sources);
-  expect(result.coverage).toHaveLength(9);
+  expect(result.coverage).toHaveLength(11);
   expect(result.coverage.filter(c => c.status === 'error')).toHaveLength(2);
   expect(JSON.stringify(result)).not.toContain('private-provider-key');
 });

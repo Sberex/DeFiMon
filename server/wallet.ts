@@ -4,6 +4,8 @@ import type { ChainClient } from './rpc.js';
 import { networks } from './networks.js';
 import { walletTokenCatalog } from './deployments/wallet-tokens.js';
 import { AAVE_V4_TOKENIZATION_SPOKES } from './deployments/aave-v4.js';
+import { eulerFactoryAbi } from './abis/euler.js';
+import { eulerDeployments } from './deployments/euler.js';
 import { walletPrices } from './wallet-prices.js';
 const tokenAbi = parseAbi(['function balanceOf(address) view returns (uint256)', 'function decimals() view returns (uint8)', 'function symbol() view returns (string)', 'function POOL() view returns (address)']);
 const providerAbi = parseAbi(['function getPoolDataProvider() view returns (address)', 'function getPool() view returns (address)']);
@@ -37,6 +39,7 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
   protocols.filter(p => p.id === 'morpho').flatMap(p => p.positions).forEach(p => {
       const match = p.id.match(/^morpho-vault-(0x[0-9a-fA-F]{40})$/); if (match) excluded.add(match[1].toLowerCase());
     });
+  protocols.filter(p => p.id === 'euler').flatMap(p => p.positions).flatMap(p => p.receiptTokens ?? []).forEach(address => excluded.add(address.toLowerCase()));
   const receiptsVerified = aTokens.status === 'fulfilled' && fTokens.status === 'fulfilled' && aavePool.status === 'fulfilled';
   const rows: (WalletToken & { decimals: number; priceAddress: Address })[] = [];
   const warnings = new Set<string>();
@@ -66,6 +69,10 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
             const pool = await client.readContract({ address: token.address, abi: tokenAbi, functionName: 'POOL', blockNumber });
             if (pool.toLowerCase() === aavePool.value.toLowerCase()) excludedReason = 'Aave receipt or debt accounting token: excluded from wallet assets.';
           } catch { /* Ordinary ERC20 tokens do not expose an Aave pool. */ }
+        }
+        if (!excludedReason && protocols.some(p => p.id === 'euler')) {
+          try { if (await client.readContract({ address: eulerDeployments[network].eVaultFactory, abi: eulerFactoryAbi, functionName: 'isProxy', args: [token.address], blockNumber })) excludedReason = 'Euler vault receipt token: its underlying value belongs in the protocol section.'; }
+          catch { excludedReason = 'Excluded because Euler receipt-token classification is unavailable.'; warnings.add('Some Euler receipt checks failed. Those token values are excluded to avoid counting a deposit twice.'); }
         }
         rows.push({ address: token.address, symbol, decimals, priceAddress: token.address, balance: Number(formatUnits(token.raw, decimals)), priceUsd: null, valueUsd: null, excludedReason });
       } catch {

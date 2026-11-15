@@ -100,12 +100,12 @@ it('uses verified automatic groups in the protocol searches on all supported net
   const { searchMarkets } = await import('../server/market-search');
   const discovery = createTokenDiscovery({ fetcher: mock(() => cg()), manual: {}, env: {} });
   const seen: string[] = [];
-  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'compound', 'fluid', 'morpho'].map(id => [id, { name: id, read: async (_client: unknown, network: string, _block: bigint, targets: any[]) => {
+  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'compound', 'fluid', 'morpho', 'euler'].map(id => [id, { name: id, read: async (_client: unknown, network: string, _block: bigint, targets: any[]) => {
     seen.push(network); expect(targets[0].supplies).toEqual([network === 'ethereum' ? A : network === 'arbitrum' ? B : C]); return [];
   } }]));
   const clientFor = (network: string) => ({ getChainId: async () => network === 'ethereum' ? 1 : network === 'arbitrum' ? 42161 : 9745, getBlockNumber: async () => 100n }) as any;
   const result = await searchMarkets([target], clientFor, sources, discovery.resolve);
-  expect(seen).toHaveLength(11); expect(result.tokenDiscovery?.[0].status).toBe('found');
+  expect(seen).toHaveLength(14); expect(result.tokenDiscovery?.[0].status).toBe('found');
 });
 it('rejects a provider asset ID that claims different token contracts on the same network', async () => {
   const fetcher = mock(url => ({ id: 'same-coin-id', platforms: { ethereum: url.includes(A) ? A : B } }));

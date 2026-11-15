@@ -12,7 +12,7 @@ it('groups Ethereum then Plasma for each protocol, retaining each network’s bl
   const calls: string[] = [];
   const result = await getCombinedPortfolio(wallet, async (address, network) => { expect(address).toBe(wallet); calls.push(network); return snapshot(network); });
   expect(calls).toEqual(['ethereum', 'plasma', 'arbitrum']);
-  expect(result.protocols.map(p => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'compound:Ethereum', 'compound:Arbitrum', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum']);
+  expect(result.protocols.map(p => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'compound:Ethereum', 'compound:Arbitrum', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum', 'euler:Ethereum', 'euler:Plasma', 'euler:Arbitrum']);
   expect(result.networks?.map(n => [n.chain, n.blockNumber, n.updatedAt])).toEqual([['Ethereum', '101', '2026-11-13T12:00:01Z'], ['Plasma', '202', '2026-11-13T12:00:02Z'], ['Arbitrum', '303', '2026-11-13T12:00:03Z']]);
   expect(result.blockNumber).toBeNull();
   expect(result.protocols.filter(p => p.id === 'fluid')).toHaveLength(3);
@@ -24,18 +24,18 @@ it('retains the other network when either provider fails, without leaking errors
       if (network === failed) throw new Error('https://provider/private-api-key');
       return snapshot(network);
     });
-    expect(result.protocols).toHaveLength(11);
+    expect(result.protocols).toHaveLength(14);
     const chain = networks[failed].name;
     expect(result.networks?.find(n => n.chain === chain)).toMatchObject({ status: 'error', blockNumber: null });
     expect(result.protocols.filter(p => p.chain === chain).every(p => p.status === 'error' && p.message?.includes('unknown'))).toBe(true);
-    expect(result.protocols.filter(p => p.chain !== chain).every(p => p.status === 'ok' && p.positions.length > 0)).toBe(true);
+    expect(result.protocols.filter(p => p.chain !== chain).every(p => p.status === 'ok' && (p.positions.length > 0 || p.id === 'euler'))).toBe(true);
     expect(JSON.stringify(result)).not.toContain('private-api-key');
   }
 });
-it('shows all eleven readers as unknown if no network can be read', async () => {
+it('shows all fourteen readers as unknown if no network can be read', async () => {
   const result = await getCombinedPortfolio(wallet, async () => { throw new Error('secret'); });
   expect(result.networks?.every(n => n.status === 'error')).toBe(true);
-  expect(result.protocols).toHaveLength(11);
+  expect(result.protocols).toHaveLength(14);
   expect(result.protocols.every(p => p.status === 'error' && p.positions.length === 0)).toBe(true);
   expect(JSON.stringify(result)).not.toContain('secret');
 });

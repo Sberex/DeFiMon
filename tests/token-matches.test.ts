@@ -33,9 +33,9 @@ it('rejects invalid and ambiguous configuration instead of guessing a token iden
     expect(() => parseTokenMatches(invalid)).toThrow();
   }
 });
-it('dispatches the configured sUSDai/USDT pair to all eleven supported protocol-network searches', async () => {
+it('dispatches the configured sUSDai/USDT pair to all fourteen supported protocol-network searches', async () => {
   const reached: string[] = [];
-  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'compound', 'fluid', 'morpho'].map(id => [id, { name: id, read: async (_client: ChainClient, network: string, _block: bigint, targets: ReturnType<typeof expandTargets>) => {
+  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'compound', 'fluid', 'morpho', 'euler'].map(id => [id, { name: id, read: async (_client: ChainClient, network: string, _block: bigint, targets: ReturnType<typeof expandTargets>) => {
     reached.push(`${id}:${network}`);
     if (network === 'plasma') expect(targets[0].borrows).toEqual([usdt0]);
     if (network === 'arbitrum') expect(targets[0].borrows).toEqual(['0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9']);
@@ -43,6 +43,6 @@ it('dispatches the configured sUSDai/USDT pair to all eleven supported protocol-
   } }]));
   const clientFor = (network: string) => ({ getChainId: async () => network === 'ethereum' ? 1 : network === 'plasma' ? 9745 : 42161, getBlockNumber: async () => 100n } as unknown as ChainClient);
   const result = await searchMarkets([{ id: 'loan', network: 'ethereum', supplied: susdai, borrowed: usdt }], clientFor, sources);
-  expect(result.coverage).toHaveLength(11); expect(reached).toHaveLength(11);
+  expect(result.coverage).toHaveLength(14); expect(reached).toHaveLength(14);
   expect(reached).toContain('fluid:plasma'); expect(reached).toContain('morpho:arbitrum');
 });

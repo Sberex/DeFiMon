@@ -14,7 +14,7 @@ interface NetworkConfig {
 // Selected Plasma and Arbitrum resolver ABIs match the pinned Ethereum ABIs in abis/fluid.ts.
 export const networks: Record<NetworkId, NetworkConfig> = {
   ethereum: {
-    protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid'],
+    protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler'],
     morphoBlue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',
     compoundMarkets: [{ address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3', label: 'USDC market' }, { address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94', label: 'WETH market' }],
     id: 1, name: 'Ethereum', rpcVariable: 'ETHEREUM_RPC_URL', nativeSymbol: 'ETH',
@@ -24,7 +24,7 @@ export const networks: Record<NetworkId, NetworkConfig> = {
     fluid: { vault: '0x6943Ed9E53e3713Bf24a92016984254311772F1A', dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
   },
   plasma: {
-    protocolIds: ['aave-v3', 'fluid'], compoundMarkets: [],
+    protocolIds: ['aave-v3', 'fluid', 'euler'], compoundMarkets: [],
     id: 9745, name: 'Plasma', rpcVariable: 'PLASMA_RPC_URL', defaultRpc: 'https://rpc.plasma.to', nativeSymbol: 'XPL',
     wrappedNative: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     aaveProvider: '0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9',
@@ -37,7 +37,7 @@ export const networks: Record<NetworkId, NetworkConfig> = {
     // morpho-org/sdks@56f1ed6 packages/morpho-ts/src/addresses.ts.
     morphoBlue: '0x6c247b1F6182318877311737BaC0844bAa518F5e',
     fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
-    protocolIds: ['aave-v3', 'morpho', 'compound', 'fluid'],
+    protocolIds: ['aave-v3', 'morpho', 'compound', 'fluid', 'euler'],
     // compound-finance/comet@f766f51583c23acc33b2a7824654ef2029a96804 deployments/arbitrum/*/roots.json.
     compoundMarkets: [
       { address: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf', label: 'USDC market' },

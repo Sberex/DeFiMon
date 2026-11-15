@@ -28,7 +28,7 @@ it('serves the reader response with no-store caching', async () => {
   const response = await fetch(`${base}/api/portfolio/${example.address}`);
   expect(response.status).toBe(200);
   expect(response.headers.get('cache-control')).toBe('no-store');
-  expect((await response.json()).protocols).toHaveLength(5);
+  expect((await response.json()).protocols).toHaveLength(6);
 });
 it('returns health and configuration presence without secret values', async () => {
   const response = await fetch(`${base}/api/health`);
@@ -61,7 +61,7 @@ it('returns both networks grouped by protocol through the combined endpoint', as
   expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
   const data = await response.json();
   expect(data.chain).toBe('Ethereum + Plasma + Arbitrum'); expect(data.blockNumber).toBeNull();
-  expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'compound:Ethereum', 'compound:Arbitrum', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum']);
+  expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'compound:Ethereum', 'compound:Arbitrum', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum', 'euler:Ethereum', 'euler:Plasma', 'euler:Arbitrum']);
   expect(chains.slice(before)).toEqual(['ethereum', 'plasma', 'arbitrum']);
 });
 
