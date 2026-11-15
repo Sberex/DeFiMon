@@ -11,7 +11,7 @@ export const MORPHO_BLUE = '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb';
 export interface MorphoToken { address: Address; symbol: string; decimals: number; priceUsd: number | null }
 export interface MorphoMarketRef { id: Hex; loan: MorphoToken; collateral: MorphoToken | null }
 export interface MorphoVaultRef { address: Address; name: string; asset: MorphoToken; factory: Address; version: 1 | 2; roles?: ('creator' | 'curator' | 'owner')[] }
-export interface MorphoDiscovery { markets: MorphoMarketRef[]; vaults: MorphoVaultRef[]; warnings: string[]; successfulFamilies: number; failures?: MorphoFailure[] }
+export interface MorphoDiscovery { markets: MorphoMarketRef[]; vaults: MorphoVaultRef[]; warnings: string[]; successfulFamilies: number; holdingsComplete?: boolean; failures?: MorphoFailure[] }
 const currentPriceFields = 'price { usd timestamp }';
 const tokenFields = `address symbol decimals ${currentPriceFields}`;
 const userFields = 'address chain { id }';

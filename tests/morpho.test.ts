@@ -219,3 +219,11 @@ it('shows associated vaults that have no deposits from anyone, with known zero p
   expect(result.positions).toHaveLength(2);
   expect(result.positions.every(p => p.suppliedUsd === 0 && p.vault?.totalAssets === 0 && p.vault?.totalAssetsUsd === 0)).toBe(true);
 });
+
+it('reports verified personal discovery separately from associated-vault warnings', async () => {
+  const { client } = fixture({ market: false });
+  const result = await readMorpho(client, wallet, 123n, async () => ({ markets: [], vaults: [], successfulFamilies: 6, holdingsComplete: true, warnings: ['Morpho V2 curator vault discovery is unavailable.', 'Morpho V2 owner vault discovery is unavailable.'] }), 'arbitrum');
+  expect(result.status).toBe('partial'); expect(result.positions).toEqual([]);
+  expect(result.balanceDiscoveryComplete).toBe(true);
+  expect(result.message).toContain('curator');
+});

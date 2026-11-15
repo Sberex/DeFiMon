@@ -35,6 +35,8 @@ export interface Position {
 export interface ProtocolResult {
   id: string; name: string; status: 'ok' | 'partial' | 'error' | 'not-integrated'; coverage: string;
   message?: string; positions: Position[];
+  /** Personal holdings discovery is independent of optional owner/curator listings. */
+  balanceDiscoveryComplete?: boolean;
   chain?: ChainName;
 }
 export interface Portfolio {

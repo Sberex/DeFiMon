@@ -194,5 +194,5 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
   const uniqueVaults = [...new Map(discovery.vaults.map(v => [v.address.toLowerCase(), v])).values()];
   if (uniqueMarkets.length !== discovery.markets.length || uniqueVaults.length !== discovery.vaults.length) warnings.add('Duplicate Morpho entries were counted once; complete lookup coverage could not be confirmed.');
   const [markets, vaults] = await Promise.all([mapLimited(uniqueMarkets, readMarket), mapLimited(uniqueVaults, readVault)]);
-  return { id: 'morpho', name: 'Morpho', status: warnings.size ? 'partial' : 'ok', coverage: MORPHO_COVERAGE.replace('Ethereum', deployment.name), message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...markets, ...vaults].filter((p): p is Position => p !== null) };
+  return { balanceDiscoveryComplete: discovery.holdingsComplete, id: 'morpho', name: 'Morpho', status: warnings.size ? 'partial' : 'ok', coverage: MORPHO_COVERAGE.replace('Ethereum', deployment.name), message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...markets, ...vaults].filter((p): p is Position => p !== null) };
 }

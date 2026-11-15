@@ -48,7 +48,7 @@ export function positionMonthlyInterest(position: Position): MonthlyInterest {
   return net(sum(rows.map(r => r.earnedUsd)), sum(rows.map(r => r.paidUsd)));
 }
 export function protocolMonthlyInterest(protocol: ProtocolResult): MonthlyInterest & { netValueUsd: number | null } {
-  if (!['ok', 'partial'].includes(protocol.status) || (!protocol.positions.length && protocol.status !== 'ok')) return { ...net(null, null), netValueUsd: null };
+  if (!['ok', 'partial'].includes(protocol.status) || protocol.balanceDiscoveryComplete === false || (!protocol.positions.length && protocol.status !== 'ok' && protocol.balanceDiscoveryComplete !== true)) return { ...net(null, null), netValueUsd: null };
   const positions = protocol.positions.map(positionMonthlyInterest);
   const netValueUsd = sum(protocol.positions.map(p => p.suppliedUsd !== null && p.debtUsd !== null ? p.suppliedUsd - p.debtUsd : null));
   return { ...net(sum(positions.map(p => p.earnedUsd)), sum(positions.map(p => p.paidUsd))), netValueUsd };
@@ -59,7 +59,7 @@ export function monthlyInterestIssues(protocols: ProtocolResult[]): InterestIssu
   const issues: InterestIssue[] = [];
   for (const protocol of protocols) {
     const context = { protocol: protocol.name, chain: protocol.chain };
-    if (!['ok', 'partial'].includes(protocol.status) || (protocol.status === 'partial' && !protocol.positions.length)) {
+    if (!['ok', 'partial'].includes(protocol.status) || protocol.balanceDiscoveryComplete === false || (protocol.status === 'partial' && !protocol.positions.length && protocol.balanceDiscoveryComplete !== true)) {
       issues.push({ ...context, reason: 'Positions could not be fully checked. Refresh and check this protocol’s connection message below.' });
       continue;
     }

@@ -858,3 +858,24 @@ test('explains unavailable total NPL and Portfolio APR with protocol, network, v
   await expect(page.locator('.total-npl > strong')).not.toHaveText('Unavailable');
   await expect(page.locator('.portfolio-apr > strong')).not.toHaveText('Unavailable');
 });
+
+test('keeps total NPL and Portfolio APR available when only Arbitrum managed-vault discovery fails', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.address = '0x5929D94eb4C41D91955154465a58a531Ad4CF7b8';
+  fixture.protocols = [fixture.protocols[0], {
+    id: 'morpho', name: 'Morpho', chain: 'Arbitrum', status: 'partial', coverage: 'Arbitrum Morpho vaults',
+    balanceDiscoveryComplete: true, positions: [],
+    message: 'Morpho V2 curator vault discovery is unavailable. Morpho V2 owner vault discovery is unavailable.',
+  }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $5.00');
+  await expect(page.locator('.portfolio-apr > strong')).not.toHaveText('Unavailable');
+  await expect(page.getByRole('region', { name: 'Missing interest data', exact: true })).toHaveCount(0);
+  const morpho = page.locator('article.morpho[data-chain="Arbitrum"]');
+  await expect(morpho.getByText('Partially checked', { exact: true })).toBeVisible();
+  await expect(morpho.locator('.protocol-warning')).toContainText('curator vault discovery is unavailable');
+  await expect(morpho.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $0.00 / month');
+});

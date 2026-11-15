@@ -124,3 +124,18 @@ it('explains failed discovery separately from missing intrinsic APR and USD pric
   expect(result.issues[1]).toMatchObject({ asset: 'sUSDai', reason: 'intrinsic (30-day) APR unavailable' });
   expect(result.issues[2]).toMatchObject({ asset: 'ETH', reason: 'USD price unavailable' });
 });
+
+it('allows a verified empty personal balance despite failed optional managed-vault listings', () => {
+  const managedOnlyFailure = { ...protocol([]), id: 'morpho', chain: 'Arbitrum' as const, status: 'partial' as const, balanceDiscoveryComplete: true };
+  expect(protocolMonthlyInterest(managedOnlyFailure)).toMatchObject({ earnedUsd: 0, paidUsd: 0, nplUsd: 0 });
+  const total = totalMonthlyInterest([protocol(), managedOnlyFailure]);
+  expect(total).toMatchObject({ earnedUsd: 150, paidUsd: 60, nplUsd: 90, partial: true, issues: [] });
+  expect(annualizedNplApr(total.nplUsd, 24000)).toBeCloseTo(.045);
+});
+it('withholds NPL if personal discovery is incomplete even when some deposits were returned', () => {
+  const incomplete = { ...protocol(), balanceDiscoveryComplete: false };
+  expect(protocolMonthlyInterest(incomplete).nplUsd).toBeNull();
+  expect(totalMonthlyInterest([incomplete]).issues).toHaveLength(1);
+  const unreadable = { ...protocol([position([])]), status: 'partial' as const, balanceDiscoveryComplete: true };
+  expect(totalMonthlyInterest([unreadable]).nplUsd).toBeNull();
+});

@@ -70,3 +70,31 @@ it('does not query Plasma or invent a Morpho deployment when the service rejects
   await expect(fetchMorphoAssociatedVaults(wallet, load as typeof fetch, 'plasma')).rejects.toThrow('does not support Plasma');
   expect(load).not.toHaveBeenCalled();
 });
+
+it('keeps personal holdings coverage complete when Arbitrum V2 management queries are rejected', async () => {
+  const load = (async (_url: unknown, options: RequestInit) => {
+    const { query } = JSON.parse(String(options.body));
+    expect(query).toMatch(/42161/);
+    if (/AssociatedVaultsV2/.test(query)) return new Response(JSON.stringify({ errors: [{ message: 'Variable rejected', status: 'GRAPHQL_VALIDATION_FAILED' }] }), { status: 400 });
+    if (/AssociatedVaultsV1/.test(query)) return new Response(JSON.stringify({ data: { vaults: page() } }));
+    if (/WalletMarkets/.test(query)) return new Response(JSON.stringify({ data: { marketPositions: page() } }));
+    if (/WalletVaults\(/.test(query)) return new Response(JSON.stringify({ data: { vaultPositions: page() } }));
+    return new Response(JSON.stringify({ data: { userByAddress: { address: wallet, chain: { id: 42161 }, vaultV2Positions: [] } } }));
+  }) as typeof fetch;
+  const result = await fetchMorphoPortfolioDiscovery(wallet, load, 'arbitrum');
+  expect(result.successfulFamilies).toBe(6);
+  expect(result.holdingsComplete).toBe(true);
+  expect(result.markets).toEqual([]); expect(result.vaults).toEqual([]);
+  expect(result.failures?.map(f => f.family)).toEqual(['vault V2 curator', 'vault V2 owner']);
+  expect(result.warnings).toHaveLength(2);
+});
+it('never lets successful management queries cover up failed personal holdings discovery', async () => {
+  const load = (async (_url: unknown, options: RequestInit) => {
+    const { query } = JSON.parse(String(options.body));
+    if (/AssociatedVaults/.test(query)) return new Response(JSON.stringify({ data: { [query.includes('AssociatedVaultsV1') ? 'vaults' : 'vaultV2s']: page() } }));
+    return new Response('{}', { status: 503 });
+  }) as typeof fetch;
+  const result = await fetchMorphoPortfolioDiscovery(wallet, load);
+  expect(result.successfulFamilies).toBe(5);
+  expect(result.holdingsComplete).toBe(false);
+});

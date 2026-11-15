@@ -84,5 +84,5 @@ export async function fetchMorphoPortfolioDiscovery(wallet: Address, fetcher: ty
       existing.roles = [...new Set([...(existing.roles ?? []), ...(v.roles ?? [])])];
     } else vaults.set(key, { ...v, roles: v.roles ? [...v.roles] : undefined });
   }
-  return { markets: holdings.markets, vaults: [...vaults.values()], warnings: [...warnings], successfulFamilies: holdings.successfulFamilies + associated.successfulFamilies, failures: [...(holdings.failures ?? []), ...associated.failures] };
+  return { holdingsComplete: holdings.successfulFamilies === 3 && holdings.warnings.length === 0, markets: holdings.markets, vaults: [...vaults.values()], warnings: [...warnings], successfulFamilies: holdings.successfulFamilies + associated.successfulFamilies, failures: [...(holdings.failures ?? []), ...associated.failures] };
 }

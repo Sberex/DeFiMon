@@ -18,6 +18,6 @@ if (wallet === '--schema') {
 } else {
   console.log('Testing public Morpho lookup only. No Ethereum-provider key or .env contents will be printed.');
   const result = await fetchMorphoPortfolioDiscovery(wallet, fetch, network);
-  console.log(JSON.stringify({ endpoint: MORPHO_API, network, successfulLookups: result.successfulFamilies, marketsFound: result.markets.length, vaultsFound: result.vaults.length, associatedVaults: result.vaults.filter(v => v.roles?.length).map(v => ({ address: v.address, version: v.version, roles: v.roles })), failures: result.failures, warnings: result.warnings }, null, 2));
+  console.log(JSON.stringify({ endpoint: MORPHO_API, network, personalHoldingsComplete: result.holdingsComplete, successfulLookups: result.successfulFamilies, marketsFound: result.markets.length, vaultsFound: result.vaults.length, associatedVaults: result.vaults.filter(v => v.roles?.length).map(v => ({ address: v.address, version: v.version, roles: v.roles })), failures: result.failures, warnings: result.warnings }, null, 2));
   if (result.failures?.length) process.exitCode = 1;
 }
