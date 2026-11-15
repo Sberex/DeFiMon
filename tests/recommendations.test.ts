@@ -35,3 +35,23 @@ it('keeps one-sided balances and unknown active APRs, excludes unreadable or emp
   expect(result[1].rows[0].supplied).toBeUndefined();
   expect(result[1].rows[0].borrowed?.symbol).toBe('USDC');
 });
+it('excludes Fluid loops with the same two token contracts on both sides without changing overview positions or totals', () => {
+  const gho = asset('GHO', 1000, 800), usdt = asset('USDT0', 2000, 1200);
+  const loop = position('fluid-nft-33', [gho, usdt]);
+  const other = position('fluid-nft-36', [asset('sUSDai', 1000), asset('USDT0', 0, 800)]);
+  for (const chain of ['Ethereum', 'Plasma', 'Arbitrum'] as const) {
+    const source = { ...protocol([loop, other]), id: 'fluid', name: 'Fluid', chain };
+    const before = structuredClone(source);
+    expect(recommendationPositions([source]).map(p => p.label)).toEqual(['fluid-nft-36']);
+    expect(source).toEqual(before);
+    expect(recommendationPositions([{ ...source, id: 'aave-v3' }])).toHaveLength(2);
+  }
+});
+it('keeps Fluid positions with different collateral/debt baskets and excludes matching baskets regardless of order or address case', async () => {
+  const { sameTwoAssetBasket } = await import('../src/recommendation-filters');
+  expect(sameTwoAssetBasket(['GHO', 'USDT0'], ['usdt0', 'gho'])).toBe(true);
+  expect(sameTwoAssetBasket(['GHO', 'USDT0'], ['GHO', 'USDC'])).toBe(false);
+  expect(sameTwoAssetBasket(['GHO'], ['GHO'])).toBe(false);
+  expect(sameTwoAssetBasket(['GHO', 'USDT0'], ['GHO'])).toBe(false);
+  expect(sameTwoAssetBasket(['', 'GHO'], ['', 'GHO'])).toBe(false);
+});

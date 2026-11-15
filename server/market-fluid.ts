@@ -1,3 +1,4 @@
+import { sameTwoAssetBasket } from '../src/recommendation-filters.js';
 import { parseAbi, type Address } from 'viem';
 import { fluidMarketLiquidity } from './fluid-market-liquidity.js';
 import { fluidMarketAbi } from './abis/fluid-markets.js';
@@ -17,6 +18,7 @@ export const readFluidMarkets: Reader = async (client, network, block, targets, 
     if (vault.vault.toLowerCase() !== address.toLowerCase()) throw new Error('Wrong vault');
     const suppliesRequired = [vault.constantVariables.supplyToken.token0, ...(vault.isSmartCol ? [vault.constantVariables.supplyToken.token1] : [])].map(a => normalizeMarketToken(a, network));
     const borrowsRequired = [vault.constantVariables.borrowToken.token0, ...(vault.isSmartDebt ? [vault.constantVariables.borrowToken.token1] : [])].map(a => normalizeMarketToken(a, network));
+    if (vault.isSmartCol && vault.isSmartDebt && sameTwoAssetBasket(suppliesRequired, borrowsRequired)) return [];
     const relevant = targets.filter(t => t.borrowed && suppliesRequired.some(a => t.supplies.includes(a)) && borrowsRequired.some(a => t.borrows.includes(a)) && suppliesRequired.every(a => t.allSupplies.includes(a)) && borrowsRequired.every(a => t.allBorrows.includes(a)));
     if (!relevant.length || vault.configs.collateralFactor === 0) return [];
     const makeAsset = (address: string, supplied: number, borrowed: number): Asset => ({ address, symbol: '', supplied, borrowed, priceUsd: null, collateral: supplied > 0, liquidationThreshold: null, liquidationPriceUsd: null });

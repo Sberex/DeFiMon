@@ -1083,3 +1083,46 @@ test('shows automatic token-match provenance, manual priority and lookup failure
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Wallet Overview', exact: true }).click();
   await expect(page.locator('.total-npl > strong')).toHaveText(total!);
 });
+
+test('keeps same-two-token Fluid vaults in overview but excludes them from recommendation cards and search targets', async ({ page }) => {
+  let portfolioReads = 0, marketReads = 0;
+  const fixture = structuredClone(example);
+  const fluid = fixture.protocols.find(p => p.id === 'fluid')!; fixture.protocols = [fluid]; fluid.chain = 'Plasma';
+  const loop = structuredClone(fluid.positions[0]); loop.id = 'fluid-nft-loop'; loop.label = 'Vault 33 · GHO/USDT0 / GHO/USDT0';
+  loop.suppliedUsd = 3000; loop.debtUsd = 2000;
+  Object.assign(loop.assets[0], { address: '0xb77e872a68c62cfc0dfb02c067ecc3da23b4bbf3', symbol: 'GHO', supplied: 1000, borrowed: 800, priceUsd: 1, supplyRate: { apr: .02, note: '' }, borrowRate: { apr: .04, note: '' } });
+  Object.assign(loop.assets[1], { address: '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', symbol: 'USDT0', supplied: 2000, borrowed: 1200, priceUsd: 1, supplyRate: { apr: .02, note: '' }, borrowRate: { apr: .04, note: '' } });
+  const eligible = structuredClone(loop); eligible.id = 'fluid-nft-eligible'; eligible.label = 'Vault 36 · sUSDai / USDT0'; eligible.suppliedUsd = 1500; eligible.debtUsd = 1000;
+  Object.assign(eligible.assets[0], { address: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', symbol: 'sUSDai', supplied: 1500, borrowed: 0 });
+  Object.assign(eligible.assets[1], { supplied: 0, borrowed: 1000 });
+  await page.route('**/api/portfolio/*', route => { fluid.positions = ++portfolioReads === 1 ? [loop, eligible] : [loop]; return route.fulfill({ json: fixture }); });
+  await page.route('**/api/recommendations', route => {
+    marketReads++;
+    const targets = route.request().postDataJSON().targets;
+    expect(targets).toHaveLength(1);
+    expect(targets[0]).toMatchObject({ network: 'plasma', supplied: eligible.assets[0].address, borrowed: eligible.assets[1].address });
+    expect(targets[0].id).not.toContain('fluid-nft-loop');
+    return route.fulfill({ json: { checkedAt: '2026-11-15T12:00:00Z', coverage: [], alternatives: [] } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.getByRole('heading', { name: loop.label, exact: true })).toBeVisible();
+  const total = await page.locator('.total-npl > strong').textContent();
+  const nav = page.getByRole('navigation', { name: 'Dashboard sections' });
+  await nav.getByRole('button', { name: 'Recommendations', exact: true }).click();
+  const recommendations = page.getByRole('region', { name: 'Wallet recommendations' });
+  await expect(recommendations.locator('.recommendation-card')).toHaveCount(1);
+  await expect(recommendations.getByRole('heading', { name: loop.label, exact: true })).toHaveCount(0);
+  await expect(recommendations.getByRole('heading', { name: eligible.label, exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Refresh alternative rates', exact: true })).toBeEnabled();
+  expect(marketReads).toBe(1);
+  await nav.getByRole('button', { name: 'Wallet Overview', exact: true }).click();
+  await expect(page.locator('.total-npl > strong')).toHaveText(total!);
+  await expect(page.getByRole('heading', { name: loop.label, exact: true })).toBeVisible();
+  await nav.getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(recommendations.getByText(/No eligible positions for recommendations/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Refresh alternative rates', exact: true })).toHaveCount(0);
+  expect(marketReads).toBe(1);
+});

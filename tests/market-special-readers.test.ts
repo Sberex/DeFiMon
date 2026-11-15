@@ -67,3 +67,16 @@ it('Morpho reports accrued supply minus borrow as total liquidity and retains ra
   const unknown = await readMorphoMarkets(client, 'ethereum', 100n, target, () => {});
   expect(unknown).toHaveLength(1); expect(unknown[0].borrowApr).toBe(.03); expect(unknown[0].liquidity).toBeNull();
 });
+it('skips same-two-token Fluid smart vault alternatives before reading rates or liquidity', async () => {
+  const functions: string[] = [];
+  const client = { readContract: async ({ functionName }: any) => {
+    functions.push(functionName);
+    if (functionName === 'getAllVaultsAddresses') return [vault];
+    if (functionName === 'getVaultEntireData') return { vault, isSmartCol: true, isSmartDebt: true, constantVariables: { supplyToken: { token0: supply, token1: debt }, borrowToken: { token0: debt, token1: supply } } };
+    throw new Error('Excluded vault must not trigger more calls');
+  } } as unknown as ChainClient;
+  const warnings: string[] = [];
+  const result = await readFluidMarkets(client, 'ethereum', 100n, expandTargets([{ ...baseTarget, supplyBasket: [supply, debt], borrowBasket: [debt, supply] }], 'ethereum'), m => warnings.push(m));
+  expect(result).toEqual([]); expect(warnings).toEqual([]);
+  expect(functions).toEqual(['getAllVaultsAddresses', 'getVaultEntireData']);
+});

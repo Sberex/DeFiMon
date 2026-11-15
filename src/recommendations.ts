@@ -1,3 +1,4 @@
+import { sameTwoAssetBasket } from './recommendation-filters';
 import type { Asset, ChainName, Position, ProtocolResult } from './types';
 
 export const isMorphoVaultPosition = (position: Position) => !!position.vault || position.id.startsWith('morpho-vault-');
@@ -12,6 +13,7 @@ export function recommendationPositions(protocols: ProtocolResult[], fallbackCha
     return protocol.positions.flatMap(position => {
       const supplied = position.assets.filter(a => Number.isFinite(a.supplied) && a.supplied > 0);
       const borrowed = position.assets.filter(a => Number.isFinite(a.borrowed) && a.borrowed > 0);
+      if (protocol.id === 'fluid' && sameTwoAssetBasket(supplied.map(a => a.address), borrowed.map(a => a.address))) return [];
       const vault = protocol.id === 'morpho' && isMorphoVaultPosition(position);
       if (vault ? !supplied.length : !supplied.length && !borrowed.length) return [];
       const rows = vault ? supplied.map(asset => ({ supplied: asset })) :
