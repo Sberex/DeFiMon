@@ -8009,12 +8009,12 @@
       "symbol": "ANTHROPIC"
     }
   ],
-  "groups": 810,
-  "contracts": 2050,
+  "groups": 813,
+  "contracts": 2054,
   "evmChains": 120,
   "categoryCounts": {
     "Other": 750,
-    "Savings stablecoin": 8,
+    "Savings stablecoin": 11,
     "Stablecoin": 52
   },
   "sources": {
@@ -15283,6 +15283,36 @@
       "retrievedAt": "2026-11-16T16:24:38.080671+00:00",
       "categoryBasis": "User requested Savings stablecoin",
       "note": "User-requested addition after the CMC snapshot; six EVM platforms retained, Solana excluded."
+    },
+    "strUSD": {
+      "provider": "CoinGecko",
+      "id": "tori-staked-trusd",
+      "name": "Tori Staked trUSD",
+      "symbol": "strUSD",
+      "url": "https://www.coingecko.com/en/coins/tori-staked-trusd",
+      "retrievedAt": "2026-11-16T18:33:17.257298+00:00",
+      "categoryBasis": "Tori Finance is a DeFi protocol that brings delta-neutral trading strategies on-chain. Its core asset, trUSD, is a synthetic dollar collateralized by the protocol's trading positions and redeemable for USDC or USDT by eligible users, subject to protocol terms. Users can stake trUSD to mint strUSD, whose exchange rate to trUSD reflects the performance of the underlying strategies. The strategies are designed to be delta-neutral, with no directional view on crypto prices. Any returns are variable, performance-based, and not guaranteed. ",
+      "note": "User-requested addition after the CMC snapshot; all CoinGecko-listed EVM contracts retained."
+    },
+    "USD3": {
+      "provider": "CoinGecko",
+      "id": "3jane-usd3",
+      "name": "3Jane USD3",
+      "symbol": "USD3",
+      "url": "https://www.coingecko.com/en/coins/3jane-usd3",
+      "retrievedAt": "2026-11-16T18:33:17.257298+00:00",
+      "categoryBasis": "3Jane is a credit protocol that provides programmable, asset-backed financing to fintech lenders through warehouse facilities, participations, and forward-flow loan purchases. The facilities are funded through a pooled capital structure comprising USD3 and sUSD3. USD3 is a yield-bearing ERC-4626 token minted by depositing USDC and represents the senior tranche. sUSD3 is staked from USD3 and represents the junior tranche, receiving the junior share of pool yield while absorbing losses before USD3. 3Jane allocates capital across approved facilities, while the fintech lenders remain responsible for borrower acquisition, underwriting, origination, and servicing.",
+      "note": "User-requested addition after the CMC snapshot; all CoinGecko-listed EVM contracts retained."
+    },
+    "etrUSD": {
+      "provider": "CoinGecko",
+      "id": "tori-ecosystem-vault",
+      "name": "Tori Ecosystem Vault",
+      "symbol": "etrUSD",
+      "url": "https://www.coingecko.com/en/coins/tori-ecosystem-vault",
+      "retrievedAt": "2026-11-16T18:35:38.097776+00:00",
+      "categoryBasis": "User requested Savings stablecoin",
+      "note": "User-requested addition after the CMC snapshot; all CoinGecko-listed EVM contracts retained. Vault share value follows net asset value rather than a fixed dollar peg."
     }
   },
   "excludedPlatforms": [

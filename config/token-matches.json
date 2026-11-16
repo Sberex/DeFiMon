@@ -4478,5 +4478,18 @@
     "ink": "0x5bcf6b008bf80b9296238546bace1797657b05d6",
     "bsc": "0xba9425ec55ee0e72216d18e0ad8bbba2553bfb60",
     "avalanche": "0x180af87b47bf272b2df59dccf2d76a6eafa625bf"
+  },
+  "strUSD": {
+    "_category": "Savings stablecoin",
+    "ethereum": "0x280839980a7ed0d7717f64125fe241012e5f5815",
+    "monad": "0x683fb58ee77172626d5b49087ddac71ef7825d20"
+  },
+  "USD3": {
+    "_category": "Savings stablecoin",
+    "ethereum": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc"
+  },
+  "etrUSD": {
+    "_category": "Savings stablecoin",
+    "ethereum": "0x6f20ae2c98c2d34e6a57f3411f2c5af92e32592d"
   }
 }

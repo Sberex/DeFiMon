@@ -93,3 +93,7 @@ Historical contract reads require an archive-capable source-network provider. Op
 npm run check:savings-apr -- reUSD ethereum
 npm run check:savings-apr -- sUSDS ethereum
 ```
+
+User-requested CoinGecko additions include **strUSD** ([Tori Staked trUSD](https://www.coingecko.com/en/coins/tori-staked-trusd)) on Ethereum and Monad, and **USD3** ([3Jane USD3](https://www.coingecko.com/en/coins/3jane-usd3)) on Ethereum. Both are classified **Savings stablecoin**: CoinGecko describes strUSD as accruing strategy performance through its trUSD exchange rate, and USD3 as a yield-bearing ERC-4626 senior-tranche token. Monad is stored as an EVM match only; it is not a dashboard network. The source records and current counts are retained in **token-matches.sources.json**.
+
+**etrUSD** ([Tori Ecosystem Vault on CoinGecko](https://www.coingecko.com/en/coins/tori-ecosystem-vault)) is included on Ethereum and classified **Savings stablecoin** as requested. It represents vault shares redeemable for trUSD; the label does not imply a fixed USD peg. Its only CoinGecko-listed platform is Ethereum.
