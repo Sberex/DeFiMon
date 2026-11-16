@@ -11,7 +11,7 @@ Each group keeps the original flat network/address format and adds optional **`_
 - **`Savings stablecoin`**: a yield-bearing savings asset, such as sUSDai, sUSDS, sDAI or sUSDe.
 - **`Other`**: all other tokens, including USTC as confirmed by the user after its loss of peg. This is the default for older groups without `_category`.
 
-Stablecoin and savings labels appear in Wallet tokens. Categories are never treated as addresses or cross-chain matches. They do not imply a $1 price, guaranteed yield, an APR estimate or additional NPL; balances retain actual market-price checks. USDY, Venus vBUSD and Gate GUSD are marked Savings stablecoin, while Aegis YUSD, Electronic eUSD, Falcon USDf and USDD remain Stablecoin, per user confirmation. Gate GUSD and Gemini GUSD have different identities despite sharing a ticker; `GUSD#3306` is Gemini's Stablecoin.
+Stablecoin and savings labels appear in Wallet tokens. Categories are never treated as addresses or cross-chain matches. They do not imply a $1 price or guaranteed yield. Supplied Savings stablecoin assets request a verified 30-day intrinsic rate; that separately identified component enters Supply APR and NPL when available. Missing history makes the affected interest unknown, rather than zero. Balances retain actual market-price checks. USDY, Venus vBUSD and Gate GUSD are marked Savings stablecoin, while Aegis YUSD, Electronic eUSD, Falcon USDf and USDD remain Stablecoin, per user confirmation. Gate GUSD and Gemini GUSD have different identities despite sharing a ticker; `GUSD#3306` is Gemini's Stablecoin.
 
 ## CoinMarketCap snapshot
 
@@ -76,3 +76,20 @@ npm run diagnose:token-matches -- ethereum 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C7
 Wallet discovery merges the configured contracts for each supported network with the existing supported token roster, removes duplicate contracts, and reads balances at the displayed block. Only nonzero ERC-20 balances are listed. Config entries take precedence for roster labels; symbols and decimals are still read from the token contract. Existing receipt-token exclusions and USD pricing checks remain in place. Adding a match does not establish bridge availability or a guaranteed one-to-one conversion.
 
 User-requested additions after that snapshot include **reUSD**, classified as **Savings stablecoin**. Its Ethereum, Arbitrum, Base, Ink, BNB Smart Chain (`bsc`) and Avalanche addresses come from [CoinGecko’s Re Protocol reUSD record](https://www.coingecko.com/en/coins/re-protocol-reusd). Solana is excluded from this EVM file, and no Plasma address is guessed. The current group/contract/category counts and source evidence are saved in **token-matches.sources.json**.
+
+## Savings-token oracle sources
+
+**savings-oracles.json** configures verified on-chain rate sources keyed by token group. Each record declares a source network, the exact canonical token, the source contract, its adapter (`chainlink` or `erc4626`), and either the expected feed description/decimals or expected underlying contract. The source token must match that network's address in **token-matches.json**, and the group must be marked **Savings stablecoin**. Category and symbol alone never prove an oracle address.
+
+The reUSD source is the actual reUSD/USD adapter `0x72B5760cFBE437DD01409f44055fDfB8f8121B46`, verified through its Morpho market `0x4565ac05d38b19374ccbb04c17cca60ca9353cd41824f0803d0fc7704f60eaed` and the oracle's `BASE_FEED_1` reference. Its source is verified on Sourcify. sUSDS, sDAI and sUSDe use the canonical share contract's `convertToAssets` rate with the declared stable underlying, rather than a presumed $1 market price. sUSDai retains its existing uncapped Ethereum exchange-rate feed and historical-round reader.
+
+For a newly classified asset without a configured source, the reader tries an attributable canonical ERC-4626 share rate, an Aave-referenced asset feed, or a direct single base feed of an actually held Morpho collateral market. Composite oracle/vault structures are not guessed. If no source or valid history can be verified, the intrinsic APR is explicitly unavailable. Additional adapters can be configured as reliable oracle data becomes available.
+
+For the new archive-based sources, the server reads the current block and finds the last block at or before `current timestamp − 30 days`, verifies the next-block boundary, and reads the **same source** at both snapshots. It applies exactly `(current rate − old rate) × 365 / (30 × old rate)`. Units and identity must match, prices must be positive, and feeds must not be future-dated or more than three days stale at either snapshot. Negative growth remains negative. Quote results are deduplicated by group across networks, cached for five minutes, and failed reads retry after one minute. No wallet history or historical balance database is stored.
+
+Historical contract reads require an archive-capable source-network provider. Optionally set **ETHEREUM_ARCHIVE_RPC_URL** (or another supported network's **..._ARCHIVE_RPC_URL**) on Render; otherwise the normal network provider is used. Keep provider keys in server environment settings. Never use a current oracle reading as the missing month-old value. Diagnose with:
+
+```sh
+npm run check:savings-apr -- reUSD ethereum
+npm run check:savings-apr -- sUSDS ethereum
+```

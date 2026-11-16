@@ -1224,3 +1224,32 @@ test('shows Base balances, monthly NPL and Base alternatives without treating Ba
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('includes reUSD oracle growth in Supply APR, monthly NPL and alternatives without calling it sUSDai', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.protocols = [{ id: 'morpho', name: 'Morpho', status: 'ok', chain: 'Ethereum', coverage: 'Savings collateral', positions: [{
+    id: 'reusd-loan', label: 'Morpho · reUSD / USDC', suppliedUsd: 1100, debtUsd: 500, healthFactor: 1.98, risk: 'lower', notes: [], assets: [
+      { address: '0x5086bf358635b81d8c47c66d1c8b9e567db70c72', symbol: 'reUSD', supplied: 1000, borrowed: 0, priceUsd: 1.1, collateral: true, liquidationThreshold: .9, liquidationPriceUsd: null, supplyRate: { apr: 0, note: 'Collateral earns no protocol lending interest' }, intrinsicSupplyRate: { apr: .12, estimated: true, note: 'Past-month reUSD oracle growth, annualized with 365 / 30.', source: { chain: 'Ethereum', oracle: '0x72B5760cFBE437DD01409f44055fDfB8f8121B46', kind: 'chainlink', label: 'reUSD/USD exchange-rate oracle', startRate: 1, endRate: 1 + .12 * 30 / 365, startTimestamp: 1792000000, endTimestamp: 1794592000, windowDays: 30 } } },
+      { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', supplied: 0, borrowed: 500, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .06, note: 'Current borrow APR' } },
+    ],
+  }] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => {
+    const { targets } = route.request().postDataJSON();
+    return route.fulfill({ json: { checkedAt: new Date().toISOString(), coverage: [], alternatives: [{ targetId: targets[0].id, protocol: 'Morpho', network: 'base', market: 'alternative', label: 'Base reUSD market', supplyApr: 0, borrowApr: .05, lltv: .9, block: '123', url: 'https://app.morpho.org/', note: '' }] } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.morpho');
+  await expect(card.locator('.position-monthly-npl strong')).toHaveText('≈ $8.50');
+  await expect(card.locator('.position-net-apr strong')).toHaveText('≈ 17.00%');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $8.50');
+  await expect(card.getByText('Intrinsic (30d): 12.00%', { exact: true })).toBeVisible();
+  await card.getByText('Intrinsic yield details', { exact: true }).click();
+  await expect(card.getByText(/Source: Ethereum reUSD\/USD exchange-rate oracle/)).toBeVisible();
+  await expect(card.getByText(/Source: Ethereum sUSDai/)).toHaveCount(0);
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  const alternatives = page.getByRole('region', { name: 'Alternatives for reUSD - USDC', exact: true });
+  await expect(alternatives.locator('tbody tr td').nth(1)).toHaveText('≈ 12.00%');
+});

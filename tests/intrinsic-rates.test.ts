@@ -89,8 +89,8 @@ it('coalesces simultaneous requests, refreshes after five minutes and retries fa
 it('adds a separate intrinsic component to supplied sUSDai across all protocol families and networks', async () => {
   const quote = await readSusdaiIntrinsicRate(fixture().client, 1n);
   const asset = { symbol: 'sUSDai', address: SUSDAI, supplied: 10, borrowed: 0, priceUsd: 1.1, collateral: true, liquidationThreshold: .9, liquidationPriceUsd: 1, supplyRate: { apr: .02, note: 'Protocol only' } };
-  const protocols: ProtocolResult[] = ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid'].map(id => ({ id, name: id, status: 'ok', coverage: '', positions: [{ id, label: id, assets: [{ ...asset }], suppliedUsd: 11, debtUsd: 5, healthFactor: 2, risk: 'lower', notes: [] }] }));
-  for (const network of ['ethereum', 'plasma', 'arbitrum'] as const) {
+  const protocols: ProtocolResult[] = ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler'].map(id => ({ id, name: id, status: 'ok', coverage: '', positions: [{ id, label: id, assets: [{ ...asset }], suppliedUsd: 11, debtUsd: 5, healthFactor: 2, risk: 'lower', notes: [] }] }));
+  for (const network of ['ethereum', 'plasma', 'arbitrum', 'base'] as const) {
     const load = vi.fn(async () => quote);
     const result = await applyIntrinsicRates(protocols, network, load);
     expect(load).toHaveBeenCalledTimes(1);

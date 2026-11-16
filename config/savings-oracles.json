@@ -1,0 +1,45 @@
+{
+  "reUSD": {
+    "network": "ethereum",
+    "kind": "chainlink",
+    "address": "0x72B5760cFBE437DD01409f44055fDfB8f8121B46",
+    "token": "0x5086bf358635b81d8c47c66d1c8b9e567db70c72",
+    "description": "reUSD/USD exchange rate",
+    "decimals": 18,
+    "label": "reUSD/USD exchange-rate oracle",
+    "evidence": "https://sourcify.dev/server/v2/contract/1/0x72B5760cFBE437DD01409f44055fDfB8f8121B46?fields=all"
+  },
+  "sUSDS": {
+    "network": "ethereum",
+    "kind": "erc4626",
+    "address": "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+    "token": "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+    "underlying": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",
+    "label": "sUSDS/USDS on-chain redemption rate"
+  },
+  "sDAI": {
+    "network": "ethereum",
+    "kind": "erc4626",
+    "address": "0x83f20f44975d03b1b09e64809b757c47f942beea",
+    "token": "0x83f20f44975d03b1b09e64809b757c47f942beea",
+    "underlying": "0x6b175474e89094c44da98b954eedeac495271d0f",
+    "label": "sDAI/DAI on-chain redemption rate"
+  },
+  "sUSDe": {
+    "network": "ethereum",
+    "kind": "erc4626",
+    "address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+    "token": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+    "underlying": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+    "label": "sUSDe/USDe on-chain redemption rate"
+  },
+  "sUSDai": {
+    "network": "ethereum",
+    "kind": "chainlink",
+    "address": "0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a",
+    "token": "0x0b2b2b2076d95dda7817e785989fe353fe955ef9",
+    "description": "SUSDAI / USDAI Exchange Rate",
+    "decimals": 18,
+    "label": "sUSDai/USDai raw exchange-rate oracle"
+  }
+}

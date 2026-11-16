@@ -1,7 +1,7 @@
 import type { Asset, InterestRate, Position, ProtocolResult } from './types';
 export interface MonthlyInterest { earnedUsd: number | null; paidUsd: number | null; nplUsd: number | null }
 const finite = (value: number | null | undefined): value is number => typeof value === 'number' && Number.isFinite(value);
-/** Same supply APR used in the table, including sUSDai intrinsic yield exactly once. */
+/** Same supply APR used in the table, including configured savings-token intrinsic yield exactly once. */
 export function supplyApr(quote?: InterestRate, intrinsic?: InterestRate, merkl?: InterestRate): number | null {
   if (!finite(quote?.apr)) return null;
   if (intrinsic && !finite(intrinsic.apr)) return null;

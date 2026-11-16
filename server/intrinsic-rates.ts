@@ -1,7 +1,8 @@
+import { savingsGroup, savingsRateService } from './savings-rates.js';
 import { parseAbi, type Address } from 'viem';
 import type { IntrinsicRate, NetworkId, ProtocolResult } from '../src/types.js';
 import { makeClient, type ChainClient } from './rpc.js';
-import { YEAR_SECONDS } from './rates.js';
+import { networkNames } from '../src/networks.js';
 // Fluid mainnet CappedRateChainlink_SUSDAI @404d73f points to this raw feed.
 // Read the raw sUSDai/USDai rate, never the capped oracle's maximum allowed APR.
 export const SUSDAI = '0x0b2b2b2076d95dda7817e785989fe353fe955ef9';
@@ -76,11 +77,11 @@ export async function readSusdaiIntrinsicRate(client: ChainClient, blockNumber: 
     const elapsed = latest[3] - start[3];
     if (elapsed < 27n * DAY || elapsed > 33n * DAY) throw new Error('Unsupported observation period');
     const growth = Number(latest[1] - start[1]) / Number(start[1]);
-    const apr = growth * YEAR_SECONDS / Number(elapsed);
+    const apr = growth * 365 / 30;
     if (!Number.isFinite(apr)) throw new Error('Invalid annualized return');
     return {
       apr, estimated: true,
-      note: `Past-month intrinsic APR estimate: (end sUSDai/USDai oracle rate ÷ start rate − 1) × 365 days ÷ elapsed days (${(Number(elapsed) / 86400).toFixed(2)}). Simple annualization, not compounded APY or USD.ai’s current advertised APY. Excludes lending interest and incentives; bridged-token market prices may differ.`,
+      note: `Past-month intrinsic APR estimate: (end sUSDai/USDai oracle rate ÷ start rate − 1) × 365 ÷ 30 (oracle observations ${(Number(elapsed) / 86400).toFixed(2)} days apart). Simple annualization, not compounded APY or USD.ai’s current advertised APY. Excludes lending interest and incentives; bridged-token market prices may differ.`,
       source: { ...source, blockNumber: String(blockNumber), startRound: String(start[0]), endRound: String(latest[0]), startTimestamp: Number(start[3]), endTimestamp: Number(latest[3]), startRate: Number(start[1]) / 1e18, endRate: Number(latest[1]) / 1e18 },
     };
   } catch { return unavailable(); }
@@ -99,11 +100,22 @@ export const getSusdaiIntrinsicRate = createSusdaiRateCache(async () => {
   const client = makeClient('ethereum');
   return readSusdaiIntrinsicRate(client, await client.getBlockNumber());
 });
-export async function applyIntrinsicRates(protocols: ProtocolResult[], network: NetworkId, load = getSusdaiIntrinsicRate): Promise<ProtocolResult[]> {
-  // Deployment identity, not a spoofable token symbol; same canonical token across supported chains.
-  if (!['ethereum', 'plasma', 'arbitrum'].includes(network)) return protocols;
-  const matches = (a: { address: string; supplied: number }) => a.address.toLowerCase() === SUSDAI && a.supplied > 0;
-  if (!protocols.some(p => p.positions.some(p => p.assets.some(matches)))) return protocols;
-  const quote = await load().catch(unavailable);
-  return protocols.map(p => ({ ...p, positions: p.positions.map(position => ({ ...position, assets: position.assets.map(a => matches(a) ? { ...a, intrinsicSupplyRate: quote } : a) })) }));
+export async function applyIntrinsicRates(protocols: ProtocolResult[], network: NetworkId, load = getSusdaiIntrinsicRate, loadSavings = savingsRateService.quote): Promise<ProtocolResult[]> {
+  const jobs = new Map<string, { protocol: string; position: string; address: string }>();
+  for (const p of protocols) for (const position of p.positions) for (const a of position.assets) {
+    if (a.supplied <= 0) continue;
+    const group = savingsGroup(network, a.address);
+    if (group && (!jobs.has(group) || (p.id === 'morpho' && !jobs.get(group)!.position.startsWith('morpho-market-')))) jobs.set(group, { protocol: p.id, position: position.id, address: a.address });
+  }
+  if (!jobs.size) return protocols;
+  const quotes = new Map<string, IntrinsicRate>();
+  await Promise.all([...jobs].map(async ([group, context]) => {
+    const isSusdai = context.address.toLowerCase() === SUSDAI;
+    const quote = await (isSusdai ? load().catch(unavailable) : loadSavings(group, { ...context, network }).catch((): IntrinsicRate => ({ apr: null, estimated: true, note: `${group} intrinsic rate history is unavailable. Earnings are unknown, not zero.`, source: { chain: networkNames[network], oracle: '', kind: 'unavailable', label: `${group} rate history unavailable` } })));
+    quotes.set(group, quote);
+  }));
+  return protocols.map(p => ({ ...p, positions: p.positions.map(position => ({ ...position, assets: position.assets.map(a => {
+    const group = a.supplied > 0 ? savingsGroup(network, a.address) : undefined;
+    return group ? { ...a, intrinsicSupplyRate: quotes.get(group)! } : a;
+  }) })) }));
 }
