@@ -74,6 +74,9 @@ it.each(['ethereum', 'arbitrum', 'plasma'] as const)('searches exact Euler pairs
   const loans = result.filter(r => r.targetId === 'loan');
   expect(loans).toHaveLength(1); expect(loans[0]).toMatchObject({ protocol: 'Euler', lltv: .8, market: expect.any(String), route: collateral, liquidity: { amount: 2000, symbol: 'USDC' } });
   expect(loans[0].borrowApr).toBeCloseTo(.031536);
+  expect(loans[0].collateralVault?.address.toLowerCase()).toBe(collateral);
+  expect(loans[0].collateralVault?.url.toLowerCase()).toBe(`https://app.euler.finance/vault/${collateral}?network=${network}`);
+  expect(loans[0].url.toLowerCase()).toBe(`https://app.euler.finance/vault/${debt}?network=${network}`);
   expect(result.filter(r => r.targetId === 'supply')).toHaveLength(2);
   const paused = eulerFixture({ paused: true, network });
   expect(await readEulerMarkets(paused.client, network, 321n, targets, () => {})).toEqual([]);

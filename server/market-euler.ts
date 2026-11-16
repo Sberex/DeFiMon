@@ -47,7 +47,7 @@ export const readEulerMarkets: Reader = async (client, network, block, targets, 
         ]);
         if (borrowLtv === 0 || liquidationLtv > 10000 || (collateralHooks[1] & 1) !== 0) return [];
         if (collateralRate.supplyRate.apr === null) { warn('Some Euler collateral lending APRs are unavailable.'); return []; }
-        return [{ ...option(target, 'Euler', network, block, address, `${info.name} · collateral ${collateralInfo.name}`, collateralRate.supplyRate.apr, rates.borrowRate.apr!, liquidationLtv / 10000, 'Euler V2 isolated debt vault with the listed receipt vault accepted as collateral. Current liquidation LTV may ramp over time. External incentives and custom borrow/deposit hooks are excluded.'), route: collateralAddress.toLowerCase(), liquidity, url: `https://app.euler.finance/vault/${address}?network=${network}` }];
+        return [{ ...option(target, 'Euler', network, block, address, info.name, collateralRate.supplyRate.apr, rates.borrowRate.apr!, liquidationLtv / 10000, 'Euler V2 isolated debt vault with the listed receipt vault accepted as collateral. Current liquidation LTV may ramp over time. External incentives and custom borrow/deposit hooks are excluded.'), route: collateralAddress.toLowerCase(), collateralVault: { address: collateralAddress, label: collateralInfo.name, url: `https://app.euler.finance/vault/${collateralAddress}?network=${network}` }, liquidity, url: `https://app.euler.finance/vault/${address}?network=${network}` }];
       }, warn);
       results.push(...rows.flat());
     }
