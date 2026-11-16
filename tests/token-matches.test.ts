@@ -29,7 +29,7 @@ it('supports adding a new token through configuration without changing matching 
   expect(correspondingTokens(usdt, 'ethereum', 'ethereum', {})).toEqual([usdt]);
 });
 it('rejects invalid and ambiguous configuration instead of guessing a token identity', () => {
-  for (const invalid of [null, [], { TOKEN: [] }, { TOKEN: {} }, { TOKEN: { base: usdt } }, { TOKEN: { ethereum: 'bad' } }, { TOKEN: { ethereum: '0x0000000000000000000000000000000000000000' } }, { TOKEN: { ethereum: usdt }, OTHER: { ethereum: usdt.toUpperCase().replace('0X', '0x') } }]) {
+  for (const invalid of [null, [], { TOKEN: [] }, { TOKEN: {} }, { TOKEN: { 'unknown-chain': usdt } }, { TOKEN: { ethereum: 'bad' } }, { TOKEN: { ethereum: '0x0000000000000000000000000000000000000000' } }, { TOKEN: { ethereum: usdt }, OTHER: { ethereum: usdt.toUpperCase().replace('0X', '0x') } }]) {
     expect(() => parseTokenMatches(invalid)).toThrow();
   }
 });

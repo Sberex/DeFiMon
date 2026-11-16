@@ -1,0 +1,482 @@
+{
+  "abstract": {
+    "chainId": 2741,
+    "name": "Abstract"
+  },
+  "anubis": {
+    "chainId": 6714,
+    "name": "Anubis"
+  },
+  "apechain": {
+    "chainId": 33139,
+    "name": "ApeChain"
+  },
+  "arbitrum": {
+    "chainId": 42161,
+    "name": "Arbitrum One"
+  },
+  "arbitrum-nova": {
+    "chainId": 42170,
+    "name": "Arbitrum Nova"
+  },
+  "arc": {
+    "chainId": 5042,
+    "name": "Arc"
+  },
+  "astar": {
+    "chainId": 592,
+    "name": "Astar"
+  },
+  "aurora": {
+    "chainId": 1313161554,
+    "name": "Aurora"
+  },
+  "avalanche": {
+    "chainId": 43114,
+    "name": "Avalanche"
+  },
+  "b-network": {
+    "chainId": 223,
+    "name": "B2"
+  },
+  "base": {
+    "chainId": 8453,
+    "name": "Base"
+  },
+  "berachain": {
+    "chainId": 80094,
+    "name": "Berachain"
+  },
+  "bitgert": {
+    "chainId": 32520,
+    "name": "Bitgert Mainnet"
+  },
+  "bitlayer": {
+    "chainId": 200901,
+    "name": "Bitlayer"
+  },
+  "blast": {
+    "chainId": 81457,
+    "name": "Blast"
+  },
+  "bob": {
+    "chainId": 60808,
+    "name": "BOB"
+  },
+  "boba": {
+    "chainId": 288,
+    "name": "Boba Network"
+  },
+  "bsc": {
+    "chainId": 56,
+    "name": "BNB Smart Chain"
+  },
+  "canto": {
+    "chainId": 7700,
+    "name": "Canto"
+  },
+  "celo": {
+    "chainId": 42220,
+    "name": "Celo"
+  },
+  "chiliz": {
+    "chainId": 88888,
+    "name": "Chiliz Chain"
+  },
+  "codex": {
+    "chainId": 81224,
+    "name": "Codex"
+  },
+  "conflux": {
+    "chainId": 1030,
+    "name": "Conflux eSpace"
+  },
+  "core": {
+    "chainId": 1116,
+    "name": "Core Dao"
+  },
+  "corn": {
+    "chainId": 21000000,
+    "name": "Corn"
+  },
+  "cronos": {
+    "chainId": 25,
+    "name": "Cronos Mainnet"
+  },
+  "cronos-zkevm": {
+    "chainId": 388,
+    "name": "Cronos zkEVM Mainnet"
+  },
+  "cube-network": {
+    "chainId": 1818,
+    "name": "Cube Chain Mainnet"
+  },
+  "cyber": {
+    "chainId": 7560,
+    "name": "Cyber"
+  },
+  "dogechain": {
+    "chainId": 2000,
+    "name": "Dogechain"
+  },
+  "duckchain": {
+    "chainId": 5545,
+    "name": "DuckChain Mainnet"
+  },
+  "elastos": {
+    "chainId": 20,
+    "name": "Elastos Smart Chain"
+  },
+  "elysium-kinetiq": {
+    "chainId": 99901,
+    "name": "Elysium"
+  },
+  "energi": {
+    "chainId": 39797,
+    "name": "Energi Mainnet"
+  },
+  "eos-evm": {
+    "chainId": 17777,
+    "name": "EOS EVM"
+  },
+  "ethereum": {
+    "chainId": 1,
+    "name": "Ethereum"
+  },
+  "ethereum-classic": {
+    "chainId": 61,
+    "name": "Ethereum Classic"
+  },
+  "etherlink": {
+    "chainId": 42793,
+    "name": "Etherlink"
+  },
+  "evmos": {
+    "chainId": 9001,
+    "name": "Evmos"
+  },
+  "fantom": {
+    "chainId": 250,
+    "name": "Fantom"
+  },
+  "flare-network": {
+    "chainId": 14,
+    "name": "Flare Mainnet"
+  },
+  "fraxtal": {
+    "chainId": 252,
+    "name": "Fraxtal"
+  },
+  "fuse": {
+    "chainId": 122,
+    "name": "Fuse"
+  },
+  "fusion-network": {
+    "chainId": 32659,
+    "name": "Fusion Mainnet"
+  },
+  "gnosis": {
+    "chainId": 100,
+    "name": "Gnosis"
+  },
+  "godwoken": {
+    "chainId": 71402,
+    "name": "Godwoken Mainnet"
+  },
+  "harmony-shard-0": {
+    "chainId": 1666600000,
+    "name": "Harmony One"
+  },
+  "hashkey-chain": {
+    "chainId": 177,
+    "name": "HSKChain"
+  },
+  "hemi": {
+    "chainId": 43111,
+    "name": "Hemi"
+  },
+  "hoo-smart-chain": {
+    "chainId": 70,
+    "name": "Hoo Smart Chain"
+  },
+  "huobi-token": {
+    "chainId": 128,
+    "name": "Huobi ECO Chain Mainnet"
+  },
+  "hyperevm": {
+    "chainId": 999,
+    "name": "HyperEVM"
+  },
+  "immutable": {
+    "chainId": 13371,
+    "name": "Immutable zkEVM"
+  },
+  "ink": {
+    "chainId": 57073,
+    "name": "Ink"
+  },
+  "iotex": {
+    "chainId": 4689,
+    "name": "IoTeX"
+  },
+  "kardiachain": {
+    "chainId": 24,
+    "name": "KardiaChain Mainnet"
+  },
+  "katana": {
+    "chainId": 747474,
+    "name": "Katana"
+  },
+  "kava": {
+    "chainId": 2222,
+    "name": "Kava EVM"
+  },
+  "klay-token": {
+    "chainId": 8217,
+    "name": "Klaytn"
+  },
+  "krown-network": {
+    "chainId": 1983,
+    "name": "Krown"
+  },
+  "kucoin-community-chain": {
+    "chainId": 321,
+    "name": "KCC Mainnet"
+  },
+  "linea": {
+    "chainId": 59144,
+    "name": "Linea Mainnet"
+  },
+  "lisk": {
+    "chainId": 1135,
+    "name": "Lisk"
+  },
+  "manta-pacific": {
+    "chainId": 169,
+    "name": "Manta Pacific Mainnet"
+  },
+  "mantle": {
+    "chainId": 5000,
+    "name": "Mantle"
+  },
+  "megaeth": {
+    "chainId": 4326,
+    "name": "MegaETH"
+  },
+  "merlin-chain": {
+    "chainId": 4200,
+    "name": "Merlin"
+  },
+  "metal": {
+    "chainId": 1750,
+    "name": "Metal L2"
+  },
+  "meter": {
+    "chainId": 82,
+    "name": "Meter"
+  },
+  "metis-andromeda": {
+    "chainId": 1088,
+    "name": "Metis"
+  },
+  "mode": {
+    "chainId": 34443,
+    "name": "Mode Mainnet"
+  },
+  "monad": {
+    "chainId": 143,
+    "name": "Monad"
+  },
+  "moonbeam": {
+    "chainId": 1284,
+    "name": "Moonbeam"
+  },
+  "moonriver": {
+    "chainId": 1285,
+    "name": "Moonriver"
+  },
+  "morph-l2": {
+    "chainId": 2818,
+    "name": "Morph"
+  },
+  "neon-evm": {
+    "chainId": 245022934,
+    "name": "Neon EVM MainNet"
+  },
+  "oasis": {
+    "chainId": 42262,
+    "name": "Oasis Emerald"
+  },
+  "okex-chain": {
+    "chainId": 66,
+    "name": "OKC"
+  },
+  "onus": {
+    "chainId": 1975,
+    "name": "ONUS Chain Mainnet"
+  },
+  "opbnb": {
+    "chainId": 204,
+    "name": "opBNB"
+  },
+  "optimism": {
+    "chainId": 10,
+    "name": "OP Mainnet"
+  },
+  "peaq": {
+    "chainId": 3338,
+    "name": "Peaq"
+  },
+  "pharos": {
+    "chainId": 1672,
+    "name": "Pharos Mainnet"
+  },
+  "plasma": {
+    "chainId": 9745,
+    "name": "Plasma"
+  },
+  "plume-network": {
+    "chainId": 98866,
+    "name": "Plume"
+  },
+  "polygon": {
+    "chainId": 137,
+    "name": "Polygon"
+  },
+  "polygon-zkevm": {
+    "chainId": 1101,
+    "name": "Polygon zkEVM"
+  },
+  "robinhood": {
+    "chainId": 4663,
+    "name": "Robinhood Chain"
+  },
+  "ronin": {
+    "chainId": 2020,
+    "name": "Ronin"
+  },
+  "rootstock": {
+    "chainId": 30,
+    "name": "Rootstock Mainnet"
+  },
+  "scroll": {
+    "chainId": 534352,
+    "name": "Scroll"
+  },
+  "sei-v2": {
+    "chainId": 1329,
+    "name": "Sei Network"
+  },
+  "shido": {
+    "chainId": 9008,
+    "name": "Shido Network"
+  },
+  "soneium": {
+    "chainId": 1868,
+    "name": "Soneium Mainnet"
+  },
+  "sonic": {
+    "chainId": 146,
+    "name": "Sonic"
+  },
+  "sophon": {
+    "chainId": 50104,
+    "name": "Sophon"
+  },
+  "stable": {
+    "chainId": 988,
+    "name": "Stable Mainnet"
+  },
+  "swellchain": {
+    "chainId": 1923,
+    "name": "Swellchain"
+  },
+  "sx-network": {
+    "chainId": 416,
+    "name": "SX Network Mainnet"
+  },
+  "syscoin": {
+    "chainId": 57,
+    "name": "Syscoin Mainnet"
+  },
+  "taiko": {
+    "chainId": 167000,
+    "name": "Taiko Mainnet"
+  },
+  "telos": {
+    "chainId": 40,
+    "name": "Telos"
+  },
+  "tempo": {
+    "chainId": 1337,
+    "name": "Tempo"
+  },
+  "thundercore": {
+    "chainId": 108,
+    "name": "ThunderCore Mainnet"
+  },
+  "tomb-chain": {
+    "chainId": 6969,
+    "name": "Tomb Mainnet"
+  },
+  "tomochain": {
+    "chainId": 88,
+    "name": "Viction"
+  },
+  "treasure": {
+    "chainId": 61166,
+    "name": "Treasure"
+  },
+  "unichain": {
+    "chainId": 130,
+    "name": "Unichain"
+  },
+  "vechain": {
+    "chainId": 100009,
+    "name": "Vechain"
+  },
+  "vector-smart-chain": {
+    "chainId": 420042,
+    "name": "Vector Smart Chain"
+  },
+  "velas": {
+    "chainId": 106,
+    "name": "Velas EVM Mainnet"
+  },
+  "wanchain": {
+    "chainId": 888,
+    "name": "Wanchain"
+  },
+  "wemix-network": {
+    "chainId": 1111,
+    "name": "WEMIX"
+  },
+  "world-chain": {
+    "chainId": 480,
+    "name": "World Chain"
+  },
+  "x-layer": {
+    "chainId": 196,
+    "name": "X Layer Mainnet"
+  },
+  "xdc-network": {
+    "chainId": 50,
+    "name": "XDC Network"
+  },
+  "zilliqa-evm": {
+    "chainId": 32769,
+    "name": "Zilliqa"
+  },
+  "zircuit": {
+    "chainId": 48900,
+    "name": "Zircuit Mainnet"
+  },
+  "zklink-nova": {
+    "chainId": 810180,
+    "name": "zkLink Nova"
+  },
+  "zksync": {
+    "chainId": 324,
+    "name": "ZKsync Era"
+  }
+}

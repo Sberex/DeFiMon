@@ -1,9 +1,10 @@
+export type TokenCategory = 'Other' | 'Stablecoin' | 'Savings stablecoin';
 export type NetworkId = 'ethereum' | 'plasma' | 'arbitrum';
 export type ChainName = 'Ethereum' | 'Plasma' | 'Arbitrum';
 export type ExtraTokens = Partial<Record<NetworkId, string[]>>;
 export interface WalletToken {
   address: string; symbol: string; balance: number | null; priceUsd: number | null; valueUsd: number | null;
-  excludedReason?: string;
+  excludedReason?: string; category?: TokenCategory;
 }
 export interface WalletBalances {
   chain: ChainName; status: 'ok' | 'partial' | 'error'; tokens: WalletToken[];

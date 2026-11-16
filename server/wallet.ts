@@ -3,6 +3,7 @@ import type { NetworkId, ProtocolResult, WalletBalances, WalletToken } from '../
 import type { ChainClient } from './rpc.js';
 import { networks } from './networks.js';
 import { walletTokenCatalog } from './deployments/wallet-tokens.js';
+import { configuredWalletTokens, configuredTokenCategory } from './token-registry.js';
 import { AAVE_V4_TOKENIZATION_SPOKES } from './deployments/aave-v4.js';
 import { eulerFactoryAbi } from './abis/euler.js';
 import { eulerDeployments } from './deployments/euler.js';
@@ -11,12 +12,12 @@ const tokenAbi = parseAbi(['function balanceOf(address) view returns (uint256)',
 const providerAbi = parseAbi(['function getPoolDataProvider() view returns (address)', 'function getPool() view returns (address)']);
 const dataAbi = parseAbi(['function getAllATokens() view returns ((string symbol,address tokenAddress)[])']);
 const lendingAbi = parseAbi(['function getAllFTokens() view returns (address[])']);
-const coverage = 'Native currency and the supported token list, plus added token contracts. This is not automatic discovery of every token. Lending receipt tokens already represented by protocol readers are excluded from wallet totals.';
+const coverage = 'Native currency, configured CoinMarketCap EVM token contracts, the supported token list, and added token contracts. This is not automatic discovery of every token. Lending receipt tokens already represented by protocol readers are excluded from wallet totals.';
 export function unavailableWallet(network: NetworkId): WalletBalances {
   return { chain: networks[network].name, status: 'error', tokens: [], pricedValueUsd: null, unpricedCount: 0, coverage, message: 'Wallet token balances could not be checked on this network. Their values are unknown.' };
 }
 
-export async function readWallet(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId, protocols: ProtocolResult[], extraTokens: string[] = [], catalog = walletTokenCatalog[network], priceReader = walletPrices): Promise<WalletBalances> {
+export async function readWallet(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId, protocols: ProtocolResult[], extraTokens: string[] = [], catalog = [...walletTokenCatalog[network], ...configuredWalletTokens(network)], priceReader = walletPrices): Promise<WalletBalances> {
   const config = networks[network];
   const addresses = [...new Map([...catalog, ...extraTokens.map(address => ({ address: getAddress(address.toLowerCase()), symbol: 'Added token' }))].map(t => [t.address.toLowerCase(), t])).values()];
   const [native, balances, aTokens, fTokens, aavePool] = await Promise.allSettled([
@@ -74,10 +75,10 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
           try { if (await client.readContract({ address: eulerDeployments[network].eVaultFactory, abi: eulerFactoryAbi, functionName: 'isProxy', args: [token.address], blockNumber })) excludedReason = 'Euler vault receipt token: its underlying value belongs in the protocol section.'; }
           catch { excludedReason = 'Excluded because Euler receipt-token classification is unavailable.'; warnings.add('Some Euler receipt checks failed. Those token values are excluded to avoid counting a deposit twice.'); }
         }
-        rows.push({ address: token.address, symbol, decimals, priceAddress: token.address, balance: Number(formatUnits(token.raw, decimals)), priceUsd: null, valueUsd: null, excludedReason });
+        rows.push({ address: token.address, category: configuredTokenCategory(network, token.address), symbol, decimals, priceAddress: token.address, balance: Number(formatUnits(token.raw, decimals)), priceUsd: null, valueUsd: null, excludedReason });
       } catch {
         failed++;
-        rows.push({ address: token.address, symbol: token.symbol, decimals: 18, priceAddress: token.address, balance: null, priceUsd: null, valueUsd: null });
+        rows.push({ address: token.address, category: configuredTokenCategory(network, token.address), symbol: token.symbol, decimals: 18, priceAddress: token.address, balance: null, priceUsd: null, valueUsd: null });
       }
     }));
   }

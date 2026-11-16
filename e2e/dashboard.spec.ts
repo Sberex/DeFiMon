@@ -1173,3 +1173,22 @@ test('shows Euler positions, rates, LLTV, NPL and market alternatives on all thr
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('labels stablecoin and savings stablecoin wallet balances without changing values', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.wallets = [{ chain: 'Ethereum', status: 'ok', coverage: 'Configured token registry', pricedValueUsd: 7.32, unpricedCount: 0, tokens: [
+    { address: '0x0B2b2B2076d95dda7817e785989fE353fe955ef9', symbol: 'sUSDai', category: 'Savings stablecoin', balance: 2, priceUsd: 1.21, valueUsd: 2.42 },
+    { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', category: 'Stablecoin', balance: 5, priceUsd: .98, valueUsd: 4.9 },
+  ] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const wallet = page.locator('.wallet-network[data-chain="Ethereum"]');
+  await expect(wallet.getByText('Savings stablecoin', { exact: true })).toBeVisible();
+  await expect(wallet.getByText('Stablecoin', { exact: true })).toBeVisible();
+  await expect(wallet.getByRole('row').filter({ hasText: 'sUSDai' })).toContainText('$2.42');
+  await expect(wallet.getByRole('row').filter({ hasText: 'USDC' })).toContainText('$4.90');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

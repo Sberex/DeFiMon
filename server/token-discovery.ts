@@ -106,7 +106,7 @@ export function createTokenDiscovery(options: { fetcher?: typeof fetch; env?: Re
   async function discover(network: NetworkId, token: string): Promise<TokenDiscoveryReport> {
     const key = `${network}:${token}`;
     const explicit = Object.entries(manual).find(([, group]) => group[network] === token);
-    if (explicit) return { network, token, label: explicit[0], status: 'manual', matches: { ...explicit[1] }, sources: [], warnings: [] };
+    if (explicit) return { network, token, label: explicit[0], status: 'manual', matches: Object.fromEntries(networkOrder.flatMap(chain => explicit[1][chain] ? [[chain, explicit[1][chain]]] : [])), sources: [], warnings: [] };
     const existing = cache.get(key); if (existing && existing.expires > now()) return structuredClone(existing.report);
     if (pending.has(key)) return structuredClone(await pending.get(key)!);
     const work = (async () => {
