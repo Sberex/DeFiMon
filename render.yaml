@@ -1,0 +1,22 @@
+# Connect this repository through Render's "New > Blueprint" flow.
+# Free services sleep when idle; choose a paid plan in Render for always-on use.
+services:
+  - type: web
+    name: defimon-api
+    runtime: node
+    plan: free
+    autoDeployTrigger: checksPass
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.11.1
+      - key: FRONTEND_ORIGINS
+        value: https://sberex.github.io
+      - key: ETHEREUM_RPC_URL
+        sync: false
+      - key: PLASMA_RPC_URL
+        value: https://rpc.plasma.to
+      - key: ARBITRUM_RPC_URL
+        value: https://arb1.arbitrum.io/rpc

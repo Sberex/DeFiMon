@@ -1,4 +1,5 @@
 import express from 'express';
+import { apiCors } from './cors.js';
 import { searchMarkets } from './market-search.js';
 import type { ComparisonTarget } from '../src/market-comparison.js';
 import { getAddress, isAddress, type Address } from 'viem';
@@ -10,6 +11,8 @@ import { networks } from './networks.js';
 export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets) {
   const app = express();
   app.disable('x-powered-by');
+  app.set('trust proxy', 1);
+  app.use('/api', apiCors);
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc) }));
   // Bound concurrent work; wallet addresses and results are not stored or logged.
   let active = 0;

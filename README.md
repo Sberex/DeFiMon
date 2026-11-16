@@ -17,6 +17,10 @@ This is an **early implementation with readers for six protocol families**. Cove
 
 Unavailable protocols are **unknown**, never zero balances. Readers can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
 
+## Publish the website
+
+Automatic GitHub Pages deployment and a Render server blueprint are included. Follow [DEPLOYMENT.md](DEPLOYMENT.md) to enable Pages, create the server, and connect its public URL. Provider keys stay on Render; the GitHub page cannot run wallet lookups by itself.
+
 ## Run locally
 
 Requires Node.js 24 and npm. Use the existing checkout; cloud tasks are already isolated and do not need an additional Git worktree.
