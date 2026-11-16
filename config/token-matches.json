@@ -4469,5 +4469,14 @@
   "XAUT0": {
     "_category": "Other",
     "hyperevm": "0xf4d9235269a96aadafc9adae454a0618ebe37949"
+  },
+  "reUSD": {
+    "_category": "Savings stablecoin",
+    "ethereum": "0x5086bf358635b81d8c47c66d1c8b9e567db70c72",
+    "arbitrum": "0x76ce01f0ef25aa66cc5f1e546a005e4a63b25609",
+    "base": "0x7d214438d0f27afccc23b3d1e1a53906ace5cfea",
+    "ink": "0x5bcf6b008bf80b9296238546bace1797657b05d6",
+    "bsc": "0xba9425ec55ee0e72216d18e0ad8bbba2553bfb60",
+    "avalanche": "0x180af87b47bf272b2df59dccf2d76a6eafa625bf"
   }
 }

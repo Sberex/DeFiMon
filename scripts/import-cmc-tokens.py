@@ -22,7 +22,7 @@ OVERRIDES = {29256: 'Savings stablecoin', 7959: 'Savings stablecoin', 38330: 'Sa
              35976: 'Stablecoin', 22933: 'Stablecoin', 35721: 'Stablecoin', 19891: 'Stablecoin', 38562: 'Stablecoin', 7129: 'Other'}
 DESCRIPTION_OVERRIDES = {38273: 'Stablecoin'}
 # These requested savings examples are often outside CMC's circulating-cap ranking.
-SUPPLEMENTS = {'susds': ('sUSDS', 'Savings stablecoin'), 'savings-dai': ('sDAI', 'Savings stablecoin'),
+SUPPLEMENTS = {'re-protocol-reusd': ('reUSD', 'Savings stablecoin'), 'susds': ('sUSDS', 'Savings stablecoin'), 'savings-dai': ('sDAI', 'Savings stablecoin'),
                'ethena-staked-usde': ('sUSDe', 'Savings stablecoin'), 'susdai': ('sUSDai', 'Savings stablecoin'),
                'usds': ('USDS', 'Stablecoin'), 'usdai': ('USDai', 'Stablecoin')}
 CANONICAL = {1: 'ethereum', 42161: 'arbitrum', 9745: 'plasma', 8453: 'base', 56: 'bsc', 10: 'optimism',

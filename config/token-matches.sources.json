@@ -8009,12 +8009,12 @@
       "symbol": "ANTHROPIC"
     }
   ],
-  "groups": 809,
-  "contracts": 2044,
+  "groups": 810,
+  "contracts": 2050,
   "evmChains": 120,
   "categoryCounts": {
     "Other": 750,
-    "Savings stablecoin": 7,
+    "Savings stablecoin": 8,
     "Stablecoin": 52
   },
   "sources": {
@@ -15273,6 +15273,16 @@
       "url": "https://www.coingecko.com/en/coins/usds",
       "categoryBasis": "User-requested example; supplement outside CMC top-1000 selection",
       "symbol": "USDS"
+    },
+    "reUSD": {
+      "provider": "CoinGecko",
+      "id": "re-protocol-reusd",
+      "name": "Re Protocol reUSD",
+      "symbol": "reUSD",
+      "url": "https://www.coingecko.com/en/coins/re-protocol-reusd",
+      "retrievedAt": "2026-11-16T16:24:38.080671+00:00",
+      "categoryBasis": "User requested Savings stablecoin",
+      "note": "User-requested addition after the CMC snapshot; six EVM platforms retained, Solana excluded."
     }
   },
   "excludedPlatforms": [
