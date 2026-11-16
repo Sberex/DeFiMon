@@ -10,11 +10,13 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    outputs:
+      pages_artifact: ${{ steps.package.outputs.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24
           cache: npm
@@ -34,8 +36,13 @@ jobs:
         env:
           PAGES_BASE_PATH: /${{ github.event.repository.name }}/
           PAGES_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://defimon-api.onrender.com' }}
-      - uses: actions/upload-pages-artifact@v3
+      - name: Name deployment package
+        id: package
+        shell: bash
+        run: echo "name=github-pages-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
+          name: ${{ steps.package.outputs.name }}
           path: dist
   deploy:
     needs: build
@@ -47,7 +54,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - name: Publish website
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+        with:
+          artifact_name: ${{ needs.build.outputs.pages_artifact }}

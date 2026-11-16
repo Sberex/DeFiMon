@@ -64,3 +64,9 @@ npx tsx scripts/check-pages.ts
 This version intentionally has no live server connection. To check a connected build, set `VITE_API_BASE_URL` while building, then use the same URL as `PAGES_API_BASE_URL` when running the check. The check mocks wallet responses and does not contact live protocols. Install Chromium first with `npx playwright install chromium` if necessary.
 
 If the page has missing assets, check the workflow's **Build public website** step and the repository path. If live requests are blocked, check `VITE_API_BASE_URL`, `FRONTEND_ORIGINS`, and whether the Render service is awake. If publishing fails with a Pages configuration error, verify Step 1 and that GitHub Actions is permitted in the repository settings.
+
+## Duplicate deployment package error
+
+If a deployment says `Multiple artifacts named "github-pages" ... Artifact count is 2`, GitHub found more than one package with the name requested by the publish step. This is a deployment-package selection error; the website build can still have succeeded. The current workflow names packages `github-pages-RUN_ID-ATTEMPT` and passes the name from the build job to deployment. A full rerun creates a new name; rerunning only deployment reuses the exact package output from the successful build. No artifact deletion or additional repository permission is required.
+
+After updating the workflow, use the new run triggered by the update, or **Actions → Deploy GitHub Pages → Run workflow → main**. Rerunning a historical workflow uses its old configuration and will not apply this fix. The workflow also uses pinned action releases verified to run on Node.js 24, including the Pages uploader's nested upload action, instead of deprecated Node.js 20 actions.
