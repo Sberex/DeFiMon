@@ -1,0 +1,179 @@
+{
+  "description": "CoinGecko-ID decisions for this import. Existing contract addresses always remain unchanged. A user-confirmed depeg may change a historical category to Other.",
+  "pending": [],
+  "assets": {
+    "blackrock-usd-institutional-digital-liquidity-fund": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "spiko-amundi-overnight-swap-fund-eur": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "blackrock-daily-reinvestment-stablecoin-reserve-vehicle": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "sygnum-fiusd-liquidity-fund": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "spiko-digital-assets-cash-carry-fund-euro-share-class": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "fidelity-usd-digital-liquidity-fund-acc": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "ubs_umint_eth": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "backed-govies-0-6-months-euro": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "nest-blackopal-liquidstone-ii-vault": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "nest-alpha-vault": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "nest-treasury-vault": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "balsa-mm-fund": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "midas-mf-one": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "midas-mhyper": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "midas-mapollo": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "midas-rockaway-market-neutral": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed USD/EUR investment funds and vault shares as Savings stablecoin on 2026-11-16"
+    },
+    "usda-3": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "precious-metals-usd": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "metronome-synth-usd": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "main-street-usd": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "yu": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "anzen-usdz": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "stablr-usd": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "usdx-money-usdx": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "terrausd": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "alchemix-usd": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "usdb": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "balanced-dollars": {
+      "category": "Other",
+      "basis": "User confirmed depeg candidates as Other on 2026-11-16",
+      "depegged": true
+    },
+    "a7a5": {
+      "category": "Savings stablecoin",
+      "basis": "CoinGecko description: A7A5 automatically distributes 50% of reserve interest income to holders daily"
+    },
+    "cygnus-finance-global-usd": {
+      "category": "Savings stablecoin",
+      "basis": "CoinGecko description: native interest-bearing stablecoin backed by short-term U.S. debt"
+    },
+    "origin-dollar": {
+      "category": "Savings stablecoin",
+      "basis": "CoinGecko description: yield is paid automatically to OUSD holders via daily rebase"
+    },
+    "openeden-open-dollar": {
+      "category": "Savings stablecoin",
+      "basis": "CoinGecko description: USDO is a rebasing yield-bearing stablecoin backed primarily by Treasury bills and reverse repos"
+    },
+    "fxarbusdtry": {
+      "category": "Savings stablecoin",
+      "basis": "CoinGecko description: tokenized delta-neutral market-making fund; follows user classification of yield-bearing USD investment funds"
+    },
+    "re-protocol-reusde": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed Savings stablecoin on 2026-11-16"
+    },
+    "midas-m1-usd-market-neutral": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed Savings stablecoin on 2026-11-16"
+    },
+    "3f-x-steakhouse-usdc-morpho-vault": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed Savings stablecoin on 2026-11-16"
+    },
+    "compounding-open-dollar": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed Savings stablecoin on 2026-11-16"
+    },
+    "liquid-euro": {
+      "category": "Savings stablecoin",
+      "basis": "User confirmed Savings stablecoin on 2026-11-16"
+    },
+    "swanusd": {
+      "category": "Stablecoin",
+      "basis": "User confirmed Stablecoin on 2026-11-16"
+    },
+    "royal-euro": {
+      "category": "Other",
+      "basis": "User confirmed Royal Euro peg exception as Other on 2026-11-16",
+      "depegged": true
+    }
+  }
+}

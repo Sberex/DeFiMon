@@ -8009,13 +8009,13 @@
       "symbol": "ANTHROPIC"
     }
   ],
-  "groups": 813,
-  "contracts": 2054,
-  "evmChains": 120,
+  "groups": 1645,
+  "contracts": 3930,
+  "evmChains": 153,
   "categoryCounts": {
-    "Other": 750,
-    "Savings stablecoin": 11,
-    "Stablecoin": 52
+    "Other": 1463,
+    "Savings stablecoin": 57,
+    "Stablecoin": 125
   },
   "sources": {
     "ETH": {

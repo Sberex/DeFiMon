@@ -3,6 +3,10 @@
     "chainId": 2741,
     "name": "Abstract"
   },
+  "adi-chain": {
+    "chainId": 36900,
+    "name": "ADI Chain"
+  },
   "anubis": {
     "chainId": 6714,
     "name": "Anubis"
@@ -26,6 +30,10 @@
   "astar": {
     "chainId": 592,
     "name": "Astar"
+  },
+  "astar-zkevm": {
+    "chainId": 3776,
+    "name": "Astar zkEVM"
   },
   "aurora": {
     "chainId": 1313161554,
@@ -55,6 +63,14 @@
     "chainId": 200901,
     "name": "Bitlayer"
   },
+  "bittensor-evm": {
+    "chainId": 964,
+    "name": "Subtensor EVM"
+  },
+  "bittorrent": {
+    "chainId": 199,
+    "name": "BitTorrent Chain Mainnet"
+  },
   "blast": {
     "chainId": 81457,
     "name": "Blast"
@@ -66,6 +82,10 @@
   "boba": {
     "chainId": 288,
     "name": "Boba Network"
+  },
+  "botanix": {
+    "chainId": 3637,
+    "name": "Botanix Mainnet"
   },
   "bsc": {
     "chainId": 56,
@@ -82,6 +102,10 @@
   "chiliz": {
     "chainId": 88888,
     "name": "Chiliz Chain"
+  },
+  "citrea": {
+    "chainId": 4114,
+    "name": "Citrea Mainnet"
   },
   "codex": {
     "chainId": 81224,
@@ -135,6 +159,10 @@
     "chainId": 39797,
     "name": "Energi Mainnet"
   },
+  "eni": {
+    "chainId": 173,
+    "name": "ENI Mainnet"
+  },
   "eos-evm": {
     "chainId": 17777,
     "name": "EOS EVM"
@@ -163,6 +191,10 @@
     "chainId": 14,
     "name": "Flare Mainnet"
   },
+  "fluent": {
+    "chainId": 25363,
+    "name": "Fluent"
+  },
   "fraxtal": {
     "chainId": 252,
     "name": "Fraxtal"
@@ -174,6 +206,10 @@
   "fusion-network": {
     "chainId": 32659,
     "name": "Fusion Mainnet"
+  },
+  "gensyn": {
+    "chainId": 685689,
+    "name": "Gensyn Mainnet"
   },
   "gnosis": {
     "chainId": 100,
@@ -191,13 +227,25 @@
     "chainId": 177,
     "name": "HSKChain"
   },
+  "hedera-hashgraph": {
+    "chainId": 295,
+    "name": "Hedera Mainnet"
+  },
   "hemi": {
     "chainId": 43111,
     "name": "Hemi"
   },
+  "henesys": {
+    "chainId": 68414,
+    "name": "Henesys"
+  },
   "hoo-smart-chain": {
     "chainId": 70,
     "name": "Hoo Smart Chain"
+  },
+  "horizen": {
+    "chainId": 26514,
+    "name": "Horizen Mainnet"
   },
   "huobi-token": {
     "chainId": 128,
@@ -207,13 +255,25 @@
     "chainId": 999,
     "name": "HyperEVM"
   },
+  "igra": {
+    "chainId": 38833,
+    "name": "Igra Network"
+  },
   "immutable": {
     "chainId": 13371,
     "name": "Immutable zkEVM"
   },
+  "injective": {
+    "chainId": 1776,
+    "name": "Injective"
+  },
   "ink": {
     "chainId": 57073,
     "name": "Ink"
+  },
+  "iota-evm": {
+    "chainId": 8822,
+    "name": "IOTA EVM"
   },
   "iotex": {
     "chainId": 4689,
@@ -235,6 +295,10 @@
     "chainId": 8217,
     "name": "Klaytn"
   },
+  "kroma": {
+    "chainId": 255,
+    "name": "Kroma"
+  },
   "krown-network": {
     "chainId": 1983,
     "name": "Krown"
@@ -242,6 +306,10 @@
   "kucoin-community-chain": {
     "chainId": 321,
     "name": "KCC Mainnet"
+  },
+  "lens": {
+    "chainId": 232,
+    "name": "Lens"
   },
   "linea": {
     "chainId": 59144,
@@ -263,6 +331,10 @@
     "chainId": 4326,
     "name": "MegaETH"
   },
+  "memecore": {
+    "chainId": 4352,
+    "name": "MemeCore"
+  },
   "merlin-chain": {
     "chainId": 4200,
     "name": "Merlin"
@@ -278,6 +350,18 @@
   "metis-andromeda": {
     "chainId": 1088,
     "name": "Metis"
+  },
+  "mezo": {
+    "chainId": 31612,
+    "name": "Mezo"
+  },
+  "milkomeda-cardano": {
+    "chainId": 2001,
+    "name": "Milkomeda C1 Mainnet"
+  },
+  "mint": {
+    "chainId": 185,
+    "name": "Mint Mainnet"
   },
   "mode": {
     "chainId": 34443,
@@ -306,6 +390,10 @@
   "oasis": {
     "chainId": 42262,
     "name": "Oasis Emerald"
+  },
+  "oasis-sapphire": {
+    "chainId": 23294,
+    "name": "Oasis Sapphire"
   },
   "okex-chain": {
     "chainId": 66,
@@ -347,6 +435,14 @@
     "chainId": 1101,
     "name": "Polygon zkEVM"
   },
+  "pulsechain": {
+    "chainId": 369,
+    "name": "PulseChain"
+  },
+  "redbelly-network": {
+    "chainId": 151,
+    "name": "Redbelly Network Mainnet"
+  },
   "robinhood": {
     "chainId": 4663,
     "name": "Robinhood Chain"
@@ -367,13 +463,29 @@
     "chainId": 1329,
     "name": "Sei Network"
   },
+  "shiden-network": {
+    "chainId": 336,
+    "name": "Shiden"
+  },
   "shido": {
     "chainId": 9008,
     "name": "Shido Network"
   },
+  "skale": {
+    "chainId": 2046399126,
+    "name": "SKALE Europa Hub"
+  },
+  "somnia": {
+    "chainId": 5031,
+    "name": "Somnia Mainnet"
+  },
   "soneium": {
     "chainId": 1868,
     "name": "Soneium Mainnet"
+  },
+  "songbird": {
+    "chainId": 19,
+    "name": "Songbird Canary-Network"
   },
   "sonic": {
     "chainId": 146,
@@ -387,6 +499,14 @@
     "chainId": 988,
     "name": "Stable Mainnet"
   },
+  "step-network": {
+    "chainId": 1234,
+    "name": "Step Network"
+  },
+  "superseed": {
+    "chainId": 5330,
+    "name": "Superseed"
+  },
   "swellchain": {
     "chainId": 1923,
     "name": "Swellchain"
@@ -399,6 +519,10 @@
     "chainId": 57,
     "name": "Syscoin Mainnet"
   },
+  "tac": {
+    "chainId": 239,
+    "name": "TAC Mainnet"
+  },
   "taiko": {
     "chainId": 167000,
     "name": "Taiko Mainnet"
@@ -410,6 +534,10 @@
   "tempo": {
     "chainId": 1337,
     "name": "Tempo"
+  },
+  "theta": {
+    "chainId": 361,
+    "name": "Theta Mainnet"
   },
   "thundercore": {
     "chainId": 108,
@@ -478,5 +606,9 @@
   "zksync": {
     "chainId": 324,
     "name": "ZKsync Era"
+  },
+  "zora-network": {
+    "chainId": 7777777,
+    "name": "Zora"
   }
 }

@@ -97,3 +97,27 @@ npm run check:savings-apr -- sUSDS ethereum
 User-requested CoinGecko additions include **strUSD** ([Tori Staked trUSD](https://www.coingecko.com/en/coins/tori-staked-trusd)) on Ethereum and Monad, and **USD3** ([3Jane USD3](https://www.coingecko.com/en/coins/3jane-usd3)) on Ethereum. Both are classified **Savings stablecoin**: CoinGecko describes strUSD as accruing strategy performance through its trUSD exchange rate, and USD3 as a yield-bearing ERC-4626 senior-tranche token. Monad is stored as an EVM match only; it is not a dashboard network. The source records and current counts are retained in **token-matches.sources.json**.
 
 **etrUSD** ([Tori Ecosystem Vault on CoinGecko](https://www.coingecko.com/en/coins/tori-ecosystem-vault)) is included on Ethereum and classified **Savings stablecoin** as requested. It represents vault shares redeemable for trUSD; the label does not imply a fixed USD peg. Its only CoinGecko-listed platform is Ethereum.
+
+
+## CoinGecko top-2,000 supplement
+
+The reviewed 2026-11-16 snapshot includes **1,524 ranked assets with eligible EVM contracts** and excludes 476 without eligible contracts. It added **832 groups and 1,876 addresses**, bringing the combined registry to **1,645 groups and 3,930 addresses across 153 EVM chain keys**. Ten address conflicts kept the existing mapping. The current categories are 125 Stablecoin, 57 Savings stablecoin and 1,463 Other.
+
+The CoinGecko import checks exactly circulating market-cap ranks **1–2000**, then retains only nonzero 20-byte contract addresses on verified EVM mainnets. Assets that only exist on non-EVM networks or have no token contract are excluded. The import preserves every existing address and its capitalization, including CoinMarketCap addresses that disagree with CoinGecko. It can add a missing network to an identity matched by an exact contract. A shared ticker never establishes an identity; unrelated assets with the same symbol get a `#cg-COINGECKO_ID` suffix. Records that join multiple existing identities are recorded as conflicts and are not merged.
+
+**token-matches.coingecko.sources.json** records all 2,000 ranked records, included/excluded platforms, added contracts and skipped conflicts. The original **token-matches.sources.json** retains the earlier CoinMarketCap ranking and source records; its current registry counts are updated separately. CoinGecko category decisions and user confirmations live in **coingecko-category-overrides.json**. Reviewed yield-bearing assets, including the user-confirmed USD/EUR investment funds, are classified Savings stablecoin. User-confirmed depegs are classified Other, including when their old stablecoin category needs correcting; their contract addresses remain unchanged. Stablecoin labels never assume a dollar peg, and non-USD stablecoins are classified against their reference currency.
+
+To prepare a new import, use a fresh cache directory to obtain a new snapshot and review the classification decisions. The default command writes only a preview outside the repository:
+
+```sh
+python3 scripts/import-coingecko-tokens.py --cache-dir /tmp/defimon-cg2000
+python3 scripts/import-coingecko-tokens.py --cache-dir /tmp/defimon-cg2000 --apply
+```
+
+The second command writes the reviewed config and provenance files only after the ranking, chains, address uniqueness and category decisions validate. It refuses to apply while category questions remain pending. API requests respect CoinGecko rate-limit retry intervals. Adding platforms to this registry does not enable extra dashboard networks: wallet discovery continues to use Ethereum, Plasma, Arbitrum and Base.
+
+The import conflict checks can be run with:
+
+```sh
+python3 -m unittest discover -s tests -p test_coingecko_import.py
+```
