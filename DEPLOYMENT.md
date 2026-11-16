@@ -29,6 +29,8 @@ The server uses public Plasma and Arbitrum providers initially. For regular use,
 
 ## 3. Connect GitHub Pages to Render
 
+The Pages workflow now defaults to **https://defimon-api.onrender.com**. No repository variable is needed for that service. Pushing to `main` or running **Deploy GitHub Pages** rebuilds the page with this connection. The steps below are only needed to override it with a different server URL.
+
 1. Open [DeFiMon → Settings → Secrets and variables → Actions → Variables](https://github.com/Sberex/DeFiMon/settings/variables/actions).
 2. Select **New repository variable**.
 3. Name it **`VITE_API_BASE_URL`** and set its value to the Render service's public HTTPS URL. Use only the origin, without `/api`, a path, or a trailing slash. This URL is public and contains no provider key.

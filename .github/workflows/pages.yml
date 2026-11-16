@@ -28,12 +28,12 @@ jobs:
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
           VITE_STATIC_HOSTING: 'true'
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://defimon-api.onrender.com' }}
       - name: Check public website under repository path
         run: npx tsx scripts/check-pages.ts
         env:
           PAGES_BASE_PATH: /${{ github.event.repository.name }}/
-          PAGES_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          PAGES_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://defimon-api.onrender.com' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
