@@ -7,6 +7,7 @@ import type { NetworkId } from '../../src/types.js';
 // Plus AaveV3Ethereum/Plasma/Arbitrum address books and Fluid Plasma/Arbitrum vault underlyings @404d73f.
 export const walletTokenCatalog: Record<NetworkId, { address: Address; symbol: string }[]> = {
   ethereum: [
+    {"address":"0x0b2b2b2076d95dda7817e785989fe353fe955ef9","symbol":"sUSDai"},
     {"address":"0x04acaf8d2865c0714f79da09645c13fd2888977f","symbol":"WFRAX"},
     {"address":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","symbol":"WETH"},
     {"address":"0x6b175474e89094c44da98b954eedeac495271d0f","symbol":"DAI"},
@@ -552,7 +553,7 @@ export const walletTokenCatalog: Record<NetworkId, { address: Address; symbol: s
     {"address":"0x23b17d3944742ace3d0c71586fcb320d1e4a1ed2","symbol":"PT_USDe_18JUN2026"},
     {"address":"0x30559e3d35e33ab69399a3fe9f383d32bd3c016e","symbol":"PT_sUSDE_18JUN2026"},
     {"address":"0xf7fb83435f455bd970f2d9f943f4eece1941b3e9","symbol":"PT_sUSDE_22OCT2026"},
-    {"address":"0x0b2b2b2076d95dda7817e785989fe353fe955ef9","symbol":"Token"},
+    {"address":"0x0b2b2b2076d95dda7817e785989fe353fe955ef9","symbol":"sUSDai"},
     {"address":"0x2d661c89d812261039af9764eceaaee884f5f67f","symbol":"Token"},
     {"address":"0x43324fa4842829db99e25713f81da2d0e7eb21c3","symbol":"Token"},
     {"address":"0x2a52b289ba68bbd02676640aa9f605700c9e5699","symbol":"Token"},
@@ -612,7 +613,7 @@ export const walletTokenCatalog: Record<NetworkId, { address: Address; symbol: s
     {"address":"0x2416092f143378750bb29b79ed961ab195cceea5","symbol":"ezETH"},
     {"address":"0x4186bfc76e2e237523cbc30fd220fe055156b41f","symbol":"rsETH"},
     {"address":"0x6c84a8f1c29108f47a79964b5fe888d4f4d0de40","symbol":"tBTC"},
-    {"address":"0x0b2b2b2076d95dda7817e785989fe353fe955ef9","symbol":"Token"},
+    {"address":"0x0b2b2b2076d95dda7817e785989fe353fe955ef9","symbol":"sUSDai"},
     {"address":"0x46850ad61c2b7d64d08c9c754f45254596696984","symbol":"Token"},
     {"address":"0x41ca7586cc1311807b4605fbb748a3b8862b42b5","symbol":"Token"},
     {"address":"0xddb46999f8891663a8f2828d25298f70416d7610","symbol":"Token"},

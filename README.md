@@ -243,7 +243,7 @@ npm run check:susdai-apr
 
 ## Wallet token balances
 
-The **Wallet tokens** section shows Ethereum first, then Plasma, then Arbitrum. It includes native **ETH** on Ethereum/Arbitrum and **XPL** on Plasma, the supported ERC-20 token list, and any additional token contracts you enter. Ethereum’s default list includes USDe, USDT, USDC, EUL, COMP, and the user-selected **WFRAX** at `0x04acaf8d2865c0714f79da09645c13fd2888977f`. WFRAX’s symbol and 18 decimals were checked on Ethereum and its address matches Frax’s official deployment list. Other symbols are read from their actual token contracts rather than guessed from names.
+The **Wallet tokens** section shows Ethereum first, then Plasma, then Arbitrum. It includes native **ETH** on Ethereum/Arbitrum and **XPL** on Plasma, the supported ERC-20 token list, and any additional token contracts you enter. sUSDai (`0x0B2b2B2076d95dda7817e785989fE353fe955ef9`) is checked automatically on all three networks and shown when the wallet has a nonzero balance. Ethereum’s default list includes USDe, USDT, USDC, EUL, COMP, and the user-selected **WFRAX** at `0x04acaf8d2865c0714f79da09645c13fd2888977f`. WFRAX’s symbol and 18 decimals were checked on Ethereum and its address matches Frax’s official deployment list. Other symbols are read from their actual token contracts rather than guessed from names.
 
 **Net value = priced wallet tokens + priced lending deposits − borrowing.** The Total supplied and Total borrowed cards still describe lending positions; ordinary wallet holdings appear in the wallet section. These holdings do not change a borrowing position’s health factor or liquidation rules.
 
