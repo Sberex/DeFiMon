@@ -77,7 +77,7 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
   const weighted = Number(account[0]) / Number(unit) * Number(account[3]) / 1e4;
   return {
     id: 'aave-v3', name: 'Aave v3', status: 'ok', coverage: `${deployment.name} main market; excludes other Aave markets and vaults.`,
-    positions: assets.length ? [{ liquidationModel: emode === 0n ? 'linear' : 'unavailable', id: 'aave-main', label: `${deployment.name} main market`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
+    positions: assets.length ? [{ liquidationModel: emode === 0n ? 'linear' : 'unavailable', marketAddress: pool, id: 'aave-main', label: `${deployment.name} main market`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
       notes: [ 'Prices come from Aave’s own oracle. Each liquidation price assumes other prices and balances stay fixed.', ...(emode !== 0n ? ['Efficiency mode is enabled. Health factor is read directly; per-asset liquidation price estimates are unavailable for this mode.'] : [])] }] : [],
   };
 }

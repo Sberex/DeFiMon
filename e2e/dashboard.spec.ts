@@ -1253,3 +1253,42 @@ test('includes reUSD oracle growth in Supply APR, monthly NPL and alternatives w
   const alternatives = page.getByRole('region', { name: 'Alternatives for reUSD - USDC', exact: true });
   await expect(alternatives.locator('tbody tr td').nth(1)).toHaveText('≈ 12.00%');
 });
+
+test('links active market titles and full identifiers across protocols and wraps addresses on mobile', async ({ page }) => {
+  const market = `0x${'ab'.repeat(32)}`;
+  const addresses = Array.from({ length: 8 }, (_, i) => `0x${String(i + 1).repeat(40)}`);
+  const template = example.protocols[0].positions[0];
+  const position = (label: string, address: string) => ({ ...template, id: address, label, marketAddress: address });
+  const fixture = { ...combinedExample, protocols: [
+    { ...example.protocols[0], id: 'aave-v3', chain: 'Ethereum', positions: [position('Aave main market', addresses[0])] },
+    { ...example.protocols[0], id: 'aave-v4', chain: 'Ethereum', positions: [position('Aave v4 MAIN', addresses[1])] },
+    { ...example.protocols[0], id: 'compound', name: 'Compound', chain: 'Arbitrum', positions: [position('Compound USDC market', addresses[2])] },
+    { ...example.protocols[0], id: 'fluid', name: 'Fluid', chain: 'Plasma', positions: [position('Fluid vault 162', addresses[3])] },
+    { ...example.protocols[0], id: 'morpho', name: 'Morpho', chain: 'Ethereum', positions: [{ ...template, id: `morpho-market-${market}`, label: 'Morpho reUSD / USDC' }] },
+    { ...example.protocols[0], id: 'morpho', name: 'Morpho', chain: 'Base', positions: [{ ...position('Morpho USDC vault', addresses[4]), vault: { address: addresses[4], version: 1, roles: [], totalAssets: 1000, totalAssetsUsd: 1000 } }] },
+    { ...example.protocols[0], id: 'euler', name: 'Euler', chain: 'Arbitrum', positions: [{ ...position('Euler lending position', addresses[5]), receiptTokens: [addresses[5], addresses[6], addresses[6]] }] },
+    { ...example.protocols[0], id: 'fluid', name: 'Fluid', chain: 'Base', positions: [{ ...position('Fluid lending deposit', addresses[7]), id: `fluid-lending-${addresses[7]}` }] },
+  ] };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/');
+  await page.getByLabel('Wallet address').fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  const urls = [
+    `https://etherscan.io/address/${addresses[0]}`, `https://etherscan.io/address/${addresses[1]}`,
+    `https://arbiscan.io/address/${addresses[2]}`, `https://plasmascan.to/address/${addresses[3]}`,
+    `https://app.morpho.org/ethereum/market/${market}`, `https://app.morpho.org/base/vault/${addresses[4]}`,
+    `https://app.euler.finance/vault/${addresses[5]}?network=arbitrum`, `https://basescan.org/address/${addresses[7]}`,
+  ];
+  const titles = ['Aave main market', 'Aave v4 MAIN', 'Compound USDC market', 'Fluid vault 162', 'Morpho reUSD / USDC', 'Morpho USDC vault', 'Euler lending position', 'Fluid lending deposit'];
+  for (let i = 0; i < titles.length; i++) {
+    const card = page.locator('.position').filter({ has: page.getByRole('heading', { name: titles[i], exact: true }) });
+    await expect(card.getByRole('heading').getByRole('link')).toHaveAttribute('href', urls[i]);
+    await expect(card.locator('.position-market-links a').first()).toHaveAttribute('href', urls[i]);
+    await expect(card.locator('.position-market-links code').first()).toHaveText(i === 4 ? market : addresses[i === 5 ? 4 : i === 6 ? 5 : i === 7 ? 7 : i]);
+  }
+  await expect(page.locator('.position-market-links a').filter({ hasText: addresses[6] })).toHaveCount(1);
+  await expect(page.locator('.position-market-links a').filter({ hasText: addresses[6] })).toHaveAttribute('href', `https://app.euler.finance/vault/${addresses[6]}?network=arbitrum`);
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(page.locator('.position-market-links code').filter({ hasText: market })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
