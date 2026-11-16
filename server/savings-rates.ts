@@ -50,8 +50,16 @@ export async function savingsSnapshot(client: ChainClient, network: NetworkId, n
   if (high.number - low.number !== 1n || target - low.timestamp > 3600n) throw new Error('Unverified historical boundary');
   return { client, start: low, end };
 }
-function unavailable(group: string, network: NetworkId, address = ''): IntrinsicRate {
-  return { apr: null, estimated: true, note: `${group} is marked Savings stablecoin. Its current and 30-day-old on-chain rate could not both be verified. An archive-capable provider may be required; intrinsic earnings are unknown, not zero.`, source: { chain: networkNames[network], oracle: address, kind: 'unavailable', label: `${group} rate history unavailable` } };
+export function savingsFailureReason(error: unknown): string {
+  // Inspect errors internally; never return provider URLs, keys or raw responses.
+  const message = error instanceof Error ? String(error) : '';
+  if (/archive|missing trie|historical state|state.*pruned/i.test(message)) return 'The rate-source provider cannot read the required historical state. Configure an archive RPC for the source network on the server.';
+  if (/No verified savings rate source|No canonical token/.test(message)) return 'No verified on-chain savings-rate source is configured for this asset.';
+  if (/Invalid oracle observation|changed unit|unit changed|Wrong savings vault underlying/.test(message)) return 'The oracle observations failed the freshness or asset-identity checks.';
+  return 'The provider could not supply verified current and 30-day-old observations. An archive-capable provider may be required.';
+}
+function unavailable(group: string, network: NetworkId, address = '', reason = ''): IntrinsicRate {
+  return { apr: null, estimated: true, note: `${group} is marked Savings stablecoin. Its current and 30-day-old on-chain rate could not both be verified. ${reason} Intrinsic earnings are unknown, not zero.`, source: { chain: networkNames[network], oracle: address, kind: 'unavailable', label: `${group} rate history unavailable` } };
 }
 export function createSavingsRateService(options: { clientFor?: (network: NetworkId) => ChainClient; registry?: TokenRegistry; sources?: Record<string, SavingsSource>; now?: () => number } = {}) {
   const clientFor = options.clientFor ?? ((network: NetworkId) => makeClient(network, process.env[`${network.toUpperCase()}_ARCHIVE_RPC_URL`])), registry = options.registry ?? configuredTokenRegistry, sources = options.sources ?? configuredSources, now = options.now ?? Date.now;
@@ -144,7 +152,7 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
       }
       const apr = savingsApr(start, end); if (apr === null) throw new Error('Invalid savings APR');
       return { apr, estimated: true, note: `Past-month ${group} intrinsic APR: (current on-chain rate − rate 30 days ago) × 365 ÷ (30 × rate 30 days ago). Simple annualization, not compounded APY. Uses ${source.label}; market prices, lending interest and incentives are separate. Past growth is not a promised future return.`, source: { chain: networkNames[source.network], oracle: source.address, kind: source.kind, label: source.label, blockNumber: String(s.end.number), startBlockNumber: String(s.start.number), startTimestamp: Number(s.start.timestamp), endTimestamp: Number(s.end.timestamp), startRate: Number(start) / 10 ** decimals, endRate: Number(end) / 10 ** decimals, windowDays: 30 } };
-    } catch { return unavailable(group, source?.network ?? context.network, source?.address); }
+    } catch (error) { return unavailable(group, source?.network ?? context.network, source?.address, savingsFailureReason(error)); }
   }
   function quote(group: string, context: Context): Promise<IntrinsicRate> {
     const cached = quotes.get(group); if (cached && cached.expires > now()) return cached.promise;

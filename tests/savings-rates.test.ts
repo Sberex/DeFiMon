@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { createSavingsRateService, savingsApr, savingsSnapshot, type SavingsSource } from '../server/savings-rates';
+import { createSavingsRateService, savingsApr, savingsSnapshot, savingsFailureReason, type SavingsSource } from '../server/savings-rates';
 import { applyIntrinsicRates } from '../server/intrinsic-rates';
 import { positionMonthlyInterest, supplyApr } from '../src/monthly-interest';
 import type { ChainClient } from '../server/rpc';
@@ -86,4 +86,11 @@ it('retries unavailable history after one minute instead of caching it as a zero
   const reads = f.reads.length; await service.quote('reUSD', { network: 'ethereum' }); expect(f.reads.length).toBe(reads);
   now = 60001; expect((await service.quote('reUSD', { network: 'ethereum' })).apr).toBeNull();
   expect(f.reads.length).toBeGreaterThan(reads);
+});
+
+it('explains historical-access failures without disclosing provider credentials', () => {
+  const reason = savingsFailureReason(new Error('Archive requests require a personal token https://private.example/secret'));
+  expect(reason).toContain('Configure an archive RPC');
+  expect(reason).not.toContain('private.example'); expect(reason).not.toContain('secret');
+  expect(savingsFailureReason(new Error('No verified savings rate source'))).toContain('No verified');
 });
