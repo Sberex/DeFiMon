@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFluid, fluidHealth, FLUID_VAULT_RESOLVER } from '../server/adapters/fluid';
 import { networks } from '../server/networks';
+import { totalMonthlyInterest, annualizedNplApr } from '../src/monthly-interest';
 import type { ChainClient } from '../server/rpc';
 const wallet = '0x1111111111111111111111111111111111111111';
 const ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -109,12 +110,12 @@ describe('Fluid vaults', () => {
     expect(result.status).toBe('partial'); expect(result.positions[0].suppliedUsd).toBeNull();
     expect(result.positions[0].risk).toBe('unknown');
   });
-  it('retains oracle health even when USD valuation is unavailable', async () => {
-    const { client } = mock({ missingEthPrice: true }); const result = await readFluid(client, wallet, 123n);
+  it('retains oracle health when neither collateral nor debt has a USD valuation', async () => {
+    const { client } = mock({ missingEthPrice: true, missingDebtPrice: true }); const result = await readFluid(client, wallet, 123n);
     expect(result.status).toBe('partial'); expect(result.positions[0].suppliedUsd).toBeNull();
     expect(result.positions[0].assets[0].priceUsd).toBeNull();
     expect(result.positions[0].healthFactor).toBeCloseTo(1.7);
-    expect(result.positions[0].assets[0].liquidationPriceUsd).toBeCloseTo(1764.705882);
+    expect(result.positions[0].assets[0].liquidationPriceUsd).toBeNull();
   });
   it('does not assume stable debt is worth $1 when its USD feed is missing', async () => {
     const { client } = mock({ missingDebtPrice: true }); const result = await readFluid(client, wallet, 123n);
@@ -274,4 +275,38 @@ it('exposes vault LLTV for all collateral legs including no-debt and smart pools
   const vault = (await readFluid(smart.client, wallet, 123n)).positions[0];
   expect(vault.liquidationModel).toBe('oracle-ratio');
   expect(vault.assets.filter(a => a.collateral).every(a => a.liquidationThreshold === .8)).toBe(true);
+});
+
+it('restores Ethereum reUSD/GHO vault valuation and monthly NPL using the vault oracle, not a $1 peg', async () => {
+  const reusd = '0x5086bf358635b81d8c47c66d1c8b9e567db70c72';
+  const gho = '0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f';
+  const base = mock({ ids: [18233n] });
+  const client = { ...base.client, readContract: async (args: any) => {
+    expect(args.blockNumber).toBe(123n);
+    if (args.functionName === 'positionByNftId') {
+      const [p, v] = position(18233n);
+      return [{ ...p, nftId: 18233n, supply: 1000n * E18, borrow: 800n * E18 }, { ...v,
+        configs: { ...v.configs, liquidationThreshold: 9000, oraclePriceLiquidate: 112n * 10n ** 25n },
+        constantVariables: { ...v.constantVariables, vaultId: 162n, supplyToken: { token0: reusd, token1: ZERO }, borrowToken: { token0: gho, token1: ZERO } } }];
+    }
+    if (args.functionName === 'symbol') return args.address === reusd ? 'reUSD' : 'GHO';
+    if (args.functionName === 'decimals' && !args.args?.length) return 18;
+    if (args.functionName === 'getAssetPrice') return args.args[0] === reusd ? 0n : 99800000n;
+    return base.client.readContract(args);
+  } } as unknown as ChainClient;
+  const result = await readFluid(client, wallet, 123n, 'ethereum');
+  const p = result.positions[0];
+  expect(p.label).toContain('Vault 162 · reUSD / GHO · NFT 18233');
+  expect(p.assets[0]).toMatchObject({ symbol: 'reUSD', priceSource: 'fluid-oracle' });
+  expect(p.assets[0].priceUsd).toBeCloseTo(1.12 * .998);
+  expect(p.suppliedUsd).toBeCloseTo(1000 * 1.12 * .998);
+  expect(p.debtUsd).toBeCloseTo(800 * .998);
+  expect(p.healthFactor).toBeCloseTo(1.26);
+  p.assets[0].intrinsicSupplyRate = { apr: .08, estimated: true, note: 'Verified 30-day savings yield', source: { chain: 'Ethereum', oracle: reusd } };
+  const total = totalMonthlyInterest([result]);
+  expect(total.earnedUsd).toBeCloseTo(1000 * .11 / 12 * 1.12 * .998);
+  expect(total.paidUsd).toBeCloseTo(800 * .05 / 12 * .998);
+  expect(total.nplUsd).toBeCloseTo(total.earnedUsd! - total.paidUsd!);
+  expect(total.issues).toEqual([]);
+  expect(annualizedNplApr(total.nplUsd, p.suppliedUsd! - p.debtUsd!)).toBeCloseTo(total.nplUsd! * 12 / (p.suppliedUsd! - p.debtUsd!));
 });
