@@ -30,7 +30,7 @@ it('retains confirmed stablecoin identities separately from yield assets and dep
   expect(configuredTokenRegistry.USTC.category).toBe('Other');
   expect(configuredTokenRegistry.USDT.addresses.plasma).toBe('0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb');
 });
-it.each(['ethereum', 'arbitrum', 'plasma'] as const)('discovers configured balances on %s without custom token input or assumed stablecoin prices', async network => {
+it.each(['ethereum', 'arbitrum', 'plasma', 'base'] as const)('discovers configured balances on %s without custom token input or assumed stablecoin prices', async network => {
   const token = configuredTokenRegistry.sUSDai.addresses[network]!;
   const usdc = configuredTokenRegistry.USDC.addresses[network]!;
   const scanned: string[] = [], blocks: bigint[] = [];
@@ -61,10 +61,10 @@ it.each(['ethereum', 'arbitrum', 'plasma'] as const)('discovers configured balan
 });
 
 it('keeps stored non-dashboard chains out of recommendation reports without requesting external discovery', async () => {
-  const manual = parseTokenMatches({ TEST: { _category: 'Stablecoin', ethereum: first, base: second } });
+  const manual = parseTokenMatches({ TEST: { _category: 'Stablecoin', ethereum: first, optimism: second } });
   const discovery = createTokenDiscovery({ manual, fetcher: (async () => { throw new Error('Unexpected external request'); }) as typeof fetch });
   const result = await discovery.resolve([{ id: 'deposit', network: 'ethereum', supplied: first }]);
   expect(result.reports[0]).toMatchObject({ status: 'manual', matches: { ethereum: first } });
   expect(Object.keys(result.reports[0].matches)).toEqual(['ethereum']);
-  expect(result.matches.TEST.base).toBe(second);
+  expect(result.matches.TEST.optimism).toBe(second);
 });

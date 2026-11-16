@@ -1,3 +1,4 @@
+import { portfolioNetwork } from './networks';
 import type { NetworkId } from './types';
 export interface ComparisonTarget { id: string; network: NetworkId; supplied: string; borrowed?: string; supplyBasket?: string[]; borrowBasket?: string[] }
 export interface MarketLiquidity { amount: number; symbol: string; token: string; note: string }
@@ -21,7 +22,7 @@ export const comparisonId = (position: RecommendationPosition, row: number) => `
 export function comparisonTargets(positions: RecommendationPosition[]): ComparisonTarget[] {
   return positions.flatMap(position => position.rows.flatMap((row, index) => {
     if (!row.supplied || !/^0x[0-9a-f]{40}$/i.test(row.supplied.address) || (row.borrowed && !/^0x[0-9a-f]{40}$/i.test(row.borrowed.address))) return [];
-    return [{ id: comparisonId(position, index), network: position.chain === 'Ethereum' ? 'ethereum' : position.chain === 'Plasma' ? 'plasma' : 'arbitrum', supplied: row.supplied.address, supplyBasket: [...new Set(position.rows.flatMap(r => r.supplied ? [r.supplied.address] : []))], borrowBasket: [...new Set(position.rows.flatMap(r => r.borrowed ? [r.borrowed.address] : []))], ...(row.borrowed ? { borrowed: row.borrowed.address } : {}) } as ComparisonTarget];
+    return [{ id: comparisonId(position, index), network: portfolioNetwork(position.chain), supplied: row.supplied.address, supplyBasket: [...new Set(position.rows.flatMap(r => r.supplied ? [r.supplied.address] : []))], borrowBasket: [...new Set(position.rows.flatMap(r => r.borrowed ? [r.borrowed.address] : []))], ...(row.borrowed ? { borrowed: row.borrowed.address } : {}) } as ComparisonTarget];
   }));
 }
 export function betterAlternatives(position: RecommendationPosition, index: number, search: MarketSearch | null) {
@@ -33,7 +34,7 @@ export function betterAlternatives(position: RecommendationPosition, index: numb
     if (candidate.targetId !== comparisonId(position, index)) return [];
     const heldRoutes = row.supplied?.v4Reserves ? new Set(row.supplied.v4Reserves.filter(s => s.supplied > 0).flatMap(s => row.borrowed ? (row.borrowed.v4Reserves ?? []).filter(b => b.borrowed > 0).map(b => `${s.hub.toLowerCase()}/${s.assetId}:${b.hub.toLowerCase()}/${b.assetId}`) : [`${s.hub.toLowerCase()}/${s.assetId}`])) : null;
     const sameCurrentRoute = !candidate.route || !heldRoutes || heldRoutes.has(candidate.route);
-    if (sameCurrentRoute && candidate.protocol === position.protocol && candidate.network === (position.chain === 'Ethereum' ? 'ethereum' : position.chain === 'Plasma' ? 'plasma' : 'arbitrum') && (position.market ? position.market.toLowerCase() === candidate.market.toLowerCase() : position.protocolId === 'aave-v3')) return [];
+    if (sameCurrentRoute && candidate.protocol === position.protocol && candidate.network === (portfolioNetwork(position.chain)) && (position.market ? position.market.toLowerCase() === candidate.market.toLowerCase() : position.protocolId === 'aave-v3')) return [];
     const apr = row.borrowed ? candidate.borrowApr : candidate.supplyApr + (row.supplied?.intrinsicSupplyRate?.apr ?? 0);
     if (apr === null || !Number.isFinite(apr) || !(row.borrowed ? apr < baseline - 1e-10 : apr > baseline + 1e-10)) return [];
     const key = `${candidate.protocol}:${candidate.network}:${candidate.market.toLowerCase()}:${candidate.route ?? ''}`;

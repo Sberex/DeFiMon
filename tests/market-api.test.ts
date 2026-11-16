@@ -14,7 +14,7 @@ afterAll(() => new Promise<void>((resolve, reject) => server.close(e => e ? reje
 const post = (body: unknown) => fetch(`${base}/api/recommendations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 it('validates bounded token-only requests before calling a market source', async () => {
   const before = load.mock.calls.length;
-  for (const targets of [[], Array.from({ length: 41 }, (_, i) => ({ ...target, id: String(i) })), [target, target], [{ ...target, network: 'base' }], [{ ...target, supplied: 'bad' }], [{ ...target, supplied: 12 }], [{ ...target, borrowed: 123 }], [{ ...target, supplyBasket: ['bad'] }], [{ ...target, arbitraryUrl: 'https://example.com' }]]) {
+  for (const targets of [[], Array.from({ length: 41 }, (_, i) => ({ ...target, id: String(i) })), [target, target], [{ ...target, network: 'unsupported' }], [{ ...target, supplied: 'bad' }], [{ ...target, supplied: 12 }], [{ ...target, borrowed: 123 }], [{ ...target, supplyBasket: ['bad'] }], [{ ...target, arbitraryUrl: 'https://example.com' }]]) {
     expect((await post({ targets })).status).toBe(400);
   }
   expect(load.mock.calls.length).toBe(before);

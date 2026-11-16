@@ -1,7 +1,8 @@
 import type { Address } from 'viem';
 import type { NetworkId } from '../../src/types.js';
-// euler-xyz/euler-interfaces@0ea27dcf23c31249857180a0753638c040c4df1b, addresses/{1,42161,9745}/CoreAddresses.json.
+// euler-xyz/euler-interfaces@0ea27dcf23c31249857180a0753638c040c4df1b, addresses/{1,42161,9745,8453}/CoreAddresses.json.
 export const eulerDeployments: Record<NetworkId, { evc: Address; eVaultFactory: Address }> = {
+  base: { evc: '0x5301c7dD20bD945D2013b48ed0DEE3A284ca8989', eVaultFactory: '0x7F321498A801A191a93C840750ed637149dDf8D0' },
   "ethereum": {
     "evc": "0x0C9a3dd6b8F28529d72d7f9cE918D493519EE383",
     "eVaultFactory": "0x29a56a1b8214D9Cf7c5561811750D5cBDb45CC8e"

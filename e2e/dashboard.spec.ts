@@ -159,7 +159,7 @@ test('explains unavailable Morpho discovery and keeps other protocols visible wi
   await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
 });
 
-test('shows all three networks grouped by protocol, refreshes all, and fits on mobile', async ({ page }) => {
+test('shows all four networks grouped by protocol, refreshes all, and fits on mobile', async ({ page }) => {
   let reads = 0;
   await page.route('**/api/portfolio/*', route => {
     expect(new URL(route.request().url()).searchParams.get('chain')).toBe('all'); reads++;
@@ -173,9 +173,9 @@ test('shows all three networks grouped by protocol, refreshes all, and fits on m
   await expect(page.getByLabel('Blockchain')).toHaveCount(0);
   await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.getByText(/Coverage: 14 of 14 protocol readers completed on Ethereum \+ Plasma \+ Arbitrum/)).toBeVisible();
-  await expect(page.locator('article.protocol')).toHaveCount(14);
-  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v3 · Arbitrum', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Morpho · Arbitrum', 'Compound · Ethereum', 'Compound · Arbitrum', 'Fluid · Ethereum', 'Fluid · Plasma', 'Fluid · Arbitrum', 'Euler · Ethereum', 'Euler · Plasma', 'Euler · Arbitrum']);
+  await expect(page.getByText(/Coverage: 19 of 19 protocol readers completed on Ethereum \+ Plasma \+ Arbitrum/)).toBeVisible();
+  await expect(page.locator('article.protocol')).toHaveCount(19);
+  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v3 · Arbitrum', 'Aave v3 · Base', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Morpho · Arbitrum', 'Morpho · Base', 'Compound · Ethereum', 'Compound · Arbitrum', 'Compound · Base', 'Fluid · Ethereum', 'Fluid · Plasma', 'Fluid · Arbitrum', 'Fluid · Base', 'Euler · Ethereum', 'Euler · Plasma', 'Euler · Arbitrum', 'Euler · Base']);
   await expect(page.getByText(/Ethereum · Block 901/)).toBeVisible();
   await expect(page.getByText(/Plasma · Block 1901/)).toBeVisible();
   await expect(page.getByText(/Arbitrum · Block 2901/)).toBeVisible();
@@ -207,7 +207,7 @@ test('an example cancels an older lookup so its late response cannot replace the
   release();
   await expect(page.getByRole('button', { name: 'Check wallet' })).toBeEnabled();
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
-  await expect(page.locator('article.protocol')).toHaveCount(14);
+  await expect(page.locator('article.protocol')).toHaveCount(19);
 });
 
 test('shows supplied and net USD estimates for Plasma sUSDai collateral with the source labeled', async ({ page }) => {
@@ -267,7 +267,7 @@ test('keeps Ethereum results when Plasma fails and never calls unavailable Plasm
 test('adds wallet tokens to net value and groups them Ethereum then Plasma', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(page.locator('.wallet-network .protocol-name h2')).toHaveText(['Wallet tokens · Ethereum', 'Wallet tokens · Plasma', 'Wallet tokens · Arbitrum']);
+  await expect(page.locator('.wallet-network .protocol-name h2')).toHaveText(['Wallet tokens · Ethereum', 'Wallet tokens · Plasma', 'Wallet tokens · Arbitrum', 'Wallet tokens · Base']);
   const ethereum = page.locator('.wallet-network[data-chain="Ethereum"]');
   const plasma = page.locator('.wallet-network[data-chain="Plasma"]');
   await expect(ethereum.getByText('ETH', { exact: true })).toBeVisible();
@@ -291,15 +291,15 @@ test('adds and removes a token contract on its selected network and refreshes th
   await page.goto('/');
   await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.locator('.wallet-network')).toHaveCount(3);
+  await expect(page.locator('.wallet-network')).toHaveCount(4);
   await page.getByText('Add another token', { exact: true }).click();
   await page.getByLabel('Token network').selectOption('plasma');
   await page.getByLabel('Token contract address').fill('0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: 'Add token', exact: true }).click();
-  await expect(page.locator('.wallet-network')).toHaveCount(3);
+  await expect(page.locator('.wallet-network')).toHaveCount(4);
   expect(queries.at(-1)).toBe('plasma:0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: 'Remove', exact: true }).click();
-  await expect(page.locator('.wallet-network')).toHaveCount(3);
+  await expect(page.locator('.wallet-network')).toHaveCount(4);
   expect(queries.at(-1)).toBe('');
 });
 
@@ -478,7 +478,7 @@ test('keeps sUSDai lending rates and balances when intrinsic oracle data is unav
 test('shows monthly token interest and USD NPL after protocol net value across networks', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(11);
+  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(15);
   const card = page.locator('article.aave-v3[data-chain="Ethereum"]');
   const summary = card.getByRole('region', { name: 'Protocol monthly interest', exact: true });
   await expect(summary.locator('.protocol-interest-totals > p')).toHaveText(['Net value: $12,000.00', 'APR: ≈ 0.50%', 'Monthly NPL: ≈ $5.00 / month']);
@@ -592,7 +592,7 @@ test('shows Merkl unclaimed and pending balances by network without changing net
   await page.getByRole('button', { name: /Explore an example/ }).click();
   const section = page.getByRole('region', { name: 'Merkl rewards', exact: true });
   await expect(section.getByText(/Illustrative Merkl rewards only/)).toBeVisible();
-  await expect(section.locator('.merkl-network h3')).toHaveText(['Merkl · Ethereum', 'Merkl · Plasma', 'Merkl · Arbitrum']);
+  await expect(section.locator('.merkl-network h3')).toHaveText(['Merkl · Ethereum', 'Merkl · Plasma', 'Merkl · Arbitrum', 'Merkl · Base']);
   const eth = section.locator('[data-chain="Ethereum"]');
   await expect(eth.locator('tbody tr').first().locator('td').nth(1)).toHaveText('1.5');
   await expect(eth.locator('tbody tr').first().locator('td').nth(2)).toHaveText('0.2');
@@ -638,7 +638,7 @@ test('late Merkl responses cannot replace an illustrative example', async ({ pag
   const section = page.getByRole('region', { name: 'Merkl rewards', exact: true });
   await expect(section.getByText(/Illustrative Merkl rewards only/)).toBeVisible();
   await expect(section.getByText('Old wallet Merkl failure', { exact: true })).toHaveCount(0);
-  await expect(section.locator('.merkl-network')).toHaveCount(3);
+  await expect(section.locator('.merkl-network')).toHaveCount(4);
 });
 
 test('Merkl balances remain visible when the lending provider fails', async ({ page }) => {
@@ -1190,6 +1190,37 @@ test('labels stablecoin and savings stablecoin wallet balances without changing 
   await expect(wallet.getByText('Stablecoin', { exact: true })).toBeVisible();
   await expect(wallet.getByRole('row').filter({ hasText: 'sUSDai' })).toContainText('$2.42');
   await expect(wallet.getByRole('row').filter({ hasText: 'USDC' })).toContainText('$4.90');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('shows Base balances, monthly NPL and Base alternatives without treating Base as Arbitrum', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.chain = 'Base';
+  const position = structuredClone(fixture.protocols[0].positions[0]);
+  Object.assign(position, { id: 'base-aave', label: 'Base main market', suppliedUsd: 6000, debtUsd: 1000, healthFactor: 4.8, risk: 'lower' });
+  position.assets = [
+    { address: '0x4200000000000000000000000000000000000006', symbol: 'WETH', supplied: 2, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .8, liquidationPriceUsd: 625, supplyRate: { apr: .02, note: 'Current Base supply APR' } },
+    { address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', symbol: 'USDC', supplied: 0, borrowed: 1000, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .06, note: 'Current Base borrow APR' } },
+  ];
+  fixture.protocols = [{ id: 'aave-v3', name: 'Aave v3', chain: 'Base', status: 'ok', coverage: 'Base main market', positions: [position] }];
+  fixture.wallets = [{ chain: 'Base', status: 'ok', pricedValueUsd: 300, unpricedCount: 0, coverage: 'Base wallet tokens', tokens: [{ address: 'native', symbol: 'ETH', balance: .1, priceUsd: 3000, valueUsd: 300 }] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => {
+    const { targets } = route.request().postDataJSON();
+    expect(targets[0].network).toBe('base');
+    return route.fulfill({ json: { checkedAt: new Date().toISOString(), coverage: [{ protocol: 'Euler', network: 'base', status: 'ok' }], alternatives: [{ targetId: targets[0].id, protocol: 'Euler', network: 'base', market: '0x9999999999999999999999999999999999999999', label: 'Base USDC vault', supplyApr: .02, borrowApr: .03, borrowApy: .0304545, lltv: .8, block: '845300', url: 'https://app.euler.finance/', note: 'Base rate quote', liquidity: { amount: 500000, symbol: 'USDC', token: position.assets[1].address, note: 'Base vault liquidity' } }] } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('article.aave-v3[data-chain="Base"] .position-monthly-npl strong')).toHaveText('≈ $5.00');
+  await expect(page.locator('article.aave-v3[data-chain="Base"] .position-net-apr strong')).toHaveText('≈ 1.20%');
+  await expect(page.locator('.wallet-network[data-chain="Base"]')).toContainText('ETH');
+  await expect(page.locator('.summary.primary strong')).toHaveText('$5,300.00');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Alternatives for WETH - USDC', exact: true }).getByText('Euler · Base', { exact: true })).toBeVisible();
+  await expect(page.getByText('500,000 USDC', { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

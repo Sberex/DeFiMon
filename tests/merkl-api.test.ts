@@ -13,7 +13,7 @@ afterAll(() => new Promise<void>(resolve => server.close(() => resolve())));
 it('returns separate read-only rewards with no-store and leaves the lending response unchanged', async () => {
   const response = await fetch(`${base}/api/rewards/${example.address}`);
   expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
-  expect((await response.json()).networks).toHaveLength(3);
+  expect((await response.json()).networks).toHaveLength(4);
   expect(await (await fetch(`${base}/api/portfolio/${example.address}`)).json()).toEqual(example);
 });
 it('rejects invalid addresses, zero addresses and provider/query injection before a lookup', async () => {

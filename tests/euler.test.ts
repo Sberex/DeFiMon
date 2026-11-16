@@ -11,7 +11,7 @@ it('derives all 256 EVC subaccounts without crossing the owner prefix', () => {
   expect(accounts.every(a => a.slice(0, -2).toLowerCase() === wallet.slice(0, -2))).toBe(true);
   expect(accounts.map(a => a.toLowerCase())).toContain(subaccount);
 });
-it.each(['ethereum', 'arbitrum', 'plasma'] as const)('reads isolated loans, collateral, passive deposits and instant rates on %s', async network => {
+it.each(['ethereum', 'arbitrum', 'plasma', 'base'] as const)('reads isolated loans, collateral, passive deposits and instant rates on %s', async network => {
   const f = eulerFixture({ network });
   const result = await readEuler(f.client, wallet, 321n, network, f.prices);
   expect(result.status).toBe('ok'); expect(result.balanceDiscoveryComplete).toBe(true);
@@ -66,7 +66,7 @@ it('resolves raw Euler caps and limits market liquidity to cash and borrowing he
   const liquidity = await createEulerReader(f.client, 'ethereum', 321n).liquidity(debt);
   expect(liquidity).toMatchObject({ amount: 2000, symbol: 'USDC' });
 });
-it.each(['ethereum', 'arbitrum', 'plasma'] as const)('searches exact Euler pairs, deposits and hook restrictions on %s', async network => {
+it.each(['ethereum', 'arbitrum', 'plasma', 'base'] as const)('searches exact Euler pairs, deposits and hook restrictions on %s', async network => {
   const targets = expandTargets([{ id: 'loan', network, supplied: WETH, borrowed: USDC }, { id: 'supply', network, supplied: USDC }], network);
   const f = eulerFixture({ network }); const warnings: string[] = [];
   const result = await readEulerMarkets(f.client, network, 321n, targets, message => warnings.push(message));

@@ -81,6 +81,9 @@ combinedExample.wallets!.push({ chain: 'Arbitrum', status: 'ok', pricedValueUsd:
   { address: '0xaf88d065e77c8cc2239327c5edb3a432268e5831', symbol: 'USDC', balance: 700, priceUsd: 1, valueUsd: 700 },
 ] });
 combinedExample.protocols.push({ id: 'euler', name: 'Euler', chain: 'Arbitrum', status: 'ok', coverage: 'Euler V2 EVK · illustrative empty account', positions: [] });
+// Base is shown with explicitly empty example positions; existing example totals stay unchanged.
+for (const id of ['aave-v3', 'morpho', 'compound', 'fluid', 'euler']) combinedExample.protocols.push({ id, name: example.protocols.find(p => p.id === id)!.name, chain: 'Base', status: 'ok', coverage: 'Illustrative empty Base account', positions: [] });
+combinedExample.wallets!.push({ chain: 'Base', status: 'ok', pricedValueUsd: 0, unpricedCount: 0, coverage: 'Illustrative wallet tokens only.', tokens: [{ address: 'native', symbol: 'ETH', balance: 0, priceUsd: 3000, valueUsd: 0 }] });
 const protocolOrder = example.protocols.map(p => p.id);
 combinedExample.protocols.sort((a, b) => protocolOrder.indexOf(a.id) - protocolOrder.indexOf(b.id) || networkOrder.findIndex(id => networkNames[id] === a.chain) - networkOrder.findIndex(id => networkNames[id] === b.chain));
 

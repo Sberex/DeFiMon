@@ -1,5 +1,5 @@
 import type { Asset, MerklAprQuote, MerklOpportunity, MerklRewards, Portfolio, Position, ProtocolResult } from './types';
-const chainIds = { Ethereum: 1, Plasma: 9745, Arbitrum: 42161 };
+const chainIds = { Ethereum: 1, Plasma: 9745, Arbitrum: 42161, Base: 8453 };
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 export interface MerklMatch { id: string; positions: number }
 export interface MerklUnapplied { id: string; name: string; reason: string }

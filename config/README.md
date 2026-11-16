@@ -1,6 +1,6 @@
 # Token registry for wallet discovery and recommendations
 
-Edit **token-matches.json** to add tokens to wallet discovery and define cross-network recommendation matches. Ethereum, Plasma and Arbitrum are the current dashboard networks; the file can also store contracts on other registered EVM mainnets, including Base.
+Edit **token-matches.json** to add tokens to wallet discovery and define cross-network recommendation matches. Ethereum, Plasma, Arbitrum and Base are the current dashboard networks; the file can also store contracts on other registered EVM mainnets, including Optimism.
 
 
 ## Categories

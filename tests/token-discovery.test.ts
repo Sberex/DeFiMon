@@ -126,3 +126,17 @@ it('never overwrites a manual group whose label happens to use the automatic-gro
   expect(result.matches['automatic-0']).toEqual({ ethereum: D });
   expect(correspondingTokens(A, 'ethereum', 'arbitrum', result.matches)).toEqual([B]);
 });
+
+it('discovers Base contracts from both verified CoinGecko and CoinMarketCap records', async () => {
+  for (const provider of ['cg', 'cmc']) {
+    const fetcher = (async (url: string | URL | Request) => {
+      if (String(url).includes('/asset_platforms')) return new Response(JSON.stringify([...platforms, { id: 'base', chain_identifier: 8453 }]));
+      if (provider === 'cg') return new Response(JSON.stringify({ id: 'new-token', platforms: { ethereum: A, base: D } }));
+      if (String(url).includes('coingecko.com')) return new Response('{}', { status: 503 });
+      const body = cmc(); body.data['42'].contract_address.push({ contract_address: D, platform: { name: 'Base', coin: { slug: 'base' } } });
+      return new Response(JSON.stringify(body));
+    }) as typeof fetch;
+    const result = await createTokenDiscovery({ fetcher, manual: {}, env: { COINMARKETCAP_API_KEY: 'fixture-key' } }).resolve([target]);
+    expect(correspondingTokens(A, 'ethereum', 'base', result.matches)).toEqual([D]);
+  }
+});

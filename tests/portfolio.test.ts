@@ -89,3 +89,13 @@ it('rejects a provider on the wrong chain before attempting Arbitrum reads', asy
   await expect(getPortfolio(wallet, 'arbitrum')).rejects.toThrow('not Arbitrum mainnet');
   expect(readers.aave).not.toHaveBeenCalled(); expect(readers.fluid).not.toHaveBeenCalled();
 });
+
+it('routes all five Base readers to the same Base wallet and block, excluding Ethereum-only Aave v4', async () => {
+  rpc.chainId = 8453;
+  const result = await getPortfolio(wallet, 'base');
+  expect(result.chain).toBe('Base');
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'morpho', 'compound', 'fluid', 'euler']);
+  for (const reader of [readers.aave, readers.compound, readers.fluid, readers.euler]) expect(reader).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'base');
+  expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'base');
+  expect(readers.aaveV4).not.toHaveBeenCalled();
+});

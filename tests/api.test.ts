@@ -60,9 +60,9 @@ it('returns both networks grouped by protocol through the combined endpoint', as
   const response = await fetch(`${base}/api/portfolio/${example.address}?chain=all`);
   expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
   const data = await response.json();
-  expect(data.chain).toBe('Ethereum + Plasma + Arbitrum'); expect(data.blockNumber).toBeNull();
-  expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'compound:Ethereum', 'compound:Arbitrum', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum', 'euler:Ethereum', 'euler:Plasma', 'euler:Arbitrum']);
-  expect(chains.slice(before)).toEqual(['ethereum', 'plasma', 'arbitrum']);
+  expect(data.chain).toBe('Ethereum + Plasma + Arbitrum + Base'); expect(data.blockNumber).toBeNull();
+  expect(data.protocols.map((p: any) => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v3:Base', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'morpho:Base', 'compound:Ethereum', 'compound:Arbitrum', 'compound:Base', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum', 'fluid:Base', 'euler:Ethereum', 'euler:Plasma', 'euler:Arbitrum', 'euler:Base']);
+  expect(chains.slice(before)).toEqual(['ethereum', 'plasma', 'arbitrum', 'base']);
 });
 
 it('rejects invalid, unsupported, zero, or excessive extra token contracts before blockchain reads', async () => {

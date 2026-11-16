@@ -84,3 +84,12 @@ it('compares Euler APR against current APR while preserving its separately label
   expect(result[0].difference).toBeCloseTo(.0014);
   expect(result[0].borrowApy).toBe(.0718);
 });
+
+it('keeps Base positions and alternatives on Base and expands verified USDC to Base', () => {
+  const p = position(); p.chain = 'Base';
+  expect(comparisonTargets([p])[0].network).toBe('base');
+  expect(correspondingTokens('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 'ethereum', 'base')).toEqual(['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913']);
+  p.market = '0x2222222222222222222222222222222222222222';
+  const id = comparisonTargets([p])[0].id;
+  expect(betterAlternatives(p, 0, search([candidate(id, { protocol: p.protocol, network: 'base', market: p.market, borrowApr: .01 })]))).toEqual([]);
+});

@@ -8,7 +8,7 @@ import { networks } from '../server/networks.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy) setGlobalDispatcher(new EnvHttpProxyAgent());
 const wallet = process.argv[2], network = process.argv[3] ?? 'ethereum';
 if (!wallet || !isAddress(wallet, { strict: false }) || /^0x0{40}$/i.test(wallet) || !isNetworkId(network)) {
-  console.error('Usage: npm run check:euler -- 0xWalletAddress [ethereum|arbitrum|plasma]'); process.exitCode = 1;
+  console.error('Usage: npm run check:euler -- 0xWalletAddress [ethereum|arbitrum|plasma|base]'); process.exitCode = 1;
 } else {
   console.log('Checking current Euler V2 EVK positions. No transaction, provider URL, API key or .env contents will be printed.');
   try {

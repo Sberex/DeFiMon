@@ -20,3 +20,5 @@ services:
         value: https://rpc.plasma.to
       - key: ARBITRUM_RPC_URL
         value: https://arb1.arbitrum.io/rpc
+      - key: BASE_RPC_URL
+        value: https://mainnet.base.org

@@ -9,10 +9,29 @@ interface NetworkConfig {
   compoundMarkets: { address: Address; label: string }[];
   protocolIds: string[];
 }
-// Aave: bgd-labs/aave-address-book/src/AaveV3{Ethereum,Plasma,Arbitrum}.sol.
-// Fluid: Instadapp/fluid-contracts-public@404d73f/deployments/{mainnet,plasma,arbitrum}.
-// Selected Plasma and Arbitrum resolver ABIs match the pinned Ethereum ABIs in abis/fluid.ts.
+// Aave: bgd-labs/aave-address-book/src/AaveV3{Ethereum,Plasma,Arbitrum,Base}.sol.
+// Fluid: Instadapp/fluid-contracts-public@404d73f/deployments/{mainnet,plasma,arbitrum,base}.
+// Selected Plasma, Arbitrum and Base resolver ABIs match the pinned Ethereum ABIs in abis/fluid.ts.
 export const networks: Record<NetworkId, NetworkConfig> = {
+  base: {
+    id: 8453, name: 'Base', rpcVariable: 'BASE_RPC_URL', defaultRpc: 'https://mainnet.base.org', nativeSymbol: 'ETH',
+    wrappedNative: '0x4200000000000000000000000000000000000006',
+    // bgd-labs/aave-address-book@266429eefae828d52c91ffcb3a75656ab18f7160, src/AaveV3Base.sol.
+    aaveProvider: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
+    // morpho-org/sdks@56f1ed6, BaseMainnet addresses.
+    morphoBlue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',
+    // Instadapp/fluid-contracts-public@404d73f, deployments/base/*Resolver.json.
+    fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
+    protocolIds: ['aave-v3', 'morpho', 'compound', 'fluid', 'euler'],
+    // compound-finance/comet@f766f515, deployments/base/*/roots.json.
+    compoundMarkets: [
+      { address: '0x784efeB622244d2348d4F2522f8860B96fbEcE89', label: 'AERO market' },
+      { address: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf', label: 'USDbC market' },
+      { address: '0xb125E6687d4313864e53df431d5425969c15Eb2F', label: 'USDC market' },
+      { address: '0x2c776041CCFe903071AF44aa147368a9c8EEA518', label: 'USDS market' },
+      { address: '0x46e6b214b524310239732D51387075E0e70970bf', label: 'WETH market' },
+    ],
+  },
   ethereum: {
     protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler'],
     morphoBlue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',

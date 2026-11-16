@@ -23,7 +23,7 @@ The page can publish before Render is ready. It clearly explains that live check
 
 The blueprint starts with Render's free plan. Free services sleep when idle, so the first lookup after inactivity can be slow; resource limits can also affect large searches. An always-on paid plan is optional and can be chosen in Render. Render pricing and plan availability may change.
 
-The server uses public Plasma and Arbitrum providers initially. For regular use, replace `PLASMA_RPC_URL` and `ARBITRUM_RPC_URL` in **Render → service → Environment** with your dedicated providers. Optional CoinGecko/CoinMarketCap keys from `.env.example` also belong there. Render sets `PORT` automatically; do not copy your local port setting.
+The server uses public Plasma, Arbitrum and Base providers initially. For regular use, replace `PLASMA_RPC_URL`, `ARBITRUM_RPC_URL` and `BASE_RPC_URL` in **Render → service → Environment** with your dedicated providers. Optional CoinGecko/CoinMarketCap keys from `.env.example` also belong there. Render sets `PORT` automatically; do not copy your local port setting.
 
 The server explicitly allows the deployed public domain `https://app.sberex.com`, including when an older Render environment lists only GitHub Pages. `FRONTEND_ORIGINS` adds other allowed frontends; the blueprint sets it to `https://sberex.github.io,https://app.sberex.com`. If you add another custom domain, add its origin to this comma-separated setting. Editing the blueprint does not automatically change a manually created service. Use the origin only: no `/DeFiMon/` path and no trailing slash. This controls browser access; it is not API authentication.
 

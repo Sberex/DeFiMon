@@ -13,7 +13,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use('/api', apiCors);
-  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc) }));
+  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc), baseConfigured: Boolean(process.env.BASE_RPC_URL || networks.base.defaultRpc) }));
   // Bound concurrent work; wallet addresses and results are not stored or logged.
   let active = 0;
   let activeRewards = 0;
@@ -46,7 +46,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     res.setHeader('Cache-Control', 'no-store');
     const network = req.query.chain ?? 'ethereum';
     if (Object.keys(req.query).some(key => key !== 'chain' && key !== 'tokens') || (!isNetworkId(network) && network !== 'all')) {
-      res.status(400).json({ error: 'Choose a supported blockchain: ethereum, plasma, arbitrum, or all.' }); return;
+      res.status(400).json({ error: 'Choose a supported blockchain: ethereum, plasma, arbitrum, base, or all.' }); return;
     }
     const extraTokens: ExtraTokens = {};
     if (req.query.tokens !== undefined) {
@@ -56,7 +56,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
       for (const entry of entries) {
         const [chain, token, extra] = entry.split(':');
         if (!isNetworkId(chain) || extra !== undefined || !isAddress(token ?? '', { strict: false }) || /^0x0{40}$/i.test(token)) {
-          res.status(400).json({ error: 'Each added token needs an Ethereum, Plasma, or Arbitrum network and a valid token contract address.' }); return;
+          res.status(400).json({ error: 'Each added token needs an Ethereum, Plasma, Arbitrum or Base network and a valid token contract address.' }); return;
         }
         const address = getAddress(token.toLowerCase());
         extraTokens[chain] = [...new Set([...(extraTokens[chain] ?? []), address])];

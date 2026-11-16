@@ -6,6 +6,69 @@ import type { NetworkId } from '../../src/types.js';
 // Uniswap/default-token-list@fc629302df08c20aa5ca368212b5e416b2299e27 src/tokens/{mainnet,arbitrum}.json (GPL-3.0; upstream license included alongside this file).
 // Plus AaveV3Ethereum/Plasma/Arbitrum address books and Fluid Plasma/Arbitrum vault underlyings @404d73f.
 export const walletTokenCatalog: Record<NetworkId, { address: Address; symbol: string }[]> = {
+  // AaveV3Base underlyings @266429e; the configured CMC registry is merged at lookup time.
+  base: [
+  {
+    "address": "0x4200000000000000000000000000000000000006",
+    "symbol": "WETH"
+  },
+  {
+    "address": "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22",
+    "symbol": "cbETH"
+  },
+  {
+    "address": "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
+    "symbol": "USDbC"
+  },
+  {
+    "address": "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+    "symbol": "wstETH"
+  },
+  {
+    "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "symbol": "USDC"
+  },
+  {
+    "address": "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
+    "symbol": "weETH"
+  },
+  {
+    "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+    "symbol": "cbBTC"
+  },
+  {
+    "address": "0x2416092f143378750bb29b79eD961ab195CcEea5",
+    "symbol": "ezETH"
+  },
+  {
+    "address": "0x6Bb7a212910682DCFdbd5BCBb3e28FB4E8da10Ee",
+    "symbol": "GHO"
+  },
+  {
+    "address": "0xEDfa23602D0EC14714057867A78d01e94176BEA0",
+    "symbol": "wrsETH"
+  },
+  {
+    "address": "0xecAc9C5F704e954931349Da37F60E39f515c11c1",
+    "symbol": "LBTC"
+  },
+  {
+    "address": "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
+    "symbol": "EURC"
+  },
+  {
+    "address": "0x63706e401c06ac8513145b7687A14804d17f814b",
+    "symbol": "AAVE"
+  },
+  {
+    "address": "0x236aa50979D5f3De3Bd1Eeb40E81137F22ab794b",
+    "symbol": "tBTC"
+  },
+  {
+    "address": "0x660975730059246A68521a3e2FBD4740173100f5",
+    "symbol": "syrupUSDC"
+  }
+],
   ethereum: [
     {"address":"0x0b2b2b2076d95dda7817e785989fe353fe955ef9","symbol":"sUSDai"},
     {"address":"0x04acaf8d2865c0714f79da09645c13fd2888977f","symbol":"WFRAX"},

@@ -52,3 +52,13 @@ it('keeps verified Arbitrum markets when another market fails, rather than losin
   expect(result.positions[1]).toMatchObject({ suppliedUsd: null, debtUsd: null, risk: 'unknown' });
   expect(JSON.stringify(result)).not.toContain('private-provider-key');
 });
+
+it('reads all five official Base Comet markets without calling another network’s deployments', async () => {
+  const f = fixture();
+  const result = await readCompound(f.client, wallet, 42161n, 'base');
+  expect(result.status).toBe('ok'); expect(result.positions).toHaveLength(5);
+  expect(result.positions.map(p => p.label)).toEqual(['AERO market', 'USDbC market', 'USDC market', 'USDS market', 'WETH market']);
+  expect([...f.addresses].map(a => a.toLowerCase()).sort()).toEqual(networks.base.compoundMarkets.map(m => m.address.toLowerCase()).sort());
+  expect(result.positions[0].assets[0].supplyRate?.apr).toBeCloseTo(.031536);
+  expect(result.coverage).toContain('Base');
+});

@@ -106,3 +106,19 @@ it('loads live user opportunities and campaign details independently and handles
   const failed = await readMerklApr(wallet, (async () => { throw new Error('private-provider-secret'); }) as typeof fetch);
   expect(failed.aprStatus).toBe('error'); expect(JSON.stringify(failed)).not.toContain('private-provider-secret');
 });
+
+it('recognizes and applies an exact Base Fluid reward without applying rewards from another network', () => {
+  const raw = rawOpportunity(1);
+  raw.opportunity.chainId = 8453;
+  raw.opportunity.tokens.forEach(token => { token.chainId = 8453; });
+  const op = parseMerklOpportunity(raw)!;
+  const campaign = detail(1);
+  campaign.chainId = 8453; campaign.campaigns[0].computeChainId = 8453;
+  const resolved = resolveMerklRules(op, campaign, wallet);
+  expect(resolved.status).toBe('ready');
+  const p = portfolio(); p.chain = 'Base'; p.protocols = [p.protocols[1]]; p.protocols[0].chain = 'Base';
+  const r = rewards(); r.opportunities = [resolved];
+  const adjusted = applyMerklApr(p, r);
+  expect(adjusted.matches).toEqual([{ id: op.id, positions: 1 }]);
+  expect(borrowApr(adjusted.portfolio.protocols[0].positions[0].assets[0].borrowRate, adjusted.portfolio.protocols[0].positions[0].assets[0].merklBorrowRate)).toBeCloseTo(.06 - op.apr);
+});

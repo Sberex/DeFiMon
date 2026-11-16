@@ -1,3 +1,4 @@
+import { networks } from './networks.js';
 import { getAddress, isAddress, type Address } from 'viem';
 import type { MerklOpportunity, MerklRewards } from '../src/types.js';
 const API = 'https://api.merkl.xyz/v4';
@@ -13,7 +14,7 @@ const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 export function parseMerklOpportunity(value: unknown): MerklOpportunity | null {
   const o = object(object(value).opportunity);
   if (!Number.isSafeInteger(o.chainId)) throw new Error('Invalid opportunity chain');
-  if (![1, 9745, 42161].includes(Number(o.chainId))) return null;
+  if (!Object.values(networks).some(network => network.id === o.chainId)) return null;
   if (typeof o.id !== 'string' || !/^[a-zA-Z0-9_-]{1,100}$/.test(o.id) || typeof o.type !== 'string' || typeof o.identifier !== 'string' || o.identifier.length > 256 || typeof o.apr !== 'number' || !Number.isFinite(o.apr) || o.apr < 0) throw new Error('Invalid opportunity rate');
   const protocol = object(o.protocol).id;
   if (typeof protocol !== 'string') throw new Error('Missing protocol identity');

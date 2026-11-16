@@ -27,3 +27,12 @@ it('uses Arbitrum One and its own default or configured provider without reusing
   vi.stubEnv('ARBITRUM_RPC_URL', 'https://arbitrum.example');
   expect(makeClient('arbitrum').transport.url).toBe('https://arbitrum.example');
 });
+
+it('uses Base mainnet and its own configured or public provider', () => {
+  vi.stubEnv('BASE_RPC_URL', '');
+  const client = makeClient('base');
+  expect(client.chain.id).toBe(8453); expect(client.chain.nativeCurrency.symbol).toBe('ETH');
+  expect(client.transport.url).toBe('https://mainnet.base.org');
+  vi.stubEnv('BASE_RPC_URL', 'https://base.example');
+  expect(makeClient('base').transport.url).toBe('https://base.example');
+});

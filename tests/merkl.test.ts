@@ -7,7 +7,7 @@ const reward = (changes: Record<string, unknown> = {}, metadata: Record<string, 
 const chain = (id = 1, rewards: unknown[] = [reward()]) => ({ chain: { id, endOfDisputePeriod: 0 }, rewards });
 it('subtracts cumulative claims, converts token units, and keeps pending separate', () => {
   const result = parseMerklRewards(wallet, [chain()], now);
-  expect(result.networks.map(n => n.chain)).toEqual(['Ethereum', 'Plasma', 'Arbitrum']);
+  expect(result.networks.map(n => n.chain)).toEqual(['Ethereum', 'Plasma', 'Arbitrum', 'Base']);
   expect(result.networks[0].rewards[0]).toMatchObject({ unclaimed: 6, pending: 2, unclaimedRaw: '6000000', pendingRaw: '2000000', priceUsd: 1.5, unclaimedUsd: 9, pendingUsd: 3 });
   expect(result.networks[0].unclaimedUsd).toBe(9);
   expect(result.networks[1].rewards).toEqual([]);
