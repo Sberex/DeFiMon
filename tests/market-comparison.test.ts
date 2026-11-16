@@ -73,3 +73,14 @@ it('sorts borrowing alternatives by descending liquidity, keeps zero above unkno
   ]));
   expect(result.map(c => c.market)).toEqual(['same-liquidity-cheaper', 'largest', 'smaller', 'zero', 'unknown', 'invalid']);
 });
+
+it('compares Euler APR against current APR while preserving its separately labeled compounded APY', () => {
+  const p = position();
+  p.rows[0].borrowed!.borrowRate = { apr: .0707, note: 'Current APR' };
+  const id = comparisonTargets([p])[0].id;
+  const result = betterAlternatives(p, 0, search([candidate(id, { protocol: 'Euler', borrowApr: .0693, borrowApy: .0718 })]));
+  expect(result).toHaveLength(1);
+  expect(result[0].comparedApr).toBe(.0693);
+  expect(result[0].difference).toBeCloseTo(.0014);
+  expect(result[0].borrowApy).toBe(.0718);
+});

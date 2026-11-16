@@ -4,7 +4,15 @@ import type { ChainClient } from './rpc.js';
 import { eulerDeployments } from './deployments/euler.js';
 import { eulerFactoryAbi, eulerVaultAbi } from './abis/euler.js';
 import { tokenMetadata, minimum, remaining, liquidityQuote } from './market-liquidity.js';
-import { perSecondApr, rate, unavailableRate } from './rates.js';
+import { rate, unavailableRate } from './rates.js';
+// Euler EVK Constants.sol and periphery Lens/Utils.sol use 365.2425 days.
+export const EULER_YEAR_SECONDS = 31_556_952;
+export function eulerBorrowApy(perSecondRay: bigint): number | null {
+  if (perSecondRay < 0n) return null;
+  // log1p/expm1 avoid precision loss when the per-second rate is very small.
+  const apy = Math.expm1(EULER_YEAR_SECONDS * Math.log1p(Number(perSecondRay) / 1e27));
+  return Number.isFinite(apy) ? apy : null;
+}
 export const EULER_COVERAGE = 'Euler V2 EVK: direct wallet vault deposits and enabled collateral/loans in owned EVC subaccounts. Excludes legacy V1, Euler Earn aggregators, externally owned smart accounts and passive deposits in subaccounts with no enabled vaults.';
 const ZERO = '0x0000000000000000000000000000000000000000';
 export const eulerAddress = (value: string): Address => {
@@ -64,10 +72,11 @@ export function createEulerReader(client: ChainClient, network: NetworkId, block
         client.readContract({ address, abi: eulerVaultAbi, functionName: 'interestFee', blockNumber }),
       ]);
       if (fee > 10000) throw new Error('Invalid fee');
-      const borrowApr = perSecondApr(spy, 1e27);
+      const borrowApr = Number(spy) / 1e27 * EULER_YEAR_SECONDS;
+      const borrowApy = eulerBorrowApy(spy);
       const supplyApr = cash + borrowed === 0n ? 0 : borrowApr * Number(borrowed) / Number(cash + borrowed) * (1 - fee / 10000);
-      return { supplyRate: rate(supplyApr, 'Instant Euler EVK lending APR: current borrowing rate × utilization × (1 − interest fee). No compounding or external rewards.'), borrowRate: rate(borrowApr, 'Instant Euler EVK interest-model APR from the current on-chain per-second ray rate. No compounding or external rewards.'), cash, borrowed };
-    } catch { return { supplyRate: unavailableRate(), borrowRate: unavailableRate(), cash: null, borrowed: null }; }
+      return { borrowApy, supplyRate: rate(supplyApr, 'Instant Euler EVK lending APR: current borrowing rate × utilization × (1 − interest fee). No compounding or external rewards.'), borrowRate: rate(borrowApr, 'Instant Euler EVK interest-model APR from the current on-chain per-second ray rate using Euler’s 365.2425-day year. No compounding or external rewards.'), cash, borrowed };
+    } catch { return { borrowApy: null, supplyRate: unavailableRate(), borrowRate: unavailableRate(), cash: null, borrowed: null }; }
   }
   function interest(address: Address) {
     const key = address.toLowerCase(); if (!rates.has(key)) rates.set(key, readRates(address)); return rates.get(key)!;

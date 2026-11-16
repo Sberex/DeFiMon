@@ -4,7 +4,7 @@ export interface MarketLiquidity { amount: number; symbol: string; token: string
 export interface MarketAlternative {
   targetId: string; protocol: string; network: NetworkId; market: string; route?: string; label: string;
   collateralVault?: { address: string; label: string; url: string };
-  liquidity?: MarketLiquidity | null; supplyApr: number; borrowApr: number | null; lltv: number | null; block: string; url: string; note: string;
+  borrowApy?: number | null; liquidity?: MarketLiquidity | null; supplyApr: number; borrowApr: number | null; lltv: number | null; block: string; url: string; note: string;
 }
 export interface TokenDiscoveryReport {
   network: NetworkId; token: string; label?: string;

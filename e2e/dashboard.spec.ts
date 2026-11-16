@@ -1147,7 +1147,7 @@ test('shows Euler positions, rates, LLTV, NPL and market alternatives on all thr
   await page.route('**/api/recommendations', route => {
     const targets = route.request().postDataJSON().targets;
     expect(targets).toHaveLength(3);
-    return route.fulfill({ json: { checkedAt: '2026-11-15T12:00:00Z', coverage: [{ protocol: 'Euler', network: 'arbitrum', status: 'ok' }], alternatives: [{ targetId: targets[0].id, protocol: 'Euler', network: 'arbitrum', market: '0x9999999999999999999999999999999999999999', route: '0x8888888888888888888888888888888888888888', label: 'Euler alternative USDC vault', collateralVault: { address: '0x8888888888888888888888888888888888888888', label: 'Euler WETH collateral vault', url: 'https://app.euler.finance/vault/0x8888888888888888888888888888888888888888?network=arbitrum' }, supplyApr: .025, borrowApr: .03, lltv: .8, block: '321', url: 'https://app.euler.finance/', note: 'Euler EVK quote.', liquidity: { amount: 500000, symbol: 'USDC', token: fixture.protocols[0].positions[0].assets[1].address, note: 'Vault cash limited by borrowing cap.' } }] } });
+    return route.fulfill({ json: { checkedAt: '2026-11-15T12:00:00Z', coverage: [{ protocol: 'Euler', network: 'arbitrum', status: 'ok' }], alternatives: [{ targetId: targets[0].id, protocol: 'Euler', network: 'arbitrum', market: '0x9999999999999999999999999999999999999999', route: '0x8888888888888888888888888888888888888888', label: 'Euler alternative USDC vault', borrowApy: .03045453395, collateralVault: { address: '0x8888888888888888888888888888888888888888', label: 'Euler WETH collateral vault', url: 'https://app.euler.finance/vault/0x8888888888888888888888888888888888888888?network=arbitrum' }, supplyApr: .025, borrowApr: .03, lltv: .8, block: '321', url: 'https://app.euler.finance/', note: 'Euler EVK quote.', liquidity: { amount: 500000, symbol: 'USDC', token: fixture.protocols[0].positions[0].assets[1].address, note: 'Vault cash limited by borrowing cap.' } }] } });
   });
   await page.goto('/');
   await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
@@ -1170,6 +1170,7 @@ test('shows Euler positions, rates, LLTV, NPL and market alternatives on all thr
   await expect(alternatives.getByRole('link', { name: /Collateral vault: Euler WETH/ })).toHaveAttribute('href', 'https://app.euler.finance/vault/0x8888888888888888888888888888888888888888?network=arbitrum');
   await expect(alternatives.getByTitle('0x8888888888888888888888888888888888888888', { exact: true })).toBeVisible();
   await expect(alternatives.getByText('500,000 USDC', { exact: true })).toBeVisible();
+  await expect(alternatives.getByText('Borrow APY: ≈ 3.05%', { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
