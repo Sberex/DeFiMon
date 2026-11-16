@@ -9,7 +9,7 @@ Once connected, pushing changes to `main` runs tests and publishes the website a
 1. Open [DeFiMon → Settings → Pages](https://github.com/Sberex/DeFiMon/settings/pages).
 2. Under **Build and deployment → Source**, select **GitHub Actions**.
 3. Open [Actions → Deploy GitHub Pages](https://github.com/Sberex/DeFiMon/actions/workflows/pages.yml), choose **Run workflow**, and select `main`.
-4. Wait for the workflow to turn green. The expected website address is **https://sberex.github.io/DeFiMon/**. The workflow's deployment link is the authoritative address.
+4. Wait for the workflow to turn green. With the configured custom domain the website address is **https://app.sberex.com/**. Without a custom domain, the repository address is **https://sberex.github.io/DeFiMon/**. The workflow's deployment link is the authoritative address.
 
 The page can publish before Render is ready. It clearly explains that live checks are not configured and offers the illustrative example dashboard.
 
@@ -25,7 +25,7 @@ The blueprint starts with Render's free plan. Free services sleep when idle, so 
 
 The server uses public Plasma and Arbitrum providers initially. For regular use, replace `PLASMA_RPC_URL` and `ARBITRUM_RPC_URL` in **Render → service → Environment** with your dedicated providers. Optional CoinGecko/CoinMarketCap keys from `.env.example` also belong there. Render sets `PORT` automatically; do not copy your local port setting.
 
-`FRONTEND_ORIGINS` is already set to `https://sberex.github.io`. If you add a custom domain, add its origin to this comma-separated setting. Use the origin only: no `/DeFiMon/` path and no trailing slash. This controls browser access; it is not API authentication.
+The server explicitly allows the deployed public domain `https://app.sberex.com`, including when an older Render environment lists only GitHub Pages. `FRONTEND_ORIGINS` adds other allowed frontends; the blueprint sets it to `https://sberex.github.io,https://app.sberex.com`. If you add another custom domain, add its origin to this comma-separated setting. Editing the blueprint does not automatically change a manually created service. Use the origin only: no `/DeFiMon/` path and no trailing slash. This controls browser access; it is not API authentication.
 
 ## 3. Connect GitHub Pages to Render
 
@@ -39,7 +39,7 @@ The Pages workflow now defaults to **https://defimon-api.onrender.com**. No repo
 
 ## Future updates
 
-Push to `main`. **Deploy GitHub Pages** runs unit tests, builds the application, runs browser tests, builds the public site under its repository path, checks that artifact, and deploys only if all checks pass. Pull requests run the separate **Tests** workflow. Render's `checksPass` setting waits for GitHub checks before automatically deploying the server. Its dashboard reports server deployment status separately.
+Push to `main`. **Deploy GitHub Pages** runs unit tests, builds the application, runs browser tests, reads the configured Pages URL and builds the public site under the matching path, checks that artifact, and deploys only if all checks pass. Pull requests run the separate **Tests** workflow. Render's `checksPass` setting waits for GitHub checks before automatically deploying the server. Its dashboard reports server deployment status separately.
 
 The website and server deploy separately. No protocol API keys or `.env` files are uploaded to GitHub Pages; only the built `dist` directory is published. Never add credentials to any `VITE_*` variable because these values appear in the public JavaScript.
 
@@ -70,3 +70,14 @@ If the page has missing assets, check the workflow's **Build public website** st
 If a deployment says `Multiple artifacts named "github-pages" ... Artifact count is 2`, GitHub found more than one package with the name requested by the publish step. This is a deployment-package selection error; the website build can still have succeeded. The current workflow names packages `github-pages-RUN_ID-ATTEMPT` and passes the name from the build job to deployment. A full rerun creates a new name; rerunning only deployment reuses the exact package output from the successful build. No artifact deletion or additional repository permission is required.
 
 After updating the workflow, use the new run triggered by the update, or **Actions → Deploy GitHub Pages → Run workflow → main**. Rerunning a historical workflow uses its old configuration and will not apply this fix. The workflow also uses pinned action releases verified to run on Node.js 24, including the Pages uploader's nested upload action, instead of deprecated Node.js 20 actions.
+
+## Custom domain asset paths
+
+The workflow reads `base_path` from GitHub's official Pages configuration action before building. With `https://app.sberex.com/`, that output is empty and both the build and artifact check use `/`, producing `/assets/...` links. With a repository URL such as `https://sberex.github.io/DeFiMon/`, both use `/DeFiMon/`. The home link uses the same build base. Changing the custom domain in **Settings → Pages** requires a new workflow run to rebuild these paths. A `CNAME` file is not required for this Actions-based deployment; the domain is configured in Pages settings.
+
+To verify a custom-domain artifact locally, run:
+
+```sh
+VITE_BASE_PATH=/ VITE_STATIC_HOSTING=true VITE_API_BASE_URL=https://defimon-api.onrender.com npm run build
+PAGES_BASE_PATH=/ PAGES_API_BASE_URL=https://defimon-api.onrender.com npx tsx scripts/check-pages.ts
+```

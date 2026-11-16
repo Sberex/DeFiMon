@@ -10,6 +10,9 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    permissions:
+      contents: read
+      pages: read
     outputs:
       pages_artifact: ${{ steps.package.outputs.name }}
     runs-on: ubuntu-latest
@@ -25,16 +28,19 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - name: Read configured GitHub Pages address
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - name: Build public website
         run: npm run build
         env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           VITE_STATIC_HOSTING: 'true'
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://defimon-api.onrender.com' }}
-      - name: Check public website under repository path
+      - name: Check public website at configured Pages path
         run: npx tsx scripts/check-pages.ts
         env:
-          PAGES_BASE_PATH: /${{ github.event.repository.name }}/
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           PAGES_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://defimon-api.onrender.com' }}
       - name: Name deployment package
         id: package
@@ -54,7 +60,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - name: Publish website
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

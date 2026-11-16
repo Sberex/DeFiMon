@@ -5,7 +5,9 @@ export const apiCors: RequestHandler = (req, res, next) => {
   const origin = req.get('Origin');
   if (!origin) { next(); return; }
   res.vary('Origin');
-  const allowed = (process.env.FRONTEND_ORIGINS ?? '').split(',').map(v => v.trim()).filter(Boolean);
+  // Keep the deployed public domain working when an older Render setting lists only GitHub Pages.
+  // FRONTEND_ORIGINS adds other explicitly allowed frontends; no wildcard is used.
+  const allowed = ['https://app.sberex.com', ...(process.env.FRONTEND_ORIGINS ?? '').split(',').map(v => v.trim()).filter(Boolean)];
   // Requests to the website hosted by this same server need no CORS permission.
   const ownOrigin = `${req.protocol}://${req.get('host')}`;
   if (!allowed.includes(origin) && origin !== ownOrigin) {

@@ -18,8 +18,8 @@ afterAll(async () => {
   if (previousOrigins === undefined) delete process.env.FRONTEND_ORIGINS; else process.env.FRONTEND_ORIGINS = previousOrigins;
   await new Promise<void>(resolve => server.close(() => resolve()));
 });
-it('permits GitHub Pages JSON preflight and requests without enabling credentials', async () => {
-  const headers = { Origin: 'https://sberex.github.io', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' };
+it.each(['https://sberex.github.io', 'https://app.sberex.com'])('permits %s JSON preflight and requests without enabling credentials', async origin => {
+  const headers = { Origin: origin, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' };
   const preflight = await fetch(`${base}/api/recommendations`, { method: 'OPTIONS', headers });
   expect(preflight.status).toBe(204);
   expect(preflight.headers.get('access-control-allow-origin')).toBe(headers.Origin);

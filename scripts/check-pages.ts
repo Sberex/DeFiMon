@@ -1,4 +1,4 @@
-// Verify the actual static artifact, including assets under /DeFiMon/ and API routing.
+// Verify the actual static artifact, including root/custom-domain or repository-path assets and API routing.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -55,5 +55,5 @@ try {
   expect(assets.length).toBeGreaterThan(0);
   expect(assets.every(status => status === 200)).toBe(true);
   expect(errors).toEqual([]);
-  console.log('GitHub Pages artifact passed: repository-path assets, home link, example, and live API configuration.');
+  console.log('GitHub Pages artifact passed: configured base-path assets, home link, example, and live API configuration.');
 } finally { await browser.close(); server.close(); server.closeAllConnections(); }
