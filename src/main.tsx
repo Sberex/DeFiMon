@@ -84,10 +84,11 @@ function PositionView({ position: p, fluid = false, lookupSnapshot }: { position
   const multiple = collateralAssets(p).length > 1 && p.debtUsd !== 0;
   const scenario = liquidationScenario(p);
   const netValue = p.suppliedUsd === null || p.debtUsd === null ? null : p.suppliedUsd - p.debtUsd;
-  const netApr = annualizedNplApr(positionMonthlyInterest(p).nplUsd, netValue);
+  const monthly = positionMonthlyInterest(p);
+  const netApr = annualizedNplApr(monthly.nplUsd, netValue);
   return <div className="position">
     <div className="position-title"><h3>{p.label}</h3><span className={`risk ${p.risk}`}>{riskNames[p.risk]}</span></div>
-    <div className="position-stats"><div><span>Supplied</span><strong>{money(p.suppliedUsd)}</strong></div><div><span>Borrowed</span><strong>{money(p.debtUsd)}</strong></div><div><span>Net value</span><strong>{money(netValue)}</strong></div><div className="position-net-apr"><span title="Monthly NPL × 12 ÷ Net value. Includes matched Merkl incentives and intrinsic yield used in NPL.">APR ⓘ</span><strong>{netAprText(netApr)}</strong>{netValue !== null && netValue < 0 && <small>Signed ratio · negative Net value</small>}</div><div><span title="Collateral adjusted for liquidation rules, divided by debt. Around 1 means liquidation can begin.">Health factor ⓘ</span><strong>{p.healthFactor === null ? '—' : p.healthFactor.toFixed(2)}</strong></div></div>
+    <div className="position-stats"><div><span>Supplied</span><strong>{money(p.suppliedUsd)}</strong></div><div><span>Borrowed</span><strong>{money(p.debtUsd)}</strong></div><div><span>Net value</span><strong>{money(netValue)}</strong></div><div className="position-monthly-npl"><span title="Estimated monthly interest earned minus interest paid, including matched Merkl incentives and intrinsic yield.">Monthly NPL</span><strong>{monthly.nplUsd === null ? 'Unavailable' : `≈ ${money(monthly.nplUsd)}`}</strong></div><div className="position-net-apr"><span title="Monthly NPL × 12 ÷ Net value. Includes matched Merkl incentives and intrinsic yield used in NPL.">APR ⓘ</span><strong>{netAprText(netApr)}</strong>{netValue !== null && netValue < 0 && <small>Signed ratio · negative Net value</small>}</div><div><span title="Collateral adjusted for liquidation rules, divided by debt. Around 1 means liquidation can begin.">Health factor ⓘ</span><strong>{p.healthFactor === null ? '—' : p.healthFactor.toFixed(2)}</strong></div></div>
     {p.vault && <MorphoVaultContext position={p} />}
     {fluid && <FluidPositionInterest position={p} />}
     {p.healthFactor !== null && p.risk !== 'no-debt' && <div className="health-track" aria-hidden="true"><span style={{ left: `${Math.min(96, Math.max(2, ((p.healthFactor ?? 1) - .8) / 2.2 * 100))}%` }} /></div>}

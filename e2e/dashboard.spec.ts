@@ -394,7 +394,7 @@ test('calculates only the largest collateral using manual prices and clears stal
   await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('0.8');
   await expect(result).toHaveText('$993.75');
   await expect(card.locator('.position-stats strong').nth(1)).toHaveText('$30,000.00');
-  await expect(card.locator('.position-stats strong').nth(4)).toHaveText('1.80');
+  await expect(card.locator('.position-stats strong').last()).toHaveText('1.80');
   await card.getByLabel('USDT liquidation price (USD)').fill('0');
   await expect(result).toHaveText('—');
   await card.getByRole('button', { name: 'Calculate', exact: true }).click();
@@ -739,12 +739,13 @@ test('a late Merkl APR lookup preserves liquidation scenario inputs and calculat
 });
 
 
-test('shows annualized NPL APR between net value and health for each protocol and Fluid vault', async ({ page }) => {
+test('shows monthly NPL before annualized APR for each protocol and Fluid vault', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  for (const [id, value] of [['aave-v3', '≈ 0.50%'], ['aave-v4', '≈ 1.90%'], ['morpho', '≈ -3.00%'], ['compound', '≈ -3.93%'], ['fluid', '≈ 0.70%']]) {
+  for (const [id, value, npl] of [['aave-v3', '≈ 0.50%', '≈ $5.00'], ['aave-v4', '≈ 1.90%', '≈ $7.92'], ['morpho', '≈ -3.00%', '≈ -$10.00'], ['compound', '≈ -3.93%', '≈ -$22.92'], ['fluid', '≈ 0.70%', '≈ $1.46']]) {
     const stats = page.locator(`article.${id}[data-chain="Ethereum"] .position-stats`).first();
-    await expect(stats.locator(':scope > div > span')).toHaveText(['Supplied', 'Borrowed', 'Net value', 'APR ⓘ', 'Health factor ⓘ']);
+    await expect(stats.locator(':scope > div > span')).toHaveText(['Supplied', 'Borrowed', 'Net value', 'Monthly NPL', 'APR ⓘ', 'Health factor ⓘ']);
+    await expect(stats.locator('.position-monthly-npl strong')).toHaveText(npl);
     await expect(stats.locator('.position-net-apr strong')).toHaveText(value);
   }
   await expect(page.locator('article.morpho[data-chain="Ethereum"] .protocol-net-apr')).toHaveText('APR: ≈ -1.70%');
@@ -763,6 +764,8 @@ test('keeps NPL APR unavailable for zero net value or unknown monthly interest',
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.locator('article.aave-v3 .position-net-apr strong')).toHaveText('Unavailable');
   await expect(page.locator('article.fluid .position-net-apr strong')).toHaveText('Unavailable');
+  await expect(page.locator('article.fluid .position-monthly-npl strong')).toHaveText('Unavailable');
+  await expect(page.locator('article.aave-v3 .position-monthly-npl strong')).toHaveText('≈ $5.00');
   await expect(page.locator('article.fluid .position-stats strong').nth(2)).toHaveText('$2,500.00');
 });
 
@@ -1156,6 +1159,7 @@ test('shows Euler positions, rates, LLTV, NPL and market alternatives on all thr
     await expect(card.locator('tbody tr').first().locator('td').nth(6)).toContainText('80.00%');
     await expect(card.locator('.position-stats strong').last()).toHaveText('4.80');
     await expect(card.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $5.00 / month');
+    await expect(card.locator('.position-monthly-npl strong')).toHaveText('≈ $5.00');
     await expect(card.getByText('Euler oracle estimate', { exact: true })).toBeVisible();
   }
   await expect(page.locator('.total-npl > strong')).toHaveText('≈ $15.00');
