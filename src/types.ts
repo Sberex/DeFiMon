@@ -6,6 +6,7 @@ export interface WalletToken {
   address: string; symbol: string; balance: number | null; priceUsd: number | null; valueUsd: number | null;
   excludedReason?: string; category?: TokenCategory;
   pendle?: PendleTokenInfo;
+  intrinsicSupplyRate?: IntrinsicRate; interestBearing?: boolean;
 }
 export interface PendleTokenInfo {
   kind: 'PT' | 'YT'; name: string; marketAddress: string; syAddress: string;
@@ -15,11 +16,11 @@ export interface PendleTokenInfo {
   marketUpdatedAt: string | null; notes: string[];
 }
 export interface PendleCoverage {
-  status: 'ok' | 'partial' | 'error'; coverage: string; message?: string; marketCount: number; blockNumber: string | null;
+  status: 'ok' | 'partial' | 'error'; coverage: string; message?: string; marketCount: number; blockNumber: string | null; balanceDiscoveryComplete?: boolean;
 }
 export interface WalletBalances {
   chain: ChainName; status: 'ok' | 'partial' | 'error'; tokens: WalletToken[];
-  pricedValueUsd: number | null; unpricedCount: number; coverage: string; message?: string; pendle?: PendleCoverage;
+  pricedValueUsd: number | null; unpricedCount: number; coverage: string; message?: string; pendle?: PendleCoverage; interestDiscoveryComplete?: boolean;
 }
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
 export interface InterestRate {
@@ -27,7 +28,7 @@ export interface InterestRate {
   pendlePt?: { network: NetworkId; marketAddress: string | null; expiry: number | null; updatedAt: string | null };
 }
 export interface IntrinsicRate extends InterestRate {
-  source: { chain: ChainName; oracle: string; kind?: 'chainlink' | 'erc4626' | 'unavailable' | 'lido'; url?: string; label?: string; startBlockNumber?: string; windowDays?: number; blockNumber?: string; startRound?: string; endRound?: string; startTimestamp?: number; endTimestamp?: number; startRate?: number; endRate?: number };
+  source: { chain: ChainName; oracle: string; kind?: 'chainlink' | 'erc4626' | 'unavailable' | 'lido' | 'pendle'; url?: string; label?: string; startBlockNumber?: string; windowDays?: number; blockNumber?: string; startRound?: string; endRound?: string; startTimestamp?: number; endTimestamp?: number; startRate?: number; endRate?: number };
 }
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;

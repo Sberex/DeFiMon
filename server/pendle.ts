@@ -22,7 +22,7 @@ const num = (v: unknown): number | null => typeof v === 'number' && Number.isFin
 const positive = (v: unknown) => { const n = num(v); return n !== null && n > 0 ? n : null; };
 function fresh(date: unknown, timestamp: number) { const t = typeof date === 'string' ? Date.parse(date) / 1000 : NaN; return Number.isFinite(t) && t <= timestamp + 300 && timestamp - t <= 1800; }
 export function unavailablePendle(network: NetworkId, block?: bigint): PendleRead {
-  return { tokens: [], coverage: { status: 'error', coverage: PENDLE_COVERAGE, marketCount: 0, blockNumber: block === undefined ? null : String(block), message: `Pendle token discovery is unavailable on ${networks[network].name}. Check api-v2.pendle.finance and this network’s provider. PT/YT holdings have not been fully checked.` } };
+  return { tokens: [], coverage: { status: 'error', coverage: PENDLE_COVERAGE, balanceDiscoveryComplete: false, marketCount: 0, blockNumber: block === undefined ? null : String(block), message: `Pendle token discovery is unavailable on ${networks[network].name}. Check api-v2.pendle.finance and this network’s provider. PT/YT holdings have not been fully checked.` } };
 }
 export function createPendleCatalog(fetcher: typeof fetch = fetch, now = Date.now) {
   const cache = new Map<NetworkId, { expires: number; promise: Promise<PendleMarket[]> }>();
@@ -62,7 +62,7 @@ export async function readPendle(client: ChainClient, wallet: Address, blockNumb
       if (!old || (num(market.liquidity?.usd) ?? 0) > (num(old.market.liquidity?.usd) ?? 0)) selected.set(key, { token, market, kind });
     }
     const entries = [...selected.values()], warnings = new Set<string>();
-    if (!entries.length) return { tokens: [], coverage: { status: 'ok', coverage: PENDLE_COVERAGE, marketCount: 0, blockNumber: String(blockNumber) } };
+    if (!entries.length) return { tokens: [], coverage: { status: 'ok', coverage: PENDLE_COVERAGE, balanceDiscoveryComplete: true, marketCount: 0, blockNumber: String(blockNumber) } };
     const [balances, block] = await Promise.all([
       client.multicall({ contracts: entries.map(e => ({ address: e.token.address, abi, functionName: 'balanceOf' as const, args: [wallet] as const })), blockNumber, allowFailure: true, batchSize: 8192 }),
       client.getBlock({ blockNumber }),
@@ -110,7 +110,7 @@ export async function readPendle(client: ChainClient, wallet: Address, blockNumb
       }
     }));
     tokens.sort((a, b) => a.address.localeCompare(b.address));
-    return { tokens, coverage: { status: warnings.size ? 'partial' : 'ok', coverage: PENDLE_COVERAGE, message: warnings.size ? [...warnings].join(' ') : undefined, marketCount: markets.length, blockNumber: String(blockNumber) } };
+    return { tokens, coverage: { status: warnings.size ? 'partial' : 'ok', coverage: PENDLE_COVERAGE, message: warnings.size ? [...warnings].join(' ') : undefined, balanceDiscoveryComplete: balances.every(b => b.status === 'success'), marketCount: markets.length, blockNumber: String(blockNumber) } };
   } catch { return unavailablePendle(network, blockNumber); }
 }
 /** Pendle is wallet-held token value, separate from lending balances and NPL. */

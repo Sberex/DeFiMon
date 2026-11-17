@@ -455,3 +455,14 @@ The reader verifies Lido’s Ethereum stETH metadata, seven distinct daily obser
 ```sh
 npm run check:lido-apr
 ```
+
+
+## Wallet token categories and income
+
+**Wallet tokens** is split into **Interest bearing tokens** first and **Other tokens** second. Each category retains the Ethereum, Plasma, Arbitrum and Base grouping; tokens within each network/category are sorted by USD value, largest first, with unpriced tokens last. Interest bearing tokens contains all configured Savings stablecoins plus the user-confirmed wallet-held wstETH and Pendle PT. Other tokens includes ordinary stablecoins, native currency, other assets and YT, with no fixed intrinsic wallet income assigned.
+
+Each interest-bearing row shows intrinsic APR and estimated monthly income in token-equivalent and USD units. Savings stablecoins use the **same rate resolver and source quotes as lending positions**: existing sUSDai oracle rounds, or verified 30-day rate/redemption snapshots for other configured savings assets. wstETH uses Lido’s seven-day staking APR. PT uses its verified Pendle Implied APY directly as APR, becoming zero after verified expiry. A source quote already obtained for the same token in a lending position is reused; the lending protocol’s own supply APR is never copied into a wallet holding.
+
+Monthly wallet earnings = **current wallet USD value × intrinsic APR ÷ 12**. Category APR = **sum of monthly wallet earnings × 12 ÷ category USD value**, so it is weighted by current USD value rather than the number of tokens. The category summary spans all four networks and each nonempty network shows its own summary. Receipt/debt tokens excluded from wallet value are excluded from wallet income too; their underlying protocol income is already counted under lending. Other-token price failures do not invalidate verified wallet income, while unreadable yield-token balances, unresolved receipt checks, missing yield rates or missing yield-token USD values remain unknown rather than zero.
+
+**Total NPL = protocol monthly earned interest + interest-bearing wallet monthly earnings − protocol monthly borrowing costs. Portfolio APR = Total NPL × 12 ÷ existing Net value.** Net value continues to count each wallet token once. Pendle tokens displayed in both the Pendle section and Wallet tokens do not add a second value or a second income contribution. No wallet balance history or database is introduced; the figures are current-state estimates using fixed balances, prices and rates. `npm run diagnose:npl -- 0xWallet` now includes wallet income and its missing-data explanations.

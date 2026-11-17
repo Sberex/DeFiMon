@@ -1375,3 +1375,44 @@ test('includes Lido wstETH collateral APR in monthly earnings, NPL, position APR
   await expect(card.getByText(/Rate observations:/)).toBeVisible();
   await expect(card.getByText(/Oracle observations:/)).toHaveCount(0);
 });
+
+test('groups wallet income tokens first, weights category APR and includes wallet earnings once in address NPL', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = [];
+  const source = { chain: 'Ethereum' as const, oracle: '', label: 'Verified intrinsic rate' };
+  fixture.wallets = [
+    { chain: 'Ethereum', status: 'ok', pricedValueUsd: 6000, unpricedCount: 0, coverage: 'Wallet', interestDiscoveryComplete: true, tokens: [
+      { address: '0x1111111111111111111111111111111111111111', symbol: 'sUSDai', category: 'Savings stablecoin', balance: 1000, priceUsd: 1, valueUsd: 1000, intrinsicSupplyRate: { apr: .12, note: 'Same verified 30-day oracle rate as lending', estimated: true, source } },
+      { address: '0x2222222222222222222222222222222222222222', symbol: 'reUSD', category: 'Savings stablecoin', balance: 3000, priceUsd: 1, valueUsd: 3000, intrinsicSupplyRate: { apr: .04, note: 'Verified intrinsic APR', estimated: true, source } },
+      { address: '0x3333333333333333333333333333333333333333', symbol: 'wstETH', category: 'Other', interestBearing: true, balance: 1, priceUsd: 1000, valueUsd: 1000, intrinsicSupplyRate: { apr: .024, note: 'Lido APR', estimated: true, source: { ...source, kind: 'lido' } } },
+      { address: 'native', symbol: 'ETH', balance: 1, priceUsd: 1000, valueUsd: 1000 },
+    ] },
+    { chain: 'Plasma', status: 'ok', pricedValueUsd: 1000, unpricedCount: 0, coverage: 'Wallet', interestDiscoveryComplete: true, tokens: [
+      { address: '0x4444444444444444444444444444444444444444', symbol: 'PT-USDC', interestBearing: true, balance: 1000, priceUsd: 1, valueUsd: 1000, intrinsicSupplyRate: { apr: .06, note: 'Pendle Implied APY used as APR', estimated: true, source: { ...source, kind: 'pendle', url: 'https://app.pendle.finance/' } } },
+    ] },
+  ];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const section = page.getByRole('region', { name: 'Interest bearing tokens', exact: true });
+  await expect(page.locator('.wallet-category>h3')).toHaveText(['Interest bearing tokens', 'Other tokens']);
+  await expect(section.locator('.wallet-category-stats strong')).toHaveText(['$6,000.00', '≈ 5.40%', '≈ $27.00 / month']);
+  await expect(section.locator('.wallet-network').first().locator('tbody td:first-child strong')).toHaveText(['reUSD', 'sUSDai', 'wstETH']);
+  await expect(page.getByRole('region', { name: 'Other tokens', exact: true }).locator('tbody td:first-child strong')).toHaveText(['ETH']);
+  await expect(page.locator('.summary.primary strong')).toHaveText('$7,000.00');
+  await expect(page.locator('.total-npl strong')).toHaveText('≈ $27.00');
+  await expect(page.locator('.portfolio-apr strong')).toHaveText('≈ 4.63%');
+  await page.getByRole('button', { name: /Refresh/ }).click();
+  await expect(page.locator('.total-npl strong')).toHaveText('≈ $27.00');
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-wallet-income-mobile.png', fullPage: true });
+});
+
+test('shows unknown wallet yield instead of inventing a zero APR or a complete address NPL', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = [];
+  fixture.wallets = [{ chain: 'Ethereum', status: 'ok', pricedValueUsd: 1000, unpricedCount: 0, coverage: 'Wallet', interestDiscoveryComplete: true, tokens: [{ address: '0x1111111111111111111111111111111111111111', symbol: 'sUSDai', category: 'Savings stablecoin', balance: 1000, priceUsd: 1, valueUsd: 1000 }] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.total-npl strong')).toHaveText('Unavailable'); await expect(page.locator('.portfolio-apr strong')).toHaveText('Unavailable');
+  await expect(page.getByRole('region', { name: 'Missing interest data' })).toContainText('intrinsic APR unavailable');
+  await expect(page.getByRole('region', { name: 'Interest bearing tokens', exact: true }).locator('.wallet-category-stats strong').last()).toHaveText('Unavailable');
+});

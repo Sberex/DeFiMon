@@ -7,6 +7,7 @@ import { configuredWalletTokens, configuredTokenCategory } from './token-registr
 import { AAVE_V4_TOKENIZATION_SPOKES } from './deployments/aave-v4.js';
 import { eulerFactoryAbi } from './abis/euler.js';
 import { eulerDeployments } from './deployments/euler.js';
+import { LIDO_WSTETH } from './lido-rates.js';
 import { walletPrices } from './wallet-prices.js';
 const tokenAbi = parseAbi(['function balanceOf(address) view returns (uint256)', 'function decimals() view returns (uint8)', 'function symbol() view returns (string)', 'function POOL() view returns (address)']);
 const providerAbi = parseAbi(['function getPoolDataProvider() view returns (address)', 'function getPool() view returns (address)']);
@@ -14,10 +15,10 @@ const dataAbi = parseAbi(['function getAllATokens() view returns ((string symbol
 const lendingAbi = parseAbi(['function getAllFTokens() view returns (address[])']);
 const coverage = 'Native currency, configured CoinMarketCap/CoinGecko EVM token contracts, the supported token list, and added token contracts. This is not automatic discovery of every token. Lending receipt tokens already represented by protocol readers are excluded from wallet totals.';
 export function unavailableWallet(network: NetworkId): WalletBalances {
-  return { chain: networks[network].name, status: 'error', tokens: [], pricedValueUsd: null, unpricedCount: 0, coverage, message: 'Wallet token balances could not be checked on this network. Their values are unknown.' };
+  return { chain: networks[network].name, status: 'error', tokens: [], pricedValueUsd: null, unpricedCount: 0, interestDiscoveryComplete: false, coverage, message: 'Wallet token balances could not be checked on this network. Their values are unknown.' };
 }
 
-export async function readWallet(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId, protocols: ProtocolResult[], extraTokens: string[] = [], catalog = [...walletTokenCatalog[network], ...configuredWalletTokens(network)], priceReader = walletPrices): Promise<WalletBalances> {
+export async function readWallet(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId, protocols: ProtocolResult[], extraTokens: string[] = [], catalog = [...walletTokenCatalog[network], ...configuredWalletTokens(network), { address: LIDO_WSTETH[network] as Address, symbol: 'wstETH' }], priceReader = walletPrices): Promise<WalletBalances> {
   const config = networks[network];
   const addresses = [...new Map([...catalog, ...extraTokens.map(address => ({ address: getAddress(address.toLowerCase()), symbol: 'Added token' }))].map(t => [t.address.toLowerCase(), t])).values()];
   const [native, balances, aTokens, fTokens, aavePool] = await Promise.allSettled([
@@ -44,15 +45,18 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
   const receiptsVerified = aTokens.status === 'fulfilled' && fTokens.status === 'fulfilled' && aavePool.status === 'fulfilled';
   const rows: (WalletToken & { decimals: number; priceAddress: Address })[] = [];
   const warnings = new Set<string>();
+  let interestDiscoveryComplete = true;
+  const interestCandidate = (address: string) => configuredTokenCategory(network, address) === 'Savings stablecoin' || address.toLowerCase() === LIDO_WSTETH[network];
   let omitted = 0;
   let failed = native.status === 'rejected' ? 1 : 0;
   const nativeBalance = native.status === 'fulfilled' ? Number(formatUnits(native.value, 18)) : null;
   rows.push({ address: 'native', symbol: config.nativeSymbol, decimals: 18, priceAddress: config.wrappedNative, balance: nativeBalance, priceUsd: null, valueUsd: nativeBalance === 0 ? 0 : null });
   if (balances.status !== 'fulfilled' || balances.value.length !== addresses.length) {
+    if (addresses.some(t => interestCandidate(t.address))) interestDiscoveryComplete = false;
     failed += addresses.length; omitted += addresses.length; warnings.add('Token balance discovery failed. Additional wallet assets have not been checked.');
   } else {
     const held = balances.value.flatMap((result, i) => {
-      if (result.status !== 'success') { failed++; omitted++; return []; }
+      if (result.status !== 'success') { if (interestCandidate(addresses[i].address)) interestDiscoveryComplete = false; failed++; omitted++; return []; }
       return result.result > 0n ? [{ ...addresses[i], raw: result.result }] : [];
     });
     for (let start = 0; start < held.length; start += 4) await Promise.all(held.slice(start, start + 4).map(async token => {
@@ -63,6 +67,7 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
         ]);
         if (decimals > 36 || typeof symbol !== 'string' || symbol.length > 128) throw new Error('Invalid metadata');
         let excludedReason = excluded.has(token.address.toLowerCase()) ? 'Lending receipt token: its underlying value belongs in the protocol section.' : !receiptsVerified ? 'Excluded from totals because the lending receipt-token check is unavailable.' : undefined;
+        if (!excluded.has(token.address.toLowerCase()) && !receiptsVerified && interestCandidate(token.address)) interestDiscoveryComplete = false;
         if (!excludedReason && aavePool.status === 'fulfilled') {
           try {
             // Both aTokens and variable/stable debt accounting tokens identify
@@ -73,10 +78,11 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
         }
         if (!excludedReason && protocols.some(p => p.id === 'euler')) {
           try { if (await client.readContract({ address: eulerDeployments[network].eVaultFactory, abi: eulerFactoryAbi, functionName: 'isProxy', args: [token.address], blockNumber })) excludedReason = 'Euler vault receipt token: its underlying value belongs in the protocol section.'; }
-          catch { excludedReason = 'Excluded because Euler receipt-token classification is unavailable.'; warnings.add('Some Euler receipt checks failed. Those token values are excluded to avoid counting a deposit twice.'); }
+          catch { if (interestCandidate(token.address)) interestDiscoveryComplete = false; excludedReason = 'Excluded because Euler receipt-token classification is unavailable.'; warnings.add('Some Euler receipt checks failed. Those token values are excluded to avoid counting a deposit twice.'); }
         }
         rows.push({ address: token.address, category: configuredTokenCategory(network, token.address), symbol, decimals, priceAddress: token.address, balance: Number(formatUnits(token.raw, decimals)), priceUsd: null, valueUsd: null, excludedReason });
       } catch {
+        if (interestCandidate(token.address)) interestDiscoveryComplete = false;
         failed++;
         rows.push({ address: token.address, category: configuredTokenCategory(network, token.address), symbol: token.symbol, decimals: 18, priceAddress: token.address, balance: null, priceUsd: null, valueUsd: null });
       }
@@ -94,5 +100,5 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
   if (unpricedCount) warnings.add('Some wallet token prices or balances are unavailable. Net value includes only priced amounts.');
   const priced = rows.filter(t => !t.excludedReason && t.valueUsd !== null);
   const tokens = rows.sort((a, b) => a.address === 'native' ? -1 : b.address === 'native' ? 1 : a.symbol.localeCompare(b.symbol)).map(({ decimals: _decimals, priceAddress: _priceAddress, ...token }) => token);
-  return { chain: config.name, status: warnings.size ? 'partial' : 'ok', tokens, pricedValueUsd: priced.length ? priced.reduce((sum, token) => sum + token.valueUsd!, 0) : null, unpricedCount: unpricedCount + omitted, coverage, message: warnings.size ? [...warnings].join(' ') : undefined };
+  return { interestDiscoveryComplete, chain: config.name, status: warnings.size ? 'partial' : 'ok', tokens, pricedValueUsd: priced.length ? priced.reduce((sum, token) => sum + token.valueUsd!, 0) : null, unpricedCount: unpricedCount + omitted, coverage, message: warnings.size ? [...warnings].join(' ') : undefined };
 }

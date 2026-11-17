@@ -100,6 +100,11 @@ export const getSusdaiIntrinsicRate = createSusdaiRateCache(async () => {
   const client = makeClient('ethereum');
   return readSusdaiIntrinsicRate(client, await client.getBlockNumber());
 });
+export async function intrinsicTokenRate(network: NetworkId, address: string, context: { protocol?: string; position?: string } = {}, load = getSusdaiIntrinsicRate, loadSavings = savingsRateService.quote): Promise<IntrinsicRate | undefined> {
+  const group = savingsGroup(network, address);
+  if (!group) return undefined;
+  return address.toLowerCase() === SUSDAI ? load().catch(unavailable) : loadSavings(group, { ...context, network, address }).catch((): IntrinsicRate => ({ apr: null, estimated: true, note: `${group} intrinsic rate history is unavailable. Earnings are unknown, not zero.`, source: { chain: networkNames[network], oracle: '', kind: 'unavailable', label: `${group} rate history unavailable` } }));
+}
 export async function applyIntrinsicRates(protocols: ProtocolResult[], network: NetworkId, load = getSusdaiIntrinsicRate, loadSavings = savingsRateService.quote): Promise<ProtocolResult[]> {
   const jobs = new Map<string, { protocol: string; position: string; address: string }>();
   for (const p of protocols) for (const position of p.positions) for (const a of position.assets) {
@@ -110,9 +115,8 @@ export async function applyIntrinsicRates(protocols: ProtocolResult[], network: 
   if (!jobs.size) return protocols;
   const quotes = new Map<string, IntrinsicRate>();
   await Promise.all([...jobs].map(async ([group, context]) => {
-    const isSusdai = context.address.toLowerCase() === SUSDAI;
-    const quote = await (isSusdai ? load().catch(unavailable) : loadSavings(group, { ...context, network }).catch((): IntrinsicRate => ({ apr: null, estimated: true, note: `${group} intrinsic rate history is unavailable. Earnings are unknown, not zero.`, source: { chain: networkNames[network], oracle: '', kind: 'unavailable', label: `${group} rate history unavailable` } })));
-    quotes.set(group, quote);
+    const quote = await intrinsicTokenRate(network, context.address, context, load, loadSavings);
+    quotes.set(group, quote!);
   }));
   return protocols.map(p => ({ ...p, positions: p.positions.map(position => ({ ...position, assets: position.assets.map(a => {
     const group = a.supplied > 0 ? savingsGroup(network, a.address) : undefined;

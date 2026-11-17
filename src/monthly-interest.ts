@@ -1,4 +1,5 @@
-import type { Asset, InterestRate, Position, ProtocolResult } from './types';
+import { walletCategoryInterest, walletInterestIssues } from './wallet-interest';
+import type { Asset, InterestRate, Position, ProtocolResult, WalletBalances } from './types';
 export interface MonthlyInterest { earnedUsd: number | null; paidUsd: number | null; nplUsd: number | null }
 const finite = (value: number | null | undefined): value is number => typeof value === 'number' && Number.isFinite(value);
 /** Same supply APR used in the table, including configured savings-token intrinsic yield exactly once. */
@@ -94,9 +95,10 @@ export function monthlyInterestIssues(protocols: ProtocolResult[]): InterestIssu
   return issues;
 }
 /** Sum each protocol/network once; Fluid's vault rows are already inside its protocol total. */
-export function totalMonthlyInterest(protocols: ProtocolResult[]): MonthlyInterest & { partial: boolean; issues: InterestIssue[] } {
+export function totalMonthlyInterest(protocols: ProtocolResult[], wallets: WalletBalances[] = []): MonthlyInterest & { partial: boolean; issues: InterestIssue[] } {
   const totals = protocols.map(protocolMonthlyInterest);
-  return { ...net(sum(totals.map(p => p.earnedUsd)), sum(totals.map(p => p.paidUsd))), partial: protocols.some(p => p.status !== 'ok'), issues: monthlyInterestIssues(protocols) };
+  const walletIncome = walletCategoryInterest(wallets);
+  return { ...net(sum([...totals.map(p => p.earnedUsd), walletIncome.earnedUsd]), sum(totals.map(p => p.paidUsd))), partial: protocols.some(p => p.status !== 'ok') || wallets.some(w => w.status !== 'ok') || walletIncome.earnedUsd === null, issues: [...monthlyInterestIssues(protocols), ...walletInterestIssues(wallets)] };
 }
 /** Annualized NPL as a fraction of net value. Negative equity retains the user's signed formula. */
 export function annualizedNplApr(monthlyNplUsd: number | null, netValueUsd: number | null): number | null {
