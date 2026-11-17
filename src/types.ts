@@ -22,7 +22,10 @@ export interface WalletBalances {
   pricedValueUsd: number | null; unpricedCount: number; coverage: string; message?: string; pendle?: PendleCoverage;
 }
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
-export interface InterestRate { apr: number | null; note: string; estimated?: boolean }
+export interface InterestRate {
+  apr: number | null; note: string; estimated?: boolean;
+  pendlePt?: { network: NetworkId; marketAddress: string | null; expiry: number | null; updatedAt: string | null };
+}
 export interface IntrinsicRate extends InterestRate {
   source: { chain: ChainName; oracle: string; kind?: 'chainlink' | 'erc4626' | 'unavailable'; label?: string; startBlockNumber?: string; windowDays?: number; blockNumber?: string; startRound?: string; endRound?: string; startTimestamp?: number; endTimestamp?: number; startRate?: number; endRate?: number };
 }

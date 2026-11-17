@@ -6,7 +6,7 @@ import type { ChainClient } from './rpc.js';
 // deployments/{1,9745,42161,8453}-core.json: pyYtLpOracle. See IPPYLpOracle,
 // IPMarket, IStandardizedYield and PendlePYOracleLib at the same revision.
 export const PENDLE_ORACLE = '0x5542be50420E88dd7D5B4a3D488FA6ED82F6DAc2' as Address;
-export const PENDLE_COVERAGE = 'Pendle V2 PT/YT tokens held directly in this wallet, including expired markets returned by Pendle’s catalog. Excludes LP/staked positions, claimable interest and rewards, and tokens held inside other protocols. Values enter Wallet tokens once. APYs are market metrics, not monthly lending income.';
+export const PENDLE_COVERAGE = 'Pendle V2 PT/YT tokens held directly in this wallet, including expired markets returned by Pendle’s catalog. Excludes LP/staked positions, claimable interest and rewards, and tokens held inside other protocols. Values enter Wallet tokens once. Direct wallet APYs are market metrics; PT collateral yield is included separately in lending estimates.';
 const abi = parseAbi([
   'function balanceOf(address) view returns(uint256)', 'function decimals() view returns(uint8)',
   'function readTokens() view returns(address,address,address)', 'function expiry() view returns(uint256)',

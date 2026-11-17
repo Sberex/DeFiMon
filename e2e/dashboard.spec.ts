@@ -1330,3 +1330,25 @@ test('keeps Pendle discovery errors distinct from a checked empty wallet', async
   await expect(section.getByText(/No directly held/)).toHaveCount(0);
   await expect(page.locator('.summary.primary strong')).toHaveText('$47,000.00');
 });
+
+test('uses PT Implied APY as Supply APR in monthly NPL, position APR and portfolio totals', async ({ page }) => {
+  const pt = '0x1111111111111111111111111111111111111111';
+  const position = { id: 'pt-loan', label: 'PT-USD3-17DEC2026 / USDC', suppliedUsd: 990, debtUsd: 500, healthFactor: 1.5, risk: 'lower' as const, notes: [], assets: [
+    { symbol: 'PT-USD3-17DEC2026', address: pt, supplied: 1000, borrowed: 0, priceUsd: .99, collateral: true, liquidationThreshold: .9, liquidationPriceUsd: null, supplyRate: { apr: .1507, estimated: true, note: 'Pendle Implied APY used directly as Supply APR, without APY-to-APR conversion.', pendlePt: { network: 'ethereum' as const, marketAddress: '0x5555555555555555555555555555555555555555', expiry: 1797465600, updatedAt: '2026-11-17T10:00:00Z' } } },
+    { symbol: 'USDC', address: '0x2222222222222222222222222222222222222222', supplied: 0, borrowed: 500, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .06, note: 'Borrow APR' } },
+  ] };
+  const fixture = { ...structuredClone(example), wallets: [], protocols: [{ id: 'morpho', name: 'Morpho', status: 'ok', coverage: 'PT loan', positions: [position] }, { id: 'fluid', name: 'Fluid', status: 'ok', coverage: 'PT vault', positions: [{ ...position, id: 'fluid-pt-vault' }] }] };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const positions = page.locator('.position');
+  await expect(positions).toHaveCount(2);
+  for (const card of await positions.all()) {
+    await expect(card.locator('tbody tr').first().locator('.asset-rate')).toContainText('15.07%');
+    await expect(card.locator('.position-monthly-npl strong')).toHaveText('≈ $9.93');
+    await expect(card.locator('.position-net-apr strong')).toHaveText('≈ 24.33%');
+    await card.locator('tbody tr').first().getByText('Estimate details', { exact: true }).click();
+    await expect(card.getByRole('link', { name: /View PT Implied APY/ })).toHaveAttribute('href', 'https://app.pendle.finance/trade/markets/0x5555555555555555555555555555555555555555/swap?view=pt&chain=ethereum');
+  }
+  await expect(page.locator('.total-npl strong')).toHaveText('≈ $19.87');
+  await expect(page.locator('.portfolio-apr strong')).toHaveText('≈ 24.33%');
+});
