@@ -442,3 +442,16 @@ npm run check:pendle -- 0xYourWallet base
 For every lending position with supplied Pendle PT collateral, **Supply APR = the current Pendle Implied APY**, using the APY number directly as requested. For example an Implied APY of 15.07% gives a 15.07% base Supply APR. The usual formulas then calculate monthly earned interest (`Supplied × Supply APR / 12`), monthly NPL and annualized NPL/net-value APR, including protocol and portfolio totals. This is a price-accretion estimate toward maturity, rather than a lending interest payment. It does not convert compounded APY into a different APR, add the protocol’s old base supply rate, or add a second savings-token intrinsic yield. Separately matched Merkl incentives retain their existing treatment.
 
 PT identities are matched by exact contract and chain in Pendle’s catalog, then checked using the market’s token addresses and the PT/market expiry at the pinned network block. This applies to PT collateral held inside Aave v3/v4, Morpho, Compound, Fluid or Euler even when the wallet has zero directly held PT. Rates must be timestamped within 30 minutes. Unavailable active PT rates remain unknown; after verified maturity the future accretion rate is zero. Ordinary collateral, YT, deposits without collateral status and borrowed-asset rates keep their existing treatment. Rate details link to the source Pendle market.
+
+
+### Lido staking APR for wstETH collateral
+
+Recognized wstETH collateral on Ethereum, Plasma, Arbitrum and Base receives Lido’s current published **seven-day average stETH staking APR** from `https://eth-api.lido.fi/v1/protocol/steth/apr/sma`. The same staking return accrues through wstETH’s stETH exchange rate. The API percentage is divided by 100 once; it is already APR and is not converted from APY. It is added once as a separate intrinsic component to protocol supply APR. Existing matched Merkl rewards remain separate. Monthly interest earned, monthly NPL, protocol/position APR and portfolio totals all use that combined supply rate.
+
+Recognition uses exact chain/contract addresses rather than the ticker. Ethereum, Arbitrum and Base addresses come from `lidofinance/docs@a7b0f5bd52d13e55a7cfcb6bf152bb695ddf304c/docs/deployed-contracts/index.md`; Plasma’s wstETH reserve comes from `bgd-labs/aave-address-book@266429eefae828d52c91ffcb3a75656ab18f7160/src/AaveV3Plasma.sol`. This does not change token categories or existing token-match addresses. Direct wallet tokens, deposits without collateral status and borrowed-token rates are not assigned this collateral income.
+
+The reader verifies Lido’s Ethereum stETH metadata, seven distinct daily observations and their reported mean. The latest report must be no older than 72 hours (Lido reports daily), and observations may not be more than ten days old or future-dated. Valid quotes are shared for five minutes; failed lookups retry after one minute. Missing or stale rates remain unknown instead of zero. The dashboard identifies **Lido staking APR**, its observation dates and a link to Lido, separately from the 30-day savings-token oracle estimates. The server needs access to **eth-api.lido.fi**, with no API key or archive connection required for this rate.
+
+```sh
+npm run check:lido-apr
+```

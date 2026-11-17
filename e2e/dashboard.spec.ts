@@ -1352,3 +1352,26 @@ test('uses PT Implied APY as Supply APR in monthly NPL, position APR and portfol
   await expect(page.locator('.total-npl strong')).toHaveText('≈ $19.87');
   await expect(page.locator('.portfolio-apr strong')).toHaveText('≈ 24.33%');
 });
+
+test('includes Lido wstETH collateral APR in monthly earnings, NPL, position APR and portfolio APR', async ({ page }) => {
+  const wsteth = '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0';
+  const position = { id: 'wsteth-loan', label: 'wstETH / GHO', suppliedUsd: 10000, debtUsd: 5000, healthFactor: 1.6, risk: 'lower' as const, notes: [], assets: [
+    { symbol: 'wstETH', address: wsteth, supplied: 5, borrowed: 0, priceUsd: 2000, collateral: true, liquidationThreshold: .8, liquidationPriceUsd: null, supplyRate: { apr: 0, note: 'Protocol APR' }, intrinsicSupplyRate: { apr: .0234, estimated: true, note: 'Lido seven-day average net staking APR.', source: { chain: 'Ethereum' as const, oracle: '', kind: 'lido' as const, label: 'Lido stETH/wstETH staking APR (7-day average)', url: 'https://lido.fi/', windowDays: 7, startTimestamp: 1794313319, endTimestamp: 1794831719 } } },
+    { symbol: 'GHO', address: '0x1111111111111111111111111111111111111111', supplied: 0, borrowed: 5000, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .04, note: 'Borrow APR' } },
+  ] };
+  const fixture = { ...structuredClone(example), wallets: [], protocols: [{ id: 'aave-v4', name: 'Aave v4', status: 'ok', coverage: 'wstETH loan', positions: [position] }] };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('.position');
+  await expect(card.getByText('Lido staking APR: 2.34%', { exact: true })).toBeVisible();
+  await expect(card.locator('tbody tr').first().locator('.asset-rate')).toContainText('2.34%');
+  await expect(card.locator('tbody tr').first().getByText('≈ $19.50 / month', { exact: true })).toBeVisible();
+  await expect(card.locator('.position-monthly-npl strong')).toHaveText('≈ $2.83');
+  await expect(card.locator('.position-net-apr strong')).toHaveText('≈ 0.68%');
+  await expect(page.locator('.total-npl strong')).toHaveText('≈ $2.83');
+  await expect(page.locator('.portfolio-apr strong')).toHaveText('≈ 0.68%');
+  await card.getByText('Intrinsic yield details', { exact: true }).click();
+  await expect(card.getByRole('link', { name: 'View Lido staking APR ↗' })).toHaveAttribute('href', 'https://lido.fi/');
+  await expect(card.getByText(/Rate observations:/)).toBeVisible();
+  await expect(card.getByText(/Oracle observations:/)).toHaveCount(0);
+});

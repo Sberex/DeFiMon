@@ -82,7 +82,7 @@ export function monthlyInterestIssues(protocols: ProtocolResult[]): InterestIssu
           const merkl = side === 'supply' ? asset.merklSupplyRate : asset.merklBorrowRate;
           if (!finite(amount) || amount < 0) reasons.push('balance unavailable');
           if (!finite(rate?.apr)) reasons.push(`${side === 'supply' ? 'Supply' : 'Borrow'} APR unavailable`);
-          if (side === 'supply' && asset.intrinsicSupplyRate && !finite(asset.intrinsicSupplyRate.apr)) reasons.push('intrinsic (30-day) APR unavailable');
+          if (side === 'supply' && asset.intrinsicSupplyRate && !finite(asset.intrinsicSupplyRate.apr)) reasons.push(asset.intrinsicSupplyRate.source.kind === 'lido' ? 'Lido staking APR unavailable' : 'intrinsic (30-day) APR unavailable');
           if (merkl && !finite(merkl.apr)) reasons.push('Merkl APR unavailable');
           if (!finite(asset.priceUsd) || asset.priceUsd < 0) reasons.push('USD price unavailable');
           issues.push({ ...location, asset: asset.symbol, reason: reasons.length ? reasons.join('; ') : 'Interest calculation exceeds supported values.' });

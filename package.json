@@ -25,7 +25,8 @@
     "check:susdai-apr": "tsx scripts/check-susdai-apr.ts",
     "check:recommendations": "tsx scripts/check-recommendations.ts",
     "check:merkl": "tsx scripts/check-merkl.ts",
-    "check:pendle": "tsx scripts/check-pendle.ts"
+    "check:pendle": "tsx scripts/check-pendle.ts",
+    "check:lido-apr": "tsx scripts/check-lido-apr.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

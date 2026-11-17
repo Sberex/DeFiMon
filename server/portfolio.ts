@@ -1,6 +1,7 @@
 import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
 import type { ExtraTokens, NetworkId, Portfolio, ProtocolResult, WalletBalances } from '../src/types.js';
+import { applyLidoRates } from './lido-rates.js';
 import { applyPtCollateralRates } from './pendle-collateral.js';
 import { readPendle, mergePendleWallet, unavailablePendle } from './pendle.js';
 import { readWallet, unavailableWallet } from './wallet.js';
@@ -37,7 +38,9 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
     fluid: () => isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', deployment.name), () => readFluid(client, address, blockNumber, network), failure),
   };
   const [protocolResults, pendle] = await Promise.all([Promise.all(deployment.protocolIds.map(id => readers[id]())), readPendle(client, address, blockNumber, network)]);
-  const protocols = await applyPtCollateralRates(await applyIntrinsicRates(protocolResults, network), client, network, blockNumber);
+  const intrinsicProtocols = await applyIntrinsicRates(protocolResults, network);
+  const ptProtocols = await applyPtCollateralRates(intrinsicProtocols, client, network, blockNumber);
+  const protocols = await applyLidoRates(ptProtocols, network);
   const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
   return { wallets: [mergePendleWallet(walletBalances, pendle)], address, chain: deployment.name, blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
 }

@@ -27,7 +27,7 @@ export interface InterestRate {
   pendlePt?: { network: NetworkId; marketAddress: string | null; expiry: number | null; updatedAt: string | null };
 }
 export interface IntrinsicRate extends InterestRate {
-  source: { chain: ChainName; oracle: string; kind?: 'chainlink' | 'erc4626' | 'unavailable'; label?: string; startBlockNumber?: string; windowDays?: number; blockNumber?: string; startRound?: string; endRound?: string; startTimestamp?: number; endTimestamp?: number; startRate?: number; endRate?: number };
+  source: { chain: ChainName; oracle: string; kind?: 'chainlink' | 'erc4626' | 'unavailable' | 'lido'; url?: string; label?: string; startBlockNumber?: string; windowDays?: number; blockNumber?: string; startRound?: string; endRound?: string; startTimestamp?: number; endTimestamp?: number; startRate?: number; endRate?: number };
 }
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
