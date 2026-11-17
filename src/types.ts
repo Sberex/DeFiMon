@@ -45,6 +45,7 @@ export interface Position {
   risk: Risk; assets: Asset[]; notes: string[];
   vault?: { address: string; version: 1 | 2; roles: { role: 'creator' | 'curator' | 'owner'; source: 'onchain' | 'api' }[]; totalAssets: number | null; totalAssetsUsd: number | null };
   marketAddress?: string;
+  morphoMarket?: { loanAsset: { address: string; symbol: string }; collateralAsset: { address: string; symbol: string } | null; supplyOnly: boolean };
   receiptTokens?: string[];
   liquidationModel?: 'linear' | 'oracle-ratio' | 'unavailable';
   liquidationQuote?: { current: number; threshold: number; unit: string };

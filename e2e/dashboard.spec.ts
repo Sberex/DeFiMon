@@ -932,6 +932,30 @@ test('shows Morpho vault supply interest without loan fields and counts own V1/V
   await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
 });
 
+test('shows supply-only Morpho msY and PT markets as USDC deposits without loan fields or invented collateral', async ({ page }) => {
+  const fixture = structuredClone(example), morpho = fixture.protocols.find(p => p.id === 'morpho')!;
+  const ids = ['0x23a7d0ff682b323363fb8ba58327ed87001f6306e09b7fd7413bbe4698e749c8', '0x2afd063a5af8e050069cfad4da95c81768b85b140bea2bd89e00407b15ce82c8'];
+  const collaterals = ['msY', 'PT-jrUSDe-2APR2026'], loan = { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC' };
+  morpho.positions = ids.map((id, i) => ({ id: `morpho-market-${id}`, label: `Morpho lending deposit · USDC · ${collaterals[i]} / USDC · ${id.slice(0, 10)}…`, suppliedUsd: i === 0 ? 1000 : 1200, debtUsd: 0, healthFactor: null, risk: 'no-debt', notes: [], morphoMarket: { loanAsset: loan, collateralAsset: { address: `0x${String(i + 1).repeat(40)}`, symbol: collaterals[i] }, supplyOnly: true }, assets: [{ ...loan, supplied: i === 0 ? 1000 : 1200, borrowed: 0, collateral: false, priceUsd: 1, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: i === 0 ? 8 : .12, note: 'Current on-chain market APR.' } }] }));
+  morpho.status = 'ok'; fixture.protocols = [morpho]; fixture.wallets = [];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/markets', route => route.fulfill({ json: { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const deposits = page.locator('.morpho-vault-position'); await expect(deposits).toHaveCount(2);
+  for (let i = 0; i < 2; i++) {
+    const deposit = deposits.nth(i);
+    await expect(deposit.getByRole('columnheader')).toHaveText(['Asset', 'Supplied', 'Supply APR', 'Current price', 'Monthly interest earned']);
+    await expect(deposit.getByRole('region', { name: 'Morpho market deposit information' })).toContainText(`Market collateral: ${collaterals[i]}`);
+    await expect(deposit.locator('tbody tr')).toHaveCount(1); await expect(deposit.locator('tbody td').first()).toHaveText('USDC');
+    for (const field of ['Borrowed', 'Net value', 'Health factor ⓘ', 'Borrow APR', 'Est. liquidation price']) await expect(deposit.getByText(field, { exact: true })).toHaveCount(0);
+    await expect(deposit.locator('.position-market-links a')).toHaveAttribute('href', `https://app.morpho.org/ethereum/market/${ids[i]}`);
+  }
+  await expect(page.locator('.summary.primary strong')).toHaveText('$2,200.00'); await expect(page.locator('.total-npl > strong')).toHaveText('≈ $678.67');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations' }).click();
+  const cards = page.locator('.recommendation-card'); await expect(cards).toHaveCount(2);
+  for (const card of await cards.all()) { await expect(card.getByRole('columnheader')).toHaveText(['Supplied asset', 'Supply APR']); await expect(card.locator('.recommendation-kind')).toHaveText('Market deposit'); }
+});
+
 test('switches between a two-column overview and recommendations with matching lending rates and nonzero Morpho deposits', async ({ page }) => {
   await page.goto('/');
   const nav = page.getByRole('navigation', { name: 'Dashboard sections', exact: true });

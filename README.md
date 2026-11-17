@@ -459,6 +459,8 @@ npm run check:lido-apr
 
 ## Wallet token categories and income
 
+Morpho direct-market positions with positive loan-token supply shares, zero borrowing shares and zero pledged collateral use the vault-style deposit display: Supplied, APR and Monthly interest earned, without loan or liquidation fields. The market's accepted collateral remains separate context and is never added as a personal holding. These positions retain their market IDs/links and direct-market Supply APR; recommendations compare higher supply rates for the loan token, and income is counted once in Total NPL. Positions with any pledged collateral or borrowing keep the lending-position display.
+
 Pendle market metrics use the catalog while it is fresh. If APYs/TVL are missing or its snapshot is older than 30 minutes, held active markets are refreshed through Pendle's individual-market endpoint. Refreshes are shared by PT/YT for one minute and must match the exact chain, market, token contracts, units and expiry; stale or mismatched responses remain unavailable. A real zero underlying APY is displayed as 0.00%. PT collateral rates use the same refresh path.
 
 **Wallet tokens** is split into **Interest bearing tokens** first and **Other tokens** second. Each category retains the Ethereum, Plasma, Arbitrum and Base grouping; tokens within each network/category are sorted by USD value, largest first, with unpriced tokens last. Interest bearing tokens contains all configured Savings stablecoins plus the user-confirmed wallet-held wstETH and Pendle PT. Other tokens includes ordinary stablecoins, native currency, other assets and YT, with no fixed intrinsic wallet income assigned.

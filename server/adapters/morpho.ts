@@ -122,9 +122,13 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
         if (oraclePrice > 0n && collateralAsset && loan.priceUsd !== null && !same(collateral.address, loan.address)) collateralAsset.liquidationPriceUsd = threshold * loan.priceUsd;
       }
       const suppliedUsd = total(assets, 'supplied'); const debtUsd = total(assets, 'borrowed');
+      const supplyOnly = position.supplyShares > 0n && position.borrowShares === 0n && position.collateral === 0n;
+      const marketCollateral = collateral ?? ref.collateral;
+      const morphoMarket = { loanAsset: { address: loan.address, symbol: loan.symbol }, collateralAsset: marketCollateral ? { address: marketCollateral.address, symbol: marketCollateral.symbol } : null, supplyOnly };
       if (suppliedUsd === null || debtUsd === null) warnings.add('Some Morpho USD prices are unavailable. Token balances and oracle-based risk remain visible; dollar totals are incomplete.');
       if (borrowRaw > 0n && oraclePrice === 0n) warnings.add('A Morpho liquidation oracle reports zero: the protocol values that collateral at zero for borrowing risk.');
-      return { id: `morpho-market-${ref.id}`, label: `Morpho · ${collateral?.symbol ?? 'no collateral'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(borrowRaw > 0n ? 1 : 0, health), assets: assets.filter(a => a.supplied > 0 || a.borrowed > 0), liquidationQuote, notes: [
+      return { morphoMarket, id: `morpho-market-${ref.id}`, label: supplyOnly ? `Morpho lending deposit · ${loan.symbol} · ${marketCollateral?.symbol ?? 'unsecured'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…` : `Morpho · ${marketCollateral?.symbol ?? 'no collateral'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(borrowRaw > 0n ? 1 : 0, health), assets: assets.filter(a => a.supplied > 0 || a.borrowed > 0), liquidationQuote, notes: [
+        ...(supplyOnly ? [`This is your direct ${loan.symbol} lending deposit in one Morpho market, displayed in deposit format. You have no pledged collateral or borrowing in this market. ${marketCollateral ? `${marketCollateral.symbol} is the market's accepted collateral, not an asset you supplied.` : 'This market has no collateral token.'} It is not a curated ERC-4626 vault.`] : []),
         'Each Morpho market has separate collateral and debt. Loan-token lending deposits do not protect a borrowing position, even in this same market.',
         `Interest is simulated to the displayed ${deployment.name} block without sending a transaction. Supply rounds down and debt rounds up using Morpho’s virtual assets and shares.`,
         'Health uses the market’s own liquidation oracle and loan-to-value limit. Dollar liquidation estimates assume the debt token price and both balances stay fixed; protocol rounding may shift the exact boundary.',

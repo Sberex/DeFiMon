@@ -1,9 +1,21 @@
 import { expect, it } from 'vitest';
 import type { Asset, Position, ProtocolResult } from '../src/types';
-import { recommendationPositions } from '../src/recommendations';
+import { isMorphoDepositPosition, recommendationPositions } from '../src/recommendations';
 const asset = (symbol: string, supplied: number, borrowed = 0): Asset => ({ symbol, address: symbol, supplied, borrowed, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .05, note: '' }, borrowRate: { apr: .08, note: '' } });
 const position = (id: string, assets: Asset[]): Position => ({ id, label: id, assets, suppliedUsd: 100, debtUsd: 50, healthFactor: 2, risk: 'lower', notes: [] });
 const protocol = (positions: Position[]): ProtocolResult => ({ id: 'morpho', name: 'Morpho', chain: 'Ethereum', status: 'ok', positions, coverage: '' });
+it('compares Morpho direct lending deposits by supplied token without confusing market collateral with wallet collateral', () => {
+  const p = position('morpho-market-0x123', [asset('USDC', 100)]);
+  p.debtUsd = 0;
+  p.morphoMarket = { supplyOnly: true, loanAsset: { address: 'USDC', symbol: 'USDC' }, collateralAsset: { address: 'msY', symbol: 'msY' } };
+  expect(isMorphoDepositPosition(p)).toBe(true);
+  const result = recommendationPositions([protocol([p])])[0];
+  expect(result.deposit).toBe(true); expect(result.vault).toBe(false);
+  expect(result.rows.map(r => [r.supplied?.symbol, r.borrowed])).toEqual([['USDC', undefined]]);
+  expect(isMorphoDepositPosition({ ...p, assets: [{ ...p.assets[0], collateral: true }] })).toBe(false);
+  expect(isMorphoDepositPosition({ ...p, assets: [{ ...p.assets[0], borrowed: 1 }] })).toBe(false);
+  expect(isMorphoDepositPosition({ ...p, debtUsd: null })).toBe(false);
+});
 it('keeps multiple collateral and debt combinations inside their own loan and preserves adjusted rates', () => {
   const eth = asset('ETH', 10); eth.intrinsicSupplyRate = { apr: .03, note: '', source: { chain: 'Ethereum', oracle: 'feed' } };
   eth.merklSupplyRate = { apr: .01, note: '', components: [] };

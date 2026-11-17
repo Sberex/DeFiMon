@@ -17,7 +17,7 @@ const FACTORY = '0x8888888888888888888888888888888888888888';
 const E18 = 10n ** 18n; const E6 = 10n ** 6n;
 const loan: MorphoToken = { address: USDC, symbol: 'USDC', decimals: 6, priceUsd: 1 };
 const collateral: MorphoToken = { address: ETH, symbol: 'WETH', decimals: 18, priceUsd: 3000 };
-function fixture(options: { network?: NetworkId; emptyVault?: boolean; vaults?: boolean; market?: boolean; noDebt?: boolean; closed?: boolean; oracleFail?: boolean; oracleZero?: boolean; loanSupply?: bigint; missingLoanPrice?: boolean; missingCollateralPrice?: boolean; sameAsset?: boolean; unregistered?: boolean; invalidId?: boolean; metadataMismatch?: boolean; failSimulation?: boolean; loanPrice?: number } = {}) {
+function fixture(options: { network?: NetworkId; emptyVault?: boolean; vaults?: boolean; market?: boolean; noDebt?: boolean; noCollateral?: boolean; closed?: boolean; oracleFail?: boolean; oracleZero?: boolean; loanSupply?: bigint; missingLoanPrice?: boolean; missingCollateralPrice?: boolean; sameAsset?: boolean; unregistered?: boolean; invalidId?: boolean; metadataMismatch?: boolean; failSimulation?: boolean; loanPrice?: number } = {}) {
   const coreAddress = networks[options.network ?? 'ethereum'].morphoBlue!;
   const params = { loanToken: USDC, collateralToken: options.sameAsset ? USDC : ETH, oracle: ORACLE, irm: IRM, lltv: 860000000000000000n } as const;
   const id = keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [params.loanToken, params.collateralToken, params.oracle, params.irm, params.lltv]));
@@ -55,7 +55,7 @@ function fixture(options: { network?: NetworkId; emptyVault?: boolean; vaults?: 
         const names = batch.map(c => decodeFunctionData({ abi: coreAbi, data: c.callData }).functionName);
         simulated.push(names); expect(names).toEqual(['accrueInterest', 'market', 'position']);
         const market = { totalSupplyAssets: 1_000_000n * E6, totalSupplyShares: 1_000_000n * E6 * 1_000_000n, totalBorrowAssets: 500_000n * E6, totalBorrowShares: 500_000n * E6 * 1_000_000n, lastUpdate: 123n, fee: 0n };
-        const position = { supplyShares: options.closed ? 0n : (options.loanSupply ?? 500n) * E6 * 1_000_000n, borrowShares: options.noDebt || options.closed ? 0n : 2000n * E6 * 1_000_000n, collateral: options.closed ? 0n : options.sameAsset ? 10000n * E6 : 2n * E18 };
+        const position = { supplyShares: options.closed ? 0n : (options.loanSupply ?? 500n) * E6 * 1_000_000n, borrowShares: options.noDebt || options.closed ? 0n : 2000n * E6 * 1_000_000n, collateral: options.closed || options.noCollateral ? 0n : options.sameAsset ? 10000n * E6 : 2n * E18 };
         output = ['0x', encodeFunctionResult({ abi: coreAbi, functionName: 'market', result: market }), encodeFunctionResult({ abi: coreAbi, functionName: 'position', result: position })];
       } else {
         const names = batch.map(c => decodeFunctionData({ abi: vaultAbi, data: c.callData }).functionName);
@@ -86,6 +86,15 @@ describe('Morpho Blue markets', () => {
     const p = (await fixture({ noDebt: true }).read()).positions[0];
     expect(p.risk).toBe('no-debt'); expect(p.healthFactor).toBeNull(); expect(p.debtUsd).toBe(0);
     expect(p.assets.every(a => a.liquidationPriceUsd === null)).toBe(true);
+    expect(p.morphoMarket?.supplyOnly).toBe(false);
+  });
+  it('classifies loan-token-only supply as a deposit and retains the market collateral without inventing a personal holding', async () => {
+    const p = (await fixture({ noDebt: true, noCollateral: true }).read()).positions[0];
+    expect(p.morphoMarket).toEqual({ supplyOnly: true, loanAsset: { address: USDC, symbol: 'USDC' }, collateralAsset: { address: ETH, symbol: 'WETH' } });
+    expect(p.label).toContain('Morpho lending deposit · USDC · WETH / USDC');
+    expect(p.label).not.toContain('no collateral'); expect(p.vault).toBeUndefined();
+    expect(p.assets).toHaveLength(1); expect(p.assets[0]).toMatchObject({ symbol: 'USDC', supplied: 500, borrowed: 0, collateral: false });
+    expect(p.suppliedUsd).toBe(500); expect(p.debtUsd).toBe(0); expect(p.healthFactor).toBeNull();
   });
   it('retains quantities and oracle risk when either indicative USD price is missing', async () => {
     for (const opts of [{ missingLoanPrice: true }, { missingCollateralPrice: true }]) {
