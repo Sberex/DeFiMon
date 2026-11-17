@@ -111,9 +111,14 @@ function ProtocolCard({ result, chain, lookupSnapshot }: { result: ProtocolResul
   </article>;
 }
 function WalletView({ wallet }: { wallet: WalletBalances }) {
+  const tokens = [...wallet.tokens].sort((a, b) => {
+    if (a.valueUsd === null) return b.valueUsd === null ? 0 : 1;
+    if (b.valueUsd === null) return -1;
+    return b.valueUsd - a.valueUsd;
+  });
   return <article className="wallet-network" data-chain={wallet.chain}><div className="protocol-heading"><div className="protocol-name"><div><h2>Wallet tokens<span className="chain-badge"> · {wallet.chain}</span></h2><p>Known wallet value: <strong>{money(wallet.pricedValueUsd)}</strong></p></div></div><span className={`status ${wallet.status}`}>{wallet.status === 'ok' ? 'Checked' : wallet.status === 'partial' ? 'Partially checked' : 'Unavailable'}</span></div>
     {wallet.message && <div className="notice protocol-warning" role="status">{wallet.message}</div>}
-    {wallet.tokens.length > 0 && <div className="position"><div className="table-wrap"><table><caption className="sr-only">Wallet token balances on {wallet.chain}</caption><thead><tr><th>Token</th><th>Balance</th><th>Price</th><th>USD value</th></tr></thead><tbody>{wallet.tokens.map(token => <tr key={token.address}><td><strong>{token.symbol}</strong>{token.category && token.category !== 'Other' && <small className="wallet-token-category">{token.category}</small>}<small title={token.address}>{token.address === 'native' ? 'Native currency' : `${token.address.slice(0, 8)}…${token.address.slice(-6)}`}</small></td><td>{token.balance === null ? '—' : quantity(token.balance)}</td><td>{money(token.priceUsd)}</td><td>{money(token.valueUsd)}{token.excludedReason && <small>{token.excludedReason}</small>}</td></tr>)}</tbody></table></div></div>}
+    {wallet.tokens.length > 0 && <div className="position"><div className="table-wrap"><table><caption className="sr-only">Wallet token balances on {wallet.chain}</caption><thead><tr><th>Token</th><th>Balance</th><th>Price</th><th aria-sort="descending">USD value ↓</th></tr></thead><tbody>{tokens.map(token => <tr key={token.address}><td><strong>{token.symbol}</strong>{token.category && token.category !== 'Other' && <small className="wallet-token-category">{token.category}</small>}<small title={token.address}>{token.address === 'native' ? 'Native currency' : `${token.address.slice(0, 8)}…${token.address.slice(-6)}`}</small></td><td>{token.balance === null ? '—' : quantity(token.balance)}</td><td>{money(token.priceUsd)}</td><td>{money(token.valueUsd)}{token.excludedReason && <small>{token.excludedReason}</small>}</td></tr>)}</tbody></table></div></div>}
     <p className="wallet-coverage">{wallet.coverage}</p>
   </article>;
 }
