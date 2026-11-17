@@ -12,7 +12,7 @@ const tokenAbi = parseAbi(['function balanceOf(address) view returns (uint256)',
 const providerAbi = parseAbi(['function getPoolDataProvider() view returns (address)', 'function getPool() view returns (address)']);
 const dataAbi = parseAbi(['function getAllATokens() view returns ((string symbol,address tokenAddress)[])']);
 const lendingAbi = parseAbi(['function getAllFTokens() view returns (address[])']);
-const coverage = 'Native currency, configured CoinMarketCap EVM token contracts, the supported token list, and added token contracts. This is not automatic discovery of every token. Lending receipt tokens already represented by protocol readers are excluded from wallet totals.';
+const coverage = 'Native currency, configured CoinMarketCap/CoinGecko EVM token contracts, the supported token list, and added token contracts. This is not automatic discovery of every token. Lending receipt tokens already represented by protocol readers are excluded from wallet totals.';
 export function unavailableWallet(network: NetworkId): WalletBalances {
   return { chain: networks[network].name, status: 'error', tokens: [], pricedValueUsd: null, unpricedCount: 0, coverage, message: 'Wallet token balances could not be checked on this network. Their values are unknown.' };
 }

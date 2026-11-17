@@ -5,10 +5,21 @@ export type ExtraTokens = Partial<Record<NetworkId, string[]>>;
 export interface WalletToken {
   address: string; symbol: string; balance: number | null; priceUsd: number | null; valueUsd: number | null;
   excludedReason?: string; category?: TokenCategory;
+  pendle?: PendleTokenInfo;
+}
+export interface PendleTokenInfo {
+  kind: 'PT' | 'YT'; name: string; marketAddress: string; syAddress: string;
+  quoteAsset: { address: string; symbol: string }; oraclePrice: number | null; quoteValue: number | null;
+  impliedApy: number | null; underlyingApy: number | null; tvlUsd: number | null;
+  expiry: number | null; matured: boolean | null; oracleAddress: string; blockNumber: string;
+  marketUpdatedAt: string | null; notes: string[];
+}
+export interface PendleCoverage {
+  status: 'ok' | 'partial' | 'error'; coverage: string; message?: string; marketCount: number; blockNumber: string | null;
 }
 export interface WalletBalances {
   chain: ChainName; status: 'ok' | 'partial' | 'error'; tokens: WalletToken[];
-  pricedValueUsd: number | null; unpricedCount: number; coverage: string; message?: string;
+  pricedValueUsd: number | null; unpricedCount: number; coverage: string; message?: string; pendle?: PendleCoverage;
 }
 export type Risk = 'no-debt' | 'lower' | 'watch' | 'high' | 'liquidatable' | 'unknown';
 export interface InterestRate { apr: number | null; note: string; estimated?: boolean }

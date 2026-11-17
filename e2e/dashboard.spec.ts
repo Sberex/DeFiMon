@@ -1292,3 +1292,41 @@ test('links active market titles and full identifiers across protocols and wraps
   await expect(page.locator('.position-market-links code').filter({ hasText: market })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('shows Pendle wallet holdings, accounting-asset prices, APYs, TVL and exact UTC/Kyiv expiry without double counting', async ({ page }) => {
+  const fixture = structuredClone(combinedExample);
+  const market = '0x13285bcbc27f92b47b4edb99d744c07b48c977c0', pt = '0xecfafdc7741323a945a163ed068b5a3c43483957', yt = '0xa8bd3b21291ace53927b35563fc80615919e63d7';
+  const info = { kind: 'PT' as const, name: 'PT reUSD (USDC)', marketAddress: market, syAddress: '0x9487bd5a3b16ecb5f3184453e3ee75b800141648', quoteAsset: { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC' }, oraclePrice: .99, quoteValue: 99, impliedApy: .12, underlyingApy: .07, tvlUsd: 5000000, expiry: Date.parse('2026-12-10T00:00:00Z') / 1000, matured: false, oracleAddress: '0x5542be50420E88dd7D5B4a3D488FA6ED82F6DAc2', blockNumber: '123', marketUpdatedAt: '2026-11-17T10:00:00Z', notes: ['Current pool-implied oracle rate; no guaranteed sale price.'] };
+  fixture.wallets![0].tokens.push({ address: pt, symbol: 'PT-reUSD-10DEC2026', balance: 100, priceUsd: .99 * .98, valueUsd: 99 * .98, pendle: info });
+  fixture.wallets![0].tokens.push({ address: yt, symbol: 'YT-reUSD-expired', balance: 50, priceUsd: 0, valueUsd: 0, pendle: { ...info, kind: 'YT', name: 'Expired YT reUSD', oraclePrice: 0, quoteValue: 0, impliedApy: null, underlyingApy: null, matured: true, expiry: Date.parse('2026-09-24T00:00:00Z') / 1000 } });
+  fixture.wallets![0].pricedValueUsd! += 99 * .98;
+  fixture.wallets!.forEach(w => { w.pendle = { status: 'ok', coverage: 'PT/YT held directly. Values counted once in wallet totals. Claimable interest is separate.', marketCount: 12, blockNumber: '123' }; });
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const section = page.getByRole('region', { name: 'Pendle positions' });
+  await expect(section.locator('.protocol-heading h2')).toHaveText(['Pendle · Ethereum', 'Pendle · Plasma', 'Pendle · Arbitrum', 'Pendle · Base']);
+  const position = section.locator('.pendle-position').filter({ has: page.getByRole('heading', { name: 'PT reUSD (USDC) ↗' }) });
+  await expect(position.getByText('99 USDC', { exact: true })).toBeVisible();
+  await expect(position.getByText('0.99 USDC', { exact: true })).toBeVisible();
+  await expect(position.getByText('12.00%', { exact: true })).toBeVisible(); await expect(position.getByText('7.00%', { exact: true })).toBeVisible();
+  await expect(position.getByText('$5,000,000.00', { exact: true })).toBeVisible();
+  await expect(position.locator('time')).toHaveText('2026-12-10 00:00:00 UTC');
+  await expect(position.locator('.pendle-expiry small')).toContainText('02:00:00');
+  await expect(position.getByRole('heading').getByRole('link')).toHaveAttribute('href', `https://app.pendle.finance/trade/markets/${market}/swap?view=pt&chain=ethereum`);
+  await expect(section.getByText('Not applicable · expired', { exact: true })).toHaveCount(2);
+  await expect(page.locator('.summary.primary strong')).toHaveText('$47,097.02');
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-pendle-mobile.png', fullPage: true });
+});
+
+test('keeps Pendle discovery errors distinct from a checked empty wallet', async ({ page }) => {
+  const fixture = structuredClone(combinedExample);
+  fixture.wallets![0].pendle = { status: 'error', marketCount: 0, blockNumber: '123', coverage: 'PT/YT wallet tokens', message: 'Pendle token discovery is unavailable. Holdings have not been checked.' };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const section = page.getByRole('region', { name: 'Pendle positions' });
+  await expect(section.getByText(/Holdings have not been checked/)).toBeVisible();
+  await expect(section.getByText(/No directly held/)).toHaveCount(0);
+  await expect(page.locator('.summary.primary strong')).toHaveText('$47,000.00');
+});

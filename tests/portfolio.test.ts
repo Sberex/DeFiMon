@@ -9,7 +9,9 @@ vi.mock('../server/adapters/aave-v4', () => ({ readAaveV4: readers.aaveV4, AAVE_
 vi.mock('../server/adapters/morpho', () => ({ readMorpho: readers.morpho, MORPHO_COVERAGE: 'Ethereum markets and vaults' }));
 vi.mock('../server/adapters/compound', () => ({ readCompound: readers.compound }));
 vi.mock('../server/adapters/fluid', () => ({ readFluid: readers.fluid, FLUID_COVERAGE: 'Fluid vaults and lending' }));
+vi.mock('../server/pendle', async importOriginal => { const actual = await importOriginal<typeof import('../server/pendle')>(); return { ...actual, readPendle: vi.fn(async () => ({ tokens: [], coverage: { status: 'ok', coverage: 'Pendle test', marketCount: 0, blockNumber: '456' } })) }; });
 import { getPortfolio } from '../server/portfolio';
+import { readPendle } from '../server/pendle';
 const wallet = '0x1111111111111111111111111111111111111111';
 beforeEach(() => {
   rpc.chainId = 1;
@@ -23,6 +25,7 @@ beforeEach(() => {
 it('includes the live Fluid reader at the same wallet and block as other protocols', async () => {
   const result = await getPortfolio(wallet);
   expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
+  expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
   expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler']);
   expect(result.protocols.find(p => p.id === 'fluid')?.status).toBe('ok');
   expect(result.protocols.filter(p => p.status === 'not-integrated')).toHaveLength(0);
@@ -58,6 +61,7 @@ it('reads Aave v3, Fluid and Euler on Plasma at the same Plasma block', async ()
   rpc.chainId = 9745;
   const result = await getPortfolio(wallet, 'plasma');
   expect(result.chain).toBe('Plasma');
+  expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'plasma');
   expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'fluid', 'euler']);
   expect(readers.aave).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'plasma');
   expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'plasma');
@@ -78,6 +82,7 @@ it('reads the five supported Arbitrum protocols at one block and skips Aave v4',
   rpc.chainId = 42161;
   const result = await getPortfolio(wallet, 'arbitrum');
   expect(result.chain).toBe('Arbitrum');
+  expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
   expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'morpho', 'compound', 'fluid', 'euler']);
   expect(readers.aave).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
   expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'arbitrum');
@@ -94,6 +99,7 @@ it('routes all five Base readers to the same Base wallet and block, excluding Et
   rpc.chainId = 8453;
   const result = await getPortfolio(wallet, 'base');
   expect(result.chain).toBe('Base');
+  expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'base');
   expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'morpho', 'compound', 'fluid', 'euler']);
   for (const reader of [readers.aave, readers.compound, readers.fluid, readers.euler]) expect(reader).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'base');
   expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'base');

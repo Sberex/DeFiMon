@@ -1,6 +1,7 @@
 import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
 import type { ExtraTokens, NetworkId, Portfolio, ProtocolResult, WalletBalances } from '../src/types.js';
+import { readPendle, mergePendleWallet, unavailablePendle } from './pendle.js';
 import { readWallet, unavailableWallet } from './wallet.js';
 import { networkOrder, combinedNetworkName } from '../src/networks.js';
 import { networks } from './networks.js';
@@ -34,9 +35,10 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
     euler: () => isolateProtocol('euler', 'Euler', EULER_COVERAGE, () => readEuler(client, address, blockNumber, network), failure),
     fluid: () => isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', deployment.name), () => readFluid(client, address, blockNumber, network), failure),
   };
-  const protocols = await applyIntrinsicRates(await Promise.all(deployment.protocolIds.map(id => readers[id]())), network);
+  const [protocolResults, pendle] = await Promise.all([Promise.all(deployment.protocolIds.map(id => readers[id]())), readPendle(client, address, blockNumber, network)]);
+  const protocols = await applyIntrinsicRates(protocolResults, network);
   const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
-  return { wallets: [walletBalances], address, chain: deployment.name, blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
+  return { wallets: [mergePendleWallet(walletBalances, pendle)], address, chain: deployment.name, blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
 }
 
 export async function getCombinedPortfolio(wallet: Address, load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, extraTokens: ExtraTokens = {}): Promise<Portfolio> {
@@ -57,7 +59,7 @@ export async function getCombinedPortfolio(wallet: Address, load: (wallet: Addre
       snapshots.push({ chain, blockNumber: result.value.blockNumber, updatedAt: result.value.updatedAt, status: 'ok' });
       protocols.push(...result.value.protocols.map(protocol => ({ ...protocol, chain })));
     } else {
-      wallets.push(unavailableWallet(network));
+      wallets.push(mergePendleWallet(unavailableWallet(network), unavailablePendle(network)));
       const message = `${chain} connection unavailable. Its balances and risk are unknown. Check the ${chain} provider connection and refresh.`;
       snapshots.push({ chain, blockNumber: null, updatedAt: new Date().toISOString(), status: 'error', message });
       for (const [id, name] of readers) {

@@ -14,6 +14,7 @@ This is an **early implementation with readers for six protocol families**. Cove
 | Morpho | Ethereum, Arbitrum and Base Morpho Blue direct markets plus vault V1/V2 deposits and associated creator/curator/owner vaults, including zero deposits; accrued balances, debt, net value, oracle health, and liquidation estimates | Requires the public Morpho API for discovery/prices. Indexing lag can omit newly opened positions. Legacy Optimizers, linked accounts, and unclaimed rewards excluded. Full live discovery is not yet verified in this cloud environment. |
 | Fluid | Ethereum, Plasma, Arbitrum, and Base T1–T4 vaults and ordinary fToken lending deposits; balances, debt, health estimate and liquidation boundary | Direct ownership only. Standalone DEX/smart-lending deposits and linked smart accounts excluded. Smart vaults show oracle-ratio boundaries rather than a single underlying token’s dollar liquidation price. |
 | Euler | V2 EVK vault deposits, isolated loans and enabled collateral in owned EVC subaccounts on Ethereum, Plasma, Arbitrum and Base; rates, LLTV, native health, NPL and alternative markets | Legacy V1, Euler Earn aggregators, external smart-account ownership discovery and passive deposits in unenabled subaccounts are excluded. |
+| Pendle | Direct wallet PT/YT holdings on Ethereum, Plasma, Arbitrum and Base; accounting-asset value, current oracle price, implied/underlying APYs, market TVL and exact expiry | LP/staked positions, claimable interest/rewards and tokens held inside lending protocols are excluded from this wallet scan. |
 
 Unavailable protocols are **unknown**, never zero balances. Readers can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
 
@@ -416,3 +417,21 @@ For an endpoint exposing the newer `Asset.price` field, `npm run diagnose:morpho
 The application does not persist wallet searches, balances, or history. Hosting access logs, your blockchain providers, Morpho’s public lookup service, and Merkl’s public rewards service may record requests. Morpho and Merkl lookups send the searched wallet address to their respective services. Results use `Cache-Control: no-store`. The server never returns raw provider errors or provider URLs. Keep `.env` out of Git.
 
 The cloud environment permits `ethereum-rpc.publicnode.com` and live Fluid reads were verified. Hosting elsewhere requires configuring its own `ETHEREUM_RPC_URL`. Environment publication and website deployment are separate operations.
+
+
+## Pendle wallet PT/YT holdings
+
+All four wallet checks also scan Pendle V2’s complete paginated market catalog at `https://api-v2.pendle.finance/core/v1/{chainId}/markets`, including expired markets. Catalogs are cached for five minutes, and balances are read at the network’s displayed block. The dedicated **Pendle** section shows directly held PT/YT balances, full market/token links, their value in the market’s accounting asset (for example USDC for PT reUSD), current oracle price per whole token, implied APY, underlying APY, total market TVL and exact expiry in UTC and Kyiv time. The same tokens appear in Wallet tokens; their values are counted **once** in Net value. Pendle APYs are market metrics and are not inserted into monthly lending NPL.
+
+Token identities, decimals, expiry and accounting units are checked against `market.readTokens()`, `market.expiry()`, token `decimals()` and `SY.assetInfo()` before valuation. PT reUSD uses six-decimal PT/YT units even though reUSD itself has 18 decimals. Accounting assets may refer to a canonical-chain denomination; they are not assumed to be locally deployed tokens. Current oracle prices use `getPtToAssetRate(market, 0)` / `getYtToAssetRate(market, 0)`: the current pool-implied rate adjusted for SY/PY losses, **not a TWAP or executable swap quote**. USD value multiplies that rate by Pendle’s separately timestamped accounting-asset USD price, with no assumed stablecoin peg. Missing prices remain unknown. API APY/TVL data and USD prices older than 30 minutes are withheld. Expired tokens keep their exact maturity time; expired YT has no future-yield value, while unclaimed accrued interest and rewards remain separate and excluded.
+
+Oracle deployments and ABI provenance: `pendle-finance/pendle-core-v2-public@82e69f0b2279c85f250a87cb0fe16a2b432ebb72`, `deployments/{1,9745,42161,8453}-core.json`, `IPPYLpOracle`, `IPMarket`, `IStandardizedYield` and `PendlePYOracleLib`. All four deployments use oracle `0x5542be50420E88dd7D5B4a3D488FA6ED82F6DAc2`. The reader needs access to **api-v2.pendle.finance** plus the existing network RPCs; no Pendle key or archive provider is required.
+
+Run a public read-only diagnostic without printing provider settings:
+
+```sh
+npm run check:pendle -- 0xYourWallet ethereum
+npm run check:pendle -- 0xYourWallet plasma
+npm run check:pendle -- 0xYourWallet arbitrum
+npm run check:pendle -- 0xYourWallet base
+```
