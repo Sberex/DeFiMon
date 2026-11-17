@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { createPendleCatalog, mergePendleWallet, readPendle, unavailablePendle, PENDLE_ORACLE, type PendleMarket } from '../server/pendle';
+import { createPendleCatalog, createPendleMarketRefresh, ensurePendleMarketMetrics, mergePendleWallet, readPendle, unavailablePendle, PENDLE_ORACLE, type PendleMarket } from '../server/pendle';
 import type { ChainClient } from '../server/rpc';
 import type { NetworkId, WalletBalances } from '../src/types';
 const address = (n: number) => `0x${n.toString(16).padStart(40, '0')}` as `0x${string}`;
@@ -70,7 +70,7 @@ it('does not turn oracle failure, failed balances, stale USD data or an asset mi
   const failed = await readPendle(client(m, { failedBalance: true }).c, wallet, blockNumber, 'ethereum', async () => [m]);
   expect(failed.coverage.status).toBe('partial'); expect(failed.tokens).toHaveLength(1);
   m.accountingAsset.priceUpdatedAt = '2020-01-01T00:00:00Z'; m.dataUpdatedAt = '2020-01-01T00:00:00Z';
-  const stale = await readPendle(client(m).c, wallet, blockNumber, 'ethereum', async () => [m]);
+  const stale = await readPendle(client(m).c, wallet, blockNumber, 'ethereum', async () => [m], async () => null);
   expect(stale.tokens[0].valueUsd).toBeNull(); expect(stale.tokens[0].pendle?.oraclePrice).not.toBeNull(); expect(stale.tokens[0].pendle?.impliedApy).toBeNull(); expect(stale.tokens[0].pendle?.tvlUsd).toBeNull();
 });
 it('shows expired YT future value as zero and leaves claimable interest separate', async () => {
@@ -96,4 +96,43 @@ it('allows canonical cross-chain accounting units while requiring local PT/YT an
   expect(await catalog('arbitrum')).toHaveLength(1);
   const result = await readPendle(client(m).c, wallet, blockNumber, 'arbitrum', async () => [m]);
   expect(result.coverage.status).toBe('ok'); expect(result.tokens[0].pendle?.notes.join(' ')).toContain('accounting unit references');
+});
+
+it('refreshes stale catalog metrics once for both sUSDat PT and YT, preserving a real 0% underlying APY', async () => {
+  const m = market();
+  m.address = '0xb6fe0f0811931a38aa97534bac3c147437223e38';
+  m.pt.address = '0x0b985c624bb2949432cce77cfd246f01390a0517';
+  m.yt.address = '0xc38901aa77112efc519a1f8bd501eb2f68055689';
+  m.dataUpdatedAt = new Date((now - 1801) * 1000).toISOString();
+  const detail = { ...m, impliedApy: .14162075, underlyingApy: 0, liquidity: { usd: 1409156.50 }, dataUpdatedAt: new Date(now * 1000).toISOString() };
+  const fetcher = vi.fn(async (url: any) => {
+    expect(String(url)).toBe(`https://api-v2.pendle.finance/core/v1/1/markets/${m.address}`);
+    return new Response(JSON.stringify(detail));
+  });
+  const refresh = createPendleMarketRefresh(fetcher as any);
+  const result = await readPendle(client(m).c, wallet, blockNumber, 'ethereum', async () => [m], refresh);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(result.coverage.status).toBe('ok'); expect(result.tokens).toHaveLength(2);
+  for (const token of result.tokens) expect(token.pendle).toMatchObject({ impliedApy: .14162075, underlyingApy: 0, tvlUsd: 1409156.50, marketUpdatedAt: detail.dataUpdatedAt });
+  expect(m.dataUpdatedAt).not.toBe(detail.dataUpdatedAt);
+});
+it('refreshes missing metrics but skips another request when catalog metrics are complete and fresh', async () => {
+  const m = market(), refresh = vi.fn(async () => ({ ...m, underlyingApy: 0 }));
+  expect(await ensurePendleMarketMetrics(m, 'ethereum', now, 'wallet', refresh)).toBe(m);
+  expect(refresh).not.toHaveBeenCalled();
+  const incomplete = { ...m, underlyingApy: undefined, liquidity: undefined };
+  expect(await ensurePendleMarketMetrics(incomplete, 'ethereum', now, 'wallet', refresh)).toMatchObject({ underlyingApy: 0, liquidity: m.liquidity });
+  expect(refresh).toHaveBeenCalledTimes(1);
+});
+it('rejects refreshed metrics with different identities, stale/future timestamps or unavailable responses', async () => {
+  const m = market(); m.dataUpdatedAt = '2020-01-01T00:00:00Z';
+  const valid = { ...m, dataUpdatedAt: new Date(now * 1000).toISOString() };
+  for (const detail of [null, m, { ...valid, address: address(900) }, { ...valid, chainId: 42161 }, { ...valid, pt: { ...m.pt, address: address(901) } }, { ...valid, accountingAsset: { ...m.accountingAsset, decimals: 18 } }, { ...valid, expiry: '2028-01-01T00:00:00Z' }, { ...valid, dataUpdatedAt: new Date((now + 301) * 1000).toISOString() }]) {
+    expect(await ensurePendleMarketMetrics(m, 'ethereum', now, 'wallet', async () => detail)).toBe(m);
+  }
+  const result = await readPendle(client(m).c, wallet, blockNumber, 'ethereum', async () => [m], async () => { throw new Error('secret-key'); });
+  expect(result.coverage.status).toBe('partial');
+  expect(result.tokens.every(t => t.pendle?.impliedApy === null && t.pendle.tvlUsd === null)).toBe(true);
+  expect(result.tokens.every(t => t.pendle?.oraclePrice !== null)).toBe(true);
+  expect(JSON.stringify(result)).not.toContain('secret-key');
 });

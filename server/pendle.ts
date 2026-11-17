@@ -21,6 +21,33 @@ const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 const num = (v: unknown): number | null => typeof v === 'number' && Number.isFinite(v) ? v : null;
 const positive = (v: unknown) => { const n = num(v); return n !== null && n > 0 ? n : null; };
 function fresh(date: unknown, timestamp: number) { const t = typeof date === 'string' ? Date.parse(date) / 1000 : NaN; return Number.isFinite(t) && t <= timestamp + 300 && timestamp - t <= 1800; }
+/** The paginated catalog can lag behind the individual market endpoint. */
+export function createPendleMarketRefresh(fetcher: typeof fetch = fetch, now = Date.now) {
+  const cache = new Map<string, { expires: number; promise: Promise<PendleMarket | null> }>();
+  return (network: NetworkId, market: Address) => {
+    const key = `${network}:${market.toLowerCase()}`, previous = cache.get(key);
+    if (previous && previous.expires > now()) return previous.promise;
+    const promise = (async () => {
+      try {
+        const response = await fetcher(`https://api-v2.pendle.finance/core/v1/${networks[network].id}/markets/${market}`, { headers: { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; DeFiMon/0.1)' }, signal: AbortSignal.timeout(15000) });
+        return response.ok ? await response.json() as PendleMarket : null;
+      } catch { return null; }
+    })();
+    cache.set(key, { expires: now() + 60000, promise });
+    return promise;
+  };
+}
+const pendleMarketRefresh = createPendleMarketRefresh();
+export async function ensurePendleMarketMetrics(market: PendleMarket, network: NetworkId, timestamp: number, mode: 'wallet' | 'pt' = 'wallet', refresh = pendleMarketRefresh): Promise<PendleMarket> {
+  const valid = (m: PendleMarket) => fresh(m.dataUpdatedAt, timestamp) && num(m.impliedApy) !== null && m.impliedApy! > -1 && (mode === 'pt' || (num(m.underlyingApy) !== null && m.underlyingApy! >= -1 && num(m.liquidity?.usd) !== null && m.liquidity!.usd! >= 0));
+  if (valid(market)) return market;
+  try {
+    const detail = await refresh(network, market.address);
+    // Refresh metrics only after verifying the exact market and token identities.
+    if (!detail || detail.chainId !== networks[network].id || !addr(detail.address) || !same(detail.address, market.address) || Date.parse(detail.expiry) !== Date.parse(market.expiry) || !(['pt', 'yt', 'sy', 'accountingAsset'] as const).every(key => detail[key] && typeof detail[key].address === 'string' && same(detail[key].address, market[key].address) && detail[key].chainId === market[key].chainId && detail[key].decimals === market[key].decimals) || !valid(detail)) return market;
+    return { ...market, impliedApy: detail.impliedApy, underlyingApy: detail.underlyingApy, liquidity: detail.liquidity, dataUpdatedAt: detail.dataUpdatedAt };
+  } catch { return market; }
+}
 export function unavailablePendle(network: NetworkId, block?: bigint): PendleRead {
   return { tokens: [], coverage: { status: 'error', coverage: PENDLE_COVERAGE, balanceDiscoveryComplete: false, marketCount: 0, blockNumber: block === undefined ? null : String(block), message: `Pendle token discovery is unavailable on ${networks[network].name}. Check api-v2.pendle.finance and this network’s provider. PT/YT holdings have not been fully checked.` } };
 }
@@ -53,7 +80,7 @@ export function createPendleCatalog(fetcher: typeof fetch = fetch, now = Date.no
   };
 }
 export const pendleCatalog = createPendleCatalog();
-export async function readPendle(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId, catalog = pendleCatalog): Promise<PendleRead> {
+export async function readPendle(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId, catalog = pendleCatalog, refresh = pendleMarketRefresh): Promise<PendleRead> {
   try {
     const markets = await catalog(network);
     const selected = new Map<string, { token: ApiToken; market: PendleMarket; kind: 'PT' | 'YT' }>();
@@ -78,7 +105,8 @@ export async function readPendle(client: ChainClient, wallet: Address, blockNumb
     let next = 0;
     await Promise.all(Array.from({ length: Math.min(4, held.length) }, async () => {
       while (next < held.length) {
-        const { token, market, kind, raw } = held[next++];
+        const { token, market: listedMarket, kind, raw } = held[next++];
+        const market = Date.parse(listedMarket.expiry) / 1000 > timestamp ? await ensurePendleMarketMetrics(listedMarket, network, timestamp, 'wallet', refresh) : listedMarket;
         const notes = ['The oracle price uses Pendle’s current pool price at the displayed block. It is not time-averaged and can differ from the price received in a swap.'];
         let balance: number | null = null, oraclePrice: number | null = null, expiry: number | null = null;
         try {
@@ -104,7 +132,7 @@ export async function readPendle(client: ChainClient, wallet: Address, blockNumb
         if (market.accountingAsset.chainId !== networks[network].id) notes.push(`The accounting unit references ${market.accountingAsset.symbol} on ${Object.values(networks).find(n => n.id === market.accountingAsset.chainId)?.name ?? `chain ${market.accountingAsset.chainId}`}. The market contract confirms this accounting unit for its prices.`);
         const details: PendleTokenInfo = { kind, name: typeof token.proName === 'string' ? token.proName : token.symbol, marketAddress: market.address, syAddress: market.sy.address, quoteAsset: { address: market.accountingAsset.address, symbol: market.accountingAsset.symbol }, oraclePrice, quoteValue, impliedApy: currentData && matured === false ? num(market.impliedApy) : null, underlyingApy: currentData && matured === false ? num(market.underlyingApy) : null, tvlUsd: currentData && num(market.liquidity?.usd) !== null && market.liquidity!.usd! >= 0 ? market.liquidity!.usd! : null, expiry, matured, oracleAddress: PENDLE_ORACLE, blockNumber: String(blockNumber), marketUpdatedAt: currentData ? market.dataUpdatedAt! : null, notes };
         if (priceUsd === null || valueUsd === null) warnings.add('Some held PT/YT values are unavailable. Wallet totals include only priced amounts.');
-        if (!currentData) notes.push('Pendle APY/TVL metadata is missing or older than 30 minutes; those metrics are unknown.');
+        if (!currentData || (matured === false && (details.impliedApy === null || details.underlyingApy === null || details.tvlUsd === null))) { notes.push('Some Pendle APY/TVL metadata is missing or older than 30 minutes after checking the individual market endpoint; unavailable metrics remain unknown.'); warnings.add('Some held PT/YT market metrics could not be refreshed. Their APYs or TVL are unknown.'); }
         if (matured) notes.push(kind === 'YT' ? 'Expired YT has no future yield value. Any unclaimed accrued interest or rewards are separate and excluded.' : 'Expired PT uses the current oracle redemption rate, including any underlying loss adjustment. No $1 peg is assumed.');
         tokens.push({ address: token.address, symbol: token.symbol, balance, priceUsd, valueUsd, pendle: details });
       }

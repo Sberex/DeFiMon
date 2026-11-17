@@ -459,6 +459,8 @@ npm run check:lido-apr
 
 ## Wallet token categories and income
 
+Pendle market metrics use the catalog while it is fresh. If APYs/TVL are missing or its snapshot is older than 30 minutes, held active markets are refreshed through Pendle's individual-market endpoint. Refreshes are shared by PT/YT for one minute and must match the exact chain, market, token contracts, units and expiry; stale or mismatched responses remain unavailable. A real zero underlying APY is displayed as 0.00%. PT collateral rates use the same refresh path.
+
 **Wallet tokens** is split into **Interest bearing tokens** first and **Other tokens** second. Each category retains the Ethereum, Plasma, Arbitrum and Base grouping; tokens within each network/category are sorted by USD value, largest first, with unpriced tokens last. Interest bearing tokens contains all configured Savings stablecoins plus the user-confirmed wallet-held wstETH and Pendle PT. Other tokens includes ordinary stablecoins, native currency, other assets and YT, with no fixed intrinsic wallet income assigned.
 
 Each interest-bearing row shows intrinsic APR and estimated monthly income in token-equivalent and USD units. Savings stablecoins use the **same rate resolver and source quotes as lending positions**: existing sUSDai oracle rounds, or verified 30-day rate/redemption snapshots for other configured savings assets. wstETH uses Lido’s seven-day staking APR. PT uses its verified Pendle Implied APY directly as APR, becoming zero after verified expiry. A source quote already obtained for the same token in a lending position is reused; the lending protocol’s own supply APR is never copied into a wallet holding.

@@ -1,12 +1,12 @@
 import { parseAbi } from 'viem';
 import type { Asset, InterestRate, NetworkId, ProtocolResult } from '../src/types.js';
 import type { ChainClient } from './rpc.js';
-import { pendleCatalog, type PendleMarket } from './pendle.js';
+import { ensurePendleMarketMetrics, pendleCatalog, type PendleMarket } from './pendle.js';
 const abi = parseAbi(['function readTokens() view returns(address,address,address)', 'function expiry() view returns(uint256)']);
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 const hint = (a: Asset) => /^PT(?:[-\s]|$)/i.test(a.symbol);
 /** Pendle APY is deliberately used directly as APR in the user's monthly model. */
-export async function applyPtCollateralRates(protocols: ProtocolResult[], client: ChainClient, network: NetworkId, blockNumber: bigint, catalog = pendleCatalog): Promise<ProtocolResult[]> {
+export async function applyPtCollateralRates(protocols: ProtocolResult[], client: ChainClient, network: NetworkId, blockNumber: bigint, catalog = pendleCatalog, refresh?: (network: NetworkId, address: `0x${string}`) => Promise<PendleMarket | null>): Promise<ProtocolResult[]> {
   const assets = protocols.flatMap(p => p.positions.flatMap(p => p.assets)).filter(a => a.collateral && a.supplied > 0);
   if (!assets.length) return protocols;
   let markets: PendleMarket[] | null = null;
@@ -22,7 +22,8 @@ export async function applyPtCollateralRates(protocols: ProtocolResult[], client
   try { timestamp = Number((await client.getBlock({ blockNumber })).timestamp); } catch { /* No expiry/freshness assumption without a verified block. */ }
   const quotes = new Map<string, InterestRate>();
   await Promise.all([...new Map(candidates.map(a => [a.address.toLowerCase(), a])).values()].map(async a => {
-    const market = selected.get(a.address.toLowerCase());
+    const listedMarket = selected.get(a.address.toLowerCase());
+    const market = listedMarket && timestamp !== null && Date.parse(listedMarket.expiry) / 1000 > timestamp ? await ensurePendleMarketMetrics(listedMarket, network, timestamp, 'pt', refresh) : listedMarket;
     const quote: InterestRate = { apr: null, estimated: true, pendlePt: { network, marketAddress: market?.address ?? null, expiry: null, updatedAt: null }, note: 'Pendle PT collateral yield is unavailable. A current, verified Implied APY is needed for Supply APR and monthly earnings; it is unknown, not zero.' };
     if (market && timestamp !== null) {
       try {

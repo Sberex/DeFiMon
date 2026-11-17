@@ -1320,6 +1320,22 @@ test('shows Pendle wallet holdings, accounting-asset prices, APYs, TVL and exact
   await page.screenshot({ path: '/tmp/defimon-pendle-mobile.png', fullPage: true });
 });
 
+test('shows sUSDat PT and YT market metrics including zero underlying APY', async ({ page }) => {
+  const fixture = structuredClone(combinedExample), market = '0xb6fe0f0811931a38aa97534bac3c147437223e38';
+  const info = { name: '', kind: 'PT' as const, marketAddress: market, syAddress: '0x8917f8c7feb840b5837edc7e128123baa2f289f9', quoteAsset: { address: '0x23238f20b894f29041f48d88ee91131c395aaa71', symbol: 'USDat' }, oraclePrice: .9725, quoteValue: 97.25, impliedApy: .14162075, underlyingApy: 0, tvlUsd: 1409156.50, expiry: Date.parse('2027-01-14T00:00:00Z') / 1000, matured: false, oracleAddress: '0x5542be50420E88dd7D5B4a3D488FA6ED82F6DAc2', blockNumber: '123', marketUpdatedAt: '2026-11-17T14:36:00Z', notes: [] };
+  for (const [kind, address] of [['PT', '0x0b985c624bb2949432cce77cfd246f01390a0517'], ['YT', '0xc38901aa77112efc519a1f8bd501eb2f68055689']] as const) fixture.wallets![0].tokens.push({ address, symbol: `${kind}-sUSDat`, balance: 100, priceUsd: .97, valueUsd: 97, pendle: { ...info, kind, name: `${kind} sUSDat (USDat)` } });
+  fixture.wallets![0].pendle = { status: 'ok', marketCount: 512, blockNumber: '123', coverage: 'PT/YT held directly.' };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  for (const kind of ['PT', 'YT']) {
+    const position = page.getByRole('region', { name: 'Pendle positions' }).locator('.pendle-position').filter({ has: page.getByRole('heading', { name: `${kind} sUSDat (USDat) ↗` }) });
+    await expect(position.getByText('14.16%', { exact: true })).toBeVisible();
+    await expect(position.getByText('0.00%', { exact: true })).toBeVisible();
+    await expect(position.getByText('$1,409,156.50', { exact: true })).toBeVisible();
+    await expect(position.getByRole('heading').getByRole('link')).toHaveAttribute('href', `https://app.pendle.finance/trade/markets/${market}/swap?view=${kind.toLowerCase()}&chain=ethereum`);
+  }
+});
+
 test('keeps Pendle discovery errors distinct from a checked empty wallet', async ({ page }) => {
   const fixture = structuredClone(combinedExample);
   fixture.wallets![0].pendle = { status: 'error', marketCount: 0, blockNumber: '123', coverage: 'PT/YT wallet tokens', message: 'Pendle token discovery is unavailable. Holdings have not been checked.' };

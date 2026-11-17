@@ -45,7 +45,7 @@ it('uses zero accretion at maturity and unknown for stale, missing or unverified
   const expired = fixture({ expired: true, stale: true });
   expect((await applyPtCollateralRates(expired.protocols, expired.client, 'ethereum', 123n, expired.catalog))[0].positions[0].assets[0].supplyRate?.apr).toBe(0);
   for (const options of [{ stale: true }, { mismatch: true }, { noBlock: true }, { apiFailure: true }, { rate: Infinity }]) {
-    const f = fixture(options), r = await applyPtCollateralRates(f.protocols, f.client, 'ethereum', 123n, f.catalog);
+    const f = fixture(options), r = await applyPtCollateralRates(f.protocols, f.client, 'ethereum', 123n, f.catalog, async () => null);
     expect(r[0].positions[0].assets[0].supplyRate?.apr).toBeNull(); expect(totalMonthlyInterest(r).nplUsd).toBeNull(); expect(JSON.stringify(r)).not.toContain('secret-key');
   }
 });
@@ -61,4 +61,12 @@ it('does not assign a known PT APY to YT, ordinary collateral, deposits or zero 
 it.each([['plasma', 9745], ['arbitrum', 42161], ['base', 8453]] as const)('looks up %s PT yields on the selected network', async (network, networkId) => {
   const f = fixture({ networkId }); const r = await applyPtCollateralRates(f.protocols, f.client, network, 123n, f.catalog);
   expect(f.catalog).toHaveBeenCalledWith(network); expect(r[0].positions[0].assets[0].supplyRate?.apr).toBe(.1507);
+});
+it('uses refreshed individual-market APY for PT collateral monthly income when the catalog is stale', async () => {
+  const f = fixture({ stale: true });
+  const refresh = vi.fn(async () => ({ ...f.market, impliedApy: .1416, dataUpdatedAt: new Date(now * 1000).toISOString() }));
+  const result = await applyPtCollateralRates(f.protocols, f.client, 'ethereum', 123n, f.catalog, refresh);
+  expect(refresh).toHaveBeenCalledTimes(1);
+  expect(result[0].positions[0].assets[0].supplyRate?.apr).toBe(.1416);
+  expect(positionMonthlyInterest(result[0].positions[0]).earnedUsd).toBeCloseTo(990 * .1416 / 12);
 });
