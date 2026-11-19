@@ -1,0 +1,3989 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-19T17:42:41.216Z",
+  "ranking": {
+    "protocol": "Aave v3",
+    "network": "ethereum",
+    "chainId": 1,
+    "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+    "block": {
+      "number": "26450669",
+      "hash": "0x13e5c8766804cdd715c92b9d3cfe0ca1d252311fc0a99e7b150505cca71556d7",
+      "timestamp": "2026-11-19T17:37:23.000Z"
+    },
+    "metric": "Outstanding stablecoin borrowing in USD, summed per wallet across all included reserves.",
+    "stablecoinDefinition": "Tokens classified Stablecoin in config/token-matches.json, plus USDtb. Savings stablecoins, principal tokens and other assets are excluded.",
+    "reserves": [
+      {
+        "symbol": "USDC",
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 6,
+        "priceUsd": 0.99989601,
+        "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "DAI",
+        "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        "decimals": 18,
+        "priceUsd": 1.00017716,
+        "variableDebtToken": "0xcF8d0c70c850859266f5C338b38F9D663181C314",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "USDT",
+        "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "decimals": 6,
+        "priceUsd": 0.99892361,
+        "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "LUSD",
+        "address": "0x5f98805A4E8be255a32880FDeC7F6728C6568bA0",
+        "decimals": 18,
+        "priceUsd": 1,
+        "variableDebtToken": "0x33652e48e4B74D18520f11BfE58Edd2ED2cEc5A2",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "FRAX",
+        "address": "0x853d955aCEf822Db058eb8505911ED77F175b99e",
+        "decimals": 18,
+        "priceUsd": 1,
+        "variableDebtToken": "0x88B8358F5BC87c2D7E116cCA5b65A9eEb2c5EA3F",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "GHO",
+        "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+        "decimals": 18,
+        "priceUsd": 1,
+        "variableDebtToken": "0x786dBff3f1292ae8F92ea68Cf93c30b34B1ed04B",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "crvUSD",
+        "address": "0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E",
+        "decimals": 18,
+        "priceUsd": 0.99628,
+        "variableDebtToken": "0x028f7886F3e937f8479efaD64f31B3fE1119857a",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "PYUSD",
+        "address": "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8",
+        "decimals": 6,
+        "priceUsd": 1.000046,
+        "variableDebtToken": "0x57B67e4DE077085Fd0AF2174e9c14871BE664546",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "USDe",
+        "address": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+        "decimals": 18,
+        "priceUsd": 0.99892361,
+        "variableDebtToken": "0x015396E1F286289aE23a762088E863b3ec465145",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "USDS",
+        "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
+        "decimals": 18,
+        "priceUsd": 0.99997538,
+        "variableDebtToken": "0x490E0E6255bF65b43E2e02F7acB783c5e04572Ff",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "RLUSD",
+        "address": "0x8292Bb45bf1Ee4d140127049757C2E0fF06317eD",
+        "decimals": 18,
+        "priceUsd": 1.000004,
+        "variableDebtToken": "0xBdFe7aD7976d5d7E0965ea83a81Ca1bCfF7e84a9",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "USDtb",
+        "address": "0xC139190F447e929f090Edeb554D95AbB8b18aC1C",
+        "decimals": 18,
+        "priceUsd": 1,
+        "variableDebtToken": "0xeA85a065F87FE28Aa8Fbf0D6C7deC472b106252C",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "EURC",
+        "address": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+        "decimals": 6,
+        "priceUsd": 1.09799945,
+        "variableDebtToken": "0x6c82c66622Eb360FC973D3F492f9D8E9eA538b08",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "mUSD",
+        "address": "0xacA92E438df0B2401fF60dA7E4337B687a2435DA",
+        "decimals": 6,
+        "priceUsd": 1,
+        "variableDebtToken": "0xE35e6A0D3AbC28289f5d4C2d262a133Df936b98D",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      },
+      {
+        "symbol": "USDG",
+        "address": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D",
+        "decimals": 6,
+        "priceUsd": 0.99995405,
+        "variableDebtToken": "0x4f97B950a30321c181E974971E156E19fAD184A3",
+        "stableDebtToken": "0x0000000000000000000000000000000000000000",
+        "stableRateDebtTotalSupply": "0"
+      }
+    ],
+    "priceOracle": "0x54586bE62E3c3580375aE3723C145253060Ca0C2",
+    "priceCurrency": "USD",
+    "priceScale": 100000000,
+    "holderSources": [
+      {
+        "symbol": "USDC",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x72E95b8931767C79bA4EeE721354d6E99a61D004&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0xb213531aA8113F455C626a305fEaEf82da605e08",
+          "quantity": 2500000
+        }
+      },
+      {
+        "symbol": "DAI",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0xcF8d0c70c850859266f5C338b38F9D663181C314&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0x3bd856465321ead1605286938493169E9C9011Cf",
+          "quantity": 69283.9515
+        }
+      },
+      {
+        "symbol": "USDT",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0x5F360F1DE284551B2550a2e057CdfB1ca8051fA3",
+          "quantity": 3815663.187
+        }
+      },
+      {
+        "symbol": "LUSD",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x33652e48e4B74D18520f11BfE58Edd2ED2cEc5A2&s=0&p=1&ps=100",
+        "holders": 71,
+        "lastHolder": {
+          "address": "0x6dc71298CE1b61BA4C83d5CDf4b3b1e9aa558a7f",
+          "quantity": 0
+        }
+      },
+      {
+        "symbol": "FRAX",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x88B8358F5BC87c2D7E116cCA5b65A9eEb2c5EA3F&s=0&p=1&ps=100",
+        "holders": 21,
+        "lastHolder": {
+          "address": "0xE843696Dc5eD44774FeB250195E6f3cC23950e01",
+          "quantity": 0
+        }
+      },
+      {
+        "symbol": "GHO",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x786dBff3f1292ae8F92ea68Cf93c30b34B1ed04B&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0x0e4E1FeBEF189aD5998B4bfC5c5ad265468a3cC0",
+          "quantity": 133181.458
+        }
+      },
+      {
+        "symbol": "crvUSD",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x028f7886F3e937f8479efaD64f31B3fE1119857a&s=0&p=1&ps=100",
+        "holders": 41,
+        "lastHolder": {
+          "address": "0xAF92e072cB195E7549f18ed99e72800F9203C72d",
+          "quantity": 0
+        }
+      },
+      {
+        "symbol": "PYUSD",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x57B67e4DE077085Fd0AF2174e9c14871BE664546&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0x5715eC9111ED305Ac724fE2bD327679e2A5382CF",
+          "quantity": 308.8246
+        }
+      },
+      {
+        "symbol": "USDe",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x015396E1F286289aE23a762088E863b3ec465145&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0x079F050599df95F98Ab50b20f31439B9781fCB42",
+          "quantity": 7877.9119
+        }
+      },
+      {
+        "symbol": "USDS",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x490E0E6255bF65b43E2e02F7acB783c5e04572Ff&s=0&p=1&ps=100",
+        "holders": 91,
+        "lastHolder": {
+          "address": "0xBa9Bf07523fA994E614321c28D542E5a506BB973",
+          "quantity": 0
+        }
+      },
+      {
+        "symbol": "RLUSD",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0xBdFe7aD7976d5d7E0965ea83a81Ca1bCfF7e84a9&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0xfc51821E05C45B65896b0800c7d0e497b81E6C0b",
+          "quantity": 0.0478
+        }
+      },
+      {
+        "symbol": "USDtb",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0xeA85a065F87FE28Aa8Fbf0D6C7deC472b106252C&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0x018d70888513513e63121b6d4CF129A2A4Ff8539",
+          "quantity": 2000
+        }
+      },
+      {
+        "symbol": "EURC",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x6c82c66622Eb360FC973D3F492f9D8E9eA538b08&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0xA36cb192CA8103a9E00B7D873675c612273378DF",
+          "quantity": 32909.998
+        }
+      },
+      {
+        "symbol": "mUSD",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0xE35e6A0D3AbC28289f5d4C2d262a133Df936b98D&s=0&p=1&ps=100",
+        "holders": 38,
+        "lastHolder": {
+          "address": "0x4d4eb02B8d86379C36E887f391a039a17D72d9E0",
+          "quantity": 0
+        }
+      },
+      {
+        "symbol": "USDG",
+        "source": "https://etherscan.io/token/generic-tokenholders2?a=0x4f97B950a30321c181E974971E156E19fAD184A3&s=0&p=1&ps=100",
+        "holders": 100,
+        "lastHolder": {
+          "address": "0x261828f7A3186A97c26395F0749be52f589486ac",
+          "quantity": 151
+        }
+      }
+    ],
+    "discoveryMethod": "Discover the largest 100 holders of each variable debt token on Etherscan. Aggregate estimates, then read all included debt balances on chain at the snapshot block for the top 25 and any further address whose estimate plus the omitted-holder bound could reach rank 20. All stable-rate debt token addresses are zero on this deployment.",
+    "verifiedCandidateCount": 25,
+    "omittedHolderAggregateBoundUsd": 6560238.225712576,
+    "largestExcludedCandidateEstimateUsd": 30772488.21374481,
+    "discoveryLimitation": "Etherscan holder discovery is indexed and can lag. Candidate balances and ranking use on-chain reads; the omitted-holder bound applies to the indexed holder snapshot, not unindexed recent borrowers."
+  },
+  "qualification": {
+    "minimumActivePositions": 3,
+    "minimumDistinctProtocols": 2,
+    "definition": "A position is one distinct wallet lending market, vault deposit or Fluid NFT with a verified positive supplied or borrowed asset balance. Aave accounts on separate networks count as separate positions but the same protocol. Multiple assets within one position do not count separately. Empty curated vaults, wallet tokens, Pendle PT/YT wallet holdings and rewards do not count.",
+    "networks": {
+      "ethereum": {
+        "block": "26450669",
+        "status": "ok"
+      },
+      "arbitrum": {
+        "block": "525684031",
+        "status": "ok"
+      },
+      "base": {
+        "block": "59598308",
+        "status": "ok"
+      },
+      "plasma": {
+        "block": "38164999",
+        "status": "ok"
+      }
+    },
+    "protocols": {
+      "ethereum": [
+        "aave-v3",
+        "aave-v4",
+        "morpho",
+        "compound",
+        "fluid",
+        "euler"
+      ],
+      "arbitrum": [
+        "aave-v3",
+        "morpho",
+        "compound",
+        "fluid",
+        "euler"
+      ],
+      "base": [
+        "aave-v3",
+        "morpho",
+        "compound",
+        "fluid",
+        "euler"
+      ],
+      "plasma": [
+        "aave-v3",
+        "fluid",
+        "euler"
+      ]
+    },
+    "coverageLimitations": [
+      "Limited to the dashboard supported deployments and directly held positions, including Euler subaccounts supported by its reader. External linked wallets and unsupported protocols are not counted.",
+      "Morpho V2 owner/curator discovery has schema errors. Deposit and direct-market discovery succeeded; ownership/curation alone does not qualify as an active deposit."
+    ]
+  },
+  "addedAddresses": [
+    "0x28a55c4b4f9615fde3cdaddf6cc01fcf2e38a6b0"
+  ],
+  "results": [
+    {
+      "rank": 1,
+      "address": "0xa711a3a64f2b2d7e05dc3f564d3862d7499c6d69",
+      "stablecoinBorrowedUsd": 382987751.988457,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 383027583.026816,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 382987751.988457
+        }
+      ],
+      "activePositionCount": 2,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 426068838.26326674,
+          "debtUsd": 382987751.988457,
+          "assets": [
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 383027583.026816,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "USDe",
+              "address": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+              "supplied": 359075896.3362241,
+              "borrowed": 0,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "sUSDe",
+              "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+              "supplied": 53570000,
+              "borrowed": 0,
+              "priceUsd": 1.25778323
+            }
+          ]
+        },
+        {
+          "protocol": "aave-v3",
+          "network": "plasma",
+          "blockNumber": "38164999",
+          "id": "aave-main",
+          "label": "Plasma main market",
+          "marketAddress": "0x925a2A7214Ed92428B5b1B090F80b25700095e12",
+          "suppliedUsd": 6933.382173890369,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "USDT0",
+              "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+              "supplied": 6940.947807,
+              "borrowed": 0,
+              "priceUsd": 0.99891
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "address": "0xabdbbd00fad79b257e7313b398a1ea10d9eef8d6",
+      "stablecoinBorrowedUsd": 223298215.74086428,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 222526754.789905,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 222503614.2326744
+        },
+        {
+          "symbol": "USDG",
+          "address": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D",
+          "variableDebtToken": "0x4f97B950a30321c181E974971E156E19fAD184A3",
+          "borrowed": 794638.021807,
+          "priceUsd": 0.99995405,
+          "borrowedUsd": 794601.508189898
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 454837775.5775101,
+          "debtUsd": 223298215.7408643,
+          "assets": [
+            {
+              "symbol": "WBTC",
+              "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+              "supplied": 1974.45241657,
+              "borrowed": 0,
+              "priceUsd": 63181.333547
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 222526754.789905,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "cbBTC",
+              "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+              "supplied": 5230.33509477,
+              "borrowed": 0,
+              "priceUsd": 63110.53362596
+            },
+            {
+              "symbol": "USDG",
+              "address": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D",
+              "supplied": 0,
+              "borrowed": 794638.021807,
+              "priceUsd": 0.99995405
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "address": "0x7cd0b7ed790f626ef1bd42db63b5ebeb5970c912",
+      "stablecoinBorrowedUsd": 183285478.21333793,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 183304540.052458,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 183285478.21333793
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 358734763.26808643,
+          "debtUsd": 185436823.8553809,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 0,
+              "borrowed": 1206.232073669619,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 183304540.052458,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "cbBTC",
+              "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+              "supplied": 5684.22959936,
+              "borrowed": 0,
+              "priceUsd": 63110.53362596
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "address": "0xc70ad21c69cbf3631637f2796a42e94c42013810",
+      "stablecoinBorrowedUsd": 144542664.202636,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 144698416.130775,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 144542664.202636
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 226601735.04033142,
+          "debtUsd": 144542664.202636,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 127052.70385807035,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 144698416.130775,
+              "priceUsd": 0.99892361
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "address": "0x741aa7cfb2c7bf2a1e7d4da2e3df6a56ca4131f3",
+      "stablecoinBorrowedUsd": 126855353.30955926,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 85115925.146841,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 85107073.94178498
+        },
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 41793265.220525,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 41748279.36777427
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 249975162.09306723,
+          "debtUsd": 126855353.30955929,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 139268.66118755445,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 711.5835440886716,
+              "borrowed": 0,
+              "priceUsd": 2228.76971663
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 85115925.146841,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 41793265.220525,
+              "priceUsd": 0.99892361
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "address": "0x99926ab8e1b589500ae87977632f13cf7f70f242",
+      "stablecoinBorrowedUsd": 122854881.8233957,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 48408773.898739,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 48403739.87034127
+        },
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 74531366.770933,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 74451141.95305443
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 169905725.22630763,
+          "debtUsd": 122854881.82339571,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 76107.54516657222,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 757.9026496257051,
+              "borrowed": 0,
+              "priceUsd": 2228.76971663
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 48408773.898739,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 74531366.770933,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "weETH",
+              "address": "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
+              "supplied": 16427.011326222426,
+              "borrowed": 0,
+              "priceUsd": 1977.03573945
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "address": "0xd848f54280f8fe8661b796e3bb8d8922c87af452",
+      "stablecoinBorrowedUsd": 116333738.93115973,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 49473679.784315,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 49468535.016354226
+        },
+        {
+          "symbol": "DAI",
+          "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "variableDebtToken": "0xcF8d0c70c850859266f5C338b38F9D663181C314",
+          "borrowed": 8159573.1936409725,
+          "priceUsd": 1.00017716,
+          "borrowedUsd": 8161018.743627958
+        },
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 58767441.857919,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 58704185.17117755
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 284936229.629453,
+          "debtUsd": 116333738.93115976,
+          "assets": [
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 127844.62544667441,
+              "borrowed": 0,
+              "priceUsd": 2228.76971663
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 49473679.784315,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "DAI",
+              "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+              "supplied": 0,
+              "borrowed": 8159573.1936409725,
+              "priceUsd": 1.00017716
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 58767441.857919,
+              "priceUsd": 0.99892361
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "address": "0x6ebb912e20ca195771f92703e4896223d9bd936a",
+      "stablecoinBorrowedUsd": 110115365.19807544,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 110126817.285805,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 110115365.19807544
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 183841007.23658633,
+          "debtUsd": 110115365.19807544,
+          "assets": [
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 110126817.285805,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "cbBTC",
+              "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+              "supplied": 2913.00036102,
+              "borrowed": 0,
+              "priceUsd": 63110.53362596
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "address": "0xd93814273b33dd33b32cd345225cfb65deb048dd",
+      "stablecoinBorrowedUsd": 104534845.93787703,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 104647487.44689,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 104534845.93787703
+        }
+      ],
+      "activePositionCount": 2,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 114929981.50674923,
+          "debtUsd": 104534845.93787704,
+          "assets": [
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 104647487.44689,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "USDe",
+              "address": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+              "supplied": 115053824.29267962,
+              "borrowed": 0,
+              "priceUsd": 0.99892361
+            }
+          ]
+        },
+        {
+          "protocol": "aave-v3",
+          "network": "plasma",
+          "blockNumber": "38164999",
+          "id": "aave-main",
+          "label": "Plasma main market",
+          "marketAddress": "0x925a2A7214Ed92428B5b1B090F80b25700095e12",
+          "suppliedUsd": 100906820.84999205,
+          "debtUsd": 93287556.39730728,
+          "assets": [
+            {
+              "symbol": "USDT0",
+              "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+              "supplied": 0,
+              "borrowed": 93389350.789668,
+              "priceUsd": 0.99891
+            },
+            {
+              "symbol": "USDe",
+              "address": "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34",
+              "supplied": 101016929.30293225,
+              "borrowed": 0,
+              "priceUsd": 0.99891
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "address": "0x7ee29373f075ee1d83b1b93b4fe94ae242df5178",
+      "stablecoinBorrowedUsd": 95295231.53839475,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 35525803.831522,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 35522109.50318156
+        },
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 59837530.554727,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 59773122.035213195
+        }
+      ],
+      "activePositionCount": 2,
+      "activeProtocolCount": 2,
+      "activeProtocols": [
+        "aave-v3",
+        "morpho"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 305654076.35099447,
+          "debtUsd": 95295231.53839476,
+          "assets": [
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 17171.75321176822,
+              "borrowed": 0,
+              "priceUsd": 2228.76971663
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 35525803.831522,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 59837530.554727,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "weETH",
+              "address": "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
+              "supplied": 135243.98546560705,
+              "borrowed": 0,
+              "priceUsd": 1977.03573945
+            }
+          ]
+        },
+        {
+          "protocol": "morpho",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "morpho-market-0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2",
+          "label": "Morpho · wstETH / USDT · 0xe7e9694b…",
+          "suppliedUsd": 191341099.56272134,
+          "debtUsd": 67448731.63118269,
+          "assets": [
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 67520979.078797,
+              "priceUsd": 0.99893
+            },
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 86191.47914978434,
+              "borrowed": 0,
+              "priceUsd": 2219.9537755954625
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 11,
+      "address": "0xe40d278afd00e6187db21ff8c96d572359ef03bf",
+      "stablecoinBorrowedUsd": 91444990.51927146,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 87106914.126082,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 87097855.87808202
+        },
+        {
+          "symbol": "EURC",
+          "address": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+          "variableDebtToken": "0x6c82c66622Eb360FC973D3F492f9D8E9eA538b08",
+          "borrowed": 3959141.000653,
+          "priceUsd": 1.09799945,
+          "borrowedUsd": 4347134.641189444
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 139600809.5926561,
+          "debtUsd": 91444990.51927148,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 30462.09454312481,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 3449.1933435574474,
+              "borrowed": 0,
+              "priceUsd": 2228.76971663
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 87106914.126082,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "cbBTC",
+              "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+              "supplied": 1229.32616118,
+              "borrowed": 0,
+              "priceUsd": 63110.53362596
+            },
+            {
+              "symbol": "EURC",
+              "address": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+              "supplied": 0,
+              "borrowed": 3959141.000653,
+              "priceUsd": 1.09799945
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "address": "0x28a55c4b4f9615fde3cdaddf6cc01fcf2e38a6b0",
+      "stablecoinBorrowedUsd": 90110796.25639851,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 81546377.540379,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 81537897.53257857
+        },
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 8582136.449673,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 8572898.723819938
+        }
+      ],
+      "activePositionCount": 7,
+      "activeProtocolCount": 4,
+      "activeProtocols": [
+        "aave-v3",
+        "euler",
+        "fluid",
+        "morpho"
+      ],
+      "qualifies": true,
+      "alreadyInTestCases": false,
+      "addedToTestCases": true,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "arbitrum",
+          "blockNumber": "525684031",
+          "id": "aave-main",
+          "label": "Arbitrum main market",
+          "marketAddress": "0x794a61358D6845594F94dc1DB02A252b5b4814aD",
+          "suppliedUsd": 94.71723534987287,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "ARB",
+              "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+              "supplied": 766.0001441942971,
+              "borrowed": 0,
+              "priceUsd": 0.12365172
+            }
+          ]
+        },
+        {
+          "protocol": "fluid",
+          "network": "arbitrum",
+          "blockNumber": "525684031",
+          "id": "fluid-nft-1534",
+          "label": "Vault 5 · wstETH / ETH · NFT 1534",
+          "marketAddress": "0x1c2bB46f36561bc4F05A94BD50916496aa501078",
+          "suppliedUsd": 5038882.756744402,
+          "debtUsd": 1628243.3970634546,
+          "assets": [
+            {
+              "symbol": "wstETH",
+              "address": "0x5979D7b546E38E414F7E9822514be443A4800529",
+              "supplied": 2267.599902519619,
+              "borrowed": 0,
+              "priceUsd": 2222.12161464
+            },
+            {
+              "symbol": "ETH",
+              "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+              "supplied": 0,
+              "borrowed": 915.6666168559673,
+              "priceUsd": 1778.20548122
+            }
+          ]
+        },
+        {
+          "protocol": "aave-v3",
+          "network": "base",
+          "blockNumber": "59598308",
+          "id": "aave-main",
+          "label": "Base main market",
+          "marketAddress": "0xA238Dd80C259a72e81d7e4664a9801593F98d1c5",
+          "suppliedUsd": 4014871.5705240685,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0x4200000000000000000000000000000000000006",
+              "supplied": 2259.201162850043,
+              "borrowed": 0,
+              "priceUsd": 1777.12
+            }
+          ]
+        },
+        {
+          "protocol": "euler",
+          "network": "base",
+          "blockNumber": "59598308",
+          "id": "euler-0x28a55c4b4f9615fde3cdaddf6cc01fcf2e38a6b0-0x859160DB5841E5cfB8D3f144C6b3381A85A4b410",
+          "label": "Euler deposit · EVK Vault eWETH-1 · 0x859160DB…",
+          "marketAddress": "0x859160DB5841E5cfB8D3f144C6b3381A85A4b410",
+          "suppliedUsd": 102103.78858042417,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0x4200000000000000000000000000000000000006",
+              "supplied": 57.454639293027014,
+              "borrowed": 0,
+              "priceUsd": 1777.12
+            }
+          ]
+        },
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 212412221.6176339,
+          "debtUsd": 90110796.25639851,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 119096.82458616968,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 81546377.540379,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 8582136.449673,
+              "priceUsd": 0.99892361
+            }
+          ]
+        },
+        {
+          "protocol": "morpho",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "morpho-vault-0x2371e134e3455e0593363cBF89d3b6cf53740618",
+          "label": "Morpho vault V1 · Gauntlet WETH Prime",
+          "suppliedUsd": 601725.3504219082,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 337.96830746732144,
+              "borrowed": 0,
+              "priceUsd": 1780.4194568749313
+            }
+          ],
+          "marketAddress": "0x2371e134e3455e0593363cBF89d3b6cf53740618"
+        },
+        {
+          "protocol": "morpho",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "morpho-vault-0x4881Ef0BF6d2365D3dd6499ccd7532bcdBCE0658",
+          "label": "Morpho vault V1 · Gauntlet LRT Core",
+          "suppliedUsd": 561795.1617985158,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 315.54090224592517,
+              "borrowed": 0,
+              "priceUsd": 1780.4194568749313
+            }
+          ],
+          "marketAddress": "0x4881Ef0BF6d2365D3dd6499ccd7532bcdBCE0658"
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 13,
+      "address": "0x34780c209d5c575cc1c1ceb57af95d4d2a69ddcf",
+      "stablecoinBorrowedUsd": 67857464.24990405,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 67930584.051271,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 67857464.24990405
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 172055763.27502498,
+          "debtUsd": 67857464.24990407,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 96469.4729039266,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 67930584.051271,
+              "priceUsd": 0.99892361
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 14,
+      "address": "0x3207363359ca0c11d11073ad48301e8c958b7910",
+      "stablecoinBorrowedUsd": 66695763.46424652,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 66767631.47509,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 66695763.46424652
+        }
+      ],
+      "activePositionCount": 2,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 74555031.18772803,
+          "debtUsd": 66695763.46424653,
+          "assets": [
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 66767631.47509,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "syrupUSDT",
+              "address": "0x356B8d89c1e1239Cbbb9dE4815c39A1474d5BA7D",
+              "supplied": 64701230.477713,
+              "borrowed": 0,
+              "priceUsd": 1.15229696
+            }
+          ]
+        },
+        {
+          "protocol": "aave-v3",
+          "network": "plasma",
+          "blockNumber": "38164999",
+          "id": "aave-main",
+          "label": "Plasma main market",
+          "marketAddress": "0x925a2A7214Ed92428B5b1B090F80b25700095e12",
+          "suppliedUsd": 3.99564e-05,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "USDT0",
+              "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+              "supplied": 4e-05,
+              "borrowed": 0,
+              "priceUsd": 0.99891
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 15,
+      "address": "0x902fba36ca71b8ff947cb1a0fae9b3a4f586eb38",
+      "stablecoinBorrowedUsd": 54862808.355127156,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 13390940.615654,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 13389548.091739377
+        },
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 41517949.76934,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 41473260.26338778
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 63097875.67022301,
+          "debtUsd": 54862808.35512717,
+          "assets": [
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 13390940.615654,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 41517949.76934,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "sUSDe",
+              "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+              "supplied": 50165938.10860637,
+              "borrowed": 0,
+              "priceUsd": 1.25778323
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 16,
+      "address": "0xdc3abf85e090528669cf1b44ef4082b269c21a95",
+      "stablecoinBorrowedUsd": 54336459.32267444,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 43860451.694883,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 43813240.74328314
+        },
+        {
+          "symbol": "GHO",
+          "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+          "variableDebtToken": "0x786dBff3f1292ae8F92ea68Cf93c30b34B1ed04B",
+          "borrowed": 10523218.579391303,
+          "priceUsd": 1,
+          "borrowedUsd": 10523218.579391303
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": true,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 83280866.63206555,
+          "debtUsd": 54336459.32267446,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 46694.52016050989,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 43860451.694883,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "GHO",
+              "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+              "supplied": 0,
+              "borrowed": 10523218.579391303,
+              "priceUsd": 1
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 17,
+      "address": "0xe84a061897afc2e7ff5fb7e3686717c528617487",
+      "stablecoinBorrowedUsd": 52524844.533552215,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDC",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "variableDebtToken": "0x72E95b8931767C79bA4EeE721354d6E99a61D004",
+          "borrowed": 14758835.297164,
+          "priceUsd": 0.99989601,
+          "borrowedUsd": 14757300.525881447
+        },
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 37808240.419576,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 37767544.00767077
+        }
+      ],
+      "activePositionCount": 2,
+      "activeProtocolCount": 2,
+      "activeProtocols": [
+        "aave-v3",
+        "compound"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 125991667.5879395,
+          "debtUsd": 52524844.53355223,
+          "assets": [
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 45219.159499773654,
+              "borrowed": 0,
+              "priceUsd": 2228.76971663
+            },
+            {
+              "symbol": "USDC",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "supplied": 0,
+              "borrowed": 14758835.297164,
+              "priceUsd": 0.99989601
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 37808240.419576,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "weETH",
+              "address": "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
+              "supplied": 12750.692251216,
+              "borrowed": 0,
+              "priceUsd": 1977.03573945
+            }
+          ]
+        },
+        {
+          "protocol": "compound",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+          "label": "USDC market",
+          "marketAddress": "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+          "suppliedUsd": 6.190973587060497e-07,
+          "debtUsd": 0,
+          "assets": [
+            {
+              "symbol": "wstETH",
+              "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+              "supplied": 2.78571963e-10,
+              "borrowed": 0,
+              "priceUsd": 2222.39651126
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 18,
+      "address": "0xc3fe8b63ea05e8e27b3f3358d646915d7ed931e4",
+      "stablecoinBorrowedUsd": 51233846.72962552,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 51289053.754196,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 51233846.72962552
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 73902880.11504425,
+          "debtUsd": 51233846.72962553,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 41436.402681753534,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 51289053.754196,
+              "priceUsd": 0.99892361
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 19,
+      "address": "0xda43cce1263c1b8c8bfacf517fc7dd19d7dd41bd",
+      "stablecoinBorrowedUsd": 48009921.84740458,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 48061654.932157,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 48009921.84740458
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 53610891.64292485,
+          "debtUsd": 48009921.84740458,
+          "assets": [
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 48061654.932157,
+              "priceUsd": 0.99892361
+            },
+            {
+              "symbol": "USDe",
+              "address": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+              "supplied": 53668660.05191814,
+              "borrowed": 0,
+              "priceUsd": 0.99892361
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "rank": 20,
+      "address": "0x2bd72f8fb377337c9cc16da4dd2dd274537ffb82",
+      "stablecoinBorrowedUsd": 47256595.66542444,
+      "stablecoinDebts": [
+        {
+          "symbol": "USDT",
+          "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "variableDebtToken": "0x6df1C1E379bC5a00a7b4C6e67A203333772f45A8",
+          "borrowed": 47307517.003652,
+          "priceUsd": 0.99892361,
+          "borrowedUsd": 47256595.66542444
+        }
+      ],
+      "activePositionCount": 1,
+      "activeProtocolCount": 1,
+      "activeProtocols": [
+        "aave-v3"
+      ],
+      "qualifies": false,
+      "alreadyInTestCases": false,
+      "addedToTestCases": false,
+      "positions": [
+        {
+          "protocol": "aave-v3",
+          "network": "ethereum",
+          "blockNumber": "26450669",
+          "id": "aave-main",
+          "label": "Ethereum main market",
+          "marketAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "suppliedUsd": 74021740.2871256,
+          "debtUsd": 47256595.66542444,
+          "assets": [
+            {
+              "symbol": "WETH",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "supplied": 41503.04606487363,
+              "borrowed": 0,
+              "priceUsd": 1783.5254832
+            },
+            {
+              "symbol": "USDT",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "supplied": 0,
+              "borrowed": 47307517.003652,
+              "priceUsd": 0.99892361
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "network": "arbitrum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "arbitrum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "base",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "base",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "base",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "compound",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "ethereum",
+          "protocol": "fluid",
+          "status": "ok"
+        },
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "status": "partial",
+          "balanceDiscoveryComplete": true,
+          "message": "Morpho V2 curator vault discovery is unavailable. Those associated vaults have not been checked. Morpho V2 owner vault discovery is unavailable. Those associated vaults have not been checked."
+        },
+        {
+          "network": "plasma",
+          "protocol": "aave-v3",
+          "status": "ok"
+        },
+        {
+          "network": "plasma",
+          "protocol": "euler",
+          "status": "ok",
+          "balanceDiscoveryComplete": true
+        },
+        {
+          "network": "plasma",
+          "protocol": "fluid",
+          "status": "ok"
+        }
+      ]
+    }
+  ]
+}
