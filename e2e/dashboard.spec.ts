@@ -21,6 +21,8 @@ test('collapses lower-liquidity alternatives while keeping enough, equal and unk
   const pair = page.getByRole('region', { name: 'Alternatives for WETH - USDC', exact: true });
   await expect(pair.getByRole('table', { name: 'Better rates for WETH - USDC' }).locator('tbody tr')).toHaveCount(3);
   await expect(pair.getByRole('link', { name: 'Enough liquidity' })).toBeVisible(); await expect(pair.getByRole('link', { name: 'Exact liquidity' })).toBeVisible(); await expect(pair.getByRole('link', { name: 'Unknown liquidity' })).toBeVisible();
+  await expect(pair.locator('.refinance-amount')).toHaveText('Amount to refinance: 1,000 USDC');
+  await expect(page.locator('.borrowed-refinance-amount')).toHaveText('1,000 USDC to refinance');
   await expect(pair.locator('.best-alternative-rate strong')).toHaveText('Best verified Borrow APR: ≈ 3.50%');
   const low = pair.locator('.insufficient-liquidity'); await expect(low).not.toHaveAttribute('open'); await expect(low.getByText('Small liquidity', { exact: true })).toBeHidden();
   await low.locator('summary').first().click();
@@ -1092,7 +1094,7 @@ test('switches between a two-column overview and recommendations with matching l
   await expect(section.locator('.recommendation-card')).not.toHaveCount(0);
   const first = section.locator('.recommendation-card').first();
   await expect(first.getByRole('columnheader')).toHaveText(['Supplied asset', 'Supply APR', 'Borrowed asset', 'Borrow APR']);
-  await expect(first.locator('tbody tr').first().locator('td')).toHaveText(['WETH', /^3\.50%Rate details/, 'USDC', /^5\.50%Rate details/]);
+  await expect(first.locator('tbody tr').first().locator('td')).toHaveText(['WETH', /^3\.50%Rate details/, 'USDC18,000 USDC to refinance', /^5\.50%Rate details/]);
   const vault = section.locator('.vault-recommendation').first();
   await expect(vault.getByRole('columnheader')).toHaveText(['Supplied asset', 'Supply APR']);
   await expect(vault.locator('tbody tr').first().locator('td').first()).toHaveText('USDC');
@@ -1122,7 +1124,7 @@ test('recommendations follow refreshed wallet data, retain unknown rates, and om
     owned.assets[0].supplied = 0;
     owned.vault = { address: 'vault', version: 2, roles: [{ role: 'owner', source: 'api' }], totalAssets: 1000000, totalAssetsUsd: 1000000 };
     morpho.positions.push(owned);
-    if (reads++ > 0) { morpho.positions[1].assets[0].symbol = 'USDT'; morpho.positions[1].assets[0].supplyRate = undefined; }
+    if (reads++ > 0) { morpho.positions[1].assets[0].symbol = 'USDT'; morpho.positions[1].assets[0].supplyRate = undefined; morpho.positions[0].assets[1].borrowed = 2000; morpho.positions[0].debtUsd = 2000; }
     fixture.protocols = [morpho];
     return route.fulfill({ json: fixture });
   });
@@ -1134,8 +1136,12 @@ test('recommendations follow refreshed wallet data, retain unknown rates, and om
   await expect(section.locator('.vault-recommendation')).toHaveCount(1);
   await expect(section.getByText('Managed-only vault', { exact: true })).toHaveCount(0);
   await expect(section.locator('.vault-recommendation tbody td').first()).toHaveText('USDC');
+  await expect(section.locator('.borrowed-refinance-amount')).toHaveText(['2,500 USDC to refinance', '2,500 USDC to refinance']);
+  await expect(section.locator('.refinance-amount')).toHaveText(['Amount to refinance: 2,500 USDC', 'Amount to refinance: 2,500 USDC']);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(section.locator('.vault-recommendation tbody td').first()).toHaveText('USDT');
+  await expect(section.locator('.borrowed-refinance-amount')).toHaveText(['2,000 USDC to refinance', '2,000 USDC to refinance']);
+  await expect(section.locator('.refinance-amount')).toHaveText(['Amount to refinance: 2,000 USDC', 'Amount to refinance: 2,000 USDC']);
   await expect(section.locator('.vault-recommendation tbody td').last()).toHaveText('Unavailable');
   await expect(page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true })).toHaveAttribute('aria-pressed', 'true');
 });

@@ -485,3 +485,6 @@ Fluid T1 collateral valuation is independent of the wallet's borrowing balance. 
 
 
 Borrowing alternatives with verified Available Liquidity below the active row's borrowed token amount are collapsed under **Lower liquidity markets**. The comparison uses normalized token quantities across matched networks, not USD values; equality stays in the main list. Both lists retain descending liquidity order, and the headline rate uses the main list. Unknown/invalid liquidity remains visibly unavailable rather than being assumed zero. Supply-only recommendations are unchanged, and opening a list never changes wallet totals.
+
+
+Recommendations show the active borrowed token quantity beneath the borrowed asset and as **Amount to refinance** above each borrowing comparison. This is the full current debt-token balance, including accrued borrowing in the position snapshot; it is the same quantity used for the lower-liquidity grouping. Multiple collateral combinations repeat that same balance for comparison rather than allocating or summing it again. Supply-only recommendations have no refinance amount, and refreshed wallet balances update both displays.
