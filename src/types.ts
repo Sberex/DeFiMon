@@ -45,6 +45,8 @@ export interface Asset {
 export interface Position {
   id: string; label: string; suppliedUsd: number | null; debtUsd: number | null; healthFactor: number | null;
   risk: Risk; assets: Asset[]; notes: string[];
+  /** Unweighted pledged collateral value from the protocol's native account data. */
+  collateralValueUsd?: number | null;
   vault?: { address: string; version: 1 | 2; roles: { role: 'creator' | 'curator' | 'owner'; source: 'onchain' | 'api' }[]; totalAssets: number | null; totalAssetsUsd: number | null };
   marketAddress?: string;
   morphoMarket?: { loanAsset: { address: string; symbol: string }; collateralAsset: { address: string; symbol: string } | null; supplyOnly: boolean };

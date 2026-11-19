@@ -42,3 +42,13 @@ it('retains unknown rates and incomplete discovery while excluded-only readable 
   const unread = position({ assets: [asset({ supplyRate: undefined })] });
   expect(totalMonthlyInterest([protocol([bad, unread])]).nplUsd).toBeNull();
 });
+it('uses authoritative unweighted account collateral, including eMode, rather than mistaking missing row flags for zero', () => {
+  const p = position({ suppliedUsd: 48580.73, collateralValueUsd: 48580.73, debtUsd: 46174.86, healthFactor: 1.01, assets: [asset({ supplied: 48580.73 }), asset({ supplied: 0, borrowed: 46174.86 })] });
+  expect(badDebtReasons('aave-v3', p)).toEqual([]);
+  expect(overviewProtocols([protocol([p], 'aave-v3')])[0].positions).toHaveLength(1);
+  expect(recommendationPositions([protocol([p], 'aave-v3')])).toHaveLength(1);
+  expect(protocolMonthlyInterest(protocol([p], 'aave-v3')).netValueUsd).toBeCloseTo(2405.87);
+  p.debtUsd = 48580.73; expect(badDebtReasons('aave-v3', p)).toEqual([]);
+  p.debtUsd = 48580.74; expect(badDebtReasons('aave-v3', p)).toHaveLength(1);
+  p.collateralValueUsd = null; expect(badDebtReasons('aave-v3', p)).toEqual([]);
+});

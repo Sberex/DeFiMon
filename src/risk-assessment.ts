@@ -8,7 +8,9 @@ export function badDebtReasons(protocol: string, position: Position): string[] {
   }
   const debtAssets = position.assets.filter(a => a.borrowed > 0);
   const collateral = position.assets.filter(a => a.collateral && a.supplied !== 0);
-  if (debtAssets.length && position.assets.every(a => finite(a.borrowed) && a.borrowed >= 0 && finite(a.supplied) && a.supplied >= 0) && debtAssets.every(a => finite(a.priceUsd) && a.priceUsd >= 0) && collateral.every(a => finite(a.collateralSupplied ?? a.supplied) && (a.collateralSupplied ?? a.supplied) >= 0 && finite(a.priceUsd) && a.priceUsd >= 0)) {
+  if (position.collateralValueUsd !== undefined) {
+    if (finite(position.collateralValueUsd) && position.collateralValueUsd >= 0 && finite(position.debtUsd) && position.debtUsd > position.collateralValueUsd) reasons.push('Wallet borrowing value exceeds the value of its supplied collateral.');
+  } else if (debtAssets.length && position.assets.every(a => finite(a.borrowed) && a.borrowed >= 0 && finite(a.supplied) && a.supplied >= 0) && debtAssets.every(a => finite(a.priceUsd) && a.priceUsd >= 0) && collateral.every(a => finite(a.collateralSupplied ?? a.supplied) && (a.collateralSupplied ?? a.supplied) >= 0 && finite(a.priceUsd) && a.priceUsd >= 0)) {
     const debt = debtAssets.reduce((s, a) => s + a.borrowed * a.priceUsd!, 0);
     const value = collateral.reduce((s, a) => s + (a.collateralSupplied ?? a.supplied) * a.priceUsd!, 0);
     if (finite(debt) && finite(value) && debt > value) reasons.push('Wallet borrowing value exceeds the value of its supplied collateral.');

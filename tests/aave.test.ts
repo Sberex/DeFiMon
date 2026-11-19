@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { readAave } from '../server/adapters/aave';
 import type { ChainClient } from '../server/rpc';
+import { badDebtReasons } from '../src/risk-assessment';
 const wallet = '0x1111111111111111111111111111111111111111';
 const token = '0x2222222222222222222222222222222222222222';
 function fixture(emode = 0n) {
@@ -101,4 +102,37 @@ it('shows verified eMode LLTV only for category members and keeps native risk', 
     expect(p.healthFactor).toBe(1.7);
     expect(p.assets[0].liquidationPriceUsd).toBeNull();
   }
+});
+it('recognizes eMode collateral with zero ordinary LLTV and uses native collateral value for Bad Debt checks', async () => {
+  const f = fixture(1n);
+  for (const mode of ['member', 'not-member', 'unreadable'] as const) {
+    const client = { ...f.client, readContract: async (args: any) => {
+      if (args.functionName === 'getEModeCategoryCollateralConfig') {
+        if (mode === 'unreadable') throw new Error('private-provider-key');
+        return { liquidationThreshold: 9600, ltv: 9500, liquidationBonus: 10100 };
+      }
+      if (args.functionName === 'getEModeCategoryCollateralBitmap') return mode === 'member' ? 8n : 0n;
+      if (args.functionName === 'getReserveData') return { id: 3 };
+      if (args.functionName === 'getReserveConfigurationData') return [18n, 0n, 0n, 0n, 1000n, false, true, false, true, false];
+      return f.client.readContract(args);
+    } } as unknown as ChainClient;
+    const p = (await readAave(client, wallet, 100n, 'plasma')).positions[0];
+    expect(p.assets[0].collateral).toBe(mode !== 'not-member');
+    expect(p.assets[0].lltv).toBe(mode === 'member' ? .96 : mode === 'not-member' ? 0 : undefined);
+    expect(p.collateralValueUsd).toBe(30000); expect(p.debtUsd).toBe(15000);
+    expect(badDebtReasons('aave-v3', p)).toEqual([]);
+    expect(p.healthFactor).toBe(1.7);
+    expect(JSON.stringify(p)).not.toContain('private-provider-key');
+  }
+});
+it('never treats a user-disabled eMode reserve as pledged collateral', async () => {
+  const f = fixture(1n);
+  const client = { ...f.client, readContract: async (args: any) => {
+    if (args.functionName === 'getUserReserveData') return [10n * 10n ** 18n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, false];
+    if (args.functionName === 'getEModeCategoryCollateralConfig') return { liquidationThreshold: 9600, ltv: 9500, liquidationBonus: 10100 };
+    if (args.functionName === 'getEModeCategoryCollateralBitmap') return 8n;
+    if (args.functionName === 'getReserveData') return { id: 3 };
+    return f.client.readContract(args);
+  } } as unknown as ChainClient;
+  expect((await readAave(client, wallet, 100n)).positions[0].assets[0].collateral).toBe(false);
 });

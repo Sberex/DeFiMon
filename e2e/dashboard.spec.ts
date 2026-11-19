@@ -4,6 +4,28 @@ import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtu
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
+test('keeps Plasma Aave eMode GHO collateral in overview, totals and recommendations instead of Bad Debt', async ({ page }) => {
+  const fixture = structuredClone(example), aave = fixture.protocols.find(p => p.id === 'aave-v3')!;
+  const gho = '0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3', usdt = '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb';
+  aave.chain = 'Plasma'; aave.positions = [{ id: 'aave-main', label: 'Plasma main market', marketAddress: '0x925a2A7214Ed92428B5b1B090F80b25700095e12', suppliedUsd: 48580.73, collateralValueUsd: 48580.73, debtUsd: 46174.86, healthFactor: 1.01, risk: 'high', liquidationModel: 'unavailable', notes: ['Efficiency mode is enabled.'], assets: [
+    { address: usdt, symbol: 'USDT0', supplied: 0, borrowed: 46174.86, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .0432, note: '' } },
+    { address: gho, symbol: 'GHO', supplied: 48580.73, borrowed: 0, priceUsd: 1, collateral: true, lltv: .96, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .0409, note: 'Current eMode reserve APR.' } },
+  ] }];
+  fixture.protocols = [aave]; fixture.wallets = [];
+  const requests: any[] = [];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => { requests.push(route.request().postDataJSON()); return route.fulfill({ json: { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } }); });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.getByRole('region', { name: 'Wallet results', exact: true }).locator('article.aave-v3');
+  await expect(card.getByRole('heading', { name: 'Plasma main market', exact: true })).toBeVisible(); await expect(card.getByText('High risk', { exact: true })).toBeVisible();
+  const row = card.locator('tbody tr').filter({ hasText: 'GHO' }); await expect(row.getByText('Collateral', { exact: true })).toBeVisible(); await expect(row.getByText('96.00%', { exact: true })).toBeVisible();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$2,405.87');
+  await expect(page.locator('.summary-grid .summary').nth(1).locator('strong')).toHaveText('$48,580.73'); await expect(page.locator('.summary-grid .summary').nth(2).locator('strong')).toHaveText('$46,174.86');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ -$0.65');
+  await page.getByRole('button', { name: 'Recommendations', exact: true }).click(); await expect(page.locator('.recommendation-card')).toHaveCount(1);
+  await expect.poll(() => requests.length).toBe(1); expect(requests[0].targets[0]).toMatchObject({ network: 'plasma', supplied: gho, borrowed: usdt });
+  await page.getByRole('button', { name: 'Risk Assessment', exact: true }).click(); await expect(page.getByRole('region', { name: 'Risk Assessment', exact: true }).getByText(/No checked positions match/)).toBeVisible();
+});
 test('separates Bad Debt from overview, totals and recommendation requests, and restores positions after a successful oracle refresh', async ({ page }) => {
   let reads = 0; const requests: any[] = [];
   const id = '0x23a7d0ff682b323363fb8ba58327ed87001f6306e09b7fd7413bbe4698e749c8';

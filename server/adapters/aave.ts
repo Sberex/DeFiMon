@@ -62,6 +62,9 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
       } catch { /* Preserve unknown LLTV if category membership cannot be verified. */ }
     }
     let borrowRate = unavailableRate();
+    // eMode can enable collateral whose ordinary liquidation threshold is zero.
+    // Unknown category eligibility must not override the user's enabled flag.
+    const collateral = balances[8] && (emode === 0n ? config[2] > 0n : effectiveLltv === undefined || effectiveLltv > 0);
     if (balances[1] + balances[2] > 0n) {
       try {
         const rates = await client.readContract({ address: data, abi: dataAbi, functionName: 'getReserveData', args: [reserve.tokenAddress], blockNumber });
@@ -69,7 +72,7 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
         borrowRate = rate(annual, 'Current Aave borrowing APR; stable and variable debt are weighted by this wallet’s balances. Excludes reward-token incentives.');
       } catch { /* A missing rate must not discard balances or liquidation risk. */ }
     }
-    return { lltv: effectiveLltv, lltvNote: emode !== 0n ? effectiveLltv === undefined ? 'Effective LLTV unavailable in efficiency mode.' : 'Effective LLTV uses verified efficiency-mode category membership.' : undefined, supplyRate: rate(rayApr(balances[6]), 'Current Aave liquidity APR, without compounding or reward-token incentives.'), borrowRate, symbol: reserve.symbol, address: reserve.tokenAddress, supplied: n(balances[0], Number(config[0])), borrowed: n(balances[1] + balances[2], Number(config[0])), priceUsd: Number(price) / Number(unit), collateral: balances[8] && config[2] > 0n, liquidationThreshold: emode === 0n ? Number(config[2]) / 1e4 : null, liquidationPriceUsd: null } satisfies Asset;
+    return { lltv: effectiveLltv, lltvNote: emode !== 0n ? effectiveLltv === undefined ? 'Effective LLTV unavailable in efficiency mode.' : 'Effective LLTV uses verified efficiency-mode category membership.' : undefined, supplyRate: rate(rayApr(balances[6]), 'Current Aave liquidity APR, without compounding or reward-token incentives.'), borrowRate, symbol: reserve.symbol, address: reserve.tokenAddress, supplied: n(balances[0], Number(config[0])), borrowed: n(balances[1] + balances[2], Number(config[0])), priceUsd: Number(price) / Number(unit), collateral, liquidationThreshold: emode === 0n ? Number(config[2]) / 1e4 : null, liquidationPriceUsd: null } satisfies Asset;
   }))).filter((asset): asset is NonNullable<typeof asset> => asset !== null);
   const debtUsd = Number(account[1]) / Number(unit);
   const suppliedUsd = assets.reduce((sum, a) => sum + a.supplied * a.priceUsd!, 0);
@@ -77,7 +80,7 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
   const weighted = Number(account[0]) / Number(unit) * Number(account[3]) / 1e4;
   return {
     id: 'aave-v3', name: 'Aave v3', status: 'ok', coverage: `${deployment.name} main market; excludes other Aave markets and vaults.`,
-    positions: assets.length ? [{ liquidationModel: emode === 0n ? 'linear' : 'unavailable', marketAddress: pool, id: 'aave-main', label: `${deployment.name} main market`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
+    positions: assets.length ? [{ collateralValueUsd: Number(account[0]) / Number(unit), liquidationModel: emode === 0n ? 'linear' : 'unavailable', marketAddress: pool, id: 'aave-main', label: `${deployment.name} main market`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
       notes: [ 'Prices come from Aave’s own oracle. Each liquidation price assumes other prices and balances stay fixed.', ...(emode !== 0n ? ['Efficiency mode is enabled. Health factor is read directly; per-asset liquidation price estimates are unavailable for this mode.'] : [])] }] : [],
   };
 }
