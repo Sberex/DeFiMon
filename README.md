@@ -491,3 +491,6 @@ Recommendations show the active borrowed token quantity beneath the borrowed ass
 
 
 Wallet Overview orders protocol/network cards and funded positions by current Net value, highest first; unknown values follow known values. Confirmed empty readers and zero personal deposits are grouped in the collapsed **Markets with 0 supplied assets** list below the active cards. A mixed Morpho card keeps funded deposits visible while zero-balance creator/curator/owner vaults move to the bottom list. Errors, incomplete discovery, unknown valuations, positive token balances priced at zero and debt-only positions remain visible. This grouping changes presentation only; the original portfolio data, financial totals, risk exclusions and recommendations are unchanged.
+
+
+The Pendle section sorts nonzero, non-expired PT/YT holdings globally by wallet USD value, highest first, retaining network labels and placing unpriced holdings last. Confirmed zero-value/zero-balance tokens, verified expired tokens (including PT with redemption value), and networks with confirmed absent PT/YT holdings appear under **Zero-value, expired or absent Pendle holdings**. Failed or incomplete discovery stays visible. Collapsing and sorting are presentation only: wallet balances, Net value and income totals are unchanged, and expired PT redemption value is retained.

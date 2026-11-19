@@ -4,6 +4,27 @@ import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtu
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
+test('sorts valuable Pendle PT/YT and collapses expired, zero and absent holdings without changing wallet value', async ({ page }) => {
+  const fixture = structuredClone(combinedExample); fixture.protocols = [];
+  const info = { kind: 'PT' as const, name: '', marketAddress: '0x1111111111111111111111111111111111111111', syAddress: '0x2222222222222222222222222222222222222222', quoteAsset: { address: '0x3333333333333333333333333333333333333333', symbol: 'USDC' }, oraclePrice: 1, quoteValue: 10, impliedApy: .1, underlyingApy: 0, tvlUsd: 100000, expiry: Date.parse('2026-12-17T00:00:00Z') / 1000, matured: false, oracleAddress: '0x5542be50420E88dd7D5B4a3D488FA6ED82F6DAc2', blockNumber: '100', marketUpdatedAt: null, notes: [] };
+  const token = (i: number, name: string, value: number | null, kind: 'PT' | 'YT' = 'PT', matured = false) => ({ address: `0x${String(i).repeat(40)}`, symbol: name, balance: 10, priceUsd: value === null ? null : value / 10, valueUsd: value, pendle: { ...info, name, kind, matured } });
+  fixture.wallets = [
+    { chain: 'Ethereum', status: 'partial', pricedValueUsd: 3700, unpricedCount: 1, coverage: '', tokens: [token(1, 'Smaller PT', 100), token(2, 'Larger YT', 400, 'YT'), token(3, 'Expired redeemable PT', 2000, 'PT', true), token(4, 'Zero-value YT', 0, 'YT'), token(5, 'Unpriced PT', null), token(7, 'Highest PT', 1200)], pendle: { status: 'partial', balanceDiscoveryComplete: true, marketCount: 100, blockNumber: '100', coverage: '' } },
+    { chain: 'Plasma', status: 'ok', pricedValueUsd: 0, unpricedCount: 0, coverage: '', tokens: [], pendle: { status: 'ok', marketCount: 10, blockNumber: '100', coverage: '' } },
+    { chain: 'Base', status: 'ok', pricedValueUsd: 800, unpricedCount: 0, coverage: '', tokens: [token(6, 'Base PT', 800)], pendle: { status: 'ok', marketCount: 10, blockNumber: '100', coverage: '' } },
+  ];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const section = page.getByRole('region', { name: 'Pendle positions' });
+  await expect(section.locator('.pendle-active .protocol-heading h2')).toHaveText(['Pendle · Ethereum', 'Pendle · Base', 'Pendle · Ethereum']);
+  await expect(section.locator('.pendle-active .pendle-position h3')).toHaveText(['Highest PT ↗', 'Base PT ↗', 'Larger YT ↗', 'Smaller PT ↗', 'Unpriced PT ↗']);
+  const collapsed = section.locator('.pendle-inactive'); await expect(collapsed).not.toHaveAttribute('open');
+  await expect(collapsed.getByText('Expired redeemable PT ↗', { exact: true })).toBeHidden(); await expect(collapsed.getByText('Zero-value YT ↗', { exact: true })).toBeHidden();
+  await expect(section.getByText(/No directly held/)).toBeHidden(); await expect(page.locator('.summary.primary strong')).toHaveText('$4,500.00');
+  await collapsed.locator('summary').first().click(); await expect(collapsed.getByText('Expired redeemable PT ↗', { exact: true })).toBeVisible(); await expect(collapsed.getByText('Zero-value YT ↗', { exact: true })).toBeVisible(); await expect(collapsed.getByText(/No directly held/)).toBeVisible();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$4,500.00');
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
 test('orders overview markets by net value and collapses confirmed empty markets and zero personal vault deposits', async ({ page }) => {
   const fixture = structuredClone(example);
   const position = (id: string, supplied: number, debt = 0) => ({ id, label: id, suppliedUsd: supplied, debtUsd: debt, healthFactor: debt ? 2 : null, risk: debt ? 'lower' as const : 'no-debt' as const, notes: [], assets: [{ address: '0x1111111111111111111111111111111111111111', symbol: 'USDC', supplied, borrowed: debt, priceUsd: 1, collateral: true, liquidationThreshold: .9, liquidationPriceUsd: null, supplyRate: { apr: .12, note: '' }, borrowRate: { apr: .06, note: '' } }] });
@@ -1482,7 +1503,11 @@ test('shows Pendle wallet holdings, accounting-asset prices, APYs, TVL and exact
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
   await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
   const section = page.getByRole('region', { name: 'Pendle positions' });
-  await expect(section.locator('.protocol-heading h2')).toHaveText(['Pendle · Ethereum', 'Pendle · Plasma', 'Pendle · Arbitrum', 'Pendle · Base']);
+  await expect(section.locator('.pendle-active .protocol-heading h2')).toHaveText(['Pendle · Ethereum']);
+  await expect(section.locator('.pendle-inactive')).not.toHaveAttribute('open');
+  await expect(section.getByText('Not applicable · expired', { exact: true }).first()).toBeHidden();
+  await section.locator('.pendle-inactive > summary').click();
+  await expect(section.locator('.pendle-collapsed-networks .protocol-heading h2')).toHaveText(['Pendle · Ethereum', 'Pendle · Plasma', 'Pendle · Arbitrum', 'Pendle · Base']);
   const position = section.locator('.pendle-position').filter({ has: page.getByRole('heading', { name: 'PT reUSD (USDC) ↗' }) });
   await expect(position.getByText('99 USDC', { exact: true })).toBeVisible();
   await expect(position.getByText('0.99 USDC', { exact: true })).toBeVisible();
