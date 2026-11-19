@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFluid, fluidHealth, FLUID_VAULT_RESOLVER } from '../server/adapters/fluid';
 import { networks } from '../server/networks';
-import { totalMonthlyInterest, annualizedNplApr } from '../src/monthly-interest';
+import { totalMonthlyInterest, positionMonthlyInterest, annualizedNplApr, supplyApr } from '../src/monthly-interest';
 import type { ChainClient } from '../server/rpc';
 const wallet = '0x1111111111111111111111111111111111111111';
 const ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -248,6 +248,41 @@ it('does not derive collateral prices from smart-pool ratios, a zero oracle, or 
   const result = await readFluid(mock().client, wallet, 123n, 'plasma');
   expect(result.positions[0].assets[0].priceUsd).toBe(0.5);
   expect(result.positions[0].assets[0].priceSource).toBeUndefined();
+});
+
+it('values debt-free Plasma sUSDai from the configured loan-token quote and counts its intrinsic earnings once', async () => {
+  const sUsdai = '0x0B2b2B2076d95dda7817e785989fE353fe955ef9', usdt0 = '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb';
+  for (const failure of [undefined, 'oracle', 'reference-price', 'reference-metadata'] as const) {
+    const base = mock({ ids: [3015n] });
+    const client = { ...base.client, readContract: async (args: any) => {
+      expect(args.blockNumber).toBe(123n);
+      if (args.functionName === 'positionByNftId') {
+        const [p, v] = position(3015n);
+        return [{ ...p, supply: 302274n * 10n ** 16n, borrow: 0n }, { ...v, exchangePricesAndRates: { supplyRateVault: 0n, borrowRateVault: 500n }, configs: { ...v.configs, liquidationThreshold: 9000, oraclePriceLiquidate: failure === 'oracle' ? 0n : 11255n * 10n ** 11n }, constantVariables: { ...v.constantVariables, vaultId: 36n, supplyToken: { token0: sUsdai, token1: ZERO }, borrowToken: { token0: usdt0, token1: ZERO } } }];
+      }
+      if (args.functionName === 'symbol') { if (args.address === usdt0 && failure === 'reference-metadata') throw new Error('secret RPC URL'); return args.address === sUsdai ? 'sUSDai' : 'USDT0'; }
+      if (args.functionName === 'decimals') return args.address === sUsdai ? 18 : 6;
+      if (args.functionName === 'getAssetPrice') return args.args[0] === sUsdai || failure === 'reference-price' ? 0n : 99900000n;
+      return base.client.readContract(args);
+    } } as unknown as ChainClient;
+    const result = await readFluid(client, wallet, 123n, 'plasma'), p = result.positions[0];
+    expect(p.assets).toHaveLength(1); expect(p.assets[0].supplied).toBe(3022.74);
+    expect(p.debtUsd).toBe(0); expect(p.healthFactor).toBeNull(); expect(p.liquidationQuote).toBeUndefined(); expect(p.assets[0].liquidationPriceUsd).toBeNull();
+    p.assets[0].intrinsicSupplyRate = { apr: .0795, estimated: true, note: 'Verified savings intrinsic APR', source: { chain: 'Ethereum', oracle: sUsdai } };
+    if (failure) {
+      expect(p.suppliedUsd).toBeNull(); expect(positionMonthlyInterest(p).earnedUsd).toBeNull();
+      expect(JSON.stringify(result)).not.toContain('secret RPC URL');
+    } else {
+      const usd = 3022.74 * 1.1255 * .999;
+      expect(p.suppliedUsd).toBeCloseTo(usd);
+      expect(p.assets[0]).toMatchObject({ priceSource: 'fluid-oracle', priceUsd: 1.1255 * .999 });
+      const monthly = positionMonthlyInterest(p), total = totalMonthlyInterest([result]);
+      expect(monthly.paidUsd).toBe(0); expect(monthly.nplUsd).toBeCloseTo(usd * .0795 / 12);
+      expect(monthly.nplUsd).toBe(monthly.earnedUsd); expect(total.nplUsd).toBe(monthly.earnedUsd);
+      expect(annualizedNplApr(monthly.nplUsd, p.suppliedUsd)).toBeCloseTo(supplyApr(p.assets[0].supplyRate, p.assets[0].intrinsicSupplyRate)!);
+      expect(total.issues).toEqual([]);
+    }
+  }
 });
 
 it('reads Fluid vaults, lending, and current rates through Arbitrum contracts and prices ETH as Arbitrum WETH', async () => {

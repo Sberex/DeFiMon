@@ -4,6 +4,22 @@ import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtu
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
+test('values a supplied-only Fluid vault and includes its full monthly earnings in position and portfolio NPL', async ({ page }) => {
+  const fixture = structuredClone(example), fluid = fixture.protocols.find(p => p.id === 'fluid')!;
+  fluid.chain = 'Plasma'; fluid.status = 'partial'; fluid.message = 'Collateral value estimated from Fluid’s oracle and the configured USDT0 reference price.';
+  fluid.positions = [{ id: 'fluid-nft-3015', label: 'Vault 36 · sUSDai / no debt · NFT 3015', marketAddress: '0xA9FF23CfF9439c418DA08CE7954a92E46311761e', suppliedUsd: 3402.09487, debtUsd: 0, healthFactor: null, risk: 'no-debt', notes: [], assets: [{ address: '0x0B2b2B2076d95dda7817e785989fE353fe955ef9', symbol: 'sUSDai', supplied: 3022.74, borrowed: 0, collateral: true, priceUsd: 1.1255, priceSource: 'fluid-oracle', liquidationThreshold: .9, liquidationPriceUsd: null, supplyRate: { apr: 0, note: 'No protocol interest on collateral.' }, intrinsicSupplyRate: { apr: .0795, estimated: true, note: 'Verified intrinsic savings yield.', source: { chain: 'Ethereum', oracle: '0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a' } } }] }];
+  fixture.protocols = [fluid]; fixture.wallets = [];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const p = page.locator('article.fluid .position');
+  await expect(p.locator('.position-stats strong')).toHaveText(['$3,402.09', '$0.00', '$3,402.09', '≈ $22.54', '≈ 7.95%', '—']);
+  await expect(p.getByText('No borrowing', { exact: true })).toBeVisible();
+  await expect(p.locator('tbody tr')).toHaveCount(1); await expect(p.getByText('Fluid oracle estimate', { exact: true })).toBeVisible();
+  await expect(p.locator('tbody td').nth(8)).toContainText('20.0257 sUSDai / month'); await expect(p.locator('tbody td').nth(8)).toContainText('$22.54 / month');
+  const interest = p.getByRole('region', { name: 'Fluid vault monthly interest', exact: true }); await expect(interest.locator('.protocol-net-value')).toHaveText('Net value: $3,402.09'); await expect(interest.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $22.54 / month');
+  await expect(page.locator('.summary.primary strong')).toHaveText('$3,402.09'); await expect(page.locator('.total-npl > strong')).toHaveText('≈ $22.54'); await expect(page.locator('.portfolio-apr > strong')).toHaveText('≈ 7.95%');
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click(); await expect(page.locator('.total-npl > strong')).toHaveText('≈ $22.54');
+});
 test('keeps Plasma Aave eMode GHO collateral in overview, totals and recommendations instead of Bad Debt', async ({ page }) => {
   const fixture = structuredClone(example), aave = fixture.protocols.find(p => p.id === 'aave-v3')!;
   const gho = '0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3', usdt = '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb';

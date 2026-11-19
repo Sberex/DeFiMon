@@ -140,6 +140,24 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
       const oracle = vault.configs.oraclePriceLiquidate;
       const health = fluidHealth(position.supply, position.borrow, oracle, threshold);
       const notes = [`Balances include accrued interest and any completed liquidations at the displayed ${deployment.name} block.`, 'Health factor is an estimate from Fluid’s liquidation oracle and liquidation threshold, not the borrowing limit. Fluid liquidates in discrete price ticks, so execution can differ slightly.'];
+      // A T1 oracle ratio prices collateral in the configured loan token even
+      // when the wallet has repaid all debt. Valuation must not depend on borrowing.
+      const unpricedSupply = assets.find(a => a.collateral && a.supplied > 0 && a.priceUsd === null);
+      if (unpricedSupply && !vault.isSmartCol && !vault.isSmartDebt && oracle > 0n) {
+        try {
+          const [supplyToken, referenceToken] = await Promise.all([getToken(c.supplyToken.token0), getToken(c.borrowToken.token0)]);
+          if (referenceToken.priceUsd !== null && supplyToken.address.toLowerCase() !== referenceToken.address.toLowerCase()) {
+            const ratio = Number(oracle) / 1e27 * 10 ** (supplyToken.decimals - referenceToken.decimals);
+            const estimate = ratio * referenceToken.priceUsd;
+            if (Number.isFinite(estimate) && estimate > 0) {
+              unpricedSupply.priceUsd = estimate;
+              unpricedSupply.priceSource = 'fluid-oracle';
+              notes.push('The collateral USD price is estimated from Fluid’s liquidation oracle ratio multiplied by the configured loan token’s independently sourced USD price, including when your borrowing balance is zero. Supplied and net values include this protocol-based estimate; it is not a market-sale quote.');
+              warnings.add('Some collateral dollar values are estimated from Fluid’s liquidation oracle and a loan-token USD price. Supplied and net values include these estimates.');
+            }
+          }
+        } catch { /* An unavailable reference price must not discard a readable supply balance. */ }
+      }
       let liquidationQuote: Position['liquidationQuote'];
       if (position.borrow > 0n && position.supply > 0n && oracle > 0n && threshold > 0 && threshold <= 10000) {
         const supplyToken = vault.isSmartCol ? null : await getToken(c.supplyToken.token0);
@@ -151,19 +169,6 @@ export async function readFluid(client: ChainClient, wallet: Address, blockNumbe
         if (!vault.isSmartCol && !vault.isSmartDebt && supplyToken && debtToken) {
           const a = assets.find(a => a.address.toLowerCase() === supplyToken.address.toLowerCase())!;
           a.liquidationThreshold = threshold / 10000;
-          // Some Fluid collateral has no configured independent USD feed
-          // (for example reUSD). For T1 only, translate Fluid's token ratio using
-          // the independently priced debt asset. Never assume a stablecoin peg,
-          // apply a pool-share ratio to an underlying token, or overwrite a feed.
-          if (a.priceUsd === null && debtToken.priceUsd !== null && supplyToken.address.toLowerCase() !== debtToken.address.toLowerCase()) {
-            const estimate = current * debtToken.priceUsd;
-            if (Number.isFinite(estimate) && estimate > 0) {
-              a.priceUsd = estimate;
-              a.priceSource = 'fluid-oracle';
-              notes.push('The collateral USD price is estimated from Fluid’s liquidation oracle ratio multiplied by the debt token’s independently sourced USD price. Supplied and net values include this protocol-based estimate; it is not a market-sale quote.');
-              warnings.add('Some collateral dollar values are estimated from Fluid’s liquidation oracle and a debt-token USD price. Supplied and net values include these estimates.');
-            }
-          }
           if (supplyToken.address.toLowerCase() !== debtToken.address.toLowerCase() && debtToken.priceUsd !== null) a.liquidationPriceUsd = boundary * debtToken.priceUsd;
           notes.push('The dollar liquidation price holds the debt token’s USD price and both balances fixed. Fluid’s collateral/debt oracle ratio determines liquidation; independent USD prices are for valuation only.');
         } else notes.push('Smart collateral/debt changes with the pool composition. A single underlying token’s dollar liquidation price is not reliable, so the actual oracle-ratio boundary is shown instead. Pool share quotes use 10^18 raw share units.');
