@@ -1,3 +1,4 @@
+import { readSparkMarkets } from './market-spark.js';
 import type { ComparisonTarget, MarketSearch } from '../src/market-comparison.js';
 import { networkOrder } from '../src/networks.js';
 import type { NetworkId } from '../src/types.js';
@@ -11,6 +12,7 @@ import { readFluidMarkets } from './market-fluid.js';
 import { readMorphoMarkets } from './market-morpho.js';
 export const marketReaders: Record<string, { name: string; read: Reader }> = {
  'aave-v3': { name: 'Aave v3', read: readAaveMarkets }, 'aave-v4': { name: 'Aave v4', read: readV4Markets },
+ spark: { name: 'Spark', read: readSparkMarkets },
  euler: { name: 'Euler', read: readEulerMarkets },
  compound: { name: 'Compound', read: readCompoundMarkets }, morpho: { name: 'Morpho', read: readMorphoMarkets }, fluid: { name: 'Fluid', read: readFluidMarkets },
 };
@@ -37,5 +39,7 @@ export async function searchMarkets(targets: ComparisonTarget[], clientFor: (net
     }
     return { coverage, alternatives };
   }));
-  return { tokenDiscovery: tokenMatches.reports, targetIds: targets.map(t => t.id), checkedAt: new Date().toISOString(), alternatives: results.flatMap(r => r.alternatives), coverage: results.flatMap(r => r.coverage) };
+  const all = results.flatMap(r => r.alternatives);
+  const sparkMarkets = new Set(all.filter(a => a.protocol === 'Spark').map(a => `${a.targetId}:${a.network}:${a.market.toLowerCase()}`));
+  return { tokenDiscovery: tokenMatches.reports, targetIds: targets.map(t => t.id), checkedAt: new Date().toISOString(), alternatives: all.filter(a => a.protocol !== 'Morpho' || !sparkMarkets.has(`${a.targetId}:${a.network}:${a.market.toLowerCase()}`)), coverage: results.flatMap(r => r.coverage) };
 }

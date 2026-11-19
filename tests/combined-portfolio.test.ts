@@ -6,13 +6,13 @@ import type { NetworkId, Portfolio } from '../src/types';
 const wallet = example.address as `0x${string}`;
 function snapshot(network: NetworkId): Portfolio {
   return { ...structuredClone(example), chain: networks[network].name, blockNumber: network === 'ethereum' ? '101' : network === 'plasma' ? '202' : '303', updatedAt: network === 'ethereum' ? '2026-11-13T12:00:01Z' : network === 'plasma' ? '2026-11-13T12:00:02Z' : '2026-11-13T12:00:03Z',
-    protocols: structuredClone(example.protocols.filter(p => networks[network].protocolIds.includes(p.id))) };
+    protocols: [...structuredClone(example.protocols.filter(p => networks[network].protocolIds.includes(p.id))), ...(network === 'plasma' ? [] : [{ id: 'spark', name: 'Spark', status: 'ok' as const, coverage: 'test', positions: [] }])] };
 }
 it('groups Ethereum then Plasma for each protocol, retaining each network’s block and independent positions', async () => {
   const calls: string[] = [];
   const result = await getCombinedPortfolio(wallet, async (address, network) => { expect(address).toBe(wallet); calls.push(network); return snapshot(network); });
   expect(calls).toEqual(['ethereum', 'plasma', 'arbitrum', 'base']);
-  expect(result.protocols.map(p => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v3:Base', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'morpho:Base', 'compound:Ethereum', 'compound:Arbitrum', 'compound:Base', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum', 'fluid:Base', 'euler:Ethereum', 'euler:Plasma', 'euler:Arbitrum', 'euler:Base']);
+  expect(result.protocols.map(p => `${p.id}:${p.chain}`)).toEqual(['aave-v3:Ethereum', 'aave-v3:Plasma', 'aave-v3:Arbitrum', 'aave-v3:Base', 'aave-v4:Ethereum', 'morpho:Ethereum', 'morpho:Arbitrum', 'morpho:Base', 'compound:Ethereum', 'compound:Arbitrum', 'compound:Base', 'fluid:Ethereum', 'fluid:Plasma', 'fluid:Arbitrum', 'fluid:Base', 'euler:Ethereum', 'euler:Plasma', 'euler:Arbitrum', 'euler:Base', 'spark:Ethereum', 'spark:Arbitrum', 'spark:Base']);
   expect(result.networks?.map(n => [n.chain, n.blockNumber, n.updatedAt])).toEqual([['Ethereum', '101', '2026-11-13T12:00:01Z'], ['Plasma', '202', '2026-11-13T12:00:02Z'], ['Arbitrum', '303', '2026-11-13T12:00:03Z'], ['Base', '303', '2026-11-13T12:00:03Z']]);
   expect(result.blockNumber).toBeNull();
   expect(result.protocols.filter(p => p.id === 'fluid')).toHaveLength(4);
@@ -24,18 +24,18 @@ it('retains the other network when either provider fails, without leaking errors
       if (network === failed) throw new Error('https://provider/private-api-key');
       return snapshot(network);
     });
-    expect(result.protocols).toHaveLength(19);
+    expect(result.protocols).toHaveLength(22);
     const chain = networks[failed].name;
     expect(result.networks?.find(n => n.chain === chain)).toMatchObject({ status: 'error', blockNumber: null });
     expect(result.protocols.filter(p => p.chain === chain).every(p => p.status === 'error' && p.message?.includes('unknown'))).toBe(true);
-    expect(result.protocols.filter(p => p.chain !== chain).every(p => p.status === 'ok' && (p.positions.length > 0 || p.id === 'euler'))).toBe(true);
+    expect(result.protocols.filter(p => p.chain !== chain).every(p => p.status === 'ok' && (p.positions.length > 0 || ['euler', 'spark'].includes(p.id)))).toBe(true);
     expect(JSON.stringify(result)).not.toContain('private-api-key');
   }
 });
-it('shows all nineteen readers as unknown if no network can be read', async () => {
+it('shows all twenty-two readers as unknown if no network can be read', async () => {
   const result = await getCombinedPortfolio(wallet, async () => { throw new Error('secret'); });
   expect(result.networks?.every(n => n.status === 'error')).toBe(true);
-  expect(result.protocols).toHaveLength(19);
+  expect(result.protocols).toHaveLength(22);
   expect(result.protocols.every(p => p.status === 'error' && p.positions.length === 0)).toBe(true);
   expect(JSON.stringify(result)).not.toContain('secret');
 });

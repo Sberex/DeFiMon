@@ -4,16 +4,16 @@ const explorers: Record<ChainName, string> = { Ethereum: 'https://etherscan.io',
 const contract = (value: string | undefined): value is string => /^0x[0-9a-f]{40}$/i.test(value ?? '');
 export function positionLinks(protocol: string, chain: ChainName, position: Position) {
   const network = portfolioNetwork(chain);
-  if (protocol === 'morpho' && /^morpho-market-0x[0-9a-f]{64}$/i.test(position.id)) {
+  if (['morpho', 'spark'].includes(protocol) && /^morpho-market-0x[0-9a-f]{64}$/i.test(position.id)) {
     const address = position.id.slice('morpho-market-'.length);
-    return [{ label: 'Market ID', address, url: `https://app.morpho.org/${network}/market/${address}` }];
+    return [{ label: 'Market ID', address, url: protocol === 'spark' ? `https://app.spark.finance/isolated-markets/${network}/${address}` : `https://app.morpho.org/${network}/market/${address}` }];
   }
   const address = position.vault?.address ?? position.marketAddress
     ?? (protocol === 'compound' ? position.id : protocol === 'fluid' && position.id.startsWith('fluid-lending-') ? position.id.slice('fluid-lending-'.length) : undefined);
   if (!contract(address)) return [];
-  const url = (value: string) => protocol === 'euler' ? `https://app.euler.finance/vault/${value}?network=${network}`
+  const url = (value: string) => protocol === 'spark' ? (position.depositOnly ? 'https://app.spark.finance/savings' : 'https://app.spark.finance/borrow') : protocol === 'euler' ? `https://app.euler.finance/vault/${value}?network=${network}`
     : protocol === 'morpho' ? `https://app.morpho.org/${network}/vault/${value}` : `${explorers[chain]}/address/${value}`;
-  const result = [{ label: position.vault || protocol === 'euler' ? 'Vault contract' : 'Market contract', address, url: url(address) }];
+  const result = [{ label: position.vault || position.depositOnly || protocol === 'euler' ? 'Vault contract' : 'Market contract', address, url: url(address) }];
   if (protocol === 'euler') {
     const seen = new Set([address.toLowerCase()]);
     for (const receipt of position.receiptTokens ?? []) {

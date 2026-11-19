@@ -3,7 +3,7 @@ import type { Asset, ChainName, Position, ProtocolResult } from './types';
 import { isBadDebtPosition } from './risk-assessment';
 
 export const isMorphoVaultPosition = (position: Position) => !!position.vault || position.id.startsWith('morpho-vault-');
-export const isMorphoDepositPosition = (position: Position) => isMorphoVaultPosition(position) || (position.morphoMarket?.supplyOnly === true && position.debtUsd === 0 && position.assets.some(a => a.supplied > 0) && position.assets.every(a => a.borrowed === 0 && !a.collateral));
+export const isMorphoDepositPosition = (position: Position) => position.depositOnly === true || isMorphoVaultPosition(position) || (position.morphoMarket?.supplyOnly === true && position.debtUsd === 0 && position.assets.some(a => a.supplied > 0) && position.assets.every(a => a.borrowed === 0 && !a.collateral));
 export interface RecommendationPosition {
   key: string; protocolId: string; market?: string; protocol: string; chain: ChainName; label: string; vault: boolean; deposit: boolean;
   rows: { supplied?: Asset; borrowed?: Asset }[];
@@ -17,8 +17,8 @@ export function recommendationPositions(protocols: ProtocolResult[], fallbackCha
       const supplied = position.assets.filter(a => Number.isFinite(a.supplied) && a.supplied > 0);
       const borrowed = position.assets.filter(a => Number.isFinite(a.borrowed) && a.borrowed > 0);
       if (protocol.id === 'fluid' && sameTwoAssetBasket(supplied.map(a => a.address), borrowed.map(a => a.address))) return [];
-      const vault = protocol.id === 'morpho' && isMorphoVaultPosition(position);
-      const deposit = protocol.id === 'morpho' && isMorphoDepositPosition(position);
+      const vault = ['morpho', 'spark'].includes(protocol.id) && isMorphoVaultPosition(position);
+      const deposit = ['morpho', 'spark'].includes(protocol.id) && isMorphoDepositPosition(position);
       if (deposit ? !supplied.length : !supplied.length && !borrowed.length) return [];
       const rows = deposit ? supplied.map(asset => ({ supplied: asset })) :
         (supplied.length ? supplied : [undefined]).flatMap(supply =>

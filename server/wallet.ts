@@ -1,3 +1,4 @@
+import { SPARK_LEND, sparkVaults } from './deployments/spark.js';
 import { formatUnits, getAddress, parseAbi, type Address } from 'viem';
 import type { NetworkId, ProtocolResult, WalletBalances, WalletToken } from '../src/types.js';
 import type { ChainClient } from './rpc.js';
@@ -31,14 +32,15 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
     client.readContract({ address: config.fluid.lending, abi: lendingAbi, functionName: 'getAllFTokens', blockNumber }),
     client.readContract({ address: config.aaveProvider, abi: providerAbi, functionName: 'getPool', blockNumber }),
   ]);
-  const excluded = new Set<string>();
+  const excluded = new Set<string>(sparkVaults[network].map(v => v.address.toLowerCase()));
+  protocols.flatMap(p => p.positions).flatMap(p => p.receiptTokens ?? []).forEach(address => excluded.add(address.toLowerCase()));
   if (aTokens.status === 'fulfilled') aTokens.value.forEach(t => excluded.add(t.tokenAddress.toLowerCase()));
   if (fTokens.status === 'fulfilled') fTokens.value.forEach(t => excluded.add(t.toLowerCase()));
   if (network === 'ethereum') {
     AAVE_V4_TOKENIZATION_SPOKES.forEach(t => excluded.add(t.address.toLowerCase()));
   }
   config.compoundMarkets.forEach(m => excluded.add(m.address.toLowerCase()));
-  protocols.filter(p => p.id === 'morpho').flatMap(p => p.positions).forEach(p => {
+  protocols.filter(p => p.id === 'morpho' || p.id === 'spark').flatMap(p => p.positions).forEach(p => {
       const match = p.id.match(/^morpho-vault-(0x[0-9a-fA-F]{40})$/); if (match) excluded.add(match[1].toLowerCase());
     });
   protocols.filter(p => p.id === 'euler').flatMap(p => p.positions).flatMap(p => p.receiptTokens ?? []).forEach(address => excluded.add(address.toLowerCase()));
@@ -73,7 +75,7 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
             // Both aTokens and variable/stable debt accounting tokens identify
             // their Aave pool. Debt balances must never be counted as assets.
             const pool = await client.readContract({ address: token.address, abi: tokenAbi, functionName: 'POOL', blockNumber });
-            if (pool.toLowerCase() === aavePool.value.toLowerCase()) excludedReason = 'Aave receipt or debt accounting token: excluded from wallet assets.';
+            if (pool.toLowerCase() === aavePool.value.toLowerCase() || (network === 'ethereum' && pool.toLowerCase() === SPARK_LEND.pool.toLowerCase())) excludedReason = 'Aave or Spark receipt or debt accounting token: excluded from wallet assets.';
           } catch { /* Ordinary ERC20 tokens do not expose an Aave pool. */ }
         }
         if (!excludedReason && protocols.some(p => p.id === 'euler')) {

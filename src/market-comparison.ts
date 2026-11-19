@@ -45,7 +45,8 @@ export function betterAlternatives(position: RecommendationPosition, index: numb
     if (candidate.targetId !== comparisonId(position, index)) return [];
     const heldRoutes = row.supplied?.v4Reserves ? new Set(row.supplied.v4Reserves.filter(s => s.supplied > 0).flatMap(s => row.borrowed ? (row.borrowed.v4Reserves ?? []).filter(b => b.borrowed > 0).map(b => `${s.hub.toLowerCase()}/${s.assetId}:${b.hub.toLowerCase()}/${b.assetId}`) : [`${s.hub.toLowerCase()}/${s.assetId}`])) : null;
     const sameCurrentRoute = !candidate.route || !heldRoutes || heldRoutes.has(candidate.route);
-    if (sameCurrentRoute && candidate.protocol === position.protocol && candidate.network === (portfolioNetwork(position.chain)) && (position.market ? position.market.toLowerCase() === candidate.market.toLowerCase() : position.protocolId === 'aave-v3')) return [];
+    const sameMarket = position.market ? position.market.toLowerCase() === candidate.market.toLowerCase() : candidate.protocol === position.protocol && position.protocolId === 'aave-v3';
+    if (sameCurrentRoute && sameMarket && candidate.network === portfolioNetwork(position.chain)) return [];
     const apr = row.borrowed ? candidate.borrowApr : candidate.supplyApr + (row.supplied?.intrinsicSupplyRate?.apr ?? 0);
     if (apr === null || !Number.isFinite(apr) || !(row.borrowed ? apr < baseline - 1e-10 : apr > baseline + 1e-10)) return [];
     const key = `${candidate.protocol}:${candidate.network}:${candidate.market.toLowerCase()}:${candidate.route ?? ''}`;

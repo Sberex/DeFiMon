@@ -4,7 +4,7 @@ A read-only Ethereum, Plasma, Arbitrum, and Base wallet dashboard for current le
 
 ## Current scope
 
-This is an **early implementation with readers for six protocol families**. Coverage is limited to the versions and products below; it is not a complete wallet balance. Production build and deterministic tests run locally. Fluid and Aave v4 have been exercised against live Ethereum positions; Aave v3 and Compound still require live position comparisons before use for financial monitoring.
+This is an **early implementation with readers for seven lending protocol families**. Coverage is limited to the versions and products below; it is not a complete wallet balance. Production build and deterministic tests run locally. Fluid and Aave v4 have been exercised against live Ethereum positions; Aave v3 and Compound still require live position comparisons before use for financial monitoring.
 
 | Protocol | Implemented coverage | Limitations |
 | --- | --- | --- |
@@ -14,6 +14,7 @@ This is an **early implementation with readers for six protocol families**. Cove
 | Morpho | Ethereum, Arbitrum and Base Morpho Blue direct markets plus vault V1/V2 deposits and associated creator/curator/owner vaults, including zero deposits; accrued balances, debt, net value, oracle health, and liquidation estimates | Requires the public Morpho API for discovery/prices. Indexing lag can omit newly opened positions. Legacy Optimizers, linked accounts, and unclaimed rewards excluded. Full live discovery is not yet verified in this cloud environment. |
 | Fluid | Ethereum, Plasma, Arbitrum, and Base T1–T4 vaults and ordinary fToken lending deposits; balances, debt, health estimate and liquidation boundary | Direct ownership only. Standalone DEX/smart-lending deposits and linked smart accounts excluded. Smart vaults show oracle-ratio boundaries rather than a single underlying token’s dollar liquidation price. |
 | Euler | V2 EVK vault deposits, isolated loans and enabled collateral in owned EVC subaccounts on Ethereum, Plasma, Arbitrum and Base; rates, LLTV, native health, NPL and alternative markets | Legacy V1, Euler Earn aggregators, external smart-account ownership discovery and passive deposits in unenabled subaccounts are excluded. |
+| Spark | Ethereum SparkLend pool and Spark Savings V2 vaults; Base Spark isolated Morpho markets, sUSDC savings and legacy Spark USDC vault; Arbitrum sUSDC/spUSDT savings | Spark has no borrowing market on Arbitrum and no supported Plasma deployment. Savings are deposit-only. Shared Morpho positions and receipt tokens are counted once. |
 | Pendle | Direct wallet PT/YT holdings on Ethereum, Plasma, Arbitrum and Base; accounting-asset value, current oracle price, implied/underlying APYs, market TVL and exact expiry | LP/staked positions, claimable interest/rewards and tokens held inside lending protocols are excluded from this wallet scan. |
 
 Unavailable protocols are **unknown**, never zero balances. Readers can return partially checked results: successful positions remain visible, while unreadable positions or missing USD prices are explicitly unknown. Dollar totals exclude an entire position if either side cannot be priced, so missing collateral is not mistaken for a negative balance. All totals are labeled partial. Example mode is synthetic, labeled on screen, and never substitutes for a failed live lookup.
@@ -494,3 +495,19 @@ Wallet Overview orders protocol/network cards and funded positions by current Ne
 
 
 The Pendle section sorts nonzero, non-expired PT/YT holdings globally by wallet USD value, highest first, retaining network labels and placing unpriced holdings last. Confirmed zero-value/zero-balance tokens, verified expired tokens (including PT with redemption value), and networks with confirmed absent PT/YT holdings appear under **Zero-value, expired or absent Pendle holdings**. Failed or incomplete discovery stays visible. Collapsing and sorting are presentation only: wallet balances, Net value and income totals are unchanged, and expired PT redemption value is retained.
+
+## Spark support
+
+Spark uses the existing Ethereum, Base and Arbitrum RPC settings. The deployment roster in `server/deployments/spark.ts` is pinned to Spark’s official address registry, with Base isolated market IDs verified against the published Spark app. No SparkLend Ethereum address is reused on other chains.
+
+Ethereum SparkLend positions use the pool’s native balances, oracle currency unit and health factor. Legacy eMode category membership is verified separately. Current protocol APRs, intrinsic collateral yield, monthly NPL and portfolio APR follow the same calculations as other lending positions. SparkLend alternatives include available reserve cash limited by the borrow cap; this deployment does not use Aave’s virtual liquidity accounting.
+
+Spark’s Base isolated markets are read directly from Morpho Blue at the selected block, including oracle checks and total loan liquidity. A shared holding or alternative returned by both readers appears once under Spark. Spark savings vault shares are converted to underlying assets with ERC-4626 accounting. Savings rates use the on-chain VSR/SSR per-second factor, converted to APR over 365 days; the legacy Morpho vault uses its allocation-weighted rate. SPK incentives are excluded. Missing prices/rates remain unknown. Spark receipts, including debt accounting tokens, are excluded from wallet asset totals even when a protocol read fails. Direct sUSDS/sDAI holdings continue to use the existing Wallet tokens intrinsic-yield reader.
+
+Run a safe public diagnostic (provider credentials are never printed):
+
+```sh
+npm run check:spark -- 0xWalletAddress ethereum
+npm run check:spark -- 0xWalletAddress base
+npm run check:spark -- 0xWalletAddress arbitrum
+```

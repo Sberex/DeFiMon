@@ -93,3 +93,14 @@ it('excludes registered Euler receipt balances even when its position reader is 
   expect(result.tokens.find(t => t.address === eul)).toMatchObject({ valueUsd: null, excludedReason: expect.stringContaining('Euler') });
   expect(result.pricedValueUsd).toBeCloseTo(6004.9);
 });
+
+it('excludes Spark debt accounting and savings shares even when the Spark position reader failed', async () => {
+  const { SPARK_LEND, sparkVaults } = await import('../server/deployments/spark');
+  const f = fixture();
+  const client = { ...f.client, readContract: async (args: any) => args.functionName === 'POOL' && args.address.toLowerCase() === eul ? SPARK_LEND.pool : f.client.readContract(args) } as unknown as ChainClient;
+  const vault = sparkVaults.ethereum[0].address;
+  const result = await readWallet(client, wallet, 123n, 'ethereum', [{ id: 'spark', name: 'Spark', coverage: '', status: 'error', positions: [] }], [], [...catalog, { address: vault, symbol: 'spETH' }], f.prices);
+  expect(result.tokens.find(t => t.address.toLowerCase() === eul)?.excludedReason).toContain('Spark');
+  expect(result.tokens.find(t => t.address.toLowerCase() === vault.toLowerCase())?.excludedReason).toContain('receipt');
+  expect(result.pricedValueUsd).toBeCloseTo(6004.9);
+});

@@ -12,7 +12,7 @@ export function expandTargets(targets: ComparisonTarget[], network: NetworkId, m
   return targets.map(t => ({ ...t, supplies: correspondingTokens(t.supplied, t.network, network, matches), borrows: t.borrowed ? correspondingTokens(t.borrowed, t.network, network, matches) : [], allSupplies: (t.supplyBasket ?? [t.supplied]).flatMap(a => correspondingTokens(a, t.network, network, matches)), allBorrows: (t.borrowBasket ?? (t.borrowed ? [t.borrowed] : [])).flatMap(a => correspondingTokens(a, t.network, network, matches)) })).filter(t => t.supplies.length && (!t.borrowed || t.borrows.length));
 }
 export function option(target: Target, protocol: string, network: NetworkId, block: bigint, market: string, label: string, supplyApr: number, borrowApr: number | null, lltv: number | null, note = ''): MarketAlternative {
-  const url = protocol === 'Morpho' ? `https://app.morpho.org/${network}/market/${market}` : protocol === 'Fluid' ? 'https://fluid.instadapp.io/' : protocol === 'Compound' ? 'https://app.compound.finance/' : protocol === 'Euler' ? 'https://app.euler.finance/' : 'https://app.aave.com/';
+  const url = protocol === 'Morpho' ? `https://app.morpho.org/${network}/market/${market}` : protocol === 'Fluid' ? 'https://fluid.instadapp.io/' : protocol === 'Compound' ? 'https://app.compound.finance/' : protocol === 'Euler' ? 'https://app.euler.finance/' : protocol === 'Spark' ? 'https://app.spark.finance/borrow' : 'https://app.aave.com/';
   return { targetId: target.id, protocol, network, block: String(block), market, label, supplyApr, borrowApr, lltv, url, note };
 }
 export async function limited<T, R>(items: T[], run: (item: T) => Promise<R>, warn: (message: string) => void): Promise<R[]> {
@@ -30,8 +30,9 @@ const aaveAbi = parseAbi([
  'function getSiloedBorrowing(address) view returns (bool)',
 ]);
 const poolAbi = parseAbi(['function getConfiguration(address) view returns ((uint256 data))']);
-export const readAaveMarkets: Reader = async (client, network, block, targets, warn) => {
-  const [data, pool] = await Promise.all(['getPoolDataProvider', 'getPool'].map(functionName => client.readContract({ address: networks[network].aaveProvider, abi: providerAbi, functionName: functionName as 'getPool' | 'getPoolDataProvider', blockNumber: block })));
+export function createAaveMarketReader(providerFor: (network: NetworkId) => Address, name = 'Aave v3', virtualLiquidity = true): Reader {
+ return async (client, network, block, targets, warn) => {
+  const [data, pool] = await Promise.all(['getPoolDataProvider', 'getPool'].map(functionName => client.readContract({ address: providerFor(network), abi: providerAbi, functionName: functionName as 'getPool' | 'getPoolDataProvider', blockNumber: block })));
   const reserves = await client.readContract({ address: data, abi: aaveAbi, functionName: 'getAllReservesTokens', blockNumber: block });
   const wanted = new Set(targets.flatMap(t => [...t.supplies, ...t.borrows]));
   const rows = await limited(reserves.filter(r => wanted.has(r.tokenAddress.toLowerCase())), async r => {
@@ -40,15 +41,17 @@ export const readAaveMarkets: Reader = async (client, network, block, targets, w
       client.readContract({ address: data, abi: aaveAbi, functionName: 'getReserveData', args: [r.tokenAddress], blockNumber: block }),
       client.readContract({ address: pool, abi: poolAbi, functionName: 'getConfiguration', args: [r.tokenAddress], blockNumber: block }),
     ]);
-    const liquidity = targets.some(t => t.borrows.includes(r.tokenAddress.toLowerCase())) ? await aaveLiquidity(client, data, pool, r.tokenAddress, flags.data, Number(config[0]), rates[3] + rates[4], block) : null;
+    const liquidity = targets.some(t => t.borrows.includes(r.tokenAddress.toLowerCase())) ? await aaveLiquidity(client, data, pool, r.tokenAddress, flags.data, Number(config[0]), rates[3] + rates[4], block, virtualLiquidity) : null;
     return { address: r.tokenAddress.toLowerCase(), config, rates, bits: flags.data, liquidity };
   }, warn);
   return targets.flatMap(t => rows.filter(s => t.supplies.includes(s.address) && s.config[8] && !s.config[9] && (s.bits & (1n << 60n)) === 0n).flatMap(s => {
-    if (!t.borrowed) return [option(t, 'Aave v3', network, block, pool, 'Main market', rayApr(s.rates[5]), null, null)];
+    if (!t.borrowed) return [option(t, name, network, block, pool, 'Main market', rayApr(s.rates[5]), null, null)];
     if (!s.config[5] || s.config[2] === 0n) return [];
-    return rows.filter(b => t.borrows.includes(b.address) && b.config[6] && b.config[8] && !b.config[9] && (b.bits & (1n << 60n)) === 0n && ((((s.bits >> 212n) & ((1n << 40n) - 1n)) === 0n) || (b.bits & (1n << 61n)) !== 0n)).map(b => ({ ...option(t, 'Aave v3', network, block, pool, 'Main market', rayApr(s.rates[5]), rayApr(b.rates[6]), Number(s.config[2]) / 10000, 'Variable borrowing APR; standard collateral configuration. Caps, eMode and available liquidity must be checked before moving a loan.'), liquidity: b.liquidity }));
+    return rows.filter(b => t.borrows.includes(b.address) && b.config[6] && b.config[8] && !b.config[9] && (b.bits & (1n << 60n)) === 0n && ((((s.bits >> 212n) & ((1n << 40n) - 1n)) === 0n) || (b.bits & (1n << 61n)) !== 0n)).map(b => ({ ...option(t, name, network, block, pool, 'Main market', rayApr(s.rates[5]), rayApr(b.rates[6]), Number(s.config[2]) / 10000, 'Variable borrowing APR; standard collateral configuration. Caps, eMode and available liquidity must be checked before moving a loan.'), liquidity: b.liquidity }));
   }));
-};
+ };
+}
+export const readAaveMarkets = createAaveMarketReader(network => networks[network].aaveProvider);
 const comet = parseAbi([
  'function baseToken() view returns (address)', 'function getUtilization() view returns (uint256)',
  'function getSupplyRate(uint256) view returns (uint64)', 'function getBorrowRate(uint256) view returns (uint64)',

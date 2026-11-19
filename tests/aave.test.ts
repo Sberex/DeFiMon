@@ -136,3 +136,18 @@ it('never treats a user-disabled eMode reserve as pledged collateral', async () 
   } } as unknown as ChainClient;
   expect((await readAave(client, wallet, 100n)).positions[0].assets[0].collateral).toBe(false);
 });
+
+it('uses the Spark provider and verifies legacy eMode membership without borrowing Aave deployment addresses', async () => {
+  const f = fixture(1n), provider = '0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE';
+  const client = { ...f.client, readContract: async (args: any) => {
+    if (args.functionName === 'getEModeCategoryData') return { liquidationThreshold: 9300 };
+    if (args.functionName === 'getReserveEModeCategory') return 1n;
+    return f.client.readContract(args);
+  } } as unknown as ChainClient;
+  const result = await readAave(client, wallet, 100n, 'ethereum', { id: 'spark', name: 'SparkLend', provider, legacyEMode: true });
+  expect(f.addresses.slice(0, 3)).toEqual([provider, provider, provider]);
+  expect(result).toMatchObject({ id: 'spark', name: 'SparkLend' });
+  expect(result.positions[0].assets[0].lltv).toBe(.93);
+  expect(result.positions[0].assets[0].supplyRate?.note).toContain('SparkLend');
+  expect(result.positions[0].healthFactor).toBe(1.7);
+});

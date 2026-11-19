@@ -39,7 +39,7 @@ export async function v4Liquidity(client: ChainClient, hub: Address, assetId: bi
 const aaveLiquidityAbi = parseAbi(['function getReserveTokensAddresses(address) view returns (address aTokenAddress,address stableDebtTokenAddress,address variableDebtTokenAddress)']);
 const poolAbi = parseAbi(['function getVirtualUnderlyingBalance(address) view returns (uint128)']);
 const ghoAbi = parseAbi(['function getFacilitatorBucket(address) view returns (uint256 bucketCapacity,uint256 bucketLevel)']);
-export async function aaveLiquidity(client: ChainClient, data: Address, pool: Address, token: Address, bits: bigint, decimals: number, debt: bigint, blockNumber: bigint): Promise<MarketLiquidity | null> {
+export async function aaveLiquidity(client: ChainClient, data: Address, pool: Address, token: Address, bits: bigint, decimals: number, debt: bigint, blockNumber: bigint, virtualLiquidity = true): Promise<MarketLiquidity | null> {
   try {
     const addresses = await client.readContract({ address: data, abi: aaveLiquidityAbi, functionName: 'getReserveTokensAddresses', args: [token], blockNumber });
     const [cash, metadata, bucket] = await Promise.all([
@@ -50,13 +50,13 @@ export async function aaveLiquidity(client: ChainClient, data: Address, pool: Ad
     if (metadata.decimals !== decimals) throw new Error('Token precision mismatch');
     const minting = bucket !== null && bucket[0] > 0n;
     let available = minting ? remaining(bucket[0], bucket[1]) : cash;
-    if (!minting) {
+    if (!minting && virtualLiquidity) {
       const virtual = await client.readContract({ address: pool, abi: poolAbi, functionName: 'getVirtualUnderlyingBalance', args: [token], blockNumber });
       available = minimum(available, virtual);
     }
     const cap = (bits >> 80n) & ((1n << 36n) - 1n);
     if (cap > 0n) available = minimum(available, remaining(cap * 10n ** BigInt(decimals), debt));
-    return liquidityQuote(available, decimals, metadata.symbol, token, minting ? 'Remaining GHO facilitator mint capacity, limited by the reserve borrow cap. This is not an aToken cash balance.' : 'Underlying cash available to the reserve, limited by its virtual liquidity accounting and remaining borrow-cap headroom.');
+    return liquidityQuote(available, decimals, metadata.symbol, token, minting ? 'Remaining GHO facilitator mint capacity, limited by the reserve borrow cap. This is not an aToken cash balance.' : virtualLiquidity ? 'Underlying cash available to the reserve, limited by its virtual liquidity accounting and remaining borrow-cap headroom.' : 'Underlying cash held by the SparkLend reserve, limited by remaining borrow-cap headroom. This deployment does not use virtual liquidity accounting.');
   } catch { return null; }
 }
 export async function compoundLiquidity(client: ChainClient, market: Address, token: Address, blockNumber: bigint): Promise<MarketLiquidity | null> {

@@ -1,3 +1,5 @@
+import { readSpark, deduplicateSparkPositions } from './adapters/spark.js';
+import { sparkCoverage } from './deployments/spark.js';
 import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
 import type { ExtraTokens, NetworkId, Portfolio, ProtocolResult, WalletBalances } from '../src/types.js';
@@ -32,6 +34,7 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
   const failure = `Could not read this protocol on ${deployment.name}. Its balances are unknown. Check the ${deployment.name} provider connection and try again.`;
   const readers: Record<string, () => Promise<ProtocolResult>> = {
     'aave-v3': () => isolateProtocol('aave-v3', 'Aave v3', `${deployment.name} main market`, () => readAave(client, address, blockNumber, network), failure),
+    spark: () => isolateProtocol('spark', 'Spark', sparkCoverage(network), () => readSpark(client, address, blockNumber, network), failure),
     'aave-v4': () => isolateProtocol('aave-v4', 'Aave v4', AAVE_V4_COVERAGE, () => readAaveV4(client, address, blockNumber), failure),
     morpho: () => isolateProtocol('morpho', 'Morpho', MORPHO_COVERAGE.replace('Ethereum', deployment.name), () => readMorpho(client, address, blockNumber, undefined, network), `Morpho lookup is unavailable on ${deployment.name}. Check access to api.morpho.org and this network’s provider. Its balances are unknown.`),
     compound: () => isolateProtocol('compound', 'Compound', `${deployment.name} Compound v3 markets`, () => readCompound(client, address, blockNumber, network), failure),
@@ -39,7 +42,7 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
     fluid: () => isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', deployment.name), () => readFluid(client, address, blockNumber, network), failure),
   };
   const [protocolResults, pendle] = await Promise.all([Promise.all(deployment.protocolIds.map(id => readers[id]())), readPendle(client, address, blockNumber, network)]);
-  const intrinsicProtocols = await applyIntrinsicRates(protocolResults, network);
+  const intrinsicProtocols = await applyIntrinsicRates(deduplicateSparkPositions(protocolResults), network);
   const ptProtocols = await applyPtCollateralRates(intrinsicProtocols, client, network, blockNumber);
   const protocols = await applyLidoRates(ptProtocols, network);
   const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
@@ -55,7 +58,7 @@ export async function getCombinedPortfolio(wallet: Address, load: (wallet: Addre
   const snapshots: NonNullable<Portfolio['networks']> = [];
   const protocols: ProtocolResult[] = [];
   const wallets: WalletBalances[] = [];
-  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid'], ['euler', 'Euler']];
+  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid'], ['euler', 'Euler'], ['spark', 'Spark']];
   results.forEach((result, i) => {
     const network = networkIds[i];
     const chain = networks[network].name;

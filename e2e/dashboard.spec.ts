@@ -1635,3 +1635,23 @@ test('shows unknown wallet yield instead of inventing a zero APR or a complete a
   await expect(page.getByRole('region', { name: 'Missing interest data' })).toContainText('intrinsic APR unavailable');
   await expect(page.getByRole('region', { name: 'Interest bearing tokens', exact: true }).locator('.wallet-category-stats strong').last()).toHaveText('Unavailable');
 });
+
+test('shows Spark savings as a deposit with NPL and supply recommendations', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.protocols = [{ id: 'spark', name: 'Spark', chain: 'Arbitrum', status: 'ok', coverage: 'Spark savings; no Spark borrowing market on Arbitrum.', balanceDiscoveryComplete: true, positions: [{ id: 'spark-vault-test', label: 'Spark savings · spUSDT', marketAddress: '0x45d91340B3B7B96985A72b5c678F7D9e8D664b62', receiptTokens: ['0x45d91340B3B7B96985A72b5c678F7D9e8D664b62'], depositOnly: true, suppliedUsd: 1200, debtUsd: 0, healthFactor: null, risk: 'no-debt', assets: [{ symbol: 'USDT', address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', supplied: 1200, borrowed: 0, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .06, note: 'Verified Spark APR' } }], notes: [] }] }];
+  fixture.wallets = [];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => route.fulfill({ json: { targetIds: route.request().postDataJSON().targets.map((t: any) => t.id), checkedAt: new Date().toISOString(), alternatives: [], coverage: [] } }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const spark = page.locator('article.protocol.spark');
+  await expect(spark.getByRole('heading', { name: 'Spark · Arbitrum' })).toBeVisible();
+  await expect(spark.locator('.vault-stats')).toContainText('$1,200.00');
+  await expect(spark.locator('.vault-stats')).toContainText('6.00%');
+  await expect(spark.locator('.vault-stats')).toContainText('$6.00');
+  await expect(spark.getByRole('columnheader', { name: 'Borrowed', exact: true })).toHaveCount(0);
+  await expect(spark.getByRole('link', { name: 'Spark savings · spUSDT' })).toHaveAttribute('href', 'https://app.spark.finance/savings');
+  await expect(page.locator('.total-npl > strong')).toContainText('$6.00');
+  await page.getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(page.locator('.recommendations')).toContainText('Spark');
+  await expect(page.locator('.recommendations')).toContainText('USDT');
+});

@@ -101,3 +101,9 @@ it('keeps Base positions and alternatives on Base and expands verified USDC to B
   const id = comparisonTargets([p])[0].id;
   expect(betterAlternatives(p, 0, search([candidate(id, { protocol: p.protocol, network: 'base', market: p.market, borrowApr: .01 })]))).toEqual([]);
 });
+
+it('excludes the same physical market listed under Spark and Morpho', () => {
+  const p = position(); p.protocol = 'Spark'; p.protocolId = 'spark';
+  const id = comparisonTargets([p])[0].id;
+  expect(betterAlternatives(p, 0, search([candidate(id, { protocol: 'Morpho', market: p.market, network: 'ethereum', borrowApr: .001 })]))).toEqual([]);
+});

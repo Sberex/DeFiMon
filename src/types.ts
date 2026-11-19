@@ -49,6 +49,7 @@ export interface Position {
   collateralValueUsd?: number | null;
   vault?: { address: string; version: 1 | 2; roles: { role: 'creator' | 'curator' | 'owner'; source: 'onchain' | 'api' }[]; totalAssets: number | null; totalAssetsUsd: number | null };
   marketAddress?: string;
+  depositOnly?: boolean;
   morphoMarket?: { loanAsset: { address: string; symbol: string }; collateralAsset: { address: string; symbol: string } | null; supplyOnly: boolean };
   collateralOracleChecks?: { asset: string; oracle: string; status: 'ok' | 'unavailable' | 'zero' }[];
   riskAssessment?: { reasons: string[] };

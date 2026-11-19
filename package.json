@@ -26,7 +26,8 @@
     "check:recommendations": "tsx scripts/check-recommendations.ts",
     "check:merkl": "tsx scripts/check-merkl.ts",
     "check:pendle": "tsx scripts/check-pendle.ts",
-    "check:lido-apr": "tsx scripts/check-lido-apr.ts"
+    "check:lido-apr": "tsx scripts/check-lido-apr.ts",
+    "check:spark": "tsx scripts/check-spark.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
