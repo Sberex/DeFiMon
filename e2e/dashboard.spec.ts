@@ -4,6 +4,26 @@ import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtu
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
+test('orders overview markets by net value and collapses confirmed empty markets and zero personal vault deposits', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const position = (id: string, supplied: number, debt = 0) => ({ id, label: id, suppliedUsd: supplied, debtUsd: debt, healthFactor: debt ? 2 : null, risk: debt ? 'lower' as const : 'no-debt' as const, notes: [], assets: [{ address: '0x1111111111111111111111111111111111111111', symbol: 'USDC', supplied, borrowed: debt, priceUsd: 1, collateral: true, liquidationThreshold: .9, liquidationPriceUsd: null, supplyRate: { apr: .12, note: '' }, borrowRate: { apr: .06, note: '' } }] });
+  const protocol = (id: string, name: string, positions: ReturnType<typeof position>[], chain: 'Ethereum' | 'Arbitrum' | 'Base' = 'Ethereum') => ({ id, name, chain, status: 'ok' as const, coverage: '', positions });
+  const managed = { ...position('Managed zero vault', 0), vault: { address: '0x2222222222222222222222222222222222222222', version: 1 as const, roles: [{ role: 'curator' as const, source: 'api' as const }], totalAssets: 1000000, totalAssetsUsd: 1000000 } };
+  fixture.protocols = [protocol('morpho', 'Morpho', [managed, position('Small market', 100)]), protocol('aave-v3', 'Aave v3', []), protocol('compound', 'Compound', [position('Middle market', 6000, 1000)], 'Base'), protocol('fluid', 'Fluid', [position('Smaller Fluid market', 2000), position('Largest Fluid market', 10000, 1000)], 'Arbitrum')];
+  fixture.wallets = [];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const overview = page.getByRole('region', { name: 'Wallet results', exact: true }), active = overview.locator('.active-markets');
+  await expect(active.locator('.protocol-heading h2')).toHaveText(['Fluid · Arbitrum', 'Compound · Base', 'Morpho · Ethereum']);
+  await expect(active.locator('article.fluid .position-title h3')).toHaveText(['Largest Fluid market', 'Smaller Fluid market']);
+  const collapsed = overview.locator('.zero-supply-markets'); await expect(collapsed).not.toHaveAttribute('open'); await expect(collapsed.locator('.protocol-heading h2')).toHaveCount(2);
+  await expect(collapsed.getByRole('heading', { name: 'Aave v3 · Ethereum' })).toBeHidden();
+  await expect(overview.getByRole('heading', { name: 'Managed zero vault', exact: true })).toBeHidden();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$16,100.00'); const total = await page.locator('.total-npl > strong').textContent();
+  await collapsed.locator('summary').first().click(); await expect(collapsed.getByRole('heading', { name: 'Aave v3 · Ethereum' })).toBeVisible(); await expect(collapsed.getByRole('heading', { name: 'Managed zero vault', exact: true })).toBeVisible();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$16,100.00'); await expect(page.locator('.total-npl > strong')).toHaveText(total!);
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
 test('collapses lower-liquidity alternatives while keeping enough, equal and unknown capacity visible', async ({ page }) => {
   const fixture = structuredClone(example), protocol = fixture.protocols[0]; fixture.protocols = [protocol]; protocol.positions = [protocol.positions[0]];
   const position = protocol.positions[0]; position.assets[0].address = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; position.assets[1].address = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; position.assets[0].symbol = 'WETH'; position.assets[1].symbol = 'USDC'; position.assets[1].borrowed = 1000; position.debtUsd = 1000; position.assets[1].borrowRate = { apr: .06, note: '' };
@@ -228,7 +248,7 @@ test('shows Aave v4 markets separately and does not offset an unhealthy market w
   await expect(card.getByRole('heading', { name: 'Aave v4 · MAIN', exact: true })).toBeVisible();
   await expect(card.getByRole('heading', { name: 'Aave v4 · BLUECHIP', exact: true })).toBeVisible();
   await expect(card.getByText('Liquidation threshold reached', { exact: true })).toBeVisible();
-  await expect(card.locator('.position-stats').first().getByText('0.90', { exact: true })).toBeVisible();
+  await expect(card.locator('.position').filter({ has: page.getByRole('heading', { name: 'Aave v4 · MAIN', exact: true }) }).locator('.position-stats').getByText('0.90', { exact: true })).toBeVisible();
   await expect(page.getByText('Lowest health factor', { exact: true })).toHaveCount(0);
 });
 
@@ -280,7 +300,7 @@ test('explains unavailable Morpho discovery and keeps other protocols visible wi
   await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
 });
 
-test('shows all four networks grouped by protocol, refreshes all, and fits on mobile', async ({ page }) => {
+test('shows all four networks sorted by net value, refreshes all, and fits on mobile', async ({ page }) => {
   let reads = 0;
   await page.route('**/api/portfolio/*', route => {
     expect(new URL(route.request().url()).searchParams.get('chain')).toBe('all'); reads++;
@@ -296,7 +316,7 @@ test('shows all four networks grouped by protocol, refreshes all, and fits on mo
   await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(page.getByText(/Coverage: 19 of 19 protocol readers completed on Ethereum \+ Plasma \+ Arbitrum/)).toBeVisible();
   await expect(page.locator('article.protocol')).toHaveCount(19);
-  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Aave v3 · Plasma', 'Aave v3 · Arbitrum', 'Aave v3 · Base', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Morpho · Arbitrum', 'Morpho · Base', 'Compound · Ethereum', 'Compound · Arbitrum', 'Compound · Base', 'Fluid · Ethereum', 'Fluid · Plasma', 'Fluid · Arbitrum', 'Fluid · Base', 'Euler · Ethereum', 'Euler · Plasma', 'Euler · Arbitrum', 'Euler · Base']);
+  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Compound · Ethereum', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Aave v3 · Plasma', 'Fluid · Ethereum', 'Fluid · Plasma', 'Aave v3 · Arbitrum', 'Compound · Arbitrum', 'Fluid · Arbitrum', 'Morpho · Arbitrum', 'Aave v3 · Base', 'Morpho · Base', 'Compound · Base', 'Fluid · Base', 'Euler · Ethereum', 'Euler · Plasma', 'Euler · Arbitrum', 'Euler · Base']);
   await expect(page.getByText(/Ethereum · Block 901/)).toBeVisible();
   await expect(page.getByText(/Plasma · Block 1901/)).toBeVisible();
   await expect(page.getByText(/Arbitrum · Block 2901/)).toBeVisible();
@@ -599,6 +619,8 @@ test('keeps sUSDai lending rates and balances when intrinsic oracle data is unav
 test('shows monthly token interest and USD NPL after protocol net value across networks', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /Explore an example/ }).click();
+  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(8);
+  await page.locator('.zero-supply-markets > summary').click();
   await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(15);
   const card = page.locator('article.aave-v3[data-chain="Ethereum"]');
   const summary = card.getByRole('region', { name: 'Protocol monthly interest', exact: true });
@@ -949,6 +971,7 @@ test('shows Morpho creator/curator/owner vaults with zero deposits without addin
   await page.goto('/');
   await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
+  await page.locator('.zero-supply-markets > summary').click();
   const card = page.locator('article.morpho');
   await expect(card.getByRole('region', { name: 'Morpho vault information', exact: true })).toHaveCount(3);
   await expect(card.getByText('Your roles: Creator (API record) · Curator', { exact: true })).toBeVisible();
@@ -1007,6 +1030,7 @@ test('keeps total NPL and Portfolio APR available when only Arbitrum managed-vau
   await expect(page.locator('.total-npl > strong')).toHaveText('≈ $5.00');
   await expect(page.locator('.portfolio-apr > strong')).not.toHaveText('Unavailable');
   await expect(page.getByRole('region', { name: 'Missing interest data', exact: true })).toHaveCount(0);
+  await page.locator('.zero-supply-markets > summary').click();
   const morpho = page.locator('article.morpho[data-chain="Arbitrum"]');
   await expect(morpho.getByText('Partially checked', { exact: true })).toBeVisible();
   await expect(morpho.locator('.protocol-warning')).toContainText('curator vault discovery is unavailable');
@@ -1034,6 +1058,7 @@ test('shows Morpho vault supply interest without loan fields and counts own V1/V
   await page.goto('/');
   await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
+  await page.locator('.zero-supply-markets > summary').click();
   const vaults = page.locator('.morpho-vault-position');
   await expect(vaults).toHaveCount(3);
   for (const vault of await vaults.all()) {
@@ -1043,15 +1068,15 @@ test('shows Morpho vault supply interest without loan fields and counts own V1/V
     await expect(vault.getByRole('columnheader', { name: 'Borrow APR', exact: true })).toHaveCount(0);
   }
   await expect(vaults.nth(0).locator('tbody td').last()).toHaveText('≈ 12 USDC / month≈ $24.00 / month');
-  await expect(vaults.nth(1).locator('tbody td').last()).toHaveText('≈ 0 USDC / month≈ $0.00 / month');
-  await expect(vaults.nth(2).locator('tbody td').last()).toHaveText('≈ 3 USDC / month≈ $3.00 / month');
+  await expect(vaults.nth(2).locator('tbody td').last()).toHaveText('≈ 0 USDC / month≈ $0.00 / month');
+  await expect(vaults.nth(1).locator('tbody td').last()).toHaveText('≈ 3 USDC / month≈ $3.00 / month');
   await expect(page.locator('.total-npl > strong')).toHaveText('≈ $27.00');
   await expect(page.locator('.summary.primary > strong')).toHaveText('$3,000.00');
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await vaults.first().screenshot({ path: '/tmp/defimon-morpho-vault-interest-mobile.png' });
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
-  await expect(vaults.nth(2).locator('tbody td').last()).toHaveText('Unavailable');
+  await expect(vaults.nth(1).locator('tbody td').last()).toHaveText('Unavailable');
   await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
 });
 
@@ -1066,7 +1091,7 @@ test('shows supply-only Morpho msY and PT markets as USDC deposits without loan 
   await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
   const deposits = page.locator('.morpho-vault-position'); await expect(deposits).toHaveCount(2);
   for (let i = 0; i < 2; i++) {
-    const deposit = deposits.nth(i);
+    const deposit = deposits.filter({ has: page.getByRole('heading', { name: new RegExp(collaterals[i]) }) });
     await expect(deposit.getByRole('columnheader')).toHaveText(['Asset', 'Supplied', 'Supply APR', 'Current price', 'Monthly interest earned']);
     await expect(deposit.getByRole('region', { name: 'Morpho market deposit information' })).toContainText(`Market collateral: ${collaterals[i]}`);
     await expect(deposit.locator('tbody tr')).toHaveCount(1); await expect(deposit.locator('tbody td').first()).toHaveText('USDC');

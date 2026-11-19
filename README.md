@@ -488,3 +488,6 @@ Borrowing alternatives with verified Available Liquidity below the active row's 
 
 
 Recommendations show the active borrowed token quantity beneath the borrowed asset and as **Amount to refinance** above each borrowing comparison. This is the full current debt-token balance, including accrued borrowing in the position snapshot; it is the same quantity used for the lower-liquidity grouping. Multiple collateral combinations repeat that same balance for comparison rather than allocating or summing it again. Supply-only recommendations have no refinance amount, and refreshed wallet balances update both displays.
+
+
+Wallet Overview orders protocol/network cards and funded positions by current Net value, highest first; unknown values follow known values. Confirmed empty readers and zero personal deposits are grouped in the collapsed **Markets with 0 supplied assets** list below the active cards. A mixed Morpho card keeps funded deposits visible while zero-balance creator/curator/owner vaults move to the bottom list. Errors, incomplete discovery, unknown valuations, positive token balances priced at zero and debt-only positions remain visible. This grouping changes presentation only; the original portfolio data, financial totals, risk exclusions and recommendations are unchanged.
