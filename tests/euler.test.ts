@@ -5,6 +5,16 @@ import { createEulerReader, resolveEulerCap, eulerBorrowApy, EULER_YEAR_SECONDS 
 import { protocolMonthlyInterest, totalMonthlyInterest } from '../src/monthly-interest';
 import { expandTargets } from '../server/market-readers';
 import { eulerFixture, wallet, subaccount, collateral, debt, deposit, WETH, USDC } from './fixtures/euler';
+import { badDebtReasons } from '../src/risk-assessment';
+it('detects failing Euler collateral routes even when external token USD prices are available', async () => {
+  const f = eulerFixture({ collateralOracleFailure: true });
+  const result = await readEuler(f.client, wallet, 321n, 'ethereum', f.prices);
+  const loan = result.positions.find(p => p.marketAddress?.toLowerCase() === debt)!;
+  expect(loan.suppliedUsd).toBe(6000);
+  expect(badDebtReasons('euler', loan)).toHaveLength(1);
+  expect(protocolMonthlyInterest(result).netValueUsd).toBe(500);
+  expect(JSON.stringify(loan.collateralOracleChecks)).not.toContain('private-provider-key');
+});
 it('derives all 256 EVC subaccounts without crossing the owner prefix', () => {
   const accounts = eulerSubaccounts(wallet);
   expect(new Set(accounts.map(a => a.toLowerCase())).size).toBe(256);

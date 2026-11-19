@@ -1,4 +1,5 @@
 import { walletCategoryInterest, walletInterestIssues } from './wallet-interest';
+import { overviewProtocols } from './risk-assessment';
 import type { Asset, InterestRate, Position, ProtocolResult, WalletBalances } from './types';
 export interface MonthlyInterest { earnedUsd: number | null; paidUsd: number | null; nplUsd: number | null }
 const finite = (value: number | null | undefined): value is number => typeof value === 'number' && Number.isFinite(value);
@@ -49,6 +50,7 @@ export function positionMonthlyInterest(position: Position): MonthlyInterest {
   return net(sum(rows.map(r => r.earnedUsd)), sum(rows.map(r => r.paidUsd)));
 }
 export function protocolMonthlyInterest(protocol: ProtocolResult): MonthlyInterest & { netValueUsd: number | null } {
+  protocol = overviewProtocols([protocol])[0];
   if (!['ok', 'partial'].includes(protocol.status) || protocol.balanceDiscoveryComplete === false || (!protocol.positions.length && protocol.status !== 'ok' && protocol.balanceDiscoveryComplete !== true)) return { ...net(null, null), netValueUsd: null };
   const positions = protocol.positions.map(positionMonthlyInterest);
   const netValueUsd = sum(protocol.positions.map(p => p.suppliedUsd !== null && p.debtUsd !== null ? p.suppliedUsd - p.debtUsd : null));
@@ -58,7 +60,7 @@ export interface InterestIssue { protocol: string; chain?: string; position?: st
 /** Explain unknown inputs without replacing unread borrowing costs with zero. */
 export function monthlyInterestIssues(protocols: ProtocolResult[]): InterestIssue[] {
   const issues: InterestIssue[] = [];
-  for (const protocol of protocols) {
+  for (const protocol of overviewProtocols(protocols)) {
     const context = { protocol: protocol.name, chain: protocol.chain };
     if (!['ok', 'partial'].includes(protocol.status) || protocol.balanceDiscoveryComplete === false || (protocol.status === 'partial' && !protocol.positions.length && protocol.balanceDiscoveryComplete !== true)) {
       issues.push({ ...context, reason: 'Positions could not be fully checked. Refresh and check this protocol’s connection message below.' });

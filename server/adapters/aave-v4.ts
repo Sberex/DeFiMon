@@ -32,13 +32,14 @@ export function mergeV4Assets(assets: Asset[]): Asset[] {
     const key = a.address.toLowerCase();
     const weighted = a.collateral ? a.supplied * (a.liquidationThreshold ?? 0) : 0;
     const existing = merged.get(key);
-    if (!existing) merged.set(key, { asset: { ...a }, weightedCollateral: weighted });
+    if (!existing) merged.set(key, { asset: { ...a, collateralSupplied: a.collateral ? a.supplied : 0 }, weightedCollateral: weighted });
     else {
       // Different oracle valuations for one token cannot be collapsed into one price scenario safely.
       if (existing.asset.priceUsd !== a.priceUsd) throw new Error('Inconsistent reserve prices for the same underlying');
       existing.asset.supplyRate = weightedRate(existing.asset.supplyRate, existing.asset.supplied, a.supplyRate, a.supplied);
       existing.asset.borrowRate = weightedRate(existing.asset.borrowRate, existing.asset.borrowed, a.borrowRate, a.borrowed);
       existing.asset.v4Reserves = [...(existing.asset.v4Reserves ?? []), ...(a.v4Reserves ?? [])];
+      existing.asset.collateralSupplied! += a.collateral ? a.supplied : 0;
       existing.asset.supplied += a.supplied;
       existing.asset.borrowed += a.borrowed;
       existing.asset.collateral ||= a.collateral;

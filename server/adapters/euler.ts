@@ -8,6 +8,7 @@ import { limited } from '../market-readers.js';
 import { walletPrices } from '../wallet-prices.js';
 import { weightedRate } from '../rates.js';
 import { liquidationPrices, riskLevel } from '../risk.js';
+import { readEulerCollateralOracles } from '../euler-risk.js';
 export const eulerSubaccounts = (wallet: Address) => Array.from({ length: 256 }, (_, i) => getAddress(`0x${(BigInt(wallet) ^ BigInt(i)).toString(16).padStart(40, '0')}`));
 const units = (raw: bigint, decimals: number) => Number(formatUnits(raw, decimals));
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
@@ -44,7 +45,7 @@ export async function readEuler(client: ChainClient, wallet: Address, blockNumbe
   }, scanWarn);
   if (scans.reduce((a, b) => a + b, 0) !== registry.vaults.length) complete = false;
   const primaryUsed = new Set<string>();
-  interface Raw { account: Address; controller?: Address; label: string; receipts: Address[]; assets: Asset[]; health: number | null }
+  interface Raw { account: Address; controller?: Address; label: string; receipts: Address[]; assets: Asset[]; health: number | null; collateralOracleChecks: NonNullable<Position['collateralOracleChecks']> }
   const rawPositions: Raw[] = [], unknownPositions: Position[] = [];
   async function readPosition(account: Address, controller: Address | undefined, receipts: Address[], label: string, collateralVaults: Address[]) {
     const id = `euler-${account}-${controller ?? receipts[0]}`;
@@ -72,7 +73,10 @@ export async function readEuler(client: ChainClient, wallet: Address, blockNumbe
       }
       const controllerName = active.find(r => controller && same(r.info.address, controller))?.info.name;
       const displayLabel = controllerName ? `Euler · ${controllerName} · account ${account.slice(0, 8)}…${account.slice(-4)}` : !controller && active.length === 1 ? `Euler deposit · ${active[0].info.name} · ${receipts[0].slice(0, 10)}…` : label;
-      rawPositions.push({ account, controller, receipts, label: displayLabel, health, assets: active.map(r => r.asset) });
+      const heldCollateral = controller ? active.filter(r => r.asset.collateral).map(r => r.info.address) : undefined;
+      const collateralOracleChecks = await readEulerCollateralOracles(client, controller ?? receipts[0], heldCollateral, blockNumber, reader.vault);
+      if (collateralOracleChecks.some(c => c.status !== 'ok')) warn('Some Euler collateral oracles could not return a positive price. Affected positions are listed in Risk Assessment.');
+      rawPositions.push({ account, controller, receipts, label: displayLabel, health, assets: active.map(r => r.asset), collateralOracleChecks });
     } catch { complete = false; warn('Some Euler holdings could not be verified. Their balances remain unknown.'); unknownPositions.push(unknown(id, label, receipts)); }
   }
   await limited(enabled, async account => {
@@ -121,6 +125,7 @@ export async function readEuler(client: ChainClient, wallet: Address, blockNumbe
         previous.borrowRate = weightedRate(previous.borrowRate, oldDebt, asset.borrowRate, asset.borrowed);
         const sum = oldSupply + asset.supplied;
         previous.liquidationThreshold = previous.liquidationThreshold === null || asset.liquidationThreshold === null ? null : sum ? ((previous.liquidationThreshold ?? 0) * oldSupply + (asset.liquidationThreshold ?? 0) * asset.supplied) / sum : 0;
+        previous.collateralSupplied = (previous.collateralSupplied ?? (previous.collateral ? oldSupply : 0)) + (asset.collateral ? asset.supplied : 0);
         previous.supplied += asset.supplied; previous.borrowed += asset.borrowed; previous.collateral ||= asset.collateral;
         previous.lltvNote = 'Effective liquidation factor weighted across this underlying token’s Euler receipt vaults and supplied balances.';
       }
@@ -131,7 +136,7 @@ export async function readEuler(client: ChainClient, wallet: Address, blockNumbe
     if (suppliedUsd === null || debtUsd === null) warn('Some Euler USD prices are unavailable. Token balances and native health remain visible.');
     const weighted = assets.reduce((s, a) => s + a.supplied * (a.priceUsd ?? 0) * (a.liquidationThreshold ?? 0), 0);
     const model = suppliedUsd !== null && debtUsd !== null && assets.every(a => !a.collateral || a.liquidationThreshold !== null) && (debtUsd === 0 || (raw.health !== null && weighted > 0 && Math.abs(weighted / debtUsd - raw.health) / Math.max(raw.health, .0001) <= .05));
-    return { id: `euler-${raw.account}-${raw.controller ?? raw.receipts[0]}`, label: raw.label, marketAddress: raw.controller ?? raw.receipts[0], receiptTokens: raw.receipts, assets: model && debtUsd !== null ? liquidationPrices(assets, debtUsd, weighted) : assets, suppliedUsd, debtUsd, healthFactor: raw.health, risk: riskLevel(assets.some(a => a.borrowed > 0) ? 1 : 0, raw.health), liquidationModel: model ? 'linear' as const : 'unavailable' as const, notes: [
+    return { collateralOracleChecks: raw.collateralOracleChecks, id: `euler-${raw.account}-${raw.controller ?? raw.receipts[0]}`, label: raw.label, marketAddress: raw.controller ?? raw.receipts[0], receiptTokens: raw.receipts, assets: model && debtUsd !== null ? liquidationPrices(assets, debtUsd, weighted) : assets, suppliedUsd, debtUsd, healthFactor: raw.health, risk: riskLevel(assets.some(a => a.borrowed > 0) ? 1 : 0, raw.health), liquidationModel: model ? 'linear' as const : 'unavailable' as const, notes: [
       `Euler EVK account ${raw.account}. Each vault share is converted once to its current underlying assets. Receipt-token wallet balances are excluded from wallet totals.`,
       'Native health uses Euler’s own liquidation oracle and current, potentially ramping liquidation LTV. USD totals use independently verified display prices; no stablecoin peg is assumed.',
       'Liquidation prices are estimates holding other USD prices and debt fixed. They are withheld if display-price collateral capacity differs materially from native oracle health, or a factor is missing.',

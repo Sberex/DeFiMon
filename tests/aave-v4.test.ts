@@ -161,6 +161,7 @@ it('retains on-chain hub and asset IDs for exact Merkl campaign matching', async
 it('merges same-token reserves with enabled-only collateral weights and debt exposure', () => {
   const a: Asset = { address: ETH, symbol: 'WETH', supplied: 2, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .8, liquidationPriceUsd: null };
   const [merged] = mergeV4Assets([a, { ...a, supplied: 2, liquidationThreshold: .9 }, { ...a, supplied: 1, borrowed: 1, collateral: false, liquidationThreshold: null }]);
+  expect(merged.collateralSupplied).toBe(a.supplied + 2);
   expect(merged.supplied).toBe(5); expect(merged.borrowed).toBe(1);
   const [withReserves] = mergeV4Assets([{ ...a, v4Reserves: [{ hub: HUB, assetId: '5', supplied: 2, borrowed: 0 }] }, { ...a, v4Reserves: [{ hub: M2.address, assetId: '7', supplied: 2, borrowed: 0 }] }]);
   expect(withReserves.v4Reserves).toHaveLength(2);

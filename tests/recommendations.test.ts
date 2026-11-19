@@ -1,12 +1,12 @@
 import { expect, it } from 'vitest';
 import type { Asset, Position, ProtocolResult } from '../src/types';
 import { isMorphoDepositPosition, recommendationPositions } from '../src/recommendations';
-const asset = (symbol: string, supplied: number, borrowed = 0): Asset => ({ symbol, address: symbol, supplied, borrowed, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .05, note: '' }, borrowRate: { apr: .08, note: '' } });
+const asset = (symbol: string, supplied: number, borrowed = 0): Asset => ({ symbol, address: symbol, supplied, borrowed, priceUsd: 1, collateral: supplied > 0, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .05, note: '' }, borrowRate: { apr: .08, note: '' } });
 const position = (id: string, assets: Asset[]): Position => ({ id, label: id, assets, suppliedUsd: 100, debtUsd: 50, healthFactor: 2, risk: 'lower', notes: [] });
 const protocol = (positions: Position[]): ProtocolResult => ({ id: 'morpho', name: 'Morpho', chain: 'Ethereum', status: 'ok', positions, coverage: '' });
 it('compares Morpho direct lending deposits by supplied token without confusing market collateral with wallet collateral', () => {
   const p = position('morpho-market-0x123', [asset('USDC', 100)]);
-  p.debtUsd = 0;
+  p.debtUsd = 0; p.assets[0].collateral = false;
   p.morphoMarket = { supplyOnly: true, loanAsset: { address: 'USDC', symbol: 'USDC' }, collateralAsset: { address: 'msY', symbol: 'msY' } };
   expect(isMorphoDepositPosition(p)).toBe(true);
   const result = recommendationPositions([protocol([p])])[0];
@@ -17,10 +17,10 @@ it('compares Morpho direct lending deposits by supplied token without confusing 
   expect(isMorphoDepositPosition({ ...p, debtUsd: null })).toBe(false);
 });
 it('keeps multiple collateral and debt combinations inside their own loan and preserves adjusted rates', () => {
-  const eth = asset('ETH', 10); eth.intrinsicSupplyRate = { apr: .03, note: '', source: { chain: 'Ethereum', oracle: 'feed' } };
+  const eth = asset('ETH', 1000); eth.intrinsicSupplyRate = { apr: .03, note: '', source: { chain: 'Ethereum', oracle: 'feed' } };
   eth.merklSupplyRate = { apr: .01, note: '', components: [] };
   const usdc = asset('USDC', 0, 500); usdc.merklBorrowRate = { apr: .02, note: '', components: [] };
-  const p = protocol([position('loan1', [eth, asset('WBTC', 1), usdc, asset('USDT', 0, 300)]), position('loan2', [asset('EUL', 10), asset('GHO', 0, 100)])]);
+  const p = protocol([position('loan1', [eth, asset('WBTC', 1000), usdc, asset('USDT', 0, 300)]), position('loan2', [asset('EUL', 1000), asset('GHO', 0, 100)])]);
   const before = structuredClone(p);
   const result = recommendationPositions([p]);
   expect(result[0].rows.map(r => [r.supplied?.symbol, r.borrowed?.symbol])).toEqual([['ETH', 'USDC'], ['ETH', 'USDT'], ['WBTC', 'USDC'], ['WBTC', 'USDT']]);
@@ -41,11 +41,10 @@ it('keeps one-sided balances and unknown active APRs, excludes unreadable or emp
   const deposit = asset('ETH', 1); deposit.supplyRate = undefined;
   const p = protocol([position('supply', [deposit]), position('borrow', [asset('USDC', 0, 1)]), position('unreadable', []), position('empty', [asset('USDT', 0)])]);
   const result = recommendationPositions([p, { ...p, chain: 'Plasma', status: 'partial' }, { ...p, status: 'error' }]);
-  expect(result).toHaveLength(4);
-  expect(new Set(result.map(r => r.key)).size).toBe(4);
+  expect(result).toHaveLength(2);
+  expect(new Set(result.map(r => r.key)).size).toBe(2);
   expect(result[0].rows[0].supplied?.supplyRate).toBeUndefined();
-  expect(result[1].rows[0].supplied).toBeUndefined();
-  expect(result[1].rows[0].borrowed?.symbol).toBe('USDC');
+  expect(result.every(r => r.rows[0].borrowed === undefined)).toBe(true);
 });
 it('excludes Fluid loops with the same two token contracts on both sides without changing overview positions or totals', () => {
   const gho = asset('GHO', 1000, 800), usdt = asset('USDT0', 2000, 1200);

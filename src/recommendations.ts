@@ -1,5 +1,6 @@
 import { sameTwoAssetBasket } from './recommendation-filters';
 import type { Asset, ChainName, Position, ProtocolResult } from './types';
+import { isBadDebtPosition } from './risk-assessment';
 
 export const isMorphoVaultPosition = (position: Position) => !!position.vault || position.id.startsWith('morpho-vault-');
 export const isMorphoDepositPosition = (position: Position) => isMorphoVaultPosition(position) || (position.morphoMarket?.supplyOnly === true && position.debtUsd === 0 && position.assets.some(a => a.supplied > 0) && position.assets.every(a => a.borrowed === 0 && !a.collateral));
@@ -12,6 +13,7 @@ export function recommendationPositions(protocols: ProtocolResult[], fallbackCha
   return protocols.flatMap(protocol => {
     if (!['ok', 'partial'].includes(protocol.status)) return [];
     return protocol.positions.flatMap(position => {
+      if (isBadDebtPosition(protocol.id, position)) return [];
       const supplied = position.assets.filter(a => Number.isFinite(a.supplied) && a.supplied > 0);
       const borrowed = position.assets.filter(a => Number.isFinite(a.borrowed) && a.borrowed > 0);
       if (protocol.id === 'fluid' && sameTwoAssetBasket(supplied.map(a => a.address), borrowed.map(a => a.address))) return [];

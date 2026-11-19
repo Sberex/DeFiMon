@@ -4,6 +4,45 @@ import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtu
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
+test('separates Bad Debt from overview, totals and recommendation requests, and restores positions after a successful oracle refresh', async ({ page }) => {
+  let reads = 0; const requests: any[] = [];
+  const id = '0x23a7d0ff682b323363fb8ba58327ed87001f6306e09b7fd7413bbe4698e749c8';
+  const loan = { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC' };
+  await page.route('**/api/portfolio/*', route => {
+    const fixture = structuredClone(example); reads++;
+    const good = { id: 'morpho-vault-safe', label: 'Healthy USDC deposit', suppliedUsd: 1000, debtUsd: 0, healthFactor: null, risk: 'no-debt' as const, notes: [], assets: [{ ...loan, supplied: 1000, borrowed: 0, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .12, note: '' } }] };
+    const bad = { ...structuredClone(good), id: `morpho-market-${id}`, label: 'Morpho lending deposit · USDC · msY / USDC', suppliedUsd: 6000000, morphoMarket: { loanAsset: loan, collateralAsset: { address: '0x890A5122Aa1dA30fEC4286DE7904Ff808F0bd74A', symbol: 'msY' }, supplyOnly: true }, collateralOracleChecks: [{ asset: 'msY', oracle: '0xB0b6Fc449CcF81Ff4129A86ddc814412E3Cd9Aa4', status: reads === 1 ? 'unavailable' as const : 'ok' as const }], assets: [{ ...good.assets[0], supplied: 6000000, supplyRate: { apr: 8, note: '' } }] };
+    const euler = { ...structuredClone(good), id: 'euler-bad', label: 'Euler failed collateral oracle', collateralOracleChecks: [{ asset: 'WETH', oracle: loan.address, status: 'zero' as const }] };
+    const underwater = { ...structuredClone(good), id: 'aave-underwater', label: 'Aave underwater loan', suppliedUsd: 500, debtUsd: 600, assets: [{ ...good.assets[0], supplied: 500, borrowed: 600, collateral: true }] };
+    const base = fixture.protocols[0];
+    fixture.protocols = [{ ...base, id: 'morpho', name: 'Morpho', status: 'ok', positions: [bad, good] }, { ...base, id: 'euler', name: 'Euler', status: 'ok', positions: [euler] }, { ...base, positions: [underwater], status: 'ok' }];
+    fixture.wallets = [{ chain: 'Ethereum', status: 'ok', pricedValueUsd: 100, unpricedCount: 0, coverage: '', tokens: [{ address: 'native', symbol: 'ETH', balance: .1, priceUsd: 1000, valueUsd: 100 }] }];
+    return route.fulfill({ json: fixture });
+  });
+  await page.route('**/api/recommendations', route => { requests.push(route.request().postDataJSON()); return route.fulfill({ json: { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } }); });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const nav = page.getByRole('navigation', { name: 'Dashboard sections' });
+  await expect(nav.getByRole('button')).toHaveCount(3);
+  for (const [i, name] of ['Wallet Overview', 'Recommendations', 'Risk Assessment'].entries()) await expect(nav.getByRole('button').nth(i)).toHaveAccessibleName(name);
+  await expect(page.locator('.summary.primary strong')).toHaveText('$1,100.00');
+  await expect(page.locator('.summary-grid .summary').nth(1).locator('strong')).toHaveText('$1,000.00');
+  await expect(page.locator('.summary-grid .summary').nth(2).locator('strong')).toHaveText('$0.00');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $10.00'); await expect(page.locator('.portfolio-apr > strong')).toHaveText('≈ 10.91%');
+  const overview = page.getByRole('region', { name: 'Wallet results', exact: true }); await expect(overview.getByRole('heading', { name: /msY/ })).toHaveCount(0);
+  await nav.getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(page.locator('.recommendation-card')).toHaveCount(1); await expect.poll(() => requests.length).toBe(1); expect(requests[0].targets).toHaveLength(1); expect(requests[0].targets[0].id).not.toContain(id);
+  await nav.getByRole('button', { name: 'Risk Assessment', exact: true }).click();
+  const risk = page.getByRole('region', { name: 'Risk Assessment', exact: true }); await expect(risk).toBeVisible();
+  await expect(risk.locator('.position')).toHaveCount(3); await expect(risk.getByText('msY collateral oracle could not return a price.', { exact: true })).toBeVisible();
+  await expect(risk.getByText('WETH collateral oracle returned zero.', { exact: true })).toBeVisible(); await expect(risk.getByText('Wallet borrowing value exceeds the value of its supplied collateral.', { exact: true })).toBeVisible();
+  await expect(risk.locator('.position-market-links a').first()).toHaveAttribute('href', `https://app.morpho.org/ethereum/market/${id}`);
+  await expect(risk.locator('.vault-interest-note')).toContainText('Excluded from overview totals and Total NPL');
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-risk-assessment-mobile.png', fullPage: true });
+  await nav.getByRole('button', { name: 'Wallet Overview', exact: true }).click(); await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(overview.getByRole('heading', { name: /msY/ })).toBeVisible(); await expect(page.locator('.summary.primary strong')).toHaveText('$6,001,100.00');
+  await nav.getByRole('button', { name: 'Risk Assessment', exact: true }).click(); await expect(risk.locator('.position')).toHaveCount(2);
+});
 test('shows clearly labeled example positions and partial protocol coverage', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Know where/ })).toBeVisible();
@@ -13,6 +52,20 @@ test('shows clearly labeled example positions and partial protocol coverage', as
   await expect(page.getByText('Not connected', { exact: true })).toHaveCount(0);
   await expect(page.getByText('$2,117.65', { exact: true })).toBeVisible();
   await page.screenshot({ path: '/tmp/defimon-desktop.png', fullPage: true });
+});
+test('shows known zero overview balances when every readable position is excluded by the Bad Debt rules', async ({ page }) => {
+  const fixture = structuredClone(example), morpho = fixture.protocols.find(p => p.id === 'morpho')!;
+  morpho.status = 'partial'; morpho.positions = [morpho.positions[0]];
+  morpho.positions[0].collateralOracleChecks = [{ asset: 'Collateral', oracle: 'oracle', status: 'unavailable' }];
+  fixture.protocols = [morpho]; fixture.wallets = [];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$0.00');
+  await expect(page.locator('.summary-grid .summary').nth(1).locator('strong')).toHaveText('$0.00');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $0.00');
+  await expect(page.locator('.portfolio-apr > strong')).toHaveText('Unavailable');
+  await page.getByRole('button', { name: 'Risk Assessment', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Risk Assessment', exact: true }).locator('.position')).toHaveCount(1);
 });
 test('rejects invalid input and displays provider failures without example balances', async ({ page }) => {
   await page.goto('/');
@@ -559,8 +612,8 @@ test('shows Fluid NPL separately for each vault and lending deposit, and keeps u
     const fixture = structuredClone(example);
     const fluid = fixture.protocols.find(p => p.id === 'fluid')!; fixture.protocols = [fluid];
     const second = structuredClone(fluid.positions[0]);
-    second.id = 'fluid-nft-second'; second.label = 'Vault 22'; second.suppliedUsd = 3000; second.debtUsd = 6000;
-    Object.assign(second.assets[0], { supplied: 1, supplyRate: { apr: .04, note: '' } });
+    second.id = 'fluid-nft-second'; second.label = 'Vault 22'; second.suppliedUsd = 6000; second.debtUsd = 6000;
+    Object.assign(second.assets[0], { supplied: 2, supplyRate: { apr: .02, note: '' } });
     Object.assign(second.assets[1], { borrowed: 6000, borrowRate: reads === 1 ? { apr: .06, note: '' } : undefined });
     const deposit = structuredClone(fluid.positions[0]);
     deposit.id = 'fluid-lending-example'; deposit.label = 'ETH lending deposit'; deposit.debtUsd = 0;
@@ -671,13 +724,15 @@ test('applies live Merkl supply and borrow APR to matching Fluid vaults and net-
   await expect(gho.locator('td').nth(4).getByText('Merkl rebate: −1.45%', { exact: true })).toBeVisible();
   await expect(fluid.locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $13.16 / month');
   await expect(fluid.locator('.position-net-apr strong')).toHaveText('≈ 7.89%');
-  const aaveBorrow = page.locator('article.aave-v4 tbody tr').first().locator('td').nth(4);
+  await page.getByRole('button', { name: 'Risk Assessment', exact: true }).click();
+  const aaveBorrow = page.locator('#risk-assessment-panel article.aave-v4 tbody tr').first().locator('td').nth(4);
   await expect(aaveBorrow.locator('.asset-rate')).toContainText('≈ 4.95%');
   await expect(aaveBorrow.getByText('Merkl rebate: −1.05%', { exact: true })).toBeVisible();
   await aaveBorrow.getByText('Merkl reward details', { exact: true }).click();
   await expect(aaveBorrow.getByText(/Estimated eligible share: 60.00%/)).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ -$21.43');
-  await expect(page.locator('.summary.primary strong')).toHaveText('-$4,000.00');
+  await page.getByRole('button', { name: 'Wallet Overview', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ $13.16');
+  await expect(page.locator('.summary.primary strong')).toHaveText('$2,000.00');
   const opportunities = page.getByRole('table', { name: 'Merkl APR opportunities and position matching' });
   await expect(opportunities.getByText('Applied to 1 position', { exact: true })).toHaveCount(3);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -693,12 +748,12 @@ test('Merkl APR failures preserve base rates and clearly exclude unverified ince
   await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
   const total = page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong');
-  await expect(total).toHaveText('≈ -$21.43');
+  await expect(total).toHaveText('≈ $13.16');
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
-  await expect(total).toHaveText('≈ -$50.83');
+  await expect(total).toHaveText('≈ -$7.50');
   await expect(page.locator('.merkl-apr-notice')).toContainText('exclude unverified Merkl incentives');
   await expect(page.locator('article.fluid tbody tr').first().locator('td').nth(4).locator('.asset-rate')).toContainText('6.00%');
-  await expect(page.locator('.summary.primary strong')).toHaveText('-$4,000.00');
+  await expect(page.locator('.summary.primary strong')).toHaveText('$2,000.00');
 });
 
 test('Merkl vault rewards do not leak into a different Fluid vault', async ({ page }) => {
@@ -1119,7 +1174,7 @@ test('keeps same-two-token Fluid vaults in overview but excludes them from recom
   const loop = structuredClone(fluid.positions[0]); loop.id = 'fluid-nft-loop'; loop.label = 'Vault 33 · GHO/USDT0 / GHO/USDT0';
   loop.suppliedUsd = 3000; loop.debtUsd = 2000;
   Object.assign(loop.assets[0], { address: '0xb77e872a68c62cfc0dfb02c067ecc3da23b4bbf3', symbol: 'GHO', supplied: 1000, borrowed: 800, priceUsd: 1, supplyRate: { apr: .02, note: '' }, borrowRate: { apr: .04, note: '' } });
-  Object.assign(loop.assets[1], { address: '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', symbol: 'USDT0', supplied: 2000, borrowed: 1200, priceUsd: 1, supplyRate: { apr: .02, note: '' }, borrowRate: { apr: .04, note: '' } });
+  Object.assign(loop.assets[1], { address: '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', symbol: 'USDT0', supplied: 2000, borrowed: 1200, collateral: true, priceUsd: 1, supplyRate: { apr: .02, note: '' }, borrowRate: { apr: .04, note: '' } });
   const eligible = structuredClone(loop); eligible.id = 'fluid-nft-eligible'; eligible.label = 'Vault 36 · sUSDai / USDT0'; eligible.suppliedUsd = 1500; eligible.debtUsd = 1000;
   Object.assign(eligible.assets[0], { address: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', symbol: 'sUSDai', supplied: 1500, borrowed: 0 });
   Object.assign(eligible.assets[1], { supplied: 0, borrowed: 1000 });

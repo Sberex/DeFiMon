@@ -33,6 +33,8 @@ export interface IntrinsicRate extends InterestRate {
 export interface Asset {
   symbol: string; address: string; supplied: number; borrowed: number; priceUsd: number | null;
   collateral: boolean; liquidationThreshold: number | null; liquidationPriceUsd: number | null;
+  /** Pledged amount when a row combines pledged collateral and ordinary deposits. */
+  collateralSupplied?: number;
   /** Actual protocol LLTV when the calculation factor is weighted across balances. */
   lltv?: number; lltvNote?: string;
   priceSource?: 'fluid-oracle' | 'euler-oracle';
@@ -46,6 +48,8 @@ export interface Position {
   vault?: { address: string; version: 1 | 2; roles: { role: 'creator' | 'curator' | 'owner'; source: 'onchain' | 'api' }[]; totalAssets: number | null; totalAssetsUsd: number | null };
   marketAddress?: string;
   morphoMarket?: { loanAsset: { address: string; symbol: string }; collateralAsset: { address: string; symbol: string } | null; supplyOnly: boolean };
+  collateralOracleChecks?: { asset: string; oracle: string; status: 'ok' | 'unavailable' | 'zero' }[];
+  riskAssessment?: { reasons: string[] };
   receiptTokens?: string[];
   liquidationModel?: 'linear' | 'oracle-ratio' | 'unavailable';
   liquidationQuote?: { current: number; threshold: number; unit: string };

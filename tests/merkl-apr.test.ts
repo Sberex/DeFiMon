@@ -91,7 +91,7 @@ it('never counts the same opportunity twice, compounds a repeated response, or a
 it('adds rewards to NPL once per eligible USD balance, including smart-pool legs and negative net borrowing costs', () => {
   const p = portfolio(), before = totalMonthlyInterest(p.protocols), result = applyMerklApr(p, rewards()).portfolio;
   const after = totalMonthlyInterest(result.protocols);
-  const expected = 10000 * opportunities[2].apr / 12 + 8000 * opportunities[1].apr / 12 + 6000 * opportunities[0].apr / 12;
+  const expected = 10000 * opportunities[2].apr / 12 + 8000 * opportunities[1].apr / 12;
   expect(after.nplUsd! - before.nplUsd!).toBeCloseTo(expected);
   expect(result.protocols[1].positions[0].suppliedUsd).toBe(10000);
   result.protocols[1].positions[0].assets[0].borrowRate!.apr = .001;

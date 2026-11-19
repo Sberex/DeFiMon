@@ -6,6 +6,7 @@ import { morphoHealth, morphoSharesToAssets, readMorpho } from '../server/adapte
 import { MORPHO_BLUE, type MorphoDiscovery, type MorphoMarketRef, type MorphoToken, type MorphoVaultRef } from '../server/morpho-discovery';
 import { morphoCoreAbi as coreAbi, morphoMulticallAbi as multiAbi, morphoVaultAbi as vaultAbi } from '../server/abis/morpho';
 import type { ChainClient } from '../server/rpc';
+import { badDebtReasons } from '../src/risk-assessment';
 const wallet = '0x1111111111111111111111111111111111111111';
 const USDC = '0x2222222222222222222222222222222222222222';
 const ETH = '0x3333333333333333333333333333333333333333';
@@ -68,6 +69,13 @@ function fixture(options: { network?: NetworkId; emptyVault?: boolean; vaults?: 
   return { client, discovery, blocks, simulated, calls, read: () => readMorpho(client, wallet, 123n, async () => discovery, options.network) };
 }
 describe('Morpho Blue markets', () => {
+  it('checks market collateral oracles even for a supply-only deposit with no wallet borrowing', async () => {
+    const r = await fixture({ noDebt: true, noCollateral: true, oracleFail: true }).read();
+    expect(r.positions[0].assets[0].supplied).toBe(500);
+    expect(r.positions[0].collateralOracleChecks?.[0].status).toBe('unavailable');
+    expect(badDebtReasons('morpho', r.positions[0])).toHaveLength(1);
+    expect(JSON.stringify(r)).not.toContain('secret provider details');
+  });
   it('simulates interest before reading shares and uses raw oracle scaling for risk and liquidation boundaries', async () => {
     const m = fixture(); const r = await m.read(); const p = r.positions[0];
     expect(r.status).toBe('ok'); expect(p.suppliedUsd).toBe(6500); expect(p.debtUsd).toBe(2000);

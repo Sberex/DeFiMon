@@ -11,7 +11,7 @@ export const WETH = '0x5555555555555555555555555555555555555555' as Address;
 export const USDC = '0x6666666666666666666666666666666666666666' as Address;
 const ZERO = '0x0000000000000000000000000000000000000000';
 const E6 = 10n ** 6n, E18 = 10n ** 18n;
-export function eulerFixture(options: { network?: NetworkId; mainLoan?: boolean; noOwner?: boolean; badBalance?: boolean; badFactory?: boolean; oracleFailure?: boolean; rateFailure?: boolean; usdOracle?: boolean; paused?: boolean; missingSlice?: boolean } = {}) {
+export function eulerFixture(options: { network?: NetworkId; mainLoan?: boolean; noOwner?: boolean; badBalance?: boolean; badFactory?: boolean; oracleFailure?: boolean; rateFailure?: boolean; usdOracle?: boolean; collateralOracleFailure?: boolean; paused?: boolean; missingSlice?: boolean } = {}) {
   const network = options.network ?? 'ethereum', deployment = eulerDeployments[network], account = options.mainLoan ? wallet : subaccount;
   const vaults = [collateral, debt, deposit]; const calls: { name: string; address: string; args: readonly unknown[] }[] = [];
   const readContract = async ({ address, functionName, args = [], blockNumber }: any): Promise<any> => {
@@ -47,9 +47,9 @@ export function eulerFixture(options: { network?: NetworkId; mainLoan?: boolean;
       case 'LTVBorrow': return args[0].toLowerCase() === collateral ? 7500 : 0;
       case 'LTVLiquidation': return args[0].toLowerCase() === collateral ? 8000 : 0;
       case 'accountLiquidity': if (options.oracleFailure) throw new Error('private-provider-key'); return [4800n * E18, 1000n * E18];
-      case 'oracle': if (!options.usdOracle) throw new Error('No price'); return deposit;
+      case 'oracle': return deposit;
       case 'unitOfAccount': return '0x0000000000000000000000000000000000000348';
-      case 'getQuote': return (args[1].toLowerCase() === WETH ? 3000n : 1n) * E18;
+      case 'getQuote': if (options.collateralOracleFailure) throw new Error('private-provider-key'); return (args[1].toLowerCase() === WETH ? 3000n : 1n) * E18;
     }
     throw new Error(`Unexpected method ${functionName}`);
   };

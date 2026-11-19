@@ -90,9 +90,11 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       const loan = await token(ref.loan);
       const collateral = position.collateral > 0n && ref.collateral ? await token(ref.collateral) : null;
       let oraclePrice: bigint | null = null;
-      if (borrowRaw > 0n) {
+      const collateralOracleChecks: NonNullable<Position['collateralOracleChecks']> = [];
+      if (ref.collateral) {
         try { oraclePrice = await client.readContract({ address: params.oracle, abi: oracleAbi, functionName: 'price', blockNumber }); }
-        catch { warnings.add('Some Morpho liquidation oracle data is unavailable. Those borrowing risks are unknown.'); }
+        catch { warnings.add('Some Morpho collateral oracles could not return a price. Affected positions are listed in Risk Assessment.'); }
+        collateralOracleChecks.push({ asset: ref.collateral.symbol, oracle: params.oracle, status: oraclePrice === null ? 'unavailable' : oraclePrice <= 0n ? 'zero' : 'ok' });
       }
       const health = morphoHealth(position.collateral, borrowRaw, oraclePrice, params.lltv);
       const currentRates = await interest.market(params, market);
@@ -106,6 +108,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
           loanAsset.supplyRate = weightedRate(loanAsset.supplyRate, loanAsset.supplied, rate(0, 'Morpho collateral itself earns no protocol lending interest.'), quantity);
           loanAsset.supplied += quantity;
           loanAsset.collateral = true;
+          loanAsset.collateralSupplied = quantity;
           loanAsset.lltv = units(params.lltv, 18);
           loanAsset.lltvNote = 'Protocol LLTV applies only to pledged collateral; lending deposits of the same token are excluded from collateral capacity.';
           loanAsset.liquidationThreshold = loanAsset.supplied > 0 ? units(params.lltv, 18) * quantity / loanAsset.supplied : null;
@@ -127,7 +130,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       const morphoMarket = { loanAsset: { address: loan.address, symbol: loan.symbol }, collateralAsset: marketCollateral ? { address: marketCollateral.address, symbol: marketCollateral.symbol } : null, supplyOnly };
       if (suppliedUsd === null || debtUsd === null) warnings.add('Some Morpho USD prices are unavailable. Token balances and oracle-based risk remain visible; dollar totals are incomplete.');
       if (borrowRaw > 0n && oraclePrice === 0n) warnings.add('A Morpho liquidation oracle reports zero: the protocol values that collateral at zero for borrowing risk.');
-      return { morphoMarket, id: `morpho-market-${ref.id}`, label: supplyOnly ? `Morpho lending deposit · ${loan.symbol} · ${marketCollateral?.symbol ?? 'unsecured'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…` : `Morpho · ${marketCollateral?.symbol ?? 'no collateral'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(borrowRaw > 0n ? 1 : 0, health), assets: assets.filter(a => a.supplied > 0 || a.borrowed > 0), liquidationQuote, notes: [
+      return { collateralOracleChecks, morphoMarket, id: `morpho-market-${ref.id}`, label: supplyOnly ? `Morpho lending deposit · ${loan.symbol} · ${marketCollateral?.symbol ?? 'unsecured'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…` : `Morpho · ${marketCollateral?.symbol ?? 'no collateral'} / ${loan.symbol} · ${ref.id.slice(0, 10)}…`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(borrowRaw > 0n ? 1 : 0, health), assets: assets.filter(a => a.supplied > 0 || a.borrowed > 0), liquidationQuote, notes: [
         ...(supplyOnly ? [`This is your direct ${loan.symbol} lending deposit in one Morpho market, displayed in deposit format. You have no pledged collateral or borrowing in this market. ${marketCollateral ? `${marketCollateral.symbol} is the market's accepted collateral, not an asset you supplied.` : 'This market has no collateral token.'} It is not a curated ERC-4626 vault.`] : []),
         'Each Morpho market has separate collateral and debt. Loan-token lending deposits do not protect a borrowing position, even in this same market.',
         `Interest is simulated to the displayed ${deployment.name} block without sending a transaction. Supply rounds down and debt rounds up using Morpho’s virtual assets and shares.`,

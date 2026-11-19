@@ -13,13 +13,13 @@ it('uses balance × APR / 12 in token units and current price for USD, then subt
   expect(result.nplUsd).toBeCloseTo(90);
 });
 it('sums multiple assets and positions within a protocol without mutating balances or rates', () => {
-  const p = protocol([position(), { ...position([asset({ supplied: 0, borrowed: 1200, priceUsd: 1, symbol: 'USDC' })]), suppliedUsd: 0, debtUsd: 1200 }]);
+  const p = protocol([position(), { ...position([asset({ supplied: 1200, borrowed: 1200, priceUsd: 1, symbol: 'USDC', supplyRate: { apr: 0, note: '' } })]), suppliedUsd: 1200, debtUsd: 1200 }]);
   const before = structuredClone(p);
   const result = protocolMonthlyInterest(p);
   expect(result.earnedUsd).toBeCloseTo(150);
   expect(result.paidUsd).toBeCloseTo(72);
   expect(result.nplUsd).toBeCloseTo(78);
-  expect(result.netValueUsd).toBe(22800);
+  expect(result.netValueUsd).toBe(24000);
   expect(p).toEqual(before);
 });
 it('includes intrinsic yield exactly once using the same combined supply APR as the table', () => {
