@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { betterAlternatives, comparisonTargets, type MarketAlternative, type MarketSearch } from '../src/market-comparison';
+import { betterAlternatives, groupAlternativesByLiquidity, comparisonTargets, type MarketAlternative, type MarketSearch } from '../src/market-comparison';
 import { recommendationPositions } from '../src/recommendations';
 import { correspondingTokens } from '../server/market-tokens';
 import { example } from '../src/example';
@@ -12,6 +12,14 @@ const position = () => {
 };
 const candidate = (targetId: string, changes: Partial<MarketAlternative> = {}): MarketAlternative => ({ targetId, protocol: 'Morpho', network: 'arbitrum', market: '0x2222222222222222222222222222222222222222', label: 'Test market', supplyApr: 0, borrowApr: .03, lltv: .8, block: '100', url: 'https://app.morpho.org/', note: '', ...changes });
 const search = (alternatives: MarketAlternative[]): MarketSearch => ({ checkedAt: '', coverage: [], alternatives });
+it('groups only known liquidity below the borrowed token amount, preserving order and equality', () => {
+  const list = [2000, 1000, 999, 0, undefined, NaN, -1].map((amount, i) => candidate('target', { market: String(i), liquidity: amount === undefined ? null : { amount, symbol: 'USDC', token: 'matched-debt-token', note: '' } }));
+  const result = groupAlternativesByLiquidity(list, 1000);
+  expect(result.visible.map(c => c.market)).toEqual(['0', '1', '4', '5', '6']);
+  expect(result.insufficient.map(c => c.market)).toEqual(['2', '3']);
+  expect(list).toHaveLength(7);
+  for (const borrowed of [undefined, 0, NaN]) expect(groupAlternativesByLiquidity(list, borrowed)).toEqual({ visible: list, insufficient: [] });
+});
 it('matches the user-configured cross-network addresses, including USDT0, while excluding unlisted assets', () => {
   expect(correspondingTokens('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', 'ethereum', 'arbitrum')).toEqual(['0x5979d7b546e38e414f7e9822514be443a4800529']);
   expect(correspondingTokens('0x0000000000000000000000000000000000001234', 'ethereum', 'arbitrum')).toEqual([]);

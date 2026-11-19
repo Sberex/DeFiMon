@@ -16,6 +16,17 @@ export interface TokenDiscoveryReport {
 }
 export interface MarketSearch { tokenDiscovery?: TokenDiscoveryReport[]; targetIds?: string[]; checkedAt: string; alternatives: MarketAlternative[]; coverage: { protocol: string; network: NetworkId; status: 'ok' | 'partial' | 'error'; message?: string }[] }
 
+/** Compare normalized debt-token units; equality can cover the full borrowing. */
+export function groupAlternativesByLiquidity<T extends MarketAlternative>(alternatives: T[], borrowedAmount?: number) {
+  const visible: T[] = [], insufficient: T[] = [];
+  for (const alternative of alternatives) {
+    const amount = alternative.liquidity?.amount;
+    const below = typeof borrowedAmount === 'number' && Number.isFinite(borrowedAmount) && borrowedAmount > 0 && typeof amount === 'number' && Number.isFinite(amount) && amount >= 0 && amount < borrowedAmount;
+    (below ? insufficient : visible).push(alternative);
+  }
+  return { visible, insufficient };
+}
+
 import type { RecommendationPosition } from './recommendations';
 import { supplyApr, borrowApr } from './monthly-interest';
 export const comparisonId = (position: RecommendationPosition, row: number) => `${position.key}:${row}`;

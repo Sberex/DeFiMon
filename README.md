@@ -482,3 +482,6 @@ Excluded positions retain their balances, rates, market links and reasons in Ris
 
 
 Fluid T1 collateral valuation is independent of the wallet's borrowing balance. When an independent collateral USD feed is unavailable, a positive vault oracle ratio can be combined with the configured loan token's verified USD price even after all debt is repaid. Raw token decimals are applied to that ratio. Zero debt creates no borrowed-asset row or liquidation boundary; Supplied equals Net value, Monthly NPL equals monthly supply earnings, and a single supplied asset's position APR equals its effective Supply APR. These earnings enter Total NPL once. Missing reference prices/metadata, zero oracle ratios and smart-pool share ratios never create a guessed dollar price.
+
+
+Borrowing alternatives with verified Available Liquidity below the active row's borrowed token amount are collapsed under **Lower liquidity markets**. The comparison uses normalized token quantities across matched networks, not USD values; equality stays in the main list. Both lists retain descending liquidity order, and the headline rate uses the main list. Unknown/invalid liquidity remains visibly unavailable rather than being assumed zero. Supply-only recommendations are unchanged, and opening a list never changes wallet totals.

@@ -4,6 +4,34 @@ import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtu
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
+test('collapses lower-liquidity alternatives while keeping enough, equal and unknown capacity visible', async ({ page }) => {
+  const fixture = structuredClone(example), protocol = fixture.protocols[0]; fixture.protocols = [protocol]; protocol.positions = [protocol.positions[0]];
+  const position = protocol.positions[0]; position.assets[0].address = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'; position.assets[1].address = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; position.assets[0].symbol = 'WETH'; position.assets[1].symbol = 'USDC'; position.assets[1].borrowed = 1000; position.debtUsd = 1000; position.assets[1].borrowRate = { apr: .06, note: '' };
+  let reads = 0;
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => {
+    reads++; const t = route.request().postDataJSON().targets[0];
+    const specs = reads === 1 ? [['Enough liquidity', 2000, .04], ['Exact liquidity', 1000, .035], ['Small liquidity', 999, .01], ['No liquidity', 0, 0], ['Unknown liquidity', null, .045]] as const : [['Small liquidity', 999, .01], ['No liquidity', 0, 0]] as const;
+    const alternatives = specs.map(([label, amount, borrowApr], i) => ({ targetId: t.id, protocol: 'Morpho', network: 'arbitrum', market: `0x${String(i + 1).repeat(64)}`, label, supplyApr: 0, borrowApr, lltv: .86, block: '100', url: 'https://app.morpho.org/', note: '', liquidity: amount === null ? null : { amount, symbol: 'USDC', token: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', note: 'Available USDC.' } }));
+    return route.fulfill({ json: { alternatives, coverage: [], checkedAt: new Date().toISOString() } });
+  });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const total = await page.locator('.total-npl > strong').textContent();
+  await page.getByRole('button', { name: 'Recommendations', exact: true }).click();
+  const pair = page.getByRole('region', { name: 'Alternatives for WETH - USDC', exact: true });
+  await expect(pair.getByRole('table', { name: 'Better rates for WETH - USDC' }).locator('tbody tr')).toHaveCount(3);
+  await expect(pair.getByRole('link', { name: 'Enough liquidity' })).toBeVisible(); await expect(pair.getByRole('link', { name: 'Exact liquidity' })).toBeVisible(); await expect(pair.getByRole('link', { name: 'Unknown liquidity' })).toBeVisible();
+  await expect(pair.locator('.best-alternative-rate strong')).toHaveText('Best verified Borrow APR: ≈ 3.50%');
+  const low = pair.locator('.insufficient-liquidity'); await expect(low).not.toHaveAttribute('open'); await expect(low.getByText('Small liquidity', { exact: true })).toBeHidden();
+  await low.locator('summary').first().click();
+  await expect(low.getByText('Small liquidity', { exact: true })).toBeVisible(); await expect(low.getByText('No liquidity', { exact: true })).toBeVisible(); await expect(low.locator('tbody tr').first()).toContainText('999 USDC');
+  await expect(low.locator('p').first()).toHaveText('Available liquidity is below your borrowed balance of 1,000 USDC.');
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Refresh alternative rates', exact: true }).click();
+  await expect(pair.getByText('All better-rate alternatives have less liquidity than your borrowed balance.', { exact: true })).toBeVisible();
+  await expect(pair.locator('.best-alternative-rate')).toHaveCount(0); await expect(pair.locator('.insufficient-liquidity')).not.toHaveAttribute('open');
+  await page.getByRole('button', { name: 'Wallet Overview', exact: true }).click(); await expect(page.locator('.total-npl > strong')).toHaveText(total!);
+});
 test('values a supplied-only Fluid vault and includes its full monthly earnings in position and portfolio NPL', async ({ page }) => {
   const fixture = structuredClone(example), fluid = fixture.protocols.find(p => p.id === 'fluid')!;
   fluid.chain = 'Plasma'; fluid.status = 'partial'; fluid.message = 'Collateral value estimated from Fluid’s oracle and the configured USDT0 reference price.';
@@ -1163,6 +1191,8 @@ test('finds lower borrow APRs and higher Morpho vault supply APRs without changi
   expect(marketReads).toBe(1);
   await page.getByRole('button', { name: 'Refresh alternative rates', exact: true }).click();
   await expect(loan.locator('tbody tr').filter({ hasText: 'Better verified market' }).locator('td').nth(2)).toHaveText('≈ 2.00%');
+  await expect(loan.getByText('0 GHO', { exact: true })).toBeHidden();
+  await loan.getByText('Lower liquidity markets (1)', { exact: true }).click();
   await expect(loan.getByText('0 GHO', { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
