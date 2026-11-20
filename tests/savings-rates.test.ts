@@ -170,3 +170,44 @@ it('retries pruned history once through an independent verified archive snapshot
   const badArchive = fixture({ chain: 42161 });
   expect((await createSavingsRateService({ clientFor: () => primary, archiveFallbackFor: () => badArchive.client, registry: f.registry, sources: { reUSD: f.source } }).quote('reUSD', { network: 'ethereum' })).apr).toBeNull();
 });
+
+it('enriches the reported Hastra PRIME/PYUSD collateral with its exact oracle, excluding unrelated PRIME tickers', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { configuredTokenRegistry } = await import('../server/token-registry');
+  const { savingsGroup } = await import('../server/savings-rates');
+  const { annualizedNplApr, totalMonthlyInterest } = await import('../src/monthly-interest');
+  const sources = JSON.parse(readFileSync(new URL('../config/savings-oracles.json', import.meta.url), 'utf8'));
+  const source = sources['Hastra-PRIME'];
+  expect(source.token).toBe('0x19ebb35279a16207ec4ba82799cc64715065f7f6');
+  expect(savingsGroup('ethereum', source.token)).toBe('Hastra-PRIME');
+  expect(savingsGroup('ethereum', configuredTokenRegistry.PRIME.addresses.ethereum!)).toBeUndefined();
+  const start = 1065661134590332800n, end = 1071060177801187095n;
+  const reads: bigint[] = [];
+  const client = {
+    getChainId: async () => 1, getBlockNumber: async () => END,
+    getBlock: async ({ blockNumber }: any) => ({ number: blockNumber, timestamp: NOW - (END - blockNumber) * 12n }),
+    readContract: async ({ address, functionName, blockNumber }: any) => {
+      expect(address.toLowerCase()).toBe(source.address.toLowerCase()); reads.push(blockNumber);
+      if (functionName === 'description') return 'PRIME / WYLDS Exchange Rate';
+      if (functionName === 'decimals') return 18;
+      const time = NOW - (END - blockNumber) * 12n - 60n;
+      if (functionName === 'latestRoundData') return [211n, blockNumber <= OLD ? start : end, time, time, 211n];
+      throw new Error('Unexpected source read');
+    },
+  } as unknown as ChainClient;
+  const service = createSavingsRateService({ clientFor: () => client, sources });
+  const asset = { address: source.token, symbol: 'PRIME', supplied: 114853.868672, borrowed: 0, priceUsd: 122947.56 / 114853.868672, collateral: true, liquidationThreshold: .86, liquidationPriceUsd: 1.01, supplyRate: { apr: 0, note: 'No Morpho collateral lending income' } };
+  const protocol: ProtocolResult = { id: 'morpho', name: 'Morpho', status: 'ok', coverage: '', positions: [{ id: 'morpho-market-0x41c41d0c9aadbf4751f5ee215ed5a16954a4b34e1b70fca5393d4b08858fa3fa', label: 'PRIME / PYUSD', suppliedUsd: 122947.56, debtUsd: 100199.03, healthFactor: 1.06, risk: 'high', notes: [], assets: [asset, { ...asset, address: '0x6c3ea9036406852006290770bedfcaba0e23a0e8', symbol: 'PYUSD', supplied: 0, borrowed: 100199.03, priceUsd: 1, collateral: false, borrowRate: { apr: .06, note: 'Borrow APR' } }] }] };
+  const result = await applyIntrinsicRates([protocol], 'ethereum', undefined, service.quote);
+  const pos = result[0].positions[0], a = pos.assets[0], m = positionMonthlyInterest(pos), apr = savingsApr(start, end)!;
+  expect(apr).toBeCloseTo(.06164094469922217);
+  expect(supplyApr(a.supplyRate, a.intrinsicSupplyRate)).toBeCloseTo(apr);
+  expect(m.earnedUsd).toBeCloseTo(122947.56 * apr / 12);
+  expect(m.nplUsd).toBeCloseTo((122947.56 * apr - 100199.03 * .06) / 12);
+  expect(annualizedNplApr(m.nplUsd, 122947.56 - 100199.03)).toBeGreaterThan(0);
+  expect(totalMonthlyInterest(result).nplUsd).toBe(m.nplUsd);
+  expect(totalMonthlyInterest(await applyIntrinsicRates(result, 'ethereum', undefined, service.quote)).nplUsd).toBe(m.nplUsd);
+  expect(reads).toContain(OLD); expect(reads).toContain(END);
+  const unrelated = structuredClone(protocol); unrelated.positions[0].assets[0].address = configuredTokenRegistry.PRIME.addresses.ethereum!;
+  expect((await applyIntrinsicRates([unrelated], 'ethereum', undefined, service.quote))[0].positions[0].assets[0].intrinsicSupplyRate).toBeUndefined();
+});

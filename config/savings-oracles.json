@@ -64,5 +64,16 @@
     "label": "InfiniFi iUSD/USD accounting oracle",
     "note": "Unstaked iUSD is the InfiniFi receipt token. Staking/locking rewards accrue to siUSD/liUSD, not a plain iUSD wallet balance. An unchanged verified accounting price gives 0% intrinsic APR; losses remain negative. This is not InfiniFi\u2019s advertised staking APY.",
     "evidence": "https://github.com/InfiniFi-Labs/infinifi-protocol/blob/2ac1b13a624e65e819ee82a982a8d5382cde921a/deployment/configuration/addresses.1.json"
+  },
+  "Hastra-PRIME": {
+    "network": "ethereum",
+    "kind": "chainlink",
+    "address": "0xf17C0EdcAA28371e9c8012D7699bF40ECF0F58d1",
+    "token": "0x19ebb35279a16207ec4ba82799cc64715065f7f6",
+    "description": "PRIME / WYLDS Exchange Rate",
+    "decimals": 18,
+    "label": "Hastra PRIME/wYLDS raw exchange-rate oracle",
+    "evidence": "https://sourcify.dev/server/v2/contract/1/0x335e5718bC20028d5e357473a3736C187Ca6b07e?fields=all",
+    "note": "Hastra PRIME is distinct from the Echelon PRIME governance token. This is growth in wYLDS per PRIME from the market\u2019s direct base feed; lending APR, incentives and market-price changes are separate."
   }
 }
