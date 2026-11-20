@@ -8,7 +8,7 @@ import type { MerklRewards, Portfolio } from '../src/types.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY) setGlobalDispatcher(new EnvHttpProxyAgent());
 async function main() {
   const args = process.argv.slice(2);
-  const wallets: string[] = args.length === 1 && args[0] === '--test-cases' ? JSON.parse(await readFile('test-cases.json', 'utf8')) : args;
+  const wallets: string[] = args.length === 1 && args[0] === '--test-cases' ? JSON.parse(await readFile('analysis/test-cases.json', 'utf8')) : args;
   if (!wallets.length || wallets.some(w => !isAddress(w, { strict: false }) || /^0x0{40}$/i.test(w))) throw new Error('Usage: npm run refresh:cookbook -- --test-cases OR 0xWallet [0xWallet ...]');
   const base = new URL(process.env.COOKBOOK_API_BASE_URL || 'https://defimon-api.onrender.com');
   if (base.protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(base.hostname)) throw new Error('Use a public HTTPS DeFiMon API origin');

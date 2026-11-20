@@ -371,7 +371,7 @@ npm run test:browser
 
 Unit/API tests cover price boundaries, debt in the same asset, efficiency mode, block consistency, simulated Compound accrual, input validation, and isolated failures. Browser tests cover search, example labeling, errors, refreshed responses, and mobile layout using controlled API fixtures. Browser fixtures do not establish live protocol accuracy.
 
-Fluid was also checked on Ethereum against live standard (T1), smart collateral (T2), and smart collateral/debt (T4) positions at blocks 26406819–26406833, plus a live fUSDC lending deposit at block 26406841. T3 behavior is covered by deterministic fixtures, not an active T3 wallet comparison. One live T2 position had an unsupported syrupUSDC dollar price; the reader correctly retained its balances and oracle health while marking its valuation incomplete. The first two wallets in `TestCases` were also checked at blocks 26406856–26406857: the first returned one active T4 GHO/USDC position with a health estimate near 1.03; the second returned no directly held covered Fluid positions. These checks validate the data path and calculations, not exact liquidation execution at the boundary.
+Fluid was also checked on Ethereum against live standard (T1), smart collateral (T2), and smart collateral/debt (T4) positions at blocks 26406819–26406833, plus a live fUSDC lending deposit at block 26406841. T3 behavior is covered by deterministic fixtures, not an active T3 wallet comparison. One live T2 position had an unsupported syrupUSDC dollar price; the reader correctly retained its balances and oracle health while marking its valuation incomplete. The first two wallets in `analysis/test-cases.json` were also checked at blocks 26406856–26406857: the first returned one active T4 GHO/USDC position with a health estimate near 1.03; the second returned no directly held covered Fluid positions. These checks validate the data path and calculations, not exact liquidation execution at the boundary.
 
 To repeat a live check for a wallet with known Fluid positions:
 
@@ -383,7 +383,7 @@ This reads the current block and prints the complete Fluid result. It exits unsu
 
 Browser tests use `/usr/bin/chromium` when present; otherwise run `npx playwright install chromium` first. Override `CHROMIUM_PATH` to use another installed executable.
 
-Aave v4 live checks confirmed all 14 lending contracts and 37 tokenized-deposit balance readers on Ethereum. A live Main-market borrower at block 26407382 returned wstETH collateral, USDC/USDT debt, and a native health factor near 4.10645, with estimated collateral liquidation prices. The second wallet in `TestCases` had no covered direct v4 positions at block 26407366. Tokenized-deposit conversion/valuation interfaces were also checked against live contract-wide supply; an individual active tokenized holder was not independently validated. Historical transfer discovery was limited by the public provider’s archive policy; current-state wallet lookup does not require historical logs.
+Aave v4 live checks confirmed all 14 lending contracts and 37 tokenized-deposit balance readers on Ethereum. A live Main-market borrower at block 26407382 returned wstETH collateral, USDC/USDT debt, and a native health factor near 4.10645, with estimated collateral liquidation prices. The second wallet in `analysis/test-cases.json` had no covered direct v4 positions at block 26407366. Tokenized-deposit conversion/valuation interfaces were also checked against live contract-wide supply; an individual active tokenized holder was not independently validated. Historical transfer discovery was limited by the public provider’s archive policy; current-state wallet lookup does not require historical logs.
 
 Repeat a current-state check with a known active v4 wallet:
 
@@ -532,4 +532,3 @@ npm run refresh:cookbook -- 0xWalletAddress
 ```
 
 The refresh script retains previous snapshots on a failed address lookup. Review and commit the JSON after a local refresh.
-
