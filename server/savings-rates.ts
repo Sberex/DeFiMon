@@ -6,12 +6,16 @@ import { networks } from './networks.js';
 import { configuredTokenRegistry, type TokenRegistry } from './token-registry.js';
 import { makeClient, type ChainClient } from './rpc.js';
 const DAY = 86400n, WINDOW = 30n * DAY;
+// Public Ethereum archive service; used only when no explicit archive RPC is set
+// and the normal provider reports pruned historical state. No wallet is sent.
+export const ETHEREUM_SAVINGS_ARCHIVE_FALLBACK = 'https://eth.drpc.org';
+const historicalStateUnavailable = (error: unknown) => /archive|missing trie|historical state|state.*pruned/i.test(error instanceof Error ? String(error) : '');
 const zero = /^0x0{40}$/i;
-const chainlinkAbi = parseAbi(['function decimals() view returns(uint8)', 'function description() view returns(string)', 'function latestRoundData() view returns(uint80,int256,uint256,uint256,uint80)']);
+const chainlinkAbi = parseAbi(['function decimals() view returns(uint8)', 'function description() view returns(string)', 'function latestRoundData() view returns(uint80,int256,uint256,uint256,uint80)', 'function receiptToken() view returns(address)']);
 const vaultAbi = parseAbi(['function asset() view returns(address)', 'function decimals() view returns(uint8)', 'function convertToAssets(uint256) view returns(uint256)']);
 const providerAbi = parseAbi(['function getPriceOracle() view returns(address)', 'function getSourceOfAsset(address) view returns(address)']);
 const morphoAbi = parseAbi(['function idToMarketParams(bytes32) view returns(address loanToken,address collateralToken,address oracle,address irm,uint256 lltv)', 'function BASE_FEED_1() view returns(address)', 'function BASE_FEED_2() view returns(address)', 'function BASE_VAULT() view returns(address)']);
-export interface SavingsSource { network: NetworkId; kind: 'chainlink' | 'erc4626'; address: Address; token: Address; description?: string; decimals?: number; underlying?: Address; label: string }
+export interface SavingsSource { network: NetworkId; kind: 'chainlink' | 'erc4626'; address: Address; token: Address; description?: string; decimals?: number; underlying?: Address; computed?: boolean; tokenGetter?: 'receiptToken'; note?: string; label: string }
 type Snapshot = { client: ChainClient; end: { number: bigint; timestamp: bigint }; start: { number: bigint; timestamp: bigint } };
 type Context = { network: NetworkId; protocol?: string; position?: string; address?: string };
 const configuredSources = JSON.parse(readFileSync(new URL('../config/savings-oracles.json', import.meta.url), 'utf8')) as Record<string, SavingsSource>;
@@ -53,7 +57,7 @@ export async function savingsSnapshot(client: ChainClient, network: NetworkId, n
 export function savingsFailureReason(error: unknown): string {
   // Inspect errors internally; never return provider URLs, keys or raw responses.
   const message = error instanceof Error ? String(error) : '';
-  if (/archive|missing trie|historical state|state.*pruned/i.test(message)) return 'The rate-source provider cannot read the required historical state. Configure an archive RPC for the source network on the server.';
+  if (historicalStateUnavailable(error)) return 'The rate-source provider cannot read the required historical state. Configure an archive RPC for the source network on the server.';
   if (/No verified savings rate source|No canonical token/.test(message)) return 'No verified on-chain savings-rate source is configured for this asset.';
   if (/Invalid oracle observation|changed unit|unit changed|Wrong savings vault underlying/.test(message)) return 'The oracle observations failed the freshness or asset-identity checks.';
   return 'The provider could not supply verified current and 30-day-old observations. An archive-capable provider may be required.';
@@ -61,23 +65,26 @@ export function savingsFailureReason(error: unknown): string {
 function unavailable(group: string, network: NetworkId, address = '', reason = ''): IntrinsicRate {
   return { apr: null, estimated: true, note: `${group} is marked Savings stablecoin. Its current and 30-day-old on-chain rate could not both be verified. ${reason} Intrinsic earnings are unknown, not zero.`, source: { chain: networkNames[network], oracle: address, kind: 'unavailable', label: `${group} rate history unavailable` } };
 }
-export function createSavingsRateService(options: { clientFor?: (network: NetworkId) => ChainClient; registry?: TokenRegistry; sources?: Record<string, SavingsSource>; now?: () => number } = {}) {
+export function createSavingsRateService(options: { clientFor?: (network: NetworkId) => ChainClient; archiveFallbackFor?: (network: NetworkId) => ChainClient | undefined; registry?: TokenRegistry; sources?: Record<string, SavingsSource>; now?: () => number } = {}) {
   const clientFor = options.clientFor ?? ((network: NetworkId) => makeClient(network, process.env[`${network.toUpperCase()}_ARCHIVE_RPC_URL`])), registry = options.registry ?? configuredTokenRegistry, sources = options.sources ?? configuredSources, now = options.now ?? Date.now;
-  const snapshots = new Map<NetworkId, { expires: number; promise: Promise<Snapshot> }>();
+  const archiveFallbackFor = options.archiveFallbackFor ?? (options.clientFor ? () => undefined : (network: NetworkId) => network === 'ethereum' && !process.env.ETHEREUM_ARCHIVE_RPC_URL ? makeClient(network, ETHEREUM_SAVINGS_ARCHIVE_FALLBACK) : undefined);
+  const snapshots = new Map<string, { expires: number; promise: Promise<Snapshot> }>();
   const quotes = new Map<string, { expires: number; promise: Promise<IntrinsicRate> }>();
-  async function snapshot(network: NetworkId) {
-    const cached = snapshots.get(network); if (cached && cached.expires > now()) return cached.promise;
-    const entry = { expires: now() + 300000, promise: savingsSnapshot(clientFor(network), network, now) };
-    snapshots.set(network, entry);
-    entry.promise.catch(() => { if (snapshots.get(network) === entry) snapshots.delete(network); });
+  async function snapshot(network: NetworkId, fallback = false) {
+    const key = `${network}:${fallback ? 'archive-fallback' : 'configured'}`;
+    const cached = snapshots.get(key); if (cached && cached.expires > now()) return cached.promise;
+    const entry = { expires: now() + 300000, promise: savingsSnapshot(fallback ? archiveFallbackFor(network)! : clientFor(network), network, now) };
+    snapshots.set(key, entry);
+    entry.promise.catch(() => { if (snapshots.get(key) === entry) snapshots.delete(key); });
     return entry.promise;
   }
-  async function discover(group: string, context: Context): Promise<SavingsSource> {
+  async function discover(group: string, context: Context, fallback = false): Promise<SavingsSource> {
     const token = registry[group];
     if (!token || token.category !== 'Savings stablecoin') throw new Error('Not a configured savings asset');
     if (sources[group]) {
       const source = sources[group];
       if (!networkOrder.includes(source.network) || !isAddress(source.address, { strict: false }) || zero.test(source.address) || !same(token.addresses[source.network] ?? '', source.token)) throw new Error('Savings source identity mismatch');
+      if (source.computed && (source.kind !== 'chainlink' || source.tokenGetter !== 'receiptToken' || !source.description || source.decimals === undefined)) throw new Error('Unverified computed oracle');
       if (source.kind !== 'chainlink' && source.kind !== 'erc4626') throw new Error('Unknown savings adapter');
       if (source.kind === 'erc4626' && !same(source.address, source.token)) throw new Error('Redemption source is not the canonical token');
       return source;
@@ -85,7 +92,7 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
     const network = token.addresses.ethereum ? 'ethereum' : context.network;
     const address = token.addresses[network] as Address | undefined;
     if (!address) throw new Error('No canonical token');
-    const { client, end } = await snapshot(network);
+    const { client, end } = await snapshot(network, fallback);
     // A canonical ERC-4626 share rate is intrinsic yield, independent of a USD peg.
     try {
       const underlying = await client.readContract({ address, abi: vaultAbi, functionName: 'asset', blockNumber: end.number });
@@ -103,7 +110,7 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
     if (context.protocol === 'morpho' && context.position?.startsWith('morpho-market-')) {
       const id = context.position.slice('morpho-market-'.length) as `0x${string}`;
       if (/^0x[0-9a-f]{64}$/i.test(id) && networks[context.network].morphoBlue) {
-        const s = await snapshot(context.network);
+        const s = await snapshot(context.network, fallback);
         const params = await s.client.readContract({ address: networks[context.network].morphoBlue!, abi: morphoAbi, functionName: 'idToMarketParams', args: [id], blockNumber: s.end.number });
         if (same(params[1], token.addresses[context.network] ?? '')) {
           const [feed, second, vault] = await Promise.all(['BASE_FEED_1', 'BASE_FEED_2', 'BASE_VAULT'].map(functionName => s.client.readContract({ address: params[2], abi: morphoAbi, functionName: functionName as 'BASE_FEED_1', blockNumber: s.end.number })));
@@ -113,11 +120,11 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
     }
     throw new Error('No verified savings rate source');
   }
-  async function load(group: string, context: Context): Promise<IntrinsicRate> {
+  async function load(group: string, context: Context, fallback = false): Promise<IntrinsicRate> {
     let source: SavingsSource | undefined;
     try {
-      source = await discover(group, context);
-      const s = await snapshot(source.network);
+      source = await discover(group, context, fallback);
+      const s = await snapshot(source.network, fallback);
       let start: bigint, end: bigint, decimals: number;
       if (source.kind === 'chainlink') {
         const read = async (blockNumber: bigint, timestamp: bigint) => {
@@ -126,7 +133,17 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
             s.client.readContract({ address: source!.address, abi: chainlinkAbi, functionName: 'decimals', blockNumber }),
             s.client.readContract({ address: source!.address, abi: chainlinkAbi, functionName: 'description', blockNumber }),
           ]);
-          if (round[1] <= 0n || round[2] <= 0n || round[3] < round[2] || round[3] > timestamp || timestamp - round[3] > 3n * DAY || round[4] < round[0] || precision > 36 || !description || (source!.description && description !== source!.description) || (source!.decimals !== undefined && precision !== source!.decimals)) throw new Error('Invalid oracle observation');
+          // InfiniFi's explicitly configured computed adapter has no stored rounds:
+          // startedAt=0, updatedAt=the queried block timestamp. Verify its token at
+          // BOTH blocks; never relax stored-feed freshness checks for other assets.
+          if (source!.tokenGetter) {
+            const token = await s.client.readContract({ address: source!.address, abi: chainlinkAbi, functionName: source!.tokenGetter, blockNumber });
+            if (!same(token, source!.token)) throw new Error('Invalid oracle observation');
+          }
+          const validStart = source!.computed
+            ? round[0] === 0n && round[2] === 0n && round[3] === timestamp && round[4] === 0n
+            : round[2] > 0n;
+          if (!validStart || round[1] <= 0n || round[3] < round[2] || round[3] > timestamp || timestamp - round[3] > 3n * DAY || round[4] < round[0] || precision > 36 || !description || (source!.description && description !== source!.description) || (source!.decimals !== undefined && precision !== source!.decimals)) throw new Error('Invalid oracle observation');
           return { value: round[1], decimals: precision, description };
         };
         const [a, b] = await Promise.all([read(s.start.number, s.start.timestamp), read(s.end.number, s.end.timestamp)]);
@@ -151,8 +168,12 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
         start = a.value; end = b.value; decimals = a.decimals;
       }
       const apr = savingsApr(start, end); if (apr === null) throw new Error('Invalid savings APR');
-      return { apr, estimated: true, note: `Past-month ${group} intrinsic APR: (current on-chain rate − rate 30 days ago) × 365 ÷ (30 × rate 30 days ago). Simple annualization, not compounded APY. Uses ${source.label}; market prices, lending interest and incentives are separate. Past growth is not a promised future return.`, source: { chain: networkNames[source.network], oracle: source.address, kind: source.kind, label: source.label, blockNumber: String(s.end.number), startBlockNumber: String(s.start.number), startTimestamp: Number(s.start.timestamp), endTimestamp: Number(s.end.timestamp), startRate: Number(start) / 10 ** decimals, endRate: Number(end) / 10 ** decimals, windowDays: 30 } };
-    } catch (error) { return unavailable(group, source?.network ?? context.network, source?.address, savingsFailureReason(error)); }
+      return { apr, estimated: true, note: `Past-month ${group} intrinsic APR: (current on-chain rate − rate 30 days ago) × 365 ÷ (30 × rate 30 days ago). Simple annualization, not compounded APY. Uses ${source.label}; market prices, lending interest and incentives are separate. Past growth is not a promised future return.${source.note ? ` ${source.note}` : ''}`, source: { chain: networkNames[source.network], oracle: source.address, kind: source.kind, label: source.label, blockNumber: String(s.end.number), startBlockNumber: String(s.start.number), startTimestamp: Number(s.start.timestamp), endTimestamp: Number(s.end.timestamp), startRate: Number(start) / 10 ** decimals, endRate: Number(end) / 10 ** decimals, windowDays: 30 } };
+    } catch (error) {
+      const network = source?.network ?? context.network;
+      if (!fallback && historicalStateUnavailable(error) && archiveFallbackFor(network)) return load(group, context, true);
+      return unavailable(group, network, source?.address, savingsFailureReason(error));
+    }
   }
   function quote(group: string, context: Context): Promise<IntrinsicRate> {
     const cached = quotes.get(group); if (cached && cached.expires > now()) return cached.promise;

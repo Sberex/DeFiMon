@@ -41,5 +41,28 @@
     "description": "SUSDAI / USDAI Exchange Rate",
     "decimals": 18,
     "label": "sUSDai/USDai raw exchange-rate oracle"
+  },
+  "MHYPER": {
+    "network": "ethereum",
+    "kind": "chainlink",
+    "address": "0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68",
+    "token": "0x9b5528528656dbc094765e2abb79f293c21191b9",
+    "description": "mHYPER/USD",
+    "decimals": 8,
+    "label": "Midas mHYPER/USD native NAV oracle",
+    "evidence": "https://github.com/midas-apps/contracts/blob/013a1493607ae21db33c1b7666f72088ffd37dd9/config/constants/addresses.ts"
+  },
+  "IUSD": {
+    "network": "ethereum",
+    "kind": "chainlink",
+    "address": "0xF81Aa28A4F68124683AfadA81e8EBBf6e2867067",
+    "token": "0x48f9e38f3070ad8945dfeae3fa70987722e3d89c",
+    "description": "Chainlink-formatted InfiniFi RT Oracle",
+    "decimals": 18,
+    "computed": true,
+    "tokenGetter": "receiptToken",
+    "label": "InfiniFi iUSD/USD accounting oracle",
+    "note": "Unstaked iUSD is the InfiniFi receipt token. Staking/locking rewards accrue to siUSD/liUSD, not a plain iUSD wallet balance. An unchanged verified accounting price gives 0% intrinsic APR; losses remain negative. This is not InfiniFi\u2019s advertised staking APY.",
+    "evidence": "https://github.com/InfiniFi-Labs/infinifi-protocol/blob/2ac1b13a624e65e819ee82a982a8d5382cde921a/deployment/configuration/addresses.1.json"
   }
 }

@@ -1913,3 +1913,21 @@ test('includes slisBNB native staking APR in collateral income and position and 
   await collateral.getByText('Intrinsic yield details', { exact: true }).click();
   await expect(collateral.getByRole('link', { name: 'View Lista slisBNB staking APR' })).toHaveAttribute('href', 'https://lista.org/liquid-staking/BNB');
 });
+
+test('restores address NPL and APR with verified mHYPER growth and unchanged iUSD oracle price', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = []; fixture.address = '0xE16BE042f9433779909a972669bE3A2003956348';
+  const mhApr = (1.14224794 - 1.13482542) * 365 / (30 * 1.13482542);
+  fixture.wallets = [{ chain: 'Ethereum', status: 'ok', pricedValueUsd: 4.404902455456117, unpricedCount: 0, interestDiscoveryComplete: true, coverage: 'Wallet', tokens: [
+    { address: '0x9b5528528656dbc094765e2abb79f293c21191b9', symbol: 'mHYPER', category: 'Savings stablecoin', interestBearing: true, balance: 3.8540620944124493, priceUsd: 1.14224794, valueUsd: 4.402294487974706, intrinsicSupplyRate: { apr: mhApr, estimated: true, note: 'Verified 30-day NAV oracle growth', source: { chain: 'Ethereum', kind: 'chainlink', oracle: '0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68', label: 'Midas mHYPER/USD native NAV oracle', startTimestamp: 1792587371, endTimestamp: 1795179371, startRate: 1.13482542, endRate: 1.14224794, windowDays: 30 } } },
+    { address: '0x48f9e38f3070ad8945dfeae3fa70987722e3d89c', symbol: 'iUSD', category: 'Savings stablecoin', interestBearing: true, balance: .002610186822595611, priceUsd: .9991497385681763, valueUsd: .0026079674814105036, intrinsicSupplyRate: { apr: 0, estimated: true, note: 'Verified accounting price unchanged. Staking rewards belong to siUSD, not plain iUSD.', source: { chain: 'Ethereum', kind: 'chainlink', oracle: '0xF81Aa28A4F68124683AfadA81e8EBBf6e2867067', label: 'InfiniFi iUSD/USD accounting oracle', startRate: 1, endRate: 1, windowDays: 30 } } },
+  ] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const section = page.getByRole('region', { name: 'Interest bearing tokens', exact: true });
+  await expect(section.locator('tbody tr').filter({ hasText: 'mHYPER' }).first()).toContainText('7.96%');
+  await expect(page.locator('.total-npl strong')).toHaveText('≈ $0.03');
+  await expect(page.locator('.portfolio-apr strong')).toHaveText('≈ 7.95%');
+  await expect(page.getByRole('region', { name: 'Missing interest data' })).toHaveCount(0);
+  await section.locator('details').filter({ has: page.locator('summary', { hasText: /\$0.01/ }) }).locator('summary').first().click();
+  await expect(section.locator('tbody tr').filter({ hasText: 'iUSD' }).first()).toContainText('0.00%');
+});

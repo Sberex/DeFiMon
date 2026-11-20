@@ -94,3 +94,78 @@ it('explains historical-access failures without disclosing provider credentials'
   expect(reason).not.toContain('private.example'); expect(reason).not.toContain('secret');
   expect(savingsFailureReason(new Error('No verified savings rate source'))).toContain('No verified');
 });
+
+it('uses configured mHYPER NAV and InfiniFi iUSD oracle history for wallet earnings and total NPL', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { configuredTokenRegistry } = await import('../server/token-registry');
+  const { applyWalletInterest } = await import('../server/wallet-interest');
+  const { totalMonthlyInterest } = await import('../src/monthly-interest');
+  const { walletInterestIssues } = await import('../src/wallet-interest');
+  const sources = JSON.parse(readFileSync(new URL('../config/savings-oracles.json', import.meta.url), 'utf8'));
+  const reads: { address: string; block: bigint }[] = [];
+  const client = {
+    getChainId: async () => 1, getBlockNumber: async () => END,
+    getBlock: async ({ blockNumber }: any) => ({ number: blockNumber, timestamp: NOW - (END - blockNumber) * 12n }),
+    readContract: async ({ address, functionName, blockNumber }: any) => {
+      reads.push({ address, block: blockNumber });
+      const group = address.toLowerCase() === sources.MHYPER.address.toLowerCase() ? 'MHYPER' : 'IUSD', s = sources[group];
+      const timestamp = NOW - (END - blockNumber) * 12n;
+      if (functionName === 'decimals') return s.decimals;
+      if (functionName === 'description') return s.description;
+      if (functionName === 'receiptToken') return s.token;
+      if (functionName === 'latestRoundData') return group === 'IUSD' ? [0n, 10n ** 18n, 0n, timestamp, 0n] : [136n, blockNumber <= OLD ? 113482542n : 114224794n, timestamp - 60n, timestamp - 60n, 136n];
+      throw new Error('Unexpected read');
+    },
+  } as unknown as ChainClient;
+  const service = createSavingsRateService({ clientFor: () => client, sources });
+  const wallet = { chain: 'Ethereum' as const, status: 'ok' as const, pricedValueUsd: 4.4049, unpricedCount: 0, coverage: '', interestDiscoveryComplete: true, tokens: [
+    { address: configuredTokenRegistry.MHYPER.addresses.ethereum!, symbol: 'mHYPER', category: 'Savings stablecoin' as const, balance: 3.8540620944124493, priceUsd: 1.14224794, valueUsd: 4.402294487974706 },
+    { address: configuredTokenRegistry.IUSD.addresses.ethereum!, symbol: 'iUSD', category: 'Savings stablecoin' as const, balance: .002610186822595611, priceUsd: .9991497, valueUsd: .0026079674814105036 },
+  ] };
+  const { intrinsicTokenRate } = await import('../server/intrinsic-rates');
+  const enriched = await applyWalletInterest(wallet, 'ethereum', [], (network, address) => intrinsicTokenRate(network, address, {}, undefined, service.quote));
+  expect(enriched.status).toBe('ok'); expect(walletInterestIssues([enriched])).toEqual([]);
+  expect(enriched.tokens[0].intrinsicSupplyRate?.apr).toBeCloseTo(.0795781668925487);
+  expect(enriched.tokens[1].intrinsicSupplyRate).toMatchObject({ apr: 0, source: { startRate: 1, endRate: 1 } });
+  expect(enriched.tokens[1].intrinsicSupplyRate?.note).toContain('not a plain iUSD wallet balance');
+  expect(totalMonthlyInterest([], [enriched]).nplUsd).toBeCloseTo(4.402294487974706 * .0795781668925487 / 12);
+  for (const group of ['MHYPER', 'IUSD']) {
+    expect(reads.some(r => r.address === sources[group].address && r.block === OLD)).toBe(true);
+    expect(reads.some(r => r.address === sources[group].address && r.block === END)).toBe(true);
+  }
+});
+
+it('accepts explicitly identified computed oracles, including losses, but rejects altered tokens and invalid computed timestamps', async () => {
+  const f = fixture();
+  const source: SavingsSource = { ...f.source, computed: true, tokenGetter: 'receiptToken' };
+  for (const variant of ['zero', 'loss', 'wrong-old-token', 'missing-token-getter', 'stale', 'future', 'nonzero-round', 'nonzero-start'] as const) {
+    const client = { ...f.client, readContract: async (args: any) => {
+      if (args.functionName === 'receiptToken') return variant === 'wrong-old-token' && args.blockNumber <= OLD ? feed : token;
+      if (args.functionName === 'latestRoundData') {
+        const t = NOW - (END - args.blockNumber) * 12n;
+        return [variant === 'nonzero-round' ? 1n : 0n, args.blockNumber > OLD && variant === 'loss' ? 99n * 10n ** 16n : 10n ** 18n, variant === 'nonzero-start' ? 1n : 0n, t + (variant === 'stale' ? -60n : variant === 'future' ? 60n : 0n), 0n];
+      }
+      return f.client.readContract(args);
+    } } as ChainClient;
+    const q = await createSavingsRateService({ clientFor: () => client, registry: f.registry, sources: { reUSD: { ...source, tokenGetter: variant === 'missing-token-getter' ? undefined : 'receiptToken' } } }).quote('reUSD', { network: 'ethereum' });
+    if (variant === 'zero') expect(q.apr).toBe(0);
+    else if (variant === 'loss') expect(q.apr).toBeCloseTo(-.01 * 365 / 30);
+    else expect(q.apr).toBeNull();
+  }
+  const client = { ...f.client, readContract: async (args: any) => args.functionName === 'latestRoundData' ? [0n, 10n ** 18n, 0n, NOW - (END - args.blockNumber) * 12n, 0n] : f.client.readContract(args) } as ChainClient;
+  expect((await createSavingsRateService({ clientFor: () => client, registry: f.registry, sources: { reUSD: f.source } }).quote('reUSD', { network: 'ethereum' })).apr).toBeNull();
+});
+
+it('retries pruned history once through an independent verified archive snapshot without masking oracle validation failures', async () => {
+  const f = fixture(), fallback = vi.fn(() => f.client);
+  const primary = { ...f.client, readContract: async () => { throw new Error('historical state pruned: private-provider-key'); } } as unknown as ChainClient;
+  const service = createSavingsRateService({ clientFor: () => primary, archiveFallbackFor: fallback, registry: f.registry, sources: { reUSD: f.source } });
+  const q = await service.quote('reUSD', { network: 'ethereum' });
+  expect(q.apr).toBeCloseTo(.02 * 365 / 30); expect(fallback).toHaveBeenCalled();
+  expect(JSON.stringify(q)).not.toContain('private-provider-key');
+  const noRetry = vi.fn(() => f.client), bad = fixture({ stale: true });
+  expect((await createSavingsRateService({ clientFor: () => bad.client, archiveFallbackFor: noRetry, registry: f.registry, sources: { reUSD: f.source } }).quote('reUSD', { network: 'ethereum' })).apr).toBeNull();
+  expect(noRetry).not.toHaveBeenCalled();
+  const badArchive = fixture({ chain: 42161 });
+  expect((await createSavingsRateService({ clientFor: () => primary, archiveFallbackFor: () => badArchive.client, registry: f.registry, sources: { reUSD: f.source } }).quote('reUSD', { network: 'ethereum' })).apr).toBeNull();
+});
