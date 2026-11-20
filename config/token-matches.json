@@ -1,4 +1,4 @@
-{
+
   "USDT": {
     "ethereum": "0xdac17f958d2ee523a2206206994597c13d831ec7",
     "plasma": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
@@ -5154,7 +5154,7 @@
     "arbitrum": "0x3e76bb02286bfeaa89dd35f11253f2cbce634f91"
   },
   "IUSD": {
-    "_category": "Savings stablecoin",
+    "_category": "Stablecoin",
     "ethereum": "0x48f9e38f3070ad8945dfeae3fa70987722e3d89c"
   },
   "MTBILL": {
