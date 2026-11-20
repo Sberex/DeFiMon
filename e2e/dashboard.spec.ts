@@ -1704,3 +1704,52 @@ test('Cookbook works without a wallet lookup and falls back to the GitHub JSON w
   await expect(cookbook.locator('.cookbook-entry')).toHaveCount(1);
   await expect(cookbook.locator('.cookbook-persistence')).toContainText('Showing snapshots saved in the GitHub JSON file');
 });
+
+test('collapses tokens below one cent in both wallet categories without changing value or income totals', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = [];
+  const source = { chain: 'Ethereum' as const, oracle: '', kind: 'erc4626' as const, label: 'Test rate' };
+  const token = (n: number, symbol: string, valueUsd: number, interest: boolean, apr = .12) => ({ address: `0x${n.toString(16).padStart(40, '0')}`, symbol, balance: valueUsd, priceUsd: 1, valueUsd, category: interest ? 'Savings stablecoin' as const : 'Other' as const, ...(interest ? { intrinsicSupplyRate: { apr, note: 'Test intrinsic APR', source } } : {}) });
+  fixture.wallets = [{ chain: 'Ethereum', status: 'ok', pricedValueUsd: 101.0349, unpricedCount: 0, coverage: 'Wallet', interestDiscoveryComplete: true, tokens: [
+    token(1, 'YIELD_BIG', 100, true), token(2, 'YIELD_CENT', .01, true), token(3, 'YIELD_TINY', .0099, true, 12), token(4, 'YIELD_ZERO', 0, true),
+    token(5, 'OTHER_BIG', 1, false), token(6, 'OTHER_CENT', .01, false), token(7, 'OTHER_TINY', .005, false), token(8, 'OTHER_ZERO', 0, false),
+  ] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/rewards/*', route => route.fulfill({ status: 503, json: {} }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const interest = page.getByRole('region', { name: 'Interest bearing tokens', exact: true }), other = page.getByRole('region', { name: 'Other tokens', exact: true });
+  await expect(interest.locator('.wallet-network > .position tbody td:first-child strong')).toHaveText(['YIELD_BIG', 'YIELD_CENT']);
+  await expect(other.locator('.wallet-network > .position tbody td:first-child strong')).toHaveText(['OTHER_BIG', 'OTHER_CENT']);
+  await expect(interest.locator('.wallet-category-stats strong').first()).toHaveText('$100.02');
+  await expect(page.locator('.summary.primary strong')).toHaveText('$101.03');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $1.01');
+  const stats = await interest.locator('.wallet-category-stats').textContent(), apr = await page.locator('.portfolio-apr > strong').textContent();
+  for (const [section, tiny, zero] of [[interest, 'YIELD_TINY', 'YIELD_ZERO'], [other, 'OTHER_TINY', 'OTHER_ZERO']] as const) {
+    const collapsed = section.locator('.small-wallet-tokens');
+    await expect(collapsed).not.toHaveAttribute('open');
+    await expect(collapsed.locator(':scope > summary')).toHaveText('Tokens below $0.01 (2)');
+    await expect(collapsed.getByText(tiny, { exact: true })).toBeHidden();
+    await collapsed.locator(':scope > summary').click();
+    await expect(collapsed.locator('tbody td:first-child strong')).toHaveText([tiny, zero]);
+  }
+  await expect(page.locator('.summary.primary strong')).toHaveText('$101.03');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $1.01');
+  await expect(interest.locator('.wallet-category-stats')).toHaveText(stats!);
+  await expect(page.locator('.portfolio-apr > strong')).toHaveText(apr!);
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('keeps unpriced wallet tokens visible rather than treating unknown USD values as dust', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = [];
+  fixture.wallets = [{ chain: 'Arbitrum', status: 'partial', pricedValueUsd: .001, unpricedCount: 2, coverage: 'Wallet', tokens: [
+    { address: '0x1111111111111111111111111111111111111111', symbol: 'UNKNOWN_YIELD', category: 'Savings stablecoin', balance: 1, priceUsd: null, valueUsd: null },
+    { address: '0x2222222222222222222222222222222222222222', symbol: 'UNKNOWN_OTHER', balance: 1, priceUsd: null, valueUsd: null },
+    { address: '0x3333333333333333333333333333333333333333', symbol: 'SMALL_OTHER', balance: .001, priceUsd: 1, valueUsd: .001 },
+  ] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/rewards/*', route => route.fulfill({ status: 503, json: {} }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.getByText('UNKNOWN_YIELD', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('UNKNOWN_OTHER', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('SMALL_OTHER', { exact: true })).toBeHidden();
+  await expect(page.getByRole('region', { name: 'Interest bearing tokens', exact: true }).locator('.small-wallet-tokens')).toHaveCount(0);
+});

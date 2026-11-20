@@ -261,6 +261,8 @@ npm run check:susdai-apr
 
 ## Wallet token balances
 
+Wallet Overview collapses tokens with a verified, unrounded USD value below $0.01 into a closed **Tokens below $0.01** list within each network and token category. This includes zero values; exactly $0.01 and unknown values stay visible. All tokens continue to contribute to their existing wallet value, category APR and monthly income calculations.
+
 The **Wallet tokens** section shows Ethereum first, then Plasma, then Arbitrum. It includes native **ETH** on Ethereum/Arbitrum and **XPL** on Plasma, the supported ERC-20 token list, and any additional token contracts you enter. sUSDai (`0x0B2b2B2076d95dda7817e785989fE353fe955ef9`) is checked automatically on all four networks and shown when the wallet has a nonzero balance. Ethereum’s default list includes USDe, USDT, USDC, EUL, COMP, and the user-selected **WFRAX** at `0x04acaf8d2865c0714f79da09645c13fd2888977f`. WFRAX’s symbol and 18 decimals were checked on Ethereum and its address matches Frax’s official deployment list. Other symbols are read from their actual token contracts rather than guessed from names.
 
 **Net value = priced wallet tokens + priced lending deposits − borrowing.** The Total supplied and Total borrowed cards still describe lending positions; ordinary wallet holdings appear in the wallet section. These holdings do not change a borrowing position’s health factor or liquidation rules.
@@ -530,3 +532,4 @@ npm run refresh:cookbook -- 0xWalletAddress
 ```
 
 The refresh script retains previous snapshots on a failed address lookup. Review and commit the JSON after a local refresh.
+

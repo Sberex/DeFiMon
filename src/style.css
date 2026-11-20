@@ -64,3 +64,8 @@ main{max-width:1600px}.dashboard-layout{display:grid;grid-template-columns:210px
 .cookbook-apr { flex-shrink: 0; color: #416639; }
 .cookbook-entry > .notice { margin: 1.2rem 1.75rem; }
 @media (max-width: 700px) { .cookbook-source { flex-direction: column; gap: .8rem; padding: 1.2rem; } .cookbook-toolbar { flex-wrap: wrap; } }
+
+.small-wallet-tokens { margin: 0 24px 20px; }
+.small-wallet-tokens > summary { cursor: pointer; color: var(--muted); font-size: 12px; padding: 12px 0; }
+.small-wallet-tokens > .position { padding: 0; border: 0; }
+@media (max-width: 700px) { .small-wallet-tokens { margin-inline: 16px; } }
