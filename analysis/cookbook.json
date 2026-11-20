@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-20T12:45:52.327Z",
+  "updatedAt": "2026-11-20T12:49:34.910Z",
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
@@ -1357,16 +1357,16 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-20T12:45:52.327Z",
-          "blockNumber": "38233684",
+          "checkedAt": "2026-11-20T12:49:34.910Z",
+          "blockNumber": "38233912",
           "complete": false,
           "positions": [
             {
-              "snapshotAt": "2026-11-20T12:45:52.327Z",
-              "blockNumber": "38233684",
-              "apr": 0.3171453152796426,
-              "netValueUsd": 35197.43018184256,
-              "monthlyNplUsd": 930.225007671139,
+              "snapshotAt": "2026-11-20T12:49:34.910Z",
+              "blockNumber": "38233912",
+              "apr": 0.3171458265810415,
+              "netValueUsd": 35197.329820224375,
+              "monthlyNplUsd": 930.22385494005,
               "verification": "verified",
               "position": {
                 "marketAddress": "0x2d38ca861aC948BF90cC682fC1455138173c1923",
@@ -1374,8 +1374,8 @@
                 "id": "fluid-nft-2764",
                 "label": "Vault 38 · sUSDai / GHO · NFT 2764",
                 "suppliedUsd": 281325.30076312687,
-                "debtUsd": 246127.8705812843,
-                "healthFactor": 1.0287041857098287,
+                "debtUsd": 246127.9709429025,
+                "healthFactor": 1.0287037662434173,
                 "risk": "high",
                 "assets": [
                   {
@@ -1386,7 +1386,7 @@
                     "priceUsd": 1.1272399744106654,
                     "collateral": true,
                     "liquidationThreshold": 0.9,
-                    "liquidationPriceUsd": 1.095786320372406,
+                    "liquidationPriceUsd": 1.0957867671925408,
                     "supplyRate": {
                       "apr": 0,
                       "note": "Current Fluid vault APR after the vault’s rate magnifier/fee adjustment."
@@ -1413,7 +1413,7 @@
                     "symbol": "GHO",
                     "address": "0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3",
                     "supplied": 0,
-                    "borrowed": 246127.8705812843,
+                    "borrowed": 246127.9709429025,
                     "priceUsd": 1,
                     "collateral": false,
                     "liquidationThreshold": null,
@@ -1423,15 +1423,15 @@
                       "note": "Current Fluid vault APR after the vault’s rate magnifier/fee adjustment."
                     },
                     "merklBorrowRate": {
-                      "apr": 0.010706966793054197,
+                      "apr": 0.010706929223385543,
                       "estimated": true,
                       "note": "Estimated Merkl incentives, paid separately from protocol interest. Headline rates, eligibility, caps and future earnings can change.",
                       "components": [
                         {
                           "id": "10592168346263943437",
                           "name": "Borrow GHO from Fluid sUSDai/GHO Vault",
-                          "listedApr": 0.010706966793054197,
-                          "appliedApr": 0.010706966793054197,
+                          "listedApr": 0.010706929223385543,
+                          "appliedApr": 0.010706929223385543,
                           "note": "Applies only to this vault and this lending side. The same APR on each pool leg allocates one side-wide reward budget across its USD value; it does not duplicate the pool reward."
                         }
                       ]
@@ -1446,7 +1446,7 @@
                 ],
                 "liquidationQuote": {
                   "current": 1.1272399744106654,
-                  "threshold": 1.095786320372406,
+                  "threshold": 1.0957867671925408,
                   "unit": "GHO per sUSDai"
                 }
               }
