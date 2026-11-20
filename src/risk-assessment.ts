@@ -3,7 +3,7 @@ const finite = (n: number | null | undefined): n is number => typeof n === 'numb
 /** User-defined Bad Debt rules, independent of liquidation LTV or display APR. */
 export function badDebtReasons(protocol: string, position: Position): string[] {
   const reasons: string[] = [];
-  if (protocol === 'morpho' || protocol === 'euler' || protocol === 'spark' && !!position.morphoMarket) for (const check of position.collateralOracleChecks ?? []) {
+  if (protocol === 'morpho' || protocol === 'lista' || protocol === 'euler' || protocol === 'spark' && !!position.morphoMarket) for (const check of position.collateralOracleChecks ?? []) {
     if (check.status !== 'ok') reasons.push(`${check.asset} collateral oracle ${check.status === 'zero' ? 'returned zero' : 'could not return a price'}.`);
   }
   const debtAssets = position.assets.filter(a => a.borrowed > 0);

@@ -1,3 +1,5 @@
+import { listaDeployments, listaLegacyVaults } from './deployments/lista.js';
+import { morphoFactoryAbi } from './abis/morpho.js';
 import { SPARK_LEND, sparkVaults } from './deployments/spark.js';
 import { formatUnits, getAddress, parseAbi, type Address } from 'viem';
 import type { NetworkId, ProtocolResult, WalletBalances, WalletToken } from '../src/types.js';
@@ -32,7 +34,7 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
     client.readContract({ address: config.fluid.lending, abi: lendingAbi, functionName: 'getAllFTokens', blockNumber }),
     client.readContract({ address: config.aaveProvider, abi: providerAbi, functionName: 'getPool', blockNumber }),
   ]);
-  const excluded = new Set<string>(sparkVaults[network].map(v => v.address.toLowerCase()));
+  const excluded = new Set<string>([...sparkVaults[network], ...(listaLegacyVaults[network] ?? [])].map(v => v.address.toLowerCase()));
   protocols.flatMap(p => p.positions).flatMap(p => p.receiptTokens ?? []).forEach(address => excluded.add(address.toLowerCase()));
   if (aTokens.status === 'fulfilled') aTokens.value.forEach(t => excluded.add(t.tokenAddress.toLowerCase()));
   if (fTokens.status === 'fulfilled') fTokens.value.forEach(t => excluded.add(t.toLowerCase()));
@@ -81,6 +83,11 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
         if (!excludedReason && protocols.some(p => p.id === 'euler')) {
           try { if (await client.readContract({ address: eulerDeployments[network].eVaultFactory, abi: eulerFactoryAbi, functionName: 'isProxy', args: [token.address], blockNumber })) excludedReason = 'Euler vault receipt token: its underlying value belongs in the protocol section.'; }
           catch { if (interestCandidate(token.address)) interestDiscoveryComplete = false; excludedReason = 'Excluded because Euler receipt-token classification is unavailable.'; warnings.add('Some Euler receipt checks failed. Those token values are excluded to avoid counting a deposit twice.'); }
+        }
+        const lista = listaDeployments[network];
+        if (!excludedReason && lista) {
+          try { if (await client.readContract({ address: lista.factory, abi: morphoFactoryAbi, functionName: 'isMoolahVault', args: [token.address], blockNumber })) excludedReason = 'Lista Earn receipt token: its underlying value belongs in the protocol section.'; }
+          catch { if (interestCandidate(token.address)) interestDiscoveryComplete = false; excludedReason = 'Excluded because Lista receipt-token classification is unavailable.'; warnings.add('Some Lista receipt checks failed. Those values are excluded to avoid counting a deposit twice.'); }
         }
         rows.push({ address: token.address, category: configuredTokenCategory(network, token.address), symbol, decimals, priceAddress: token.address, balance: Number(formatUnits(token.raw, decimals)), priceUsd: null, valueUsd: null, excludedReason });
       } catch {

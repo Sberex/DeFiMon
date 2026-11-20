@@ -1,9 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 const rpc = vi.hoisted(() => ({ chainId: 1 }));
-const readers = vi.hoisted(() => ({ aave: vi.fn(), aaveV4: vi.fn(), morpho: vi.fn(), compound: vi.fn(), fluid: vi.fn(), euler: vi.fn(), spark: vi.fn() }));
+const readers = vi.hoisted(() => ({ aave: vi.fn(), aaveV4: vi.fn(), morpho: vi.fn(), compound: vi.fn(), fluid: vi.fn(), euler: vi.fn(), spark: vi.fn(), lista: vi.fn() }));
 vi.mock('../server/rpc', () => ({ makeClient: () => ({ getChainId: async () => rpc.chainId, getBlockNumber: async () => 456n }) }));
 vi.mock('../server/wallet', () => ({ readWallet: async (_client: unknown, _wallet: unknown, _block: unknown, network: string) => ({ chain: network === 'arbitrum' ? 'Arbitrum' : network === 'plasma' ? 'Plasma' : 'Ethereum', status: 'ok', tokens: [], pricedValueUsd: 0, unpricedCount: 0, coverage: 'test' }), unavailableWallet: () => ({ status: 'error' }) }));
 vi.mock('../server/adapters/spark', async importOriginal => ({ ...await importOriginal<typeof import('../server/adapters/spark')>(), readSpark: readers.spark }));
+vi.mock('../server/adapters/lista', () => ({ readLista: readers.lista }));
 vi.mock('../server/adapters/euler', () => ({ readEuler: readers.euler }));
 vi.mock('../server/adapters/aave', () => ({ readAave: readers.aave }));
 vi.mock('../server/adapters/aave-v4', () => ({ readAaveV4: readers.aaveV4, AAVE_V4_COVERAGE: 'V4 lending and tokenized deposits' }));
@@ -16,6 +17,7 @@ import { readPendle } from '../server/pendle';
 const wallet = '0x1111111111111111111111111111111111111111';
 beforeEach(() => {
   rpc.chainId = 1;
+  readers.lista.mockReset().mockResolvedValue({ id: 'lista', name: 'Lista DAO', status: 'ok', positions: [] });
   readers.spark.mockReset().mockResolvedValue({ id: 'spark', name: 'Spark', status: 'ok', positions: [] });
   readers.aave.mockReset().mockResolvedValue({ id: 'aave-v3', name: 'Aave v3', status: 'ok', positions: [] });
   readers.aaveV4.mockReset().mockResolvedValue({ id: 'aave-v4', name: 'Aave v4', status: 'ok', positions: [] });
@@ -28,7 +30,7 @@ it('includes the live Fluid reader at the same wallet and block as other protoco
   const result = await getPortfolio(wallet);
   expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
   expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
-  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark']);
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista']);
   expect(result.protocols.find(p => p.id === 'fluid')?.status).toBe('ok');
   expect(result.protocols.filter(p => p.status === 'not-integrated')).toHaveLength(0);
   expect(readers.aaveV4).toHaveBeenCalledWith(expect.anything(), wallet, 456n);
@@ -112,7 +114,8 @@ it('routes BSC Aave, Fluid, Euler and Pendle reads to the same BSC block', async
   rpc.chainId = 56;
   const result = await getPortfolio(wallet, 'bsc');
   expect(result.chain).toBe('Binance Smart Chain');
-  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'fluid', 'euler']);
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'fluid', 'euler', 'lista']);
+  expect(readers.lista).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'bsc');
   for (const reader of [readers.aave, readers.fluid, readers.euler]) expect(reader).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'bsc');
   expect(readers.morpho).not.toHaveBeenCalled();
   expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'bsc');

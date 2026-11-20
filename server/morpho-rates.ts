@@ -9,7 +9,7 @@ type Market = ContractFunctionReturnType<typeof core, 'view', 'market'>;
 const ZERO = '0x0000000000000000000000000000000000000000';
 const MULTICALL = '0xcA11bde05977b3631167028862bE2a173976CA11';
 const vaultAbi = parseAbi([
-  'function asset() view returns (address)', 'function MORPHO() view returns (address)',
+  'function asset() view returns (address)', 'function MORPHO() view returns (address)', 'function MOOLAH() view returns (address)',
   'function totalAssets() view returns (uint256)', 'function fee() view returns (uint96)',
   'function withdrawQueueLength() view returns (uint256)', 'function withdrawQueue(uint256) view returns (bytes32)',
   'function adaptersLength() view returns (uint256)', 'function adapters(uint256) view returns (address)',
@@ -29,7 +29,7 @@ export function morphoSupplyApr(borrowApr: number, supply: bigint, borrow: bigin
   if (fee > 10n ** 18n) throw new Error('Invalid market fee');
   return supply === 0n ? 0 : borrowApr * Number(borrow) / Number(supply) * (1 - Number(fee) / 1e18);
 }
-export function createMorphoRates(client: ChainClient, blockNumber: bigint, morphoBlue: Address = MORPHO_BLUE) {
+export function createMorphoRates(client: ChainClient, blockNumber: bigint, morphoBlue: Address = MORPHO_BLUE, vaultCoreFunction: 'MORPHO' | 'MOOLAH' = 'MORPHO') {
   async function market(params: Params, state: Market) {
     try {
       let borrowApr = 0;
@@ -81,7 +81,7 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint, morp
     let interestPerYear = 0;
     if (version === 1) {
       const [morpho, length, fee] = await Promise.all([
-        client.readContract({ address, abi: vaultAbi, functionName: 'MORPHO', blockNumber }),
+        client.readContract({ address, abi: vaultAbi, functionName: vaultCoreFunction, blockNumber }),
         client.readContract({ address, abi: vaultAbi, functionName: 'withdrawQueueLength', blockNumber }),
         client.readContract({ address, abi: vaultAbi, functionName: 'fee', blockNumber }),
       ]);

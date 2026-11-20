@@ -19,6 +19,7 @@ function fixture(options: { noPrice?: boolean; failBalance?: boolean; failReceip
       if (functionName === 'getAllATokens') { if (options.failReceiptCheck) throw new Error('secret'); return [{ tokenAddress: receipt, symbol: 'aUSDC' }]; }
       if (functionName === 'getAllFTokens') return [];
       if (functionName === 'symbol') return address.toLowerCase() === usdc ? 'USDC' : address.toLowerCase() === receipt ? 'aUSDC' : 'EUL';
+      if (functionName === 'isMoolahVault') return false;
       if (functionName === 'decimals') return address.toLowerCase() === usdc ? 6 : 18;
       throw new Error(functionName);
     },
@@ -102,5 +103,19 @@ it('excludes Spark debt accounting and savings shares even when the Spark positi
   const result = await readWallet(client, wallet, 123n, 'ethereum', [{ id: 'spark', name: 'Spark', coverage: '', status: 'error', positions: [] }], [], [...catalog, { address: vault, symbol: 'spETH' }], f.prices);
   expect(result.tokens.find(t => t.address.toLowerCase() === eul)?.excludedReason).toContain('Spark');
   expect(result.tokens.find(t => t.address.toLowerCase() === vault.toLowerCase())?.excludedReason).toContain('receipt');
+  expect(result.pricedValueUsd).toBeCloseTo(6004.9);
+});
+
+it('excludes legacy Lista Earn shares even if the Lista reader is unavailable and the factory has no registration', async () => {
+  const f = fixture(), legacy = '0x9651ae50a5763c6f9b883f9d50e8116281cfcab2';
+  const result = await readWallet(f.client, wallet, 123n, 'ethereum', [], [legacy], [...catalog], f.prices);
+  expect(result.tokens.find(t => t.address.toLowerCase() === legacy)).toMatchObject({ excludedReason: expect.stringContaining('receipt'), valueUsd: null });
+  expect(result.pricedValueUsd).toBeCloseTo(6010.9);
+});
+it('excludes a factory-registered Lista vault when protocol discovery failed', async () => {
+  const f = fixture(), original = f.client.readContract;
+  f.client.readContract = (async (args: any) => args.functionName === 'isMoolahVault' ? args.args[0] === eul : original(args)) as typeof original;
+  const result = await readWallet(f.client, wallet, 123n, 'ethereum', [], [], [...catalog], f.prices);
+  expect(result.tokens.find(t => t.address === eul)).toMatchObject({ excludedReason: expect.stringContaining('Lista Earn receipt'), valueUsd: null });
   expect(result.pricedValueUsd).toBeCloseTo(6004.9);
 });

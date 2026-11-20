@@ -1821,3 +1821,30 @@ test('shows Binance Smart Chain balances, monthly NPL, BscScan links and BSC alt
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('shows Lista DAO loans and Earn deposits across Ethereum and BSC with NPL, links and alternatives', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.wallets = [];
+  const market = `0x${'1'.repeat(64)}`, vault = '0x6666666666666666666666666666666666666666';
+  const loan = { ...fixture.protocols[0].positions[0], id: `lista-market-${market}`, label: 'Lista DAO Moolah · WETH / USDC', suppliedUsd: 600, debtUsd: 200, healthFactor: 2.4, risk: 'lower' as const, notes: ['Native Lista core valuation'], morphoMarket: { loanAsset: { address: '0x2222222222222222222222222222222222222222', symbol: 'USDC' }, collateralAsset: { address: '0x3333333333333333333333333333333333333333', symbol: 'WETH' }, supplyOnly: false }, assets: [
+    { address: '0x3333333333333333333333333333333333333333', symbol: 'WETH', supplied: .2, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .8, liquidationPriceUsd: 1250, supplyRate: { apr: 0, note: 'Collateral earns no protocol lending yield.' } },
+    { address: '0x2222222222222222222222222222222222222222', symbol: 'USDC', supplied: 0, borrowed: 200, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .06, note: 'Current Lista borrow APR' } },
+  ] };
+  const deposit = { ...loan, id: `lista-vault-${vault}`, label: 'Lista DAO Earn · USDC', depositOnly: true, suppliedUsd: 500, debtUsd: 0, risk: 'no-debt' as const, healthFactor: null, morphoMarket: undefined, vault: { address: vault, version: 1 as const, roles: [], totalAssets: 100000, totalAssetsUsd: 100000 }, assets: [{ ...loan.assets[1], supplied: 500, borrowed: 0, borrowRate: undefined, supplyRate: { apr: .06, note: 'Allocation-weighted net vault APR' } }] };
+  fixture.protocols = [{ id: 'lista', name: 'Lista DAO', chain: 'Ethereum', coverage: 'Lista Moolah lending', status: 'ok', positions: [loan] }, { id: 'lista', name: 'Lista DAO', chain: 'Binance Smart Chain', coverage: 'Lista Earn vaults', status: 'ok', positions: [deposit] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => {
+    const { targets } = route.request().postDataJSON();
+    return route.fulfill({ json: { checkedAt: new Date().toISOString(), coverage: [{ protocol: 'Lista DAO', network: 'ethereum', status: 'ok' }], alternatives: targets.map((t: { id: string; borrowed?: string }) => ({ targetId: t.id, protocol: 'Lista DAO', network: 'ethereum', market: t.borrowed ? `0x${'9'.repeat(64)}` : '0x7777777777777777777777777777777777777777', label: t.borrowed ? 'Alternative Lista loan' : 'Alternative Lista Earn', supplyApr: t.borrowed ? 0 : .08, borrowApr: t.borrowed ? .03 : null, lltv: t.borrowed ? .8 : null, block: '123', url: 'https://lista.org/lending/earn', note: 'Verified current Lista rate', liquidity: t.borrowed ? { amount: 50000, symbol: 'USDC', token: t.borrowed, note: 'Market loan liquidity' } : null })) } });
+  });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.summary.primary strong')).toHaveText('$900.00');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $1.50');
+  await expect(page.locator('article.lista[data-chain="Ethereum"] .position-monthly-npl strong')).toHaveText('≈ -$1.00');
+  await expect(page.locator('article.lista[data-chain="Binance Smart Chain"] .morpho-vault-position')).toHaveCount(1);
+  await expect(page.locator('article.lista[data-chain="Binance Smart Chain"] .position-market-links a')).toHaveAttribute('href', `https://lista.org/lending/vault/bsc/${vault}`);
+  await expect(page.locator('article.lista[data-chain="Ethereum"] .position-market-links a')).toHaveAttribute('href', `https://lista.org/lending/market/ethereum/${market}`);
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(page.getByText('Alternative Lista loan', { exact: false })).toBeVisible();
+  await expect(page.getByText('Alternative Lista Earn', { exact: false })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

@@ -1,3 +1,4 @@
+import { readListaMarkets } from './market-lista.js';
 import { readSparkMarkets } from './market-spark.js';
 import type { ComparisonTarget, MarketSearch } from '../src/market-comparison.js';
 import { networkOrder } from '../src/networks.js';
@@ -12,7 +13,7 @@ import { readFluidMarkets } from './market-fluid.js';
 import { readMorphoMarkets } from './market-morpho.js';
 export const marketReaders: Record<string, { name: string; read: Reader }> = {
  'aave-v3': { name: 'Aave v3', read: readAaveMarkets }, 'aave-v4': { name: 'Aave v4', read: readV4Markets },
- spark: { name: 'Spark', read: readSparkMarkets },
+ spark: { name: 'Spark', read: readSparkMarkets }, lista: { name: 'Lista DAO', read: readListaMarkets },
  euler: { name: 'Euler', read: readEulerMarkets },
  compound: { name: 'Compound', read: readCompoundMarkets }, morpho: { name: 'Morpho', read: readMorphoMarkets }, fluid: { name: 'Fluid', read: readFluidMarkets },
 };

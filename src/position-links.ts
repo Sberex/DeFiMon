@@ -3,6 +3,11 @@ import { portfolioNetwork, networkExplorers as explorers } from './networks';
 const contract = (value: string | undefined): value is string => /^0x[0-9a-f]{40}$/i.test(value ?? '');
 export function positionLinks(protocol: string, chain: ChainName, position: Position) {
   const network = portfolioNetwork(chain);
+  if (protocol === 'lista') {
+    const vault = !!position.vault || position.id.startsWith('lista-vault-');
+    const address = position.vault?.address ?? position.id.match(/0x[0-9a-f]{64}|0x[0-9a-f]{40}/i)?.[0];
+    return address ? [{ label: vault ? 'Vault contract' : 'Market ID', address, url: `https://lista.org/lending/${vault ? 'vault' : 'market'}/${network}/${address}` }] : [];
+  }
   if (['morpho', 'spark'].includes(protocol) && /^morpho-market-0x[0-9a-f]{64}$/i.test(position.id)) {
     const address = position.id.slice('morpho-market-'.length);
     return [{ label: 'Market ID', address, url: protocol === 'spark' ? `https://app.spark.finance/isolated-markets/${network}/${address}` : `https://app.morpho.org/${network}/market/${address}` }];

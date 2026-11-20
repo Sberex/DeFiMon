@@ -41,14 +41,14 @@ function total(assets: Asset[], side: 'supplied' | 'borrowed') {
   if (assets.some(a => a[side] > 0 && a.priceUsd === null)) return null;
   return assets.reduce((sum, a) => sum + a[side] * (a.priceUsd ?? 0), 0);
 }
-export async function readMorpho(client: ChainClient, wallet: Address, blockNumber: bigint, discover?: (wallet: Address) => Promise<MorphoDiscovery>, network: NetworkId = 'ethereum'): Promise<ProtocolResult> {
+export async function readMorpho(client: ChainClient, wallet: Address, blockNumber: bigint, discover?: (wallet: Address) => Promise<MorphoDiscovery>, network: NetworkId = 'ethereum', options?: { core: Address; family: 'lista'; legacyVaults?: { address: Address; asset: Address }[] }): Promise<ProtocolResult> {
   const deployment = networks[network];
-  if (!deployment.morphoBlue) throw new Error('Unsupported Morpho network');
-  const morphoBlue = deployment.morphoBlue;
+  if (!(options?.core ?? deployment.morphoBlue)) throw new Error('Unsupported Morpho network');
+  const morphoBlue = options?.core ?? deployment.morphoBlue!;
   const discovery = await (discover ? discover(wallet) : fetchMorphoPortfolioDiscovery(wallet, fetch, network));
   if (!discovery.successfulFamilies) throw new MorphoDiscoveryUnavailable(discovery.failures ?? []);
   const warnings = new Set(discovery.warnings);
-  const interest = createMorphoRates(client, blockNumber, morphoBlue);
+  const interest = createMorphoRates(client, blockNumber, morphoBlue, options?.family === 'lista' ? 'MOOLAH' : 'MORPHO');
   const metadata = new Map<string, Promise<{ symbol: string; decimals: number }>>();
   async function token(t: MorphoToken) {
     const key = t.address.toLowerCase();
@@ -92,7 +92,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       let oraclePrice: bigint | null = null;
       const collateralOracleChecks: NonNullable<Position['collateralOracleChecks']> = [];
       if (ref.collateral) {
-        try { oraclePrice = await client.readContract({ address: params.oracle, abi: oracleAbi, functionName: 'price', blockNumber }); }
+        try { oraclePrice = options?.family === 'lista' ? await client.readContract({ address: morphoBlue, abi: coreAbi, functionName: 'getPrice', args: [params], blockNumber }) : await client.readContract({ address: params.oracle, abi: oracleAbi, functionName: 'price', blockNumber }); }
         catch { warnings.add('Some Morpho collateral oracles could not return a price. Affected positions are listed in Risk Assessment.'); }
         collateralOracleChecks.push({ asset: ref.collateral.symbol, oracle: params.oracle, status: oraclePrice === null ? 'unavailable' : oraclePrice <= 0n ? 'zero' : 'ok' });
       }
@@ -144,7 +144,8 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
   }
   async function readVault(ref: MorphoVaultRef): Promise<Position | null> {
     try {
-      const registered = await client.readContract({ address: ref.factory, abi: factoryAbi, functionName: ref.version === 1 ? 'isMetaMorpho' : 'isVaultV2', args: [ref.address], blockNumber });
+      const legacy = options?.family === 'lista' && options.legacyVaults?.some(v => same(v.address, ref.address) && same(v.asset, ref.asset.address));
+      const registered = legacy || await client.readContract({ address: ref.factory, abi: factoryAbi, functionName: options?.family === 'lista' ? 'isMoolahVault' : ref.version === 1 ? 'isMetaMorpho' : 'isVaultV2', args: [ref.address], blockNumber });
       if (!registered) throw new Error('Vault not recognized by its factory');
       const underlying = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'asset', blockNumber });
       if (!same(underlying, ref.asset.address)) throw new Error('Vault underlying mismatch');
@@ -159,7 +160,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       }
       let raw: bigint; let vaultTotalRaw: bigint | null = null;
       if (ref.version === 1) {
-        const core = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'MORPHO', blockNumber });
+        const core = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: options?.family === 'lista' ? 'MOOLAH' : 'MORPHO', blockNumber });
         if (!same(core, morphoBlue)) throw new Error('Wrong Morpho deployment');
         const shares = await client.readContract({ address: ref.address, abi: vaultAbi, functionName: 'balanceOf', args: [wallet], blockNumber });
         if (shares === 0n && !roles.length) return null;

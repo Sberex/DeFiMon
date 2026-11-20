@@ -23,6 +23,7 @@ it('reads BNB and configured BEP-20 balances using BSC token decimals and verifi
       expect(blockNumber).toBe(123n);
       if (functionName === 'getPoolDataProvider' || functionName === 'getPool') { expect(address).toBe(networks.bsc.aaveProvider); return wallet; }
       if (functionName === 'getAllATokens' || functionName === 'getAllFTokens') return [];
+      if (functionName === 'isMoolahVault') return false;
       if (functionName === 'decimals') return 18;
       if (functionName === 'symbol') return 'USDT';
       throw new Error('Ordinary ERC20 does not identify an Aave pool');
@@ -37,19 +38,19 @@ it('reads BNB and configured BEP-20 balances using BSC token decimals and verifi
   expect(configuredWalletTokens('bsc').every(t => seen.includes(t.address))).toBe(true);
   expect(new Set(seen).size).toBe(seen.length);
 });
-it('searches the three BSC lending protocols for an explicitly matched cross-network pair', async () => {
+it('searches the four BSC lending protocols for an explicitly matched cross-network pair', async () => {
   const ethUsdc = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', ethUsdt = '0xdac17f958d2ee523a2206206994597c13d831ec7';
   const supplied = correspondingTokens(ethUsdc, 'ethereum', 'bsc')[0];
   expect(supplied).toBe('0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d');
   expect(correspondingTokens(ethUsdt, 'ethereum', 'bsc')).toEqual([usdt]);
   const reached: string[] = [];
-  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark'].map(id => [id, { name: id, read: async (_client: ChainClient, network: string, block: bigint, targets: ReturnType<typeof expandTargets>) => {
+  const sources = Object.fromEntries(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista'].map(id => [id, { name: id, read: async (_client: ChainClient, network: string, block: bigint, targets: ReturnType<typeof expandTargets>) => {
     if (network === 'bsc') { reached.push(id); expect(block).toBe(123n); expect(targets[0].supplies).toEqual([supplied]); expect(targets[0].borrows).toEqual([usdt]); }
     return [];
   } }]));
   const result = await searchMarkets([{ id: 'loan', network: 'ethereum', supplied: ethUsdc, borrowed: ethUsdt }], network => ({ getChainId: async () => networks[network].id, getBlockNumber: async () => 123n } as unknown as ChainClient), sources);
-  expect(reached.sort()).toEqual(['aave-v3', 'euler', 'fluid']);
-  expect(result.coverage.filter(c => c.network === 'bsc')).toHaveLength(3);
+  expect(reached.sort()).toEqual(['aave-v3', 'euler', 'fluid', 'lista']);
+  expect(result.coverage.filter(c => c.network === 'bsc')).toHaveLength(4);
   expect(result.coverage.filter(c => c.network === 'bsc').every(c => c.status === 'ok')).toBe(true);
 });
 it('uses BSC contracts and explorer links instead of Ethereum defaults', () => {

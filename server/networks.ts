@@ -23,7 +23,7 @@ export const networks: Record<NetworkId, NetworkConfig> = {
     // Instadapp/fluid-contracts-public@404d73f, deployments/bnb/*Resolver.json.
     fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0xAf572EfC84d905926F7b05C1B7bE04e4E89542B0', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
     // Morpho's discovery API rejects chainId 56. Do not claim verified holdings or search results.
-    protocolIds: ['aave-v3', 'fluid', 'euler'], compoundMarkets: [],
+    protocolIds: ['aave-v3', 'fluid', 'euler', 'lista'], compoundMarkets: [],
   },
   base: {
     id: 8453, name: 'Base', rpcVariable: 'BASE_RPC_URL', defaultRpc: 'https://mainnet.base.org', nativeSymbol: 'ETH',
@@ -45,7 +45,7 @@ export const networks: Record<NetworkId, NetworkConfig> = {
     ],
   },
   ethereum: {
-    protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark'],
+    protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista'],
     morphoBlue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',
     compoundMarkets: [{ address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3', label: 'USDC market' }, { address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94', label: 'WETH market' }],
     id: 1, name: 'Ethereum', rpcVariable: 'ETHEREUM_RPC_URL', nativeSymbol: 'ETH',

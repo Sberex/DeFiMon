@@ -45,6 +45,7 @@ it.each(['ethereum', 'arbitrum', 'plasma', 'base'] as const)('discovers configur
       if (functionName === 'getPoolDataProvider' || functionName === 'getPool') return first;
       if (functionName === 'getAllATokens' || functionName === 'getAllFTokens') return [];
       if (functionName === 'symbol') return address.toLowerCase() === token ? 'sUSDai' : 'USDC';
+      if (functionName === 'isMoolahVault') return false;
       if (functionName === 'decimals') return address.toLowerCase() === token ? 18 : 6;
       throw new Error('Unsupported fixture method');
     },

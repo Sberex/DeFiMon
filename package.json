@@ -29,7 +29,8 @@
     "check:lido-apr": "tsx scripts/check-lido-apr.ts",
     "check:spark": "tsx scripts/check-spark.ts",
     "refresh:cookbook": "tsx scripts/refresh-cookbook.ts",
-    "check:bsc": "tsx scripts/check-network.ts bsc"
+    "check:bsc": "tsx scripts/check-network.ts bsc",
+    "check:lista": "tsx scripts/check-lista.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
