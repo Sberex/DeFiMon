@@ -1890,3 +1890,26 @@ test('shows 0% for an expired bridged Lista PT absent from Pendle catalog and ca
   await expect(card.locator('.position-monthly-npl strong')).toHaveText('≈ -$2.50');
   await expect(page.getByText('Supply APR unavailable', { exact: false })).toHaveCount(0);
 });
+
+test('includes slisBNB native staking APR in collateral income and position and wallet NPL', async ({ page }) => {
+  const { applySlisBnbRates, createSlisBnbRateService, SLISBNB, SLISBNB_MARKET } = await import('../server/slisbnb-rates');
+  const fixture = structuredClone(example); fixture.wallets = [];
+  fixture.protocols = [{ id: 'lista', name: 'Lista DAO', chain: 'Binance Smart Chain', status: 'ok', balanceDiscoveryComplete: true, coverage: 'Lista Moolah', positions: [{
+    id: `lista-market-${SLISBNB_MARKET}`, label: 'Lista DAO Moolah · slisBNB / USD1', suppliedUsd: 85469.03, debtUsd: 49887.23, healthFactor: 1.47, risk: 'lower', notes: [], assets: [
+      { address: SLISBNB, symbol: 'slisBNB', supplied: 144.95, borrowed: 0, priceUsd: 85469.03 / 144.95, collateral: true, liquidationThreshold: .86, liquidationPriceUsd: 400.2, supplyRate: { apr: 0, note: 'No protocol lending interest' } },
+      { address: '0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d', symbol: 'USD1', supplied: 0, borrowed: 49887.23, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .03, note: 'Borrow APR' } },
+    ],
+  }] }];
+  fixture.protocols = await applySlisBnbRates(fixture.protocols, 'bsc', createSlisBnbRateService((async () => Response.json({ code: '000000000', timestamp: Date.now(), data: { marketId: SLISBNB_MARKET, chain: 'bsc', collateralToken: SLISBNB, collateralNativeApy: '0.01519' } })) as any));
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => route.fulfill({ json: { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill('0xc6dd9976066f3364b4d6a72cd4f1fa0468327aa7'); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.lista'), collateral = card.locator('tr').filter({ hasText: 'slisBNB staking APR' });
+  await expect(collateral).toContainText('1.52%');
+  await expect(collateral).toContainText('$108.19');
+  await expect(card.locator('.position-monthly-npl')).toContainText('-$16.53');
+  await expect(page.locator('.total-npl > strong')).toContainText('-$16.53');
+  await expect(card.locator('.position')).toContainText('-0.56%');
+  await collateral.getByText('Intrinsic yield details', { exact: true }).click();
+  await expect(collateral.getByRole('link', { name: 'View Lista slisBNB staking APR' })).toHaveAttribute('href', 'https://lista.org/liquid-staking/BNB');
+});

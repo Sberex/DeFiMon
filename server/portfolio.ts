@@ -6,6 +6,7 @@ import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
 import type { ExtraTokens, NetworkId, Portfolio, ProtocolResult, WalletBalances } from '../src/types.js';
 import { applyWalletInterest } from './wallet-interest.js';
+import { applySlisBnbRates } from './slisbnb-rates.js';
 import { applyLidoRates } from './lido-rates.js';
 import { applyPtCollateralRates } from './pendle-collateral.js';
 import { readPendle, mergePendleWallet, unavailablePendle } from './pendle.js';
@@ -47,7 +48,7 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
   const [protocolResults, pendle] = await Promise.all([Promise.all(deployment.protocolIds.map(id => readers[id]())), readPendle(client, address, blockNumber, network)]);
   const intrinsicProtocols = await applyIntrinsicRates(deduplicateSparkPositions(protocolResults), network);
   const ptProtocols = await applyPtCollateralRates(intrinsicProtocols, client, network, blockNumber);
-  const protocols = await applyLidoRates(ptProtocols, network);
+  const protocols = await applySlisBnbRates(await applyLidoRates(ptProtocols, network), network);
   const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
   return { wallets: [await applyWalletInterest(mergePendleWallet(walletBalances, pendle), network, protocols)], address, chain: deployment.name, blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
 }
