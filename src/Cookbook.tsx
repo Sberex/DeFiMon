@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { apiUrl } from './api';
-import { cookbookPositions, parseCookbook, type CookbookResponse } from './cookbook';
+import { COOKBOOK_MIN_APR, cookbookPositions, parseCookbook, type CookbookResponse } from './cookbook';
 const source = 'https://github.com/Sberex/DeFiMon/blob/main/analysis/cookbook.json';
 const rawSource = 'https://raw.githubusercontent.com/Sberex/DeFiMon/main/analysis/cookbook.json';
 const explorers = { Ethereum: 'https://etherscan.io', Arbitrum: 'https://arbiscan.io', Base: 'https://basescan.org', Plasma: 'https://plasmascan.to' };
@@ -33,8 +33,20 @@ export function Cookbook({ revision, renderPosition }: { revision: object | null
     return () => request.abort();
   }, [revision, retry]);
   const entries = result ? cookbookPositions(result.data) : [];
+  const addresses = new Set(entries.map(entry => entry.address.toLowerCase())).size;
+  const totalNetValue = entries.reduce((total, entry) => total + entry.netValueUsd, 0);
+  const highestApr = entries.reduce<number | null>((highest, entry) => highest === null ? entry.apr : Math.max(highest, entry.apr), null);
+  const threshold = result?.data.minimumApr ?? COOKBOOK_MIN_APR;
+  const money = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(value);
   return <section className="cookbook" aria-label="Cookbook">
     <div className="section-label"><h2>Cookbook</h2><span>Position APR &gt; 14%</span></div>
+    <section className="summary-grid cookbook-summary" aria-label="Cookbook summary">
+      <div className="summary"><span>Number of positions</span><strong>{result ? entries.length.toLocaleString('en-US') : '—'}</strong><small>Saved position snapshots</small></div>
+      <div className="summary"><span>Number of addresses</span><strong>{result ? addresses.toLocaleString('en-US') : '—'}</strong><small>Unique wallets with saved positions</small></div>
+      <div className="summary cookbook-total-value"><span>Total Net Value</span><strong>{result ? money(totalNetValue) : '—'}</strong><small>Sum of saved position net values</small></div>
+      <div className="summary"><span>Highest APR</span><strong>{highestApr === null ? '—' : `${(highestApr * 100).toFixed(2)}%`}</strong><small>Among saved snapshots</small></div>
+      <div className="summary"><span>Threshold minimum APR</span><strong>{(threshold * 100).toFixed(0)}%</strong><small>Position APR must exceed this rate</small></div>
+    </section>
     <p className="recommendations-intro">Snapshots of lending positions from analysed wallets. APR is monthly NPL × 12 ÷ net value, including the verified intrinsic yield and matched rewards shown in the snapshot. Rates, balances and risk can change after the snapshot.</p>
     <div className="cookbook-toolbar"><a href={source} target="_blank" rel="noreferrer">View source JSON <ExternalLinkIcon /></a><button type="button" className="secondary" disabled={loading} onClick={() => setRetry(n => n + 1)}>{loading ? 'Loading snapshots…' : 'Reload snapshots'}</button></div>
     {result?.persistence.message && <p className="notice cookbook-persistence" role="status">{result.persistence.message}</p>}

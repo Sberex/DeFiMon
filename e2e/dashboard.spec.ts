@@ -1672,6 +1672,7 @@ test('Cookbook renders JSON snapshots with wallet and time, refreshes without du
   await nav.getByRole('button', { name: 'Cookbook', exact: true }).click();
   const cookbook = page.getByRole('region', { name: 'Cookbook', exact: true });
   await expect(cookbook.locator('.cookbook-entry')).toHaveCount(1);
+  await expect(cookbook.locator('.cookbook-summary strong')).toHaveText(['1', '1', '$500.00', '30.00%', '14%']);
   await expect(cookbook.locator('.cookbook-wallet')).toHaveText(/0x1111111111111111111111111111111111111111/);
   await expect(cookbook.locator('time')).toHaveAttribute('datetime', '2026-11-20T10:00:00.000Z');
   await expect(cookbook.locator('.cookbook-apr')).toHaveText('30.00% APR');
@@ -1680,6 +1681,7 @@ test('Cookbook renders JSON snapshots with wallet and time, refreshes without du
   await cookbook.getByRole('button', { name: 'Reload snapshots' }).click();
   await expect(cookbook.locator('.cookbook-entry')).toHaveCount(1);
   await expect(cookbook.locator('.cookbook-apr')).toHaveText('40.00% APR');
+  await expect(cookbook.locator('.cookbook-summary strong')).toHaveText(['1', '1', '$500.00', '40.00%', '14%']);
   await expect(cookbook.locator('time')).toHaveAttribute('datetime', '2026-11-20T11:00:00.000Z');
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -1687,6 +1689,7 @@ test('Cookbook renders JSON snapshots with wallet and time, refreshes without du
   saved = updateCookbook(saved, snapshot(.1, '2026-11-20T12:00:00.000Z'));
   await cookbook.getByRole('button', { name: 'Reload snapshots' }).click();
   await expect(cookbook.locator('.cookbook-entry')).toHaveCount(0);
+  await expect(cookbook.locator('.cookbook-summary strong')).toHaveText(['0', '0', '$0.00', '—', '14%']);
   await expect(cookbook).toContainText('No saved positions currently meet');
   await nav.getByRole('button', { name: 'Wallet Overview', exact: true }).click();
   await expect(page.locator('.summary.primary strong')).toHaveText(net!); await expect(page.locator('.total-npl > strong')).toHaveText(npl!);
@@ -1752,4 +1755,31 @@ test('keeps unpriced wallet tokens visible rather than treating unknown USD valu
   await expect(page.getByText('UNKNOWN_OTHER', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('SMALL_OTHER', { exact: true })).toBeHidden();
   await expect(page.getByRole('region', { name: 'Interest bearing tokens', exact: true }).locator('.small-wallet-tokens')).toHaveCount(0);
+});
+
+
+test('Cookbook summary totals positions across wallets and counts each source address once', async ({ page }) => {
+  const { emptyCookbook, updateCookbook } = await import('../src/cookbook');
+  const { snapshot } = await import('../tests/fixtures/cookbook');
+  const first = snapshot(.3), secondPosition = snapshot(.2).protocols[0].positions[0];
+  secondPosition.id = 'second-loan'; first.protocols[0].positions.push(secondPosition);
+  const otherAddress = '0x4444444444444444444444444444444444444444';
+  let saved = updateCookbook(updateCookbook(emptyCookbook(), first), snapshot(.5, first.updatedAt, otherAddress));
+  await page.route('**/api/cookbook', route => route.fulfill({ json: { data: saved, persistence: { mode: 'github', synced: true } } }));
+  await page.goto('/'); await page.getByRole('button', { name: 'Cookbook', exact: true }).click();
+  const cookbook = page.getByRole('region', { name: 'Cookbook', exact: true });
+  const summary = cookbook.getByRole('region', { name: 'Cookbook summary', exact: true });
+  await expect(summary.locator('.summary > span')).toHaveText(['Number of positions', 'Number of addresses', 'Total Net Value', 'Highest APR', 'Threshold minimum APR']);
+  await expect(summary.locator('strong')).toHaveText(['3', '2', '$1,500.00', '50.00%', '14%']);
+  await summary.screenshot({ path: '/tmp/defimon-cookbook-summary-desktop.png' });
+  saved = updateCookbook(saved, snapshot(.25, '2026-11-20T11:00:00.000Z'));
+  await cookbook.getByRole('button', { name: 'Reload snapshots' }).click();
+  await expect(summary.locator('strong')).toHaveText(['2', '2', '$1,000.00', '50.00%', '14%']);
+  const closed = snapshot(.5, '2026-11-20T12:00:00.000Z', otherAddress); closed.protocols[0].positions = [];
+  saved = updateCookbook(saved, closed);
+  await cookbook.getByRole('button', { name: 'Reload snapshots' }).click();
+  await expect(summary.locator('strong')).toHaveText(['1', '1', '$500.00', '25.00%', '14%']);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await summary.screenshot({ path: '/tmp/defimon-cookbook-summary-mobile.png' });
 });

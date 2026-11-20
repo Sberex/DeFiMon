@@ -516,6 +516,8 @@ npm run check:spark -- 0xWalletAddress arbitrum
 
 ## Recommendations → Cookbook
 
+Cookbook’s top summary shows the displayed position count, distinct source wallets with saved positions, summed position net value, highest snapshot APR, and the strict 14% minimum APR threshold. Wallets retained only as empty deletion records are not counted.
+
 `analysis/cookbook.json` is the data source for Cookbook. After each real wallet lookup, the server captures lending positions whose **position APR is strictly above 14%**: monthly NPL × 12 ÷ positive net value. This is the same calculation used by the dashboard, including verified intrinsic collateral yield and matched Merkl APR. Bad Debt positions, zero net value and unreadable APRs do not create examples. Example/demo mode never writes snapshots.
 
 Each example includes its full source wallet address, protocol, network, asset balances/rates, monthly NPL, APR, risk, source block and snapshot timestamp. Cookbook shows times in Europe/Kiev and keeps ISO timestamps in JSON. A refresh replaces the same wallet/market snapshot, removes verified closed or below-threshold positions, and retains other wallets. Failed or incomplete reads retain the last verified snapshot with an explicit unverified label; a failed RPC call never proves a position closed. Empty scope records preserve deletions when concurrent writers merge data.
