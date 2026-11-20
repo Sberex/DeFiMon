@@ -1,3 +1,6 @@
+import type { CookbookStore } from './cookbook-store.js';
+import { emptyCookbook } from '../src/cookbook.js';
+import { applyMerklApr } from '../src/merkl-rates.js';
 import express from 'express';
 import { apiCors } from './cors.js';
 import { searchMarkets } from './market-search.js';
@@ -8,13 +11,27 @@ import type { ExtraTokens, MerklRewards, NetworkId, Portfolio } from '../src/typ
 import { isNetworkId } from '../src/networks.js';
 import { readMerklRewards, unavailableMerkl } from './merkl.js';
 import { networks } from './networks.js';
-export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets) {
+export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use('/api', apiCors);
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc), baseConfigured: Boolean(process.env.BASE_RPC_URL || networks.base.defaultRpc) }));
-  // Bound concurrent work; wallet addresses and results are not stored or logged.
+  app.get('/api/cookbook', async (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try { res.json(cookbook ? await cookbook.read() : { data: emptyCookbook(), persistence: { mode: 'local', synced: true } }); }
+    catch { res.status(503).json({ error: 'Cookbook snapshots are unavailable. Existing data has not been changed.' }); }
+  });
+  // Share the native rewards lookup used by the dashboard and Cookbook APRs.
+  const rewardRequests = new Map<string, { until: number; value: Promise<MerklRewards> }>();
+  function rewardsFor(wallet: Address) {
+    const key = wallet.toLowerCase(), existing = rewardRequests.get(key);
+    if (existing && existing.until > Date.now()) return existing.value;
+    for (const [key, value] of rewardRequests) if (value.until < Date.now()) rewardRequests.delete(key);
+    const value = loadRewards(wallet).catch(() => unavailableMerkl(wallet));
+    rewardRequests.set(key, { until: Date.now() + 30000, value }); return value;
+  }
+  // Bound concurrent work. Qualifying lending snapshots are saved to Cookbook.
   let active = 0;
   let activeRewards = 0;
   app.get('/api/rewards/:address', async (req, res) => {
@@ -25,7 +42,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     if (activeRewards >= 5) { res.setHeader('Retry-After', '10'); res.status(429).json({ error: 'Reward lookups are busy. Please refresh shortly.' }); return; }
     activeRewards++;
     const address = getAddress(req.params.address);
-    try { res.json(await loadRewards(address)); }
+    try { res.json(await rewardsFor(address)); }
     catch { res.json(unavailableMerkl(address)); }
     finally { activeRewards--; }
   });
@@ -67,7 +84,15 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     }
     if (active >= 5) { res.setHeader('Retry-After', '10'); res.status(429).json({ error: 'The monitor is busy. Please try again shortly.' }); return; }
     active++;
-    try { res.json(network === 'all' ? await getCombinedPortfolio(req.params.address as Address, load, extraTokens) : await load(req.params.address as Address, network, extraTokens)); }
+    try {
+      const rewardsSnapshot = cookbook ? rewardsFor(getAddress(req.params.address)) : null;
+      const portfolio = network === 'all' ? await getCombinedPortfolio(req.params.address as Address, load, extraTokens) : await load(req.params.address as Address, network, extraTokens);
+      if (cookbook) {
+        try { await cookbook.record(applyMerklApr(portfolio, await rewardsSnapshot).portfolio); }
+        catch { res.setHeader('X-Cookbook-Save', 'unavailable'); }
+      }
+      res.json(portfolio);
+    }
     catch {
       if (network === 'all') { res.status(503).json({ error: 'Could not complete the wallet lookup. Please refresh and try again.' }); return; }
       const config = networks[network];

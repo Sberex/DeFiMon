@@ -1,6 +1,6 @@
 # DeFiMon
 
-A read-only Ethereum, Plasma, Arbitrum, and Base wallet dashboard for current lending positions and liquidation risk. No wallet connection, transaction signing, database, or historical tracking.
+A read-only Ethereum, Plasma, Arbitrum, and Base wallet dashboard for current lending positions and liquidation risk. No wallet connection or transaction signing. Qualifying Cookbook snapshots are stored in public JSON.
 
 ## Current scope
 
@@ -511,3 +511,22 @@ npm run check:spark -- 0xWalletAddress ethereum
 npm run check:spark -- 0xWalletAddress base
 npm run check:spark -- 0xWalletAddress arbitrum
 ```
+
+## Recommendations → Cookbook
+
+`analysis/cookbook.json` is the data source for Cookbook. After each real wallet lookup, the server captures lending positions whose **position APR is strictly above 14%**: monthly NPL × 12 ÷ positive net value. This is the same calculation used by the dashboard, including verified intrinsic collateral yield and matched Merkl APR. Bad Debt positions, zero net value and unreadable APRs do not create examples. Example/demo mode never writes snapshots.
+
+Each example includes its full source wallet address, protocol, network, asset balances/rates, monthly NPL, APR, risk, source block and snapshot timestamp. Cookbook shows times in Europe/Kiev and keeps ISO timestamps in JSON. A refresh replaces the same wallet/market snapshot, removes verified closed or below-threshold positions, and retains other wallets. Failed or incomplete reads retain the last verified snapshot with an explicit unverified label; a failed RPC call never proves a position closed. Empty scope records preserve deletions when concurrent writers merge data.
+
+**Live persistence:** add `COOKBOOK_GITHUB_TOKEN` to the Render service’s Environment settings. Use a fine-grained GitHub token restricted to **Sberex/DeFiMon**, with **Contents: Read and write**. Keep it server-only; never use a `VITE_` variable or commit a token. No new RPC keys are required. The server uses GitHub’s Contents API to update only `analysis/cookbook.json`, retries version conflicts and merges snapshots by wallet/protocol/network timestamp. Data commits include `[skip ci] [skip render]`, so new examples do not rebuild or restart the site. GitHub access errors are reported without exposing credentials.
+
+Until that credential is configured, wallet checks update the server’s local JSON and Cookbook displays an explicit persistence notice. **Render’s free filesystem is ephemeral:** unsynced local examples can disappear at restart/redeploy. The committed seed examples remain available. The public Cookbook API is `GET /api/cookbook`; there is no client endpoint for submitting fabricated APRs or positions. Only server-derived wallet results are captured. If the API is down, the page falls back to the public GitHub JSON. Cookbook snapshots never enter the currently viewed wallet’s totals or trigger alternative-market searches.
+
+To refresh the repository JSON locally using the deployed API:
+
+```sh
+npm run refresh:cookbook -- --test-cases
+npm run refresh:cookbook -- 0xWalletAddress
+```
+
+The refresh script retains previous snapshots on a failed address lookup. Review and commit the JSON after a local refresh.

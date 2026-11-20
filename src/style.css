@@ -53,3 +53,14 @@ main{max-width:1600px}.dashboard-layout{display:grid;grid-template-columns:210px
 .pendle-active,.pendle-collapsed-networks{display:grid;gap:16px}.pendle-inactive{margin-top:20px;border:1px solid var(--border);border-radius:10px;padding:16px;background:#f4f7ee}.pendle-inactive>summary{font-size:13px;color:#526044}.pendle-inactive>p{font-size:12px;margin:12px 0}.pendle-inactive .protocol{background:#fff}
 
 .spark .protocol-logo, .tile-logo.spark { background: #fff0d4; color: #976013; }
+
+.dashboard-nav .dashboard-subnav { margin-top: -.35rem; padding-left: 1.2rem; }
+.dashboard-nav .dashboard-subnav button { font-size: .95rem; padding-block: .8rem; }
+.cookbook-disclosure { color: var(--muted); font-size: .85rem; margin: 1rem 0; }
+.cookbook-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 1rem 0 1.5rem; }
+.cookbook-source { display: flex; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 1.75rem; border-bottom: 1px solid var(--border); }
+.cookbook-source p { margin: .5rem 0 0; color: var(--muted); font-size: .9rem; }
+.cookbook-wallet { overflow-wrap: anywhere; }
+.cookbook-apr { flex-shrink: 0; color: #416639; }
+.cookbook-entry > .notice { margin: 1.2rem 1.75rem; }
+@media (max-width: 700px) { .cookbook-source { flex-direction: column; gap: .8rem; padding: 1.2rem; } .cookbook-toolbar { flex-wrap: wrap; } }

@@ -131,8 +131,10 @@ test('separates Bad Debt from overview, totals and recommendation requests, and 
   await page.route('**/api/recommendations', route => { requests.push(route.request().postDataJSON()); return route.fulfill({ json: { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } }); });
   await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
   const nav = page.getByRole('navigation', { name: 'Dashboard sections' });
-  await expect(nav.getByRole('button')).toHaveCount(3);
-  for (const [i, name] of ['Wallet Overview', 'Recommendations', 'Risk Assessment'].entries()) await expect(nav.getByRole('button').nth(i)).toHaveAccessibleName(name);
+  const topLevel = nav.locator(':scope > button');
+  await expect(topLevel).toHaveCount(3);
+  for (const [i, name] of ['Wallet Overview', 'Recommendations', 'Risk Assessment'].entries()) await expect(topLevel.nth(i)).toHaveAccessibleName(name);
+  await expect(nav.getByRole('group', { name: 'Recommendations subsections' }).getByRole('button', { name: 'Cookbook' })).toBeVisible();
   await expect(page.locator('.summary.primary strong')).toHaveText('$1,100.00');
   await expect(page.locator('.summary-grid .summary').nth(1).locator('strong')).toHaveText('$1,000.00');
   await expect(page.locator('.summary-grid .summary').nth(2).locator('strong')).toHaveText('$0.00');
@@ -1654,4 +1656,51 @@ test('shows Spark savings as a deposit with NPL and supply recommendations', asy
   await page.getByRole('button', { name: 'Recommendations', exact: true }).click();
   await expect(page.locator('.recommendations')).toContainText('Spark');
   await expect(page.locator('.recommendations')).toContainText('USDT');
+});
+
+test('Cookbook renders JSON snapshots with wallet and time, refreshes without duplicates, and leaves wallet totals unchanged', async ({ page }) => {
+  const { emptyCookbook, updateCookbook } = await import('../src/cookbook');
+  const { snapshot } = await import('../tests/fixtures/cookbook');
+  let saved = updateCookbook(emptyCookbook(), snapshot(.3)); let recommendationSearches = 0;
+  await page.route('**/api/cookbook', route => route.fulfill({ json: { data: saved, persistence: { mode: 'local', synced: false, message: 'Automatic saving to GitHub is not configured. New snapshots are saved locally.' } } }));
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: example }));
+  await page.route('**/api/rewards/*', route => route.fulfill({ status: 503, json: {} }));
+  await page.route('**/api/recommendations', route => { recommendationSearches++; return route.fulfill({ json: { alternatives: [], coverage: [] } }); });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const net = await page.locator('.summary.primary strong').textContent(), npl = await page.locator('.total-npl > strong').textContent();
+  const nav = page.getByRole('navigation', { name: 'Dashboard sections' });
+  await nav.getByRole('button', { name: 'Cookbook', exact: true }).click();
+  const cookbook = page.getByRole('region', { name: 'Cookbook', exact: true });
+  await expect(cookbook.locator('.cookbook-entry')).toHaveCount(1);
+  await expect(cookbook.locator('.cookbook-wallet')).toHaveText(/0x1111111111111111111111111111111111111111/);
+  await expect(cookbook.locator('time')).toHaveAttribute('datetime', '2026-11-20T10:00:00.000Z');
+  await expect(cookbook.locator('.cookbook-apr')).toHaveText('30.00% APR');
+  await expect(cookbook.locator('.cookbook-persistence')).toContainText('saved locally');
+  saved = updateCookbook(saved, snapshot(.4, '2026-11-20T11:00:00.000Z'));
+  await cookbook.getByRole('button', { name: 'Reload snapshots' }).click();
+  await expect(cookbook.locator('.cookbook-entry')).toHaveCount(1);
+  await expect(cookbook.locator('.cookbook-apr')).toHaveText('40.00% APR');
+  await expect(cookbook.locator('time')).toHaveAttribute('datetime', '2026-11-20T11:00:00.000Z');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/defimon-cookbook-mobile.png', fullPage: true });
+  saved = updateCookbook(saved, snapshot(.1, '2026-11-20T12:00:00.000Z'));
+  await cookbook.getByRole('button', { name: 'Reload snapshots' }).click();
+  await expect(cookbook.locator('.cookbook-entry')).toHaveCount(0);
+  await expect(cookbook).toContainText('No saved positions currently meet');
+  await nav.getByRole('button', { name: 'Wallet Overview', exact: true }).click();
+  await expect(page.locator('.summary.primary strong')).toHaveText(net!); await expect(page.locator('.total-npl > strong')).toHaveText(npl!);
+  expect(recommendationSearches).toBe(0);
+});
+
+test('Cookbook works without a wallet lookup and falls back to the GitHub JSON when the API is down', async ({ page }) => {
+  const { emptyCookbook, updateCookbook } = await import('../src/cookbook');
+  const { snapshot } = await import('../tests/fixtures/cookbook');
+  const saved = updateCookbook(emptyCookbook(), snapshot(.2));
+  await page.route('**/api/cookbook', route => route.fulfill({ status: 503, json: {} }));
+  await page.route('https://raw.githubusercontent.com/Sberex/DeFiMon/main/analysis/cookbook.json', route => route.fulfill({ json: saved }));
+  await page.goto('/'); await page.getByRole('button', { name: 'Cookbook', exact: true }).click();
+  const cookbook = page.getByRole('region', { name: 'Cookbook', exact: true });
+  await expect(cookbook.locator('.cookbook-entry')).toHaveCount(1);
+  await expect(cookbook.locator('.cookbook-persistence')).toContainText('Showing snapshots saved in the GitHub JSON file');
 });
