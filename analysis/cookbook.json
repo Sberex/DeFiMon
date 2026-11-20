@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-20T13:01:20.821Z",
+  "updatedAt": "2026-11-20T13:02:12.630Z",
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
@@ -1357,16 +1357,16 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-20T13:01:20.821Z",
-          "blockNumber": "38234616",
+          "checkedAt": "2026-11-20T13:02:12.630Z",
+          "blockNumber": "38234670",
           "complete": false,
           "positions": [
             {
-              "snapshotAt": "2026-11-20T13:01:20.821Z",
-              "blockNumber": "38234616",
-              "apr": 0.31714821655795433,
-              "netValueUsd": 35197.019931806455,
-              "monthlyNplUsd": 930.222674960599,
+              "snapshotAt": "2026-11-20T13:02:12.630Z",
+              "blockNumber": "38234670",
+              "apr": 0.3171483998829431,
+              "netValueUsd": 35196.99616180605,
+              "monthlyNplUsd": 930.2225844502398,
               "verification": "verified",
               "position": {
                 "marketAddress": "0x2d38ca861aC948BF90cC682fC1455138173c1923",
@@ -1374,8 +1374,8 @@
                 "id": "fluid-nft-2764",
                 "label": "Vault 38 · sUSDai / GHO · NFT 2764",
                 "suppliedUsd": 281325.30076312687,
-                "debtUsd": 246128.28083132042,
-                "healthFactor": 1.0287024710514077,
+                "debtUsd": 246128.30460132082,
+                "healthFactor": 1.0287023717038004,
                 "risk": "high",
                 "assets": [
                   {
@@ -1386,7 +1386,7 @@
                     "priceUsd": 1.1272399744106654,
                     "collateral": true,
                     "liquidationThreshold": 0.9,
-                    "liquidationPriceUsd": 1.095788146847305,
+                    "liquidationPriceUsd": 1.095788252673765,
                     "supplyRate": {
                       "apr": 0,
                       "note": "Current Fluid vault APR after the vault’s rate magnifier/fee adjustment."
@@ -1413,7 +1413,7 @@
                     "symbol": "GHO",
                     "address": "0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3",
                     "supplied": 0,
-                    "borrowed": 246128.28083132042,
+                    "borrowed": 246128.30460132082,
                     "priceUsd": 1,
                     "collateral": false,
                     "liquidationThreshold": null,
@@ -1446,7 +1446,7 @@
                 ],
                 "liquidationQuote": {
                   "current": 1.1272399744106654,
-                  "threshold": 1.095788146847305,
+                  "threshold": 1.095788252673765,
                   "unit": "GHO per sUSDai"
                 }
               }
