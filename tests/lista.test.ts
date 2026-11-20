@@ -12,7 +12,7 @@ import { positionLinks } from '../src/position-links';
 import type { ChainClient } from '../server/rpc';
 const wallet = '0x1111111111111111111111111111111111111111', loan = '0x2222222222222222222222222222222222222222', col = '0x3333333333333333333333333333333333333333', oracle = '0x4444444444444444444444444444444444444444', model = '0x5555555555555555555555555555555555555555', vault = '0x6666666666666666666666666666666666666666';
 const E6 = 10n ** 6n, E18 = 10n ** 18n;
-function fixture(network: 'bsc' | 'ethereum', options: { deposit?: boolean; vault?: boolean; failOracle?: boolean; wrongFactory?: boolean; failRate?: boolean; legacy?: boolean } = {}) {
+function fixture(network: 'bsc' | 'ethereum', options: { deposit?: boolean; vault?: boolean; failOracle?: boolean; wrongFactory?: boolean; failRate?: boolean; legacy?: boolean; broker?: boolean } = {}) {
   const deployment = listaDeployments[network]!;
   const underlying = options.legacy ? '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' as const : loan;
   const vaultAddress = options.legacy ? '0x9651ae50a5763c6f9b883f9d50e8116281cfcab2' as const : vault;
@@ -22,6 +22,7 @@ function fixture(network: 'bsc' | 'ethereum', options: { deposit?: boolean; vaul
   const token = (address: Address) => ({ address, symbol: address === underlying ? 'USDC' : 'WBNB', decimals: address === underlying ? 6 : 18, priceUsd: address === underlying ? 1 : 600 });
   const discovery = async (): Promise<MorphoDiscovery> => ({ markets: options.vault ? [] : [{ id, loan: token(underlying), collateral: token(col) }], vaults: options.vault ? [{ address: vaultAddress, name: 'Lista USDC Earn', asset: token(underlying), factory: deployment.factory, version: 1 as const }] : [], successfulFamilies: 2, holdingsComplete: true, warnings: [] });
   const client = {
+    getBlock: async ({ blockNumber }: any) => { expect(blockNumber).toBe(123n); return { timestamp: 1234n }; },
     readContract: async ({ address, functionName, args, blockNumber }: any) => {
       expect(blockNumber).toBe(123n);
       switch (functionName) {
@@ -29,6 +30,13 @@ function fixture(network: 'bsc' | 'ethereum', options: { deposit?: boolean; vaul
         case 'getPrice': expect(address).toBe(deployment.core); expect(args[0]).toEqual(params); if (options.failOracle) throw new Error('private-rpc-details'); return 600n * 10n ** 24n;
         case 'isMoolahVault': expect(address).toBe(deployment.factory); return options.legacy ? false : !options.wrongFactory;
         case 'MOOLAH': return deployment.core;
+        case 'brokers': return options.broker ? vault : '0x0000000000000000000000000000000000000000';
+        case 'MARKET_ID': return id;
+        case 'LOAN_TOKEN': return underlying;
+        case 'COLLATERAL_TOKEN': return col;
+        case 'getUserTotalDebt': return 210n * E6;
+        case 'userDynamicPosition': return { principal: 0n, normalizedDebt: 0n };
+        case 'userFixedPositions': return [{ posId: 1n, principal: 200n * E6, apr: 11n * 10n ** 26n, start: 10n, end: 100000n, lastRepaidTime: 10n, interestRepaid: 0n, principalRepaid: 0n }];
         case 'MORPHO': case 'isMetaMorpho': case 'price': throw new Error('Wrong protocol interface');
         case 'asset': return underlying;
         case 'balanceOf': return 500n * E18;
@@ -128,10 +136,34 @@ it('values pinned pre-factory Ethereum savings vaults with the same share and fe
   expect(r.status).toBe('ok'); expect(r.positions[0].suppliedUsd).toBe(500);
   expect(r.positions[0].assets[0].supplyRate?.apr).toBeCloseTo(.0405);
 });
-it('keeps broker-managed debt incomplete instead of reporting only the core principal', async () => {
+it('includes broker-managed loans in discovery instead of silently dropping the main position', async () => {
   const id = marketId(1) as `0x${string}`;
-  const client = { multicall: async () => [{ status: 'success', result: { supplyShares: 0n, borrowShares: 1n, collateral: 1n } }], readContract: async ({ functionName }: any) => functionName === 'brokers' ? vault : { loanToken: loan, collateralToken: col } } as unknown as ChainClient;
-  const result = await listaDiscovery(client, wallet, 123n, 'bsc', async () => ({ markets: [id], vaults: [] }));
-  expect(result.holdingsComplete).toBe(false); expect(result.markets).toEqual([]);
-  expect(result.warnings.join(' ')).toContain('broker interest');
+  const client = { multicall: async () => [{ status: 'success', result: { supplyShares: 0n, borrowShares: 1n, collateral: 1n } }], readContract: async ({ functionName, address }: any) => functionName === 'idToMarketParams' ? { loanToken: loan, collateralToken: col } : functionName === 'decimals' ? (address === loan ? 6 : 18) : functionName === 'symbol' ? 'TOKEN' : (() => { throw new Error('No external price'); })() } as unknown as ChainClient;
+  const result = await listaDiscovery(client, wallet, 123n, 'bsc', async () => ({ markets: [id], vaults: [] }), async () => new Map([[loan, 1], [col, 600]]));
+  expect(result.holdingsComplete).toBe(true); expect(result.markets).toHaveLength(1);
+});
+it('displays full broker debt and uses it for health, liquidation and monthly interest', async () => {
+  const f = fixture('bsc', { broker: true });
+  const r = await readLista(f.client, wallet, 123n, 'bsc', f.discovery), p = r.positions[0];
+  expect(r.status).toBe('ok'); expect(p.debtUsd).toBe(210);
+  expect(p.healthFactor).toBeCloseTo(600 * .8 / 210);
+  expect(p.liquidationQuote?.threshold).toBeCloseTo(210 / .8);
+  expect(positionMonthlyInterest(p).paidUsd).toBeCloseTo(200 * .1 / 12);
+  expect(p.assets.find(a => a.borrowed > 0)?.borrowRate?.note).toContain('10.00% fixed contract APR');
+});
+
+it.each([false, true])('uses native 8-decimal prices only if the core confirms their ratio (mismatch: %s)', async mismatch => {
+  const id = marketId(1) as `0x${string}`;
+  const client = { multicall: async () => [{ status: 'success', result: { supplyShares: 0n, borrowShares: 0n, collateral: 1n } }], readContract: async ({ functionName, args, address, blockNumber }: any) => {
+    expect(blockNumber).toBe(123n);
+    if (functionName === 'idToMarketParams') return { loanToken: loan, collateralToken: col, oracle };
+    if (functionName === 'decimals') return address === loan ? 6 : 18;
+    if (functionName === 'symbol') return address === loan ? 'USDC' : 'PT-old';
+    if (functionName === 'peek') return args[0] === loan ? 98000000n : 105000000n;
+    if (functionName === 'getPrice') return mismatch ? 1n : 10n ** 24n * 105000000n / 98000000n;
+    throw new Error('Unexpected fixture method');
+  } } as unknown as ChainClient;
+  const result = await listaDiscovery(client, wallet, 123n, 'bsc', async () => ({ markets: [id], vaults: [] }), async () => new Map());
+  expect(result.markets[0].loan.priceUsd).toBe(mismatch ? null : .98);
+  expect(result.markets[0].collateral?.priceUsd).toBe(mismatch ? null : 1.05);
 });

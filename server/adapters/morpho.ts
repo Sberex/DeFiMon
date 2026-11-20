@@ -1,5 +1,5 @@
 import { decodeFunctionResult, encodeAbiParameters, encodeFunctionData, formatUnits, keccak256, parseAbiParameters, type Address, type Hex } from 'viem';
-import type { Asset, Position, ProtocolResult, NetworkId } from '../../src/types.js';
+import type { Asset, Position, ProtocolResult, NetworkId, InterestRate } from '../../src/types.js';
 import type { ChainClient } from '../rpc.js';
 import { MorphoDiscoveryUnavailable } from '../morpho-errors.js';
 import { createMorphoRates } from '../morpho-rates.js';
@@ -41,7 +41,7 @@ function total(assets: Asset[], side: 'supplied' | 'borrowed') {
   if (assets.some(a => a[side] > 0 && a.priceUsd === null)) return null;
   return assets.reduce((sum, a) => sum + a[side] * (a.priceUsd ?? 0), 0);
 }
-export async function readMorpho(client: ChainClient, wallet: Address, blockNumber: bigint, discover?: (wallet: Address) => Promise<MorphoDiscovery>, network: NetworkId = 'ethereum', options?: { core: Address; family: 'lista'; legacyVaults?: { address: Address; asset: Address }[] }): Promise<ProtocolResult> {
+export async function readMorpho(client: ChainClient, wallet: Address, blockNumber: bigint, discover?: (wallet: Address) => Promise<MorphoDiscovery>, network: NetworkId = 'ethereum', options?: { core: Address; family: 'lista'; legacyVaults?: { address: Address; asset: Address }[]; readBorrow?: (id: Hex, params: { loanToken: Address; collateralToken: Address }) => Promise<{ debt: bigint; borrowRate: InterestRate } | null> }): Promise<ProtocolResult> {
   const deployment = networks[network];
   if (!(options?.core ?? deployment.morphoBlue)) throw new Error('Unsupported Morpho network');
   const morphoBlue = options?.core ?? deployment.morphoBlue!;
@@ -86,7 +86,12 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       if (!market.lastUpdate || position.supplyShares > market.totalSupplyShares || position.borrowShares > market.totalBorrowShares) throw new Error('Invalid Morpho state');
       if (position.supplyShares === 0n && position.borrowShares === 0n && position.collateral === 0n) return null;
       const supplyRaw = morphoSharesToAssets(position.supplyShares, market.totalSupplyAssets, market.totalSupplyShares);
-      const borrowRaw = morphoSharesToAssets(position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares, true);
+      let borrowRaw = morphoSharesToAssets(position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares, true);
+      const broker = position.borrowShares > 0n && options?.readBorrow ? await options.readBorrow(ref.id, params) : null;
+      if (broker) {
+        if (broker.debt + 2n < borrowRaw) throw new Error('Broker debt is smaller than its core principal');
+        borrowRaw = broker.debt;
+      }
       const loan = await token(ref.loan);
       const collateral = position.collateral > 0n && ref.collateral ? await token(ref.collateral) : null;
       let oraclePrice: bigint | null = null;
@@ -98,6 +103,7 @@ export async function readMorpho(client: ChainClient, wallet: Address, blockNumb
       }
       const health = morphoHealth(position.collateral, borrowRaw, oraclePrice, params.lltv);
       const currentRates = await interest.market(params, market);
+      if (broker) currentRates.borrowRate = broker.borrowRate;
       const loanAsset: Asset = { ...currentRates, symbol: loan.symbol, address: loan.address, supplied: units(supplyRaw, loan.decimals), borrowed: units(borrowRaw, loan.decimals), priceUsd: loan.priceUsd, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null };
       const assets = [loanAsset];
       let collateralAsset: Asset | undefined;

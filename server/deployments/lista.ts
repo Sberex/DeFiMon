@@ -6,7 +6,7 @@ export const listaDeployments: Partial<Record<NetworkId, { core: Address; factor
   bsc: { core: '0x8F73b65B4caAf64FBA2aF91cC5D4a2A1318E5D8C', factory: '0x2a0Cb6401FD3c6196750dc6b46702040761D9671' },
   ethereum: { core: '0xf820fB4680712CD7263a0D3D024D5b5aEA82Fd70', factory: '0xa91D9E7343d7EEe8Ed2C8f55e9162827850A7F17' },
 };
-export const LISTA_COVERAGE = 'Lista DAO Moolah direct market lending/collateral/loans and registered or pinned-legacy ERC-4626 Earn vault deposits on Ethereum and Binance Smart Chain. Discovery covers the official paginated catalog. Excludes CDP lisUSD minting, fixed-term broker loans, managed smart accounts, Lista One, staking, and unclaimed incentives.';
+export const LISTA_COVERAGE = 'Lista DAO Moolah direct market lending/collateral/loans, verified LendingBroker fixed/dynamic loans and registered or pinned-legacy ERC-4626 Earn vault deposits on Ethereum and Binance Smart Chain. Discovery covers the official paginated catalog. Excludes CDP lisUSD minting, other broker types, managed smart accounts, Lista One, staking, and unclaimed incentives.';
 export const listaUrl = (network: NetworkId, address: string, vault = false) => `https://lista.org/lending/${vault ? 'vault' : 'market'}/${network}/${address}`;
 
 // Official Lista Earn catalog snapshot 2026-11-20. These vaults predate the factory mapping.

@@ -9,7 +9,7 @@ import type { MorphoDiscovery, MorphoToken } from './morpho-discovery.js';
 export const LISTA_API = 'https://api.lista.org';
 export interface ListaCatalog { markets: Hex[]; vaults: { address: Address; name: string; asset: Address }[] }
 const zero = /^0x0{40}$/i;
-const brokerAbi = parseAbi(['function brokers(bytes32) view returns(address)']);
+const priceAbi = parseAbi(['function peek(address) view returns(uint256)']);
 function address(value: unknown): Address {
   if (typeof value !== 'string' || !isAddress(value, { strict: false }) || zero.test(value)) throw new Error('Invalid Lista address');
   return getAddress(value.toLowerCase());
@@ -53,7 +53,7 @@ export function createListaCatalog(fetcher: typeof fetch = fetch, now = Date.now
   };
 }
 export const listaCatalog = createListaCatalog();
-export async function listaDiscovery(client: ChainClient, wallet: Address, block: bigint, network: NetworkId, catalog = listaCatalog): Promise<MorphoDiscovery> {
+export async function listaDiscovery(client: ChainClient, wallet: Address, block: bigint, network: NetworkId, catalog = listaCatalog, priceReader = walletPrices): Promise<MorphoDiscovery> {
   const deployment = listaDeployments[network]; if (!deployment) throw new Error('Unsupported Lista network');
   const listed = await catalog(network), warnings = new Set<string>(); let complete = true;
   const [positions, balances] = await Promise.all([
@@ -66,7 +66,7 @@ export async function listaDiscovery(client: ChainClient, wallet: Address, block
   function token(address: Address) {
     const key = address.toLowerCase(); if (!metadata.has(key)) metadata.set(key, (async () => {
       const info = await tokenMetadata(client, address, block); if (info.decimals > 36 || !info.symbol || info.symbol.length > 128) throw new Error('Invalid Lista token');
-      const prices = await walletPrices(client, network, block, [{ address, decimals: info.decimals }]);
+      const prices = await priceReader(client, network, block, [{ address, decimals: info.decimals }]);
       return { address, ...info, priceUsd: prices.get(key) ?? null };
     })()); return metadata.get(key)!;
   }
@@ -76,11 +76,23 @@ export async function listaDiscovery(client: ChainClient, wallet: Address, block
     if (p.result.supplyShares === 0n && p.result.borrowShares === 0n && p.result.collateral === 0n) continue;
     try {
       const params = await client.readContract({ address: deployment.core, abi: morphoCoreAbi, functionName: 'idToMarketParams', args: [listed.markets[i]], blockNumber: block });
-      if (p.result.borrowShares > 0n) {
-        const broker = await client.readContract({ address: deployment.core, abi: brokerAbi, functionName: 'brokers', args: [listed.markets[i]], blockNumber: block });
-        if (!zero.test(broker)) { complete = false; warnings.add('A Lista broker-managed loan was found. Its extra broker interest cannot be verified by the direct-market reader; debt and NPL remain incomplete.'); continue; }
+      const loan = { ...await token(params.loanToken) }, collateral = zero.test(params.collateralToken) ? null : { ...await token(params.collateralToken) };
+      // Lista's native oracle reports USD prices with 8 decimals. Verify its ratio
+      // against the core before using it to price assets missing from external feeds.
+      if (collateral && (loan.priceUsd === null || collateral.priceUsd === null)) {
+        try {
+          const [base, quote, ratio] = await Promise.all([
+            client.readContract({ address: params.oracle, abi: priceAbi, functionName: 'peek', args: [params.collateralToken], blockNumber: block }),
+            client.readContract({ address: params.oracle, abi: priceAbi, functionName: 'peek', args: [params.loanToken], blockNumber: block }),
+            client.readContract({ address: deployment.core, abi: morphoCoreAbi, functionName: 'getPrice', args: [params], blockNumber: block }),
+          ]);
+          if (base > 0n && quote > 0n && ratio > 0n && 10n ** BigInt(36 + loan.decimals - collateral.decimals) * base / quote === ratio) {
+            if (loan.priceUsd === null) loan.priceUsd = Number(quote) / 1e8;
+            if (collateral.priceUsd === null) collateral.priceUsd = Number(base) / 1e8;
+          }
+        } catch { /* Unknown prices remain unknown; never assume a stablecoin peg. */ }
       }
-      markets.push({ id: listed.markets[i], loan: await token(params.loanToken), collateral: zero.test(params.collateralToken) ? null : await token(params.collateralToken) });
+      markets.push({ id: listed.markets[i], loan, collateral });
     } catch { complete = false; warnings.add('A held Lista market identity or token could not be verified. Its value is unknown.'); }
   }
   for (let i = 0; i < balances.length; i++) {

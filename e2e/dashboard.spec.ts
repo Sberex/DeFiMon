@@ -1848,3 +1848,24 @@ test('shows Lista DAO loans and Earn deposits across Ethereum and BSC with NPL, 
   await expect(page.getByText('Alternative Lista Earn', { exact: false })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('shows the Lista broker loan for the reported wallet while keeping unrelated unverified PT yield explicit', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.address = '0xc6dd9976066f3364b4d6a72cd4f1fa0468327aa7'; fixture.wallets = [];
+  const market = '0x95f93825819b67a64610e6adb9ac5f70d5108f5121b9df6551e23a4a7a801b5b';
+  const loan = { id: `lista-market-${market}`, label: 'Lista DAO Moolah · slisBNB / USD1', suppliedUsd: 86049.46, debtUsd: 49888.07, healthFactor: 1.483, risk: 'lower' as const, notes: ['Full broker debt verified at the snapshot block'], assets: [
+    { address: '0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B', symbol: 'slisBNB', supplied: 144.95, borrowed: 0, priceUsd: 593.65, collateral: true, liquidationThreshold: .86, liquidationPriceUsd: 400, supplyRate: { apr: 0, note: 'No protocol collateral lending interest' } },
+    { address: '0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d', symbol: 'USD1', supplied: 0, borrowed: 49943, priceUsd: .9989, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .0299836, estimated: true, note: '3.00% fixed contract APR. Full broker debt includes accrued interest; current interest charges fixed principal only.' } },
+  ] };
+  const dust = { ...loan, id: 'lista-market-unverified-pt', label: 'Residual PT-sUSDE collateral', suppliedUsd: 1e-18, debtUsd: 0, healthFactor: null, risk: 'no-debt' as const, assets: [{ ...loan.assets[0], address: '0x7EB92A12a15E8a019A26A8b344F1e59b14cb8Ad3', symbol: 'PT-sUSDE-9APR2026-(PLASMA)', supplied: 1e-18, priceUsd: 1, supplyRate: { apr: null, note: 'Pendle PT yield is unverified.' } }] };
+  fixture.protocols = [{ id: 'lista', name: 'Lista DAO', chain: 'Binance Smart Chain', status: 'ok', balanceDiscoveryComplete: true, coverage: 'Lista Moolah and LendingBroker', positions: [loan, dust] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => route.fulfill({ json: { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.lista');
+  await expect(card.getByRole('heading', { name: 'Lista DAO Moolah · slisBNB / USD1', exact: true })).toBeVisible();
+  await expect(card.locator('.position').first().getByText('$49,888.07', { exact: true })).toBeVisible();
+  await expect(card.locator('.position-monthly-npl').first()).not.toContainText('Unavailable');
+  await expect(card.locator('.position-market-links a').first()).toHaveAttribute('href', `https://lista.org/lending/market/bsc/${market}`);
+  await expect(page.getByText('Positions could not be fully checked.', { exact: false })).toHaveCount(0);
+  await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
+});
