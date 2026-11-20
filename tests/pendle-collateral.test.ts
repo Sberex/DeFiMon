@@ -58,7 +58,7 @@ it('does not assign a known PT APY to YT, ordinary collateral, deposits or zero 
   const r = await applyPtCollateralRates(f.protocols, f.client, 'ethereum', 123n, f.catalog);
   expect(r.slice(0, 4).map(p => p.positions[0].assets[0].supplyRate?.apr)).toEqual([.02, .02, .02, .02]);
 });
-it.each([['plasma', 9745], ['arbitrum', 42161], ['base', 8453]] as const)('looks up %s PT yields on the selected network', async (network, networkId) => {
+it.each([['plasma', 9745], ['arbitrum', 42161], ['base', 8453], ['bsc', 56]] as const)('looks up %s PT yields on the selected network', async (network, networkId) => {
   const f = fixture({ networkId }); const r = await applyPtCollateralRates(f.protocols, f.client, network, 123n, f.catalog);
   expect(f.catalog).toHaveBeenCalledWith(network); expect(r[0].positions[0].assets[0].supplyRate?.apr).toBe(.1507);
 });

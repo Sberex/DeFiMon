@@ -28,7 +28,7 @@ function client(m: PendleMarket, options: { expired?: boolean; failPrice?: boole
   } as unknown as ChainClient;
   return { c, calls };
 }
-it.each([['ethereum', 1], ['plasma', 9745], ['arbitrum', 42161], ['base', 8453]] as const)('discovers %s markets by its chain ID and caches only complete pages', async (network, chainId) => {
+it.each([['ethereum', 1], ['plasma', 9745], ['arbitrum', 42161], ['base', 8453], ['bsc', 56]] as const)('discovers %s markets by its chain ID and caches only complete pages', async (network, chainId) => {
   const fetcher = vi.fn(async (url: any) => { expect(String(url)).toContain(`/v1/${chainId}/markets`); return new Response(JSON.stringify({ total: 1, results: [market(chainId)] })); });
   const catalog = createPendleCatalog(fetcher as any);
   expect(await catalog(network)).toHaveLength(1); await catalog(network); expect(fetcher).toHaveBeenCalledTimes(1);

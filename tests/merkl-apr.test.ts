@@ -107,16 +107,16 @@ it('loads live user opportunities and campaign details independently and handles
   expect(failed.aprStatus).toBe('error'); expect(JSON.stringify(failed)).not.toContain('private-provider-secret');
 });
 
-it('recognizes and applies an exact Base Fluid reward without applying rewards from another network', () => {
+it.each([['Base', 8453], ['Binance Smart Chain', 56]] as const)('recognizes and applies an exact %s Fluid reward without applying rewards from another network', (chain, chainId) => {
   const raw = rawOpportunity(1);
-  raw.opportunity.chainId = 8453;
-  raw.opportunity.tokens.forEach(token => { token.chainId = 8453; });
+  raw.opportunity.chainId = chainId;
+  raw.opportunity.tokens.forEach(token => { token.chainId = chainId; });
   const op = parseMerklOpportunity(raw)!;
   const campaign = detail(1);
-  campaign.chainId = 8453; campaign.campaigns[0].computeChainId = 8453;
+  campaign.chainId = chainId; campaign.campaigns[0].computeChainId = chainId;
   const resolved = resolveMerklRules(op, campaign, wallet);
   expect(resolved.status).toBe('ready');
-  const p = portfolio(); p.chain = 'Base'; p.protocols = [p.protocols[1]]; p.protocols[0].chain = 'Base';
+  const p = portfolio(); p.chain = chain; p.protocols = [p.protocols[1]]; p.protocols[0].chain = chain;
   const r = rewards(); r.opportunities = [resolved];
   const adjusted = applyMerklApr(p, r);
   expect(adjusted.matches).toEqual([{ id: op.id, positions: 1 }]);

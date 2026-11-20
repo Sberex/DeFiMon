@@ -47,7 +47,7 @@ it('loads only wallet intrinsic yield, reuses lending source quotes, and never c
   expect(walletCategoryInterest([again]).earnedUsd).toBe(walletCategoryInterest([reused]).earnedUsd);
   expect(w.tokens[0].intrinsicSupplyRate).toBeUndefined();
 });
-it.each(['ethereum', 'plasma', 'arbitrum', 'base'] as const)('recognizes wallet wstETH on %s using the same Lido source as collateral', async network => {
+it.each(['ethereum', 'plasma', 'arbitrum', 'base', 'bsc'] as const)('recognizes wallet wstETH on %s using the same Lido source as collateral', async network => {
   const w = wallet([{ ...token('wstETH', 1000), category: 'Other', address: LIDO_WSTETH[network] }]);
   const lido = vi.fn(async () => quote(.0234)), load = vi.fn();
   const r = await applyWalletInterest(w, network, [], load, lido);

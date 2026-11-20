@@ -28,7 +28,8 @@
     "check:pendle": "tsx scripts/check-pendle.ts",
     "check:lido-apr": "tsx scripts/check-lido-apr.ts",
     "check:spark": "tsx scripts/check-spark.ts",
-    "refresh:cookbook": "tsx scripts/refresh-cookbook.ts"
+    "refresh:cookbook": "tsx scripts/refresh-cookbook.ts",
+    "check:bsc": "tsx scripts/check-network.ts bsc"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

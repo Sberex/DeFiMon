@@ -1,4 +1,5 @@
 import type { Address, Hex } from 'viem';
+import { networkNames } from '../../src/networks.js';
 import type { NetworkId } from '../../src/types.js';
 // sparkdotfi/spark-address-registry@f9aa5cd6ebd688da81a5beed74ddd90a1dea116d,
 // src/{SparkLend,Ethereum,Base,Arbitrum}.sol. Spark app /borrow and Base
@@ -23,10 +24,11 @@ export const sparkVaults: Record<NetworkId, SparkVault[]> = {
     { address: '0x940098b108fB7D0a7E374f6eDED7760787464609', kind: 'ssr', oracle: '0xEE2816c1E1eed14d444552654Ed3027abC033A36' },
     { address: '0x45d91340B3B7B96985A72b5c678F7D9e8D664b62', kind: 'vsr' },
   ],
+  bsc: [],
   plasma: [],
 };
 export const sparkIsolatedMarkets: Record<NetworkId, Hex[]> = {
-  ethereum: [], arbitrum: [], plasma: [],
+  ethereum: [], arbitrum: [], plasma: [], bsc: [],
   base: [
     '0x8793cf302b8ffd655ab97bd1c695dbd967807e8367a65cb2f4edaf1380ba1bda',
     '0x9103c3b4e834476c9a62ea009ba2c884ee42e94e6e314a26f04d312434191836',
@@ -36,4 +38,4 @@ export const sparkCoverage = (network: NetworkId) => network === 'ethereum'
   ? 'SparkLend main pool and registered Spark Savings V2 vaults. Excludes staking, rewards and linked wallets.'
   : network === 'base' ? 'Spark Morpho isolated markets, sUSDC savings and legacy Spark USDC Morpho vault. No SparkLend pool on Base.'
   : network === 'arbitrum' ? 'Spark sUSDC and spUSDT savings vaults. Spark has no borrowing pool or isolated markets on Arbitrum.'
-  : 'Spark has no supported deployment on Plasma.';
+  : `Spark has no supported deployment on ${networkNames[network]}.`;

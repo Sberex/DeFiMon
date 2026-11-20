@@ -107,3 +107,18 @@ it('routes all five Base readers to the same Base wallet and block, excluding Et
   expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'base');
   expect(readers.aaveV4).not.toHaveBeenCalled();
 });
+
+it('routes BSC Aave, Fluid, Euler and Pendle reads to the same BSC block', async () => {
+  rpc.chainId = 56;
+  const result = await getPortfolio(wallet, 'bsc');
+  expect(result.chain).toBe('Binance Smart Chain');
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'fluid', 'euler']);
+  for (const reader of [readers.aave, readers.fluid, readers.euler]) expect(reader).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'bsc');
+  expect(readers.morpho).not.toHaveBeenCalled();
+  expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'bsc');
+  expect(readers.aaveV4).not.toHaveBeenCalled(); expect(readers.compound).not.toHaveBeenCalled();
+});
+it('rejects a non-BSC provider before any BSC balances or positions are read', async () => {
+  await expect(getPortfolio(wallet, 'bsc')).rejects.toThrow('not Binance Smart Chain mainnet');
+  expect(readers.aave).not.toHaveBeenCalled(); expect(readers.fluid).not.toHaveBeenCalled();
+});

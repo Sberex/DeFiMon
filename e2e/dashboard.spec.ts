@@ -323,7 +323,7 @@ test('explains unavailable Morpho discovery and keeps other protocols visible wi
   await expect(page.getByText('$26,500.00', { exact: true })).toBeVisible();
 });
 
-test('shows all four networks sorted by net value, refreshes all, and fits on mobile', async ({ page }) => {
+test('shows all five networks sorted by net value, refreshes all, and fits on mobile', async ({ page }) => {
   let reads = 0;
   await page.route('**/api/portfolio/*', route => {
     expect(new URL(route.request().url()).searchParams.get('chain')).toBe('all'); reads++;
@@ -331,23 +331,29 @@ test('shows all four networks sorted by net value, refreshes all, and fits on mo
       { chain: 'Ethereum', status: 'ok', blockNumber: String(900 + reads), updatedAt: new Date().toISOString() },
       { chain: 'Plasma', status: 'ok', blockNumber: String(1900 + reads), updatedAt: new Date().toISOString() },
       { chain: 'Arbitrum', status: 'ok', blockNumber: String(2900 + reads), updatedAt: new Date().toISOString() },
+      { chain: 'Base', status: 'ok', blockNumber: String(3900 + reads), updatedAt: new Date().toISOString() },
+      { chain: 'Binance Smart Chain', status: 'ok', blockNumber: String(4900 + reads), updatedAt: new Date().toISOString() },
     ] } });
   });
   await page.goto('/');
   await expect(page.getByLabel('Blockchain')).toHaveCount(0);
   await page.getByLabel('Wallet address').fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.getByText(/Coverage: 19 of 19 protocol readers completed on Ethereum \+ Plasma \+ Arbitrum/)).toBeVisible();
-  await expect(page.locator('article.protocol')).toHaveCount(19);
-  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Compound · Ethereum', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Aave v3 · Plasma', 'Fluid · Ethereum', 'Fluid · Plasma', 'Aave v3 · Arbitrum', 'Compound · Arbitrum', 'Fluid · Arbitrum', 'Morpho · Arbitrum', 'Aave v3 · Base', 'Morpho · Base', 'Compound · Base', 'Fluid · Base', 'Euler · Ethereum', 'Euler · Plasma', 'Euler · Arbitrum', 'Euler · Base']);
+  await expect(page.getByText(/Coverage: 22 of 22 protocol readers completed on Ethereum \+ Plasma \+ Arbitrum/)).toBeVisible();
+  await expect(page.locator('article.protocol')).toHaveCount(22);
+  await expect(page.locator('article.protocol .protocol-name h2')).toHaveText(['Aave v3 · Ethereum', 'Compound · Ethereum', 'Aave v4 · Ethereum', 'Morpho · Ethereum', 'Aave v3 · Plasma', 'Fluid · Ethereum', 'Fluid · Plasma', 'Aave v3 · Arbitrum', 'Compound · Arbitrum', 'Fluid · Arbitrum', 'Morpho · Arbitrum', 'Aave v3 · Base', 'Aave v3 · Binance Smart Chain', 'Morpho · Base', 'Compound · Base', 'Fluid · Base', 'Fluid · Binance Smart Chain', 'Euler · Ethereum', 'Euler · Plasma', 'Euler · Arbitrum', 'Euler · Base', 'Euler · Binance Smart Chain']);
   await expect(page.getByText(/Ethereum · Block 901/)).toBeVisible();
   await expect(page.getByText(/Plasma · Block 1901/)).toBeVisible();
   await expect(page.getByText(/Arbitrum · Block 2901/)).toBeVisible();
+  await expect(page.getByText(/Base · Block 3901/)).toBeVisible();
+  await expect(page.getByText(/Binance Smart Chain · Block 4901/)).toBeVisible();
   await expect(page.getByText('$47,000.00', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Refresh' }).click();
   await expect(page.getByText(/Ethereum · Block 902/)).toBeVisible();
   await expect(page.getByText(/Plasma · Block 1902/)).toBeVisible();
   await expect(page.getByText(/Arbitrum · Block 2902/)).toBeVisible();
+  await expect(page.getByText(/Base · Block 3902/)).toBeVisible();
+  await expect(page.getByText(/Binance Smart Chain · Block 4902/)).toBeVisible();
   expect(reads).toBe(2);
   await page.screenshot({ path: '/tmp/defimon-combined-networks.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -371,7 +377,7 @@ test('an example cancels an older lookup so its late response cannot replace the
   release();
   await expect(page.getByRole('button', { name: 'Check wallet' })).toBeEnabled();
   await expect(page.getByText(/Example only — all balances/)).toBeVisible();
-  await expect(page.locator('article.protocol')).toHaveCount(19);
+  await expect(page.locator('article.protocol')).toHaveCount(22);
 });
 
 test('shows supplied and net USD estimates for Plasma sUSDai collateral with the source labeled', async ({ page }) => {
@@ -431,7 +437,7 @@ test('keeps Ethereum results when Plasma fails and never calls unavailable Plasm
 test('adds wallet tokens to net value and groups them Ethereum then Plasma', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /Explore an example/ }).click();
-  await expect(page.locator('.wallet-network .protocol-name h2')).toHaveText(['Wallet tokens · Ethereum', 'Wallet tokens · Plasma', 'Wallet tokens · Arbitrum', 'Wallet tokens · Base']);
+  await expect(page.locator('.wallet-network .protocol-name h2')).toHaveText(['Wallet tokens · Ethereum', 'Wallet tokens · Plasma', 'Wallet tokens · Arbitrum', 'Wallet tokens · Base', 'Wallet tokens · Binance Smart Chain']);
   const ethereum = page.locator('.wallet-network[data-chain="Ethereum"]');
   const plasma = page.locator('.wallet-network[data-chain="Plasma"]');
   await expect(ethereum.getByText('ETH', { exact: true })).toBeVisible();
@@ -455,15 +461,15 @@ test('adds and removes a token contract on its selected network and refreshes th
   await page.goto('/');
   await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
   await page.getByRole('button', { name: 'Check wallet' }).click();
-  await expect(page.locator('.wallet-network')).toHaveCount(4);
+  await expect(page.locator('.wallet-network')).toHaveCount(5);
   await page.getByText('Add another token', { exact: true }).click();
   await page.getByLabel('Token network').selectOption('plasma');
   await page.getByLabel('Token contract address').fill('0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: 'Add token', exact: true }).click();
-  await expect(page.locator('.wallet-network')).toHaveCount(4);
+  await expect(page.locator('.wallet-network')).toHaveCount(5);
   expect(queries.at(-1)).toBe('plasma:0x2222222222222222222222222222222222222222');
   await page.getByRole('button', { name: 'Remove', exact: true }).click();
-  await expect(page.locator('.wallet-network')).toHaveCount(4);
+  await expect(page.locator('.wallet-network')).toHaveCount(5);
   expect(queries.at(-1)).toBe('');
 });
 
@@ -644,7 +650,7 @@ test('shows monthly token interest and USD NPL after protocol net value across n
   await page.getByRole('button', { name: /Explore an example/ }).click();
   await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(8);
   await page.locator('.zero-supply-markets > summary').click();
-  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(15);
+  await expect(page.getByRole('region', { name: 'Protocol monthly interest', exact: true })).toHaveCount(17);
   const card = page.locator('article.aave-v3[data-chain="Ethereum"]');
   const summary = card.getByRole('region', { name: 'Protocol monthly interest', exact: true });
   await expect(summary.locator('.protocol-interest-totals > p')).toHaveText(['Net value: $12,000.00', 'APR: ≈ 0.50%', 'Monthly NPL: ≈ $5.00 / month']);
@@ -1005,7 +1011,7 @@ test('shows Morpho creator/curator/owner vaults with zero deposits without addin
   await expect(empty.getByText('Vault assets · all depositors: 0 USDC · $0.00', { exact: true })).toBeVisible();
   await expect(page.locator('.summary.primary strong')).toHaveText('$1,000.00');
   await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ $2.92');
-  await expect(page.locator('.morpho-network-note')).toContainText('Plasma discovery is unsupported');
+  await expect(page.locator('.morpho-network-note')).toContainText('Plasma and Binance Smart Chain discovery are unsupported');
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await empty.screenshot({ path: '/tmp/defimon-morpho-zero-vault-mobile.png' });
@@ -1509,7 +1515,7 @@ test('shows Pendle wallet holdings, accounting-asset prices, APYs, TVL and exact
   await expect(section.locator('.pendle-inactive')).not.toHaveAttribute('open');
   await expect(section.getByText('Not applicable · expired', { exact: true }).first()).toBeHidden();
   await section.locator('.pendle-inactive > summary').click();
-  await expect(section.locator('.pendle-collapsed-networks .protocol-heading h2')).toHaveText(['Pendle · Ethereum', 'Pendle · Plasma', 'Pendle · Arbitrum', 'Pendle · Base']);
+  await expect(section.locator('.pendle-collapsed-networks .protocol-heading h2')).toHaveText(['Pendle · Ethereum', 'Pendle · Plasma', 'Pendle · Arbitrum', 'Pendle · Base', 'Pendle · Binance Smart Chain']);
   const position = section.locator('.pendle-position').filter({ has: page.getByRole('heading', { name: 'PT reUSD (USDC) ↗' }) });
   await expect(position.getByText('99 USDC', { exact: true })).toBeVisible();
   await expect(position.getByText('0.99 USDC', { exact: true })).toBeVisible();
@@ -1782,4 +1788,36 @@ test('Cookbook summary totals positions across wallets and counts each source ad
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await summary.screenshot({ path: '/tmp/defimon-cookbook-summary-mobile.png' });
+});
+
+test('shows Binance Smart Chain balances, monthly NPL, BscScan links and BSC alternatives', async ({ page }) => {
+  const fixture = structuredClone(example);
+  fixture.chain = 'Binance Smart Chain';
+  const position = structuredClone(fixture.protocols[0].positions[0]);
+  Object.assign(position, { id: 'bsc-aave', marketAddress: '0x6807dc923806fE8Fd134338EABCA509979a7e0cB', label: 'Binance Smart Chain main market', suppliedUsd: 6000, debtUsd: 1000, healthFactor: 4.8, risk: 'lower' });
+  position.assets = [
+    { address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', symbol: 'WBNB', supplied: 2, borrowed: 0, priceUsd: 3000, collateral: true, liquidationThreshold: .8, liquidationPriceUsd: 625, supplyRate: { apr: .02, note: 'Current Binance Smart Chain supply APR' } },
+    { address: '0x55d398326f99059fF775485246999027B3197955', symbol: 'USDT', supplied: 0, borrowed: 1000, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .06, note: 'Current Binance Smart Chain borrow APR' } },
+  ];
+  fixture.protocols = [{ id: 'aave-v3', name: 'Aave v3', chain: 'Binance Smart Chain', status: 'ok', coverage: 'Binance Smart Chain main market', positions: [position] }];
+  fixture.wallets = [{ chain: 'Binance Smart Chain', status: 'ok', pricedValueUsd: 300, unpricedCount: 0, coverage: 'Binance Smart Chain wallet tokens', tokens: [{ address: 'native', symbol: 'BNB', balance: .1, priceUsd: 3000, valueUsd: 300 }] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => {
+    const { targets } = route.request().postDataJSON();
+    expect(targets[0].network).toBe('bsc');
+    return route.fulfill({ json: { checkedAt: new Date().toISOString(), coverage: [{ protocol: 'Euler', network: 'bsc', status: 'ok' }], alternatives: [{ targetId: targets[0].id, protocol: 'Euler', network: 'bsc', market: '0x9999999999999999999999999999999999999999', label: 'Binance Smart Chain USDT vault', supplyApr: .02, borrowApr: .03, borrowApy: .0304545, lltv: .8, block: '56000', url: 'https://app.euler.finance/', note: 'Binance Smart Chain rate quote', liquidity: { amount: 500000, symbol: 'USDT', token: position.assets[1].address, note: 'Binance Smart Chain vault liquidity' } }] } });
+  });
+  await page.goto('/');
+  await page.getByLabel('Wallet address', { exact: true }).fill(example.address);
+  await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('article.aave-v3[data-chain="Binance Smart Chain"] .position-monthly-npl strong')).toHaveText('≈ $5.00');
+  await expect(page.locator('article.aave-v3[data-chain="Binance Smart Chain"] .position-net-apr strong')).toHaveText('≈ 1.20%');
+  await expect(page.locator('.wallet-network[data-chain="Binance Smart Chain"]')).toContainText('BNB');
+  await expect(page.locator('article.aave-v3 .position-market-links a')).toHaveAttribute('href', 'https://bscscan.com/address/0x6807dc923806fE8Fd134338EABCA509979a7e0cB');
+  await expect(page.locator('.summary.primary strong')).toHaveText('$5,300.00');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Alternatives for WBNB - USDT', exact: true }).getByText('Euler · Binance Smart Chain', { exact: true })).toBeVisible();
+  await expect(page.getByText('500,000 USDT', { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

@@ -72,7 +72,7 @@ export function createTokenDiscovery(options: { fetcher?: typeof fetch; env?: Re
     if (!object(value)) return;
     const coin = object(value.coin) ? value.coin : value;
     const identifiers = [value.name, coin.slug, coin.name].filter((v): v is string => typeof v === 'string').map(v => v.toLowerCase().replace(/[ _-]/g, ''));
-    const names: Record<string, NetworkId> = { ethereum: 'ethereum', arbitrum: 'arbitrum', arbitrumone: 'arbitrum', plasma: 'plasma', base: 'base' };
+    const names: Record<string, NetworkId> = { ethereum: 'ethereum', arbitrum: 'arbitrum', arbitrumone: 'arbitrum', plasma: 'plasma', base: 'base', bsc: 'bsc', bnb: 'bsc', binancesmartchain: 'bsc', bnbsmartchain: 'bsc', bnbchain: 'bsc' };
     const recognized = new Set(identifiers.flatMap(id => names[id] ? [names[id]] : []));
     return recognized.size === 1 ? [...recognized][0] : undefined;
   }

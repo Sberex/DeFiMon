@@ -13,7 +13,7 @@ if (wallet === '--schema') {
   try { console.log(JSON.stringify(await inspectMorphoPriceSchema(), null, 2)); }
   catch (error) { console.log(JSON.stringify({ failure: toMorphoFailure('price schema', error) }, null, 2)); process.exitCode = 1; }
 } else if (!wallet || !isAddress(wallet) || !isNetworkId(network) || network === 'plasma') {
-  console.error('Usage: npm run diagnose:morpho -- 0xYourWalletAddress [ethereum|arbitrum|base] (or --schema for public price-field metadata)');
+  console.error('Usage: npm run diagnose:morpho -- 0xYourWalletAddress [ethereum|arbitrum|base|bsc] (or --schema for public price-field metadata)');
   process.exitCode = 1;
 } else {
   console.log('Testing public Morpho lookup only. No Ethereum-provider key or .env contents will be printed.');

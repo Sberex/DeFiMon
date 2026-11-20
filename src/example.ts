@@ -85,6 +85,8 @@ combinedExample.protocols.push({ id: 'euler', name: 'Euler', chain: 'Arbitrum', 
 for (const id of ['aave-v3', 'morpho', 'compound', 'fluid', 'euler']) combinedExample.protocols.push({ id, name: example.protocols.find(p => p.id === id)!.name, chain: 'Base', status: 'ok', coverage: 'Illustrative empty Base account', positions: [] });
 combinedExample.wallets!.push({ chain: 'Base', status: 'ok', pricedValueUsd: 0, unpricedCount: 0, coverage: 'Illustrative wallet tokens only.', tokens: [{ address: 'native', symbol: 'ETH', balance: 0, priceUsd: 3000, valueUsd: 0 }] });
 const protocolOrder = example.protocols.map(p => p.id);
+for (const id of ['aave-v3', 'fluid', 'euler']) combinedExample.protocols.push({ id, name: example.protocols.find(p => p.id === id)!.name, chain: 'Binance Smart Chain', status: 'ok', coverage: 'Illustrative empty Binance Smart Chain account', positions: [] });
+combinedExample.wallets!.push({ chain: 'Binance Smart Chain', status: 'ok', pricedValueUsd: 0, unpricedCount: 0, coverage: 'Illustrative wallet tokens only.', tokens: [{ address: 'native', symbol: 'BNB', balance: 0, priceUsd: null, valueUsd: 0 }] });
 combinedExample.protocols.sort((a, b) => protocolOrder.indexOf(a.id) - protocolOrder.indexOf(b.id) || networkOrder.findIndex(id => networkNames[id] === a.chain) - networkOrder.findIndex(id => networkNames[id] === b.chain));
 
 // Fictional current APRs, never used by live readers.

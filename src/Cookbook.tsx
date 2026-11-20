@@ -1,9 +1,10 @@
+import { networkExplorers as explorers } from './networks';
 import { useEffect, useState, type ReactNode } from 'react';
 import { apiUrl } from './api';
 import { COOKBOOK_MIN_APR, cookbookPositions, parseCookbook, type CookbookResponse } from './cookbook';
 const source = 'https://github.com/Sberex/DeFiMon/blob/main/analysis/cookbook.json';
 const rawSource = 'https://raw.githubusercontent.com/Sberex/DeFiMon/main/analysis/cookbook.json';
-const explorers = { Ethereum: 'https://etherscan.io', Arbitrum: 'https://arbiscan.io', Base: 'https://basescan.org', Plasma: 'https://plasmascan.to' };
+
 function ExternalLinkIcon() { return <svg className="arrow-icon" width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>; }
 type Entry = ReturnType<typeof cookbookPositions>[number];
 export function Cookbook({ revision, renderPosition }: { revision: object | null; renderPosition: (entry: Entry, snapshot: object) => ReactNode }) {

@@ -22,3 +22,5 @@ services:
         value: https://arb1.arbitrum.io/rpc
       - key: BASE_RPC_URL
         value: https://mainnet.base.org
+      - key: BSC_RPC_URL
+        value: https://bsc-rpc.publicnode.com

@@ -1,6 +1,6 @@
 # Token registry for wallet discovery and recommendations
 
-Edit **token-matches.json** to add tokens to wallet discovery and define cross-network recommendation matches. Ethereum, Plasma, Arbitrum and Base are the current dashboard networks; the file can also store contracts on other registered EVM mainnets, including Optimism.
+Edit **token-matches.json** to add tokens to wallet discovery and define cross-network recommendation matches. Ethereum, Plasma, Arbitrum, Base and Binance Smart Chain are the current dashboard networks; the file can also store contracts on other registered EVM mainnets, including Optimism.
 
 
 ## Categories
@@ -114,7 +114,7 @@ python3 scripts/import-coingecko-tokens.py --cache-dir /tmp/defimon-cg2000
 python3 scripts/import-coingecko-tokens.py --cache-dir /tmp/defimon-cg2000 --apply
 ```
 
-The second command writes the reviewed config and provenance files only after the ranking, chains, address uniqueness and category decisions validate. It refuses to apply while category questions remain pending. API requests respect CoinGecko rate-limit retry intervals. Adding platforms to this registry does not enable extra dashboard networks: wallet discovery continues to use Ethereum, Plasma, Arbitrum and Base.
+The second command writes the reviewed config and provenance files only after the ranking, chains, address uniqueness and category decisions validate. It refuses to apply while category questions remain pending. API requests respect CoinGecko rate-limit retry intervals. Adding platforms to this registry does not enable extra dashboard networks: wallet discovery continues to use Ethereum, Plasma, Arbitrum, Base and Binance Smart Chain.
 
 The import conflict checks can be run with:
 

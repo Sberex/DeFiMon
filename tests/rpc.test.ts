@@ -36,3 +36,12 @@ it('uses Base mainnet and its own configured or public provider', () => {
   vi.stubEnv('BASE_RPC_URL', 'https://base.example');
   expect(makeClient('base').transport.url).toBe('https://base.example');
 });
+
+it('uses Binance Smart Chain mainnet and BNB with its own public or configured provider', () => {
+  vi.stubEnv('BSC_RPC_URL', '');
+  const client = makeClient('bsc');
+  expect(client.chain.id).toBe(56); expect(client.chain.nativeCurrency.symbol).toBe('BNB');
+  expect(client.transport.url).toBe('https://bsc-rpc.publicnode.com');
+  vi.stubEnv('BSC_RPC_URL', 'https://bsc.example');
+  expect(makeClient('bsc').transport.url).toBe('https://bsc.example');
+});

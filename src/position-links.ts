@@ -1,6 +1,5 @@
 import type { ChainName, Position } from './types';
-import { portfolioNetwork } from './networks';
-const explorers: Record<ChainName, string> = { Ethereum: 'https://etherscan.io', Plasma: 'https://plasmascan.to', Arbitrum: 'https://arbiscan.io', Base: 'https://basescan.org' };
+import { portfolioNetwork, networkExplorers as explorers } from './networks';
 const contract = (value: string | undefined): value is string => /^0x[0-9a-f]{40}$/i.test(value ?? '');
 export function positionLinks(protocol: string, chain: ChainName, position: Position) {
   const network = portfolioNetwork(chain);

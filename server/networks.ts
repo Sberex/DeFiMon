@@ -9,10 +9,22 @@ interface NetworkConfig {
   compoundMarkets: { address: Address; label: string }[];
   protocolIds: string[];
 }
-// Aave: bgd-labs/aave-address-book/src/AaveV3{Ethereum,Plasma,Arbitrum,Base}.sol.
-// Fluid: Instadapp/fluid-contracts-public@404d73f/deployments/{mainnet,plasma,arbitrum,base}.
+// Aave: bgd-labs/aave-address-book/src/AaveV3{Ethereum,Plasma,Arbitrum,Base,BNB}.sol.
+// Fluid: Instadapp/fluid-contracts-public@404d73f/deployments/{mainnet,plasma,arbitrum,base,bnb}.
 // Selected Plasma, Arbitrum and Base resolver ABIs match the pinned Ethereum ABIs in abis/fluid.ts.
 export const networks: Record<NetworkId, NetworkConfig> = {
+  bsc: {
+    id: 56, name: 'Binance Smart Chain', rpcVariable: 'BSC_RPC_URL', defaultRpc: 'https://bsc-rpc.publicnode.com', nativeSymbol: 'BNB',
+    wrappedNative: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+    // bgd-labs/aave-address-book@266429e, src/AaveV3BNB.sol.
+    aaveProvider: '0xff75B6da14FfbbfD355Daf7a2731456b3562Ba6D',
+    // morpho-org/sdks@56f1ed6, BscMainnet (not the Ethereum core).
+    morphoBlue: '0x01b0Bd309AA75547f7a37Ad7B1219A898E67a83a',
+    // Instadapp/fluid-contracts-public@404d73f, deployments/bnb/*Resolver.json.
+    fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0xAf572EfC84d905926F7b05C1B7bE04e4E89542B0', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
+    // Morpho's discovery API rejects chainId 56. Do not claim verified holdings or search results.
+    protocolIds: ['aave-v3', 'fluid', 'euler'], compoundMarkets: [],
+  },
   base: {
     id: 8453, name: 'Base', rpcVariable: 'BASE_RPC_URL', defaultRpc: 'https://mainnet.base.org', nativeSymbol: 'ETH',
     wrappedNative: '0x4200000000000000000000000000000000000006',

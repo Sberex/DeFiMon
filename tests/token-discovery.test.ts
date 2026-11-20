@@ -2,7 +2,7 @@ import { expect, it, vi } from 'vitest';
 import { createTokenDiscovery } from '../server/token-discovery';
 import { correspondingTokens } from '../server/market-tokens';
 const A = '0x1111111111111111111111111111111111111111', B = '0x2222222222222222222222222222222222222222', C = '0x3333333333333333333333333333333333333333', D = '0x4444444444444444444444444444444444444444';
-const platforms = [{ id: 'ethereum', chain_identifier: 1 }, { id: 'arbitrum-one', chain_identifier: 42161 }, { id: 'plasma', chain_identifier: 9745 }, { id: 'other-network', chain_identifier: 56 }];
+const platforms = [{ id: 'ethereum', chain_identifier: 1 }, { id: 'arbitrum-one', chain_identifier: 42161 }, { id: 'plasma', chain_identifier: 9745 }, { id: 'other-network', chain_identifier: 10 }];
 const target = { id: 'source', network: 'ethereum' as const, supplied: A };
 const cg = (contracts = { ethereum: A, 'arbitrum-one': B, plasma: C }) => ({ id: 'new-token', symbol: 'SAME', platforms: contracts });
 const cmc = (arb = B) => ({ data: { '42': { id: 42, slug: 'new-token', platform: { name: 'Ethereum', token_address: A }, contract_address: [{ contract_address: arb, platform: { name: 'Arbitrum', coin: { slug: 'arbitrum' } } }, { contract_address: C, platform: { name: 'Plasma', coin: { slug: 'plasma' } } }] } }, status: { error_code: 0 } });
@@ -138,5 +138,19 @@ it('discovers Base contracts from both verified CoinGecko and CoinMarketCap reco
     }) as typeof fetch;
     const result = await createTokenDiscovery({ fetcher, manual: {}, env: { COINMARKETCAP_API_KEY: 'fixture-key' } }).resolve([target]);
     expect(correspondingTokens(A, 'ethereum', 'base', result.matches)).toEqual([D]);
+  }
+});
+
+it('discovers BSC contracts from chain ID 56 and CoinMarketCap BNB Smart Chain names', async () => {
+  for (const provider of ['cg', 'cmc']) {
+    const fetcher = (async (url: string | URL | Request) => {
+      if (String(url).includes('/asset_platforms')) return new Response(JSON.stringify([...platforms, { id: 'binance-smart-chain', chain_identifier: 56 }]));
+      if (provider === 'cg') return new Response(JSON.stringify({ id: 'new-token', platforms: { ethereum: A, 'binance-smart-chain': D } }));
+      if (String(url).includes('coingecko.com')) return new Response('{}', { status: 503 });
+      const body = cmc(); body.data['42'].contract_address.push({ contract_address: D, platform: { name: 'BNB Smart Chain (BEP20)', coin: { slug: 'bnb' } } });
+      return new Response(JSON.stringify(body));
+    }) as typeof fetch;
+    const result = await createTokenDiscovery({ fetcher, manual: {}, env: { COINMARKETCAP_API_KEY: 'fixture-key' } }).resolve([target]);
+    expect(correspondingTokens(A, 'ethereum', 'bsc', result.matches)).toEqual([D]);
   }
 });

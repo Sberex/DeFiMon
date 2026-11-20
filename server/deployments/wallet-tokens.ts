@@ -6,6 +6,41 @@ import type { NetworkId } from '../../src/types.js';
 // Uniswap/default-token-list@fc629302df08c20aa5ca368212b5e416b2299e27 src/tokens/{mainnet,arbitrum}.json (GPL-3.0; upstream license included alongside this file).
 // Plus AaveV3Ethereum/Plasma/Arbitrum address books and Fluid Plasma/Arbitrum vault underlyings @404d73f.
 export const walletTokenCatalog: Record<NetworkId, { address: Address; symbol: string }[]> = {
+  // AaveV3BNB.sol @266429e. Token decimals/symbols are verified on chain.
+  bsc: [
+  {
+    "address": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+    "symbol": "Cake"
+  },
+  {
+    "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    "symbol": "WBNB"
+  },
+  {
+    "address": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+    "symbol": "BTCB"
+  },
+  {
+    "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    "symbol": "ETH"
+  },
+  {
+    "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    "symbol": "USDC"
+  },
+  {
+    "address": "0x55d398326f99059fF775485246999027B3197955",
+    "symbol": "USDT"
+  },
+  {
+    "address": "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+    "symbol": "FDUSD"
+  },
+  {
+    "address": "0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C",
+    "symbol": "wstETH"
+  }
+],
   // AaveV3Base underlyings @266429e; the configured CMC registry is merged at lookup time.
   base: [
   {

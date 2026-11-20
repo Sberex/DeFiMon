@@ -17,7 +17,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use('/api', apiCors);
-  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc), baseConfigured: Boolean(process.env.BASE_RPC_URL || networks.base.defaultRpc) }));
+  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc), baseConfigured: Boolean(process.env.BASE_RPC_URL || networks.base.defaultRpc), bscConfigured: Boolean(process.env.BSC_RPC_URL || networks.bsc.defaultRpc) }));
   app.get('/api/cookbook', async (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try { res.json(cookbook ? await cookbook.read() : { data: emptyCookbook(), persistence: { mode: 'local', synced: true } }); }
@@ -74,7 +74,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
       for (const entry of entries) {
         const [chain, token, extra] = entry.split(':');
         if (!isNetworkId(chain) || extra !== undefined || !isAddress(token ?? '', { strict: false }) || /^0x0{40}$/i.test(token)) {
-          res.status(400).json({ error: 'Each added token needs an Ethereum, Plasma, Arbitrum or Base network and a valid token contract address.' }); return;
+          res.status(400).json({ error: 'Each added token needs an Ethereum, Plasma, Arbitrum, Base or Binance Smart Chain network and a valid token contract address.' }); return;
         }
         const address = getAddress(token.toLowerCase());
         extraTokens[chain] = [...new Set([...(extraTokens[chain] ?? []), address])];

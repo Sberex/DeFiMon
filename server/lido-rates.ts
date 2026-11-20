@@ -6,6 +6,8 @@ export const LIDO_WSTETH: Record<NetworkId, string> = {
   ethereum: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
   arbitrum: '0x5979d7b546e38e414f7e9822514be443a4800529',
   plasma: '0xe48d935e6c9e735463cccf29a7f11e32bc09136e',
+  // AaveV3BNB.sol @266429e, wstETH_UNDERLYING.
+  bsc: '0x26c5e01524d2e6280a48f2c50ff6de7e52e9611c',
   base: '0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452',
 };
 export const LIDO_APR_URL = 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma';

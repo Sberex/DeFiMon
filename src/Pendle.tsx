@@ -1,10 +1,10 @@
-import type { ChainName, WalletBalances, WalletToken } from './types';
+import type { WalletBalances, WalletToken } from './types';
 import { groupPendleHoldings } from './pendle-display';
-import { portfolioNetwork } from './networks';
+import { portfolioNetwork, networkExplorers as explorers } from './networks';
 const money = (v: number | null) => v === null ? 'Unavailable' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(v);
 const amount = (v: number | null) => v === null ? 'Unavailable' : new Intl.NumberFormat('en-US', { maximumSignificantDigits: 9 }).format(v);
 const apy = (v: number | null) => v === null ? 'Unavailable' : `${(v * 100).toFixed(2)}%`;
-const explorers: Record<ChainName, string> = { Ethereum: 'https://etherscan.io', Plasma: 'https://plasmascan.to', Arbitrum: 'https://arbiscan.io', Base: 'https://basescan.org' };
+
 export function PendleView({ wallets }: { wallets: WalletBalances[] }) {
   const { active, collapsed } = groupPendleHoldings(wallets);
   if (!active.length && !collapsed.length) return null;
