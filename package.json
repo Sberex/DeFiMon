@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -k \"tsx watch server/index.ts\" \"vite --host 0.0.0.0\"",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run check:config && tsc --noEmit && vite build",
+    "check:config": "tsx scripts/check-config.ts",
     "start": "tsx server/index.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

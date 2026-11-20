@@ -95,7 +95,7 @@ it('explains historical-access failures without disclosing provider credentials'
   expect(savingsFailureReason(new Error('No verified savings rate source'))).toContain('No verified');
 });
 
-it('uses configured mHYPER NAV and InfiniFi iUSD oracle history for wallet earnings and total NPL', async () => {
+it('uses configured mHYPER NAV for wallet earnings and preserves plain iUSD as a non-yield stablecoin', async () => {
   const { readFileSync } = await import('node:fs');
   const { configuredTokenRegistry } = await import('../server/token-registry');
   const { applyWalletInterest } = await import('../server/wallet-interest');
@@ -120,16 +120,17 @@ it('uses configured mHYPER NAV and InfiniFi iUSD oracle history for wallet earni
   const service = createSavingsRateService({ clientFor: () => client, sources });
   const wallet = { chain: 'Ethereum' as const, status: 'ok' as const, pricedValueUsd: 4.4049, unpricedCount: 0, coverage: '', interestDiscoveryComplete: true, tokens: [
     { address: configuredTokenRegistry.MHYPER.addresses.ethereum!, symbol: 'mHYPER', category: 'Savings stablecoin' as const, balance: 3.8540620944124493, priceUsd: 1.14224794, valueUsd: 4.402294487974706 },
-    { address: configuredTokenRegistry.IUSD.addresses.ethereum!, symbol: 'iUSD', category: 'Savings stablecoin' as const, balance: .002610186822595611, priceUsd: .9991497, valueUsd: .0026079674814105036 },
+    { address: configuredTokenRegistry.IUSD.addresses.ethereum!, symbol: 'iUSD', category: 'Stablecoin' as const, balance: .002610186822595611, priceUsd: .9991497, valueUsd: .0026079674814105036 },
   ] };
   const { intrinsicTokenRate } = await import('../server/intrinsic-rates');
   const enriched = await applyWalletInterest(wallet, 'ethereum', [], (network, address) => intrinsicTokenRate(network, address, {}, undefined, service.quote));
   expect(enriched.status).toBe('ok'); expect(walletInterestIssues([enriched])).toEqual([]);
   expect(enriched.tokens[0].intrinsicSupplyRate?.apr).toBeCloseTo(.0795781668925487);
-  expect(enriched.tokens[1].intrinsicSupplyRate).toMatchObject({ apr: 0, source: { startRate: 1, endRate: 1 } });
-  expect(enriched.tokens[1].intrinsicSupplyRate?.note).toContain('not a plain iUSD wallet balance');
+  expect(configuredTokenRegistry.IUSD.category).toBe('Stablecoin');
+  expect(enriched.tokens[1].intrinsicSupplyRate).toBeUndefined();
+  expect(reads.some(r => r.address === sources.IUSD.address)).toBe(false);
   expect(totalMonthlyInterest([], [enriched]).nplUsd).toBeCloseTo(4.402294487974706 * .0795781668925487 / 12);
-  for (const group of ['MHYPER', 'IUSD']) {
+  for (const group of ['MHYPER']) {
     expect(reads.some(r => r.address === sources[group].address && r.block === OLD)).toBe(true);
     expect(reads.some(r => r.address === sources[group].address && r.block === END)).toBe(true);
   }
