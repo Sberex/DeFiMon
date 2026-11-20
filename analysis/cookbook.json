@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-20T12:40:08.693Z",
+  "updatedAt": "2026-11-20T12:45:52.327Z",
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
@@ -1343,6 +1343,111 @@
                   "current": 1.014650158200757,
                   "threshold": 0.9793954544717122,
                   "unit": "debt pool share per collateral pool share"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0xe16be042f9433779909a972669be3a2003956348",
+      "scopes": [
+        {
+          "protocolId": "fluid",
+          "protocolName": "Fluid",
+          "chain": "Plasma",
+          "checkedAt": "2026-11-20T12:45:52.327Z",
+          "blockNumber": "38233684",
+          "complete": false,
+          "positions": [
+            {
+              "snapshotAt": "2026-11-20T12:45:52.327Z",
+              "blockNumber": "38233684",
+              "apr": 0.3171453152796426,
+              "netValueUsd": 35197.43018184256,
+              "monthlyNplUsd": 930.225007671139,
+              "verification": "verified",
+              "position": {
+                "marketAddress": "0x2d38ca861aC948BF90cC682fC1455138173c1923",
+                "liquidationModel": "linear",
+                "id": "fluid-nft-2764",
+                "label": "Vault 38 · sUSDai / GHO · NFT 2764",
+                "suppliedUsd": 281325.30076312687,
+                "debtUsd": 246127.8705812843,
+                "healthFactor": 1.0287041857098287,
+                "risk": "high",
+                "assets": [
+                  {
+                    "symbol": "sUSDai",
+                    "address": "0x0B2b2B2076d95dda7817e785989fE353fe955ef9",
+                    "supplied": 249570.01805246226,
+                    "borrowed": 0,
+                    "priceUsd": 1.1272399744106654,
+                    "collateral": true,
+                    "liquidationThreshold": 0.9,
+                    "liquidationPriceUsd": 1.095786320372406,
+                    "supplyRate": {
+                      "apr": 0,
+                      "note": "Current Fluid vault APR after the vault’s rate magnifier/fee adjustment."
+                    },
+                    "priceSource": "fluid-oracle",
+                    "intrinsicSupplyRate": {
+                      "apr": 0.07965522117951039,
+                      "estimated": true,
+                      "note": "Past-month intrinsic APR estimate: (end sUSDai/USDai oracle rate ÷ start rate − 1) × 365 ÷ 30 (oracle observations 30.01 days apart). Simple annualization, not compounded APY or USD.ai’s current advertised APY. Excludes lending interest and incentives; bridged-token market prices may differ.",
+                      "source": {
+                        "chain": "Ethereum",
+                        "oracle": "0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a",
+                        "blockNumber": "26456392",
+                        "startRound": "18446744073709551740",
+                        "endRound": "18446744073709551770",
+                        "startTimestamp": 1792558559,
+                        "endTimestamp": 1795151207,
+                        "startRate": 1.1199933961726638,
+                        "endRate": 1.1273259979555452
+                      }
+                    }
+                  },
+                  {
+                    "symbol": "GHO",
+                    "address": "0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3",
+                    "supplied": 0,
+                    "borrowed": 246127.8705812843,
+                    "priceUsd": 1,
+                    "collateral": false,
+                    "liquidationThreshold": null,
+                    "liquidationPriceUsd": null,
+                    "borrowRate": {
+                      "apr": 0.0564,
+                      "note": "Current Fluid vault APR after the vault’s rate magnifier/fee adjustment."
+                    },
+                    "merklBorrowRate": {
+                      "apr": 0.010706966793054197,
+                      "estimated": true,
+                      "note": "Estimated Merkl incentives, paid separately from protocol interest. Headline rates, eligibility, caps and future earnings can change.",
+                      "components": [
+                        {
+                          "id": "10592168346263943437",
+                          "name": "Borrow GHO from Fluid sUSDai/GHO Vault",
+                          "listedApr": 0.010706966793054197,
+                          "appliedApr": 0.010706966793054197,
+                          "note": "Applies only to this vault and this lending side. The same APR on each pool leg allocates one side-wide reward budget across its USD value; it does not duplicate the pool reward."
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "notes": [
+                  "Balances include accrued interest and any completed liquidations at the displayed Plasma block.",
+                  "Health factor is an estimate from Fluid’s liquidation oracle and liquidation threshold, not the borrowing limit. Fluid liquidates in discrete price ticks, so execution can differ slightly.",
+                  "The collateral USD price is estimated from Fluid’s liquidation oracle ratio multiplied by the configured loan token’s independently sourced USD price, including when your borrowing balance is zero. Supplied and net values include this protocol-based estimate; it is not a market-sale quote.",
+                  "The dollar liquidation price holds the debt token’s USD price and both balances fixed. Fluid’s collateral/debt oracle ratio determines liquidation; independent USD prices are for valuation only."
+                ],
+                "liquidationQuote": {
+                  "current": 1.1272399744106654,
+                  "threshold": 1.095786320372406,
+                  "unit": "GHO per sUSDai"
                 }
               }
             }
