@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { isAddress } from 'viem';
+import { parseIntrinsicOracles, type IntrinsicOracle } from './intrinsic-oracles.js';
 import type { NetworkId, TokenCategory } from '../src/types.js';
 export type TokenAddresses = Partial<Record<NetworkId, string>> & Record<string, string | undefined>;
-export interface RegistryToken { category: TokenCategory; addresses: TokenAddresses }
+export interface RegistryToken { category: TokenCategory; addresses: TokenAddresses; intrinsicOracles?: IntrinsicOracle[] }
 export type TokenRegistry = Record<string, RegistryToken>;
 const categories = new Set<TokenCategory>(['Other', 'Stablecoin', 'Savings stablecoin']);
 export const evmChains: Record<string, { chainId: number; name: string }> = JSON.parse(readFileSync(new URL('../config/evm-chains.json', import.meta.url), 'utf8'));
@@ -16,14 +17,15 @@ export function parseTokenRegistry(value: unknown): TokenRegistry {
     if (typeof category !== 'string' || !categories.has(category as TokenCategory)) throw new Error(`Invalid _category for ${name}. Use Stablecoin, Savings stablecoin or Other.`);
     const addresses: TokenAddresses = Object.create(null);
     for (const [network, address] of Object.entries(group)) {
-      if (network === '_category') continue;
+      if (network === '_category' || network === '_intrinsicOracles') continue;
       if (!Object.hasOwn(evmChains, network) || typeof address !== 'string' || !isAddress(address, { strict: false }) || /^0x0{40}$/i.test(address) || /^0x[eE]{40}$/.test(address)) throw new Error(`Invalid EVM network or contract address in token-matches.json for ${name}.`);
       const key = `${network}:${address.toLowerCase()}`;
       if (seen.has(key)) throw new Error(`Duplicate network/address in token-matches.json for ${name}. Each contract must belong to only one token group.`);
       seen.add(key); addresses[network] = address.toLowerCase();
     }
     if (!Object.keys(addresses).length) throw new Error(`Token ${name} needs at least one EVM contract address.`);
-    result[name] = { category: category as TokenCategory, addresses };
+    const intrinsicOracles = '_intrinsicOracles' in group ? parseIntrinsicOracles(group._intrinsicOracles, addresses, name) : undefined;
+    result[name] = { category: category as TokenCategory, addresses, ...(intrinsicOracles ? { intrinsicOracles } : {}) };
   }
   return result;
 }

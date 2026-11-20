@@ -79,7 +79,29 @@ User-requested additions after that snapshot include **reUSD**, classified as **
 
 ## Savings-token oracle sources
 
-**savings-oracles.json** configures verified on-chain rate sources keyed by token group. Each record declares a source network, the exact canonical token, the source contract, its adapter (`chainlink` or `erc4626`), and either the expected feed description/decimals or expected underlying contract. The source token must match that network's address in **token-matches.json**, and the group must be marked **Savings stablecoin**. Category and symbol alone never prove an oracle address.
+**token-matches.json** keeps optional **`_intrinsicOracles`** metadata inside each token group. It is an ordered list of sources. Each declares `network` (oracle chain), `address` (oracle contract), `token` (that chain's canonical asset in the same group), `kind` (`chainlink` or `erc4626`), and a `label`. Chainlink sources may pin `description` and `decimals`; ERC-4626 sources must pin `underlying`. Names and tickers never select a source. The old separate `savings-oracles.json` file has been removed.
+
+Example (the token can have balances on several chains while its oracle lives on Ethereum):
+
+```json
+"reUSD": {
+  "_category": "Savings stablecoin",
+  "ethereum": "0x5086bf358635b81d8c47c66d1c8b9e567db70c72",
+  "_intrinsicOracles": [
+    {
+      "network": "ethereum",
+      "kind": "chainlink",
+      "address": "0x72B5760cFBE437DD01409f44055fDfB8f8121B46",
+      "token": "0x5086bf358635b81d8c47c66d1c8b9e567db70c72",
+      "description": "reUSD/USD exchange rate",
+      "decimals": 18,
+      "label": "reUSD/USD exchange-rate oracle"
+    }
+  ]
+}
+```
+
+Sources are tried in listed order. Each must supply its own valid current and 30-day-old observations; prices from different sources are never combined. A source must match the token's configured network/address, and the token must be categorized Savings stablecoin for its income to be included. Metadata is excluded from token discovery and cross-chain address matches. `npm run check:config` validates it before building. sUSDai uses `"history": "rounds"` to preserve its archive-free Chainlink round lookup; other feeds use historical block reads. Both lending positions and wallet balances consume these same configured sources. mF-ONE uses the official Midas mF-ONE/USD NAV feed, distinct from its Unloop product's feed.
 
 The reUSD source is the actual reUSD/USD adapter `0x72B5760cFBE437DD01409f44055fDfB8f8121B46`, verified through its Morpho market `0x4565ac05d38b19374ccbb04c17cca60ca9353cd41824f0803d0fc7704f60eaed` and the oracle's `BASE_FEED_1` reference. Its source is verified on Sourcify. sUSDS, sDAI and sUSDe use the canonical share contract's `convertToAssets` rate with the declared stable underlying, rather than a presumed $1 market price. sUSDai retains its existing uncapped Ethereum exchange-rate feed and historical-round reader.
 

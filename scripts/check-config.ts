@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 // Validate server configuration before producing a deployable build. TypeScript
 // alone does not parse JSON files loaded with readFileSync at runtime.
-const files = ['token-matches.json', 'evm-chains.json', 'savings-oracles.json'];
+const files = ['token-matches.json', 'evm-chains.json'];
 try {
   for (const file of files) {
     try {

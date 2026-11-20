@@ -69,3 +69,14 @@ it('keeps stored non-dashboard chains out of recommendation reports without requ
   expect(Object.keys(result.reports[0].matches)).toEqual(['ethereum']);
   expect(result.matches.TEST.optimism).toBe(second);
 });
+
+it('validates inline intrinsic oracles as metadata and keeps them out of wallet and cross-chain token addresses', () => {
+  const source = { network: 'ethereum', kind: 'chainlink', address: second, token: first, description: 'TEST/USD', decimals: 18, label: 'TEST oracle' };
+  const input = { RENAMED: { _category: 'Savings stablecoin', ethereum: first, _intrinsicOracles: [source] } };
+  expect(parseTokenRegistry(input).RENAMED.intrinsicOracles).toEqual([source]);
+  expect(parseTokenRegistry(input).RENAMED.addresses).toEqual({ ethereum: first });
+  expect(parseTokenMatches(input)).toEqual({ RENAMED: { ethereum: first } });
+  for (const oracles of [[], [source, source], [{ ...source, address: 'bad' }], [{ ...source, token: second }], [{ ...source, network: 'moon' }], [{ ...source, kind: 'guess' }], [{ ...source, decimals: 37 }], [{ ...source, computed: true }], [{ ...source, kind: 'erc4626' }], [{ ...source, unexpected: true }]]) {
+    expect(() => parseTokenRegistry({ RENAMED: { _category: 'Savings stablecoin', ethereum: first, _intrinsicOracles: oracles } })).toThrow('_intrinsicOracles');
+  }
+});

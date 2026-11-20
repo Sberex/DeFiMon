@@ -157,7 +157,19 @@
     "plasma": "0x0B2b2B2076d95dda7817e785989fE353fe955ef9",
     "arbitrum": "0x0B2b2B2076d95dda7817e785989fE353fe955ef9",
     "_category": "Savings stablecoin",
-    "base": "0x0b2b2b2076d95dda7817e785989fe353fe955ef9"
+    "base": "0x0b2b2b2076d95dda7817e785989fe353fe955ef9",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x0fBE44B96320EBD455FF9CCE0781fA9A83Ddee7a",
+        "token": "0x0b2b2b2076d95dda7817e785989fe353fe955ef9",
+        "description": "SUSDAI / USDAI Exchange Rate",
+        "decimals": 18,
+        "label": "sUSDai/USDai raw exchange-rate oracle",
+        "history": "rounds"
+      }
+    ]
   },
   "wstETH": {
     "ethereum": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
@@ -4798,20 +4810,50 @@
     "x-layer": "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2",
     "zircuit": "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2",
     "zksync": "0xad17da2f6ac76746ef261e835c50b2651ce36da8",
-    "hyperevm": "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2"
+    "hyperevm": "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+        "token": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
+        "underlying": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+        "label": "sUSDe/USDe on-chain redemption rate"
+      }
+    ]
   },
   "sDAI": {
     "_category": "Savings stablecoin",
     "base": "0x99ac4484e8a1dbd6a185380b3a811913ac884d87",
     "ethereum": "0x83f20f44975d03b1b09e64809b757c47f942beea",
-    "optimism": "0x2218a117083f5b482b0bb821d27056ba9c04b1d3"
+    "optimism": "0x2218a117083f5b482b0bb821d27056ba9c04b1d3",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x83f20f44975d03b1b09e64809b757c47f942beea",
+        "token": "0x83f20f44975d03b1b09e64809b757c47f942beea",
+        "underlying": "0x6b175474e89094c44da98b954eedeac495271d0f",
+        "label": "sDAI/DAI on-chain redemption rate"
+      }
+    ]
   },
   "sUSDS": {
     "_category": "Savings stablecoin",
     "arbitrum": "0xddb46999f8891663a8f2828d25298f70416d7610",
     "base": "0x5875eee11cf8398102fdad704c9e96607675467a",
     "ethereum": "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
-    "optimism": "0xb5b2dc7fd34c249f4be7fb1fcea07950784229e0"
+    "optimism": "0xb5b2dc7fd34c249f4be7fb1fcea07950784229e0",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+        "token": "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd",
+        "underlying": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",
+        "label": "sUSDS/USDS on-chain redemption rate"
+      }
+    ]
   },
   "USDS": {
     "_category": "Stablecoin",
@@ -4834,7 +4876,19 @@
     "base": "0x7d214438d0f27afccc23b3d1e1a53906ace5cfea",
     "ink": "0x5bcf6b008bf80b9296238546bace1797657b05d6",
     "bsc": "0xba9425ec55ee0e72216d18e0ad8bbba2553bfb60",
-    "avalanche": "0x180af87b47bf272b2df59dccf2d76a6eafa625bf"
+    "avalanche": "0x180af87b47bf272b2df59dccf2d76a6eafa625bf",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x72B5760cFBE437DD01409f44055fDfB8f8121B46",
+        "token": "0x5086bf358635b81d8c47c66d1c8b9e567db70c72",
+        "description": "reUSD/USD exchange rate",
+        "decimals": 18,
+        "label": "reUSD/USD exchange-rate oracle",
+        "evidence": "https://sourcify.dev/server/v2/contract/1/0x72B5760cFBE437DD01409f44055fDfB8f8121B46?fields=all"
+      }
+    ]
   },
   "strUSD": {
     "_category": "Savings stablecoin",
@@ -5155,7 +5209,22 @@
   },
   "IUSD": {
     "_category": "Stablecoin",
-    "ethereum": "0x48f9e38f3070ad8945dfeae3fa70987722e3d89c"
+    "ethereum": "0x48f9e38f3070ad8945dfeae3fa70987722e3d89c",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0xF81Aa28A4F68124683AfadA81e8EBBf6e2867067",
+        "token": "0x48f9e38f3070ad8945dfeae3fa70987722e3d89c",
+        "description": "Chainlink-formatted InfiniFi RT Oracle",
+        "decimals": 18,
+        "computed": true,
+        "tokenGetter": "receiptToken",
+        "label": "InfiniFi iUSD/USD accounting oracle",
+        "note": "Unstaked iUSD is the InfiniFi receipt token. Staking/locking rewards accrue to siUSD/liUSD, not a plain iUSD wallet balance. An unchanged verified accounting price gives 0% intrinsic APR; losses remain negative. This is not InfiniFi’s advertised staking APY.",
+        "evidence": "https://github.com/InfiniFi-Labs/infinifi-protocol/blob/2ac1b13a624e65e819ee82a982a8d5382cde921a/deployment/configuration/addresses.1.json"
+      }
+    ]
   },
   "MTBILL": {
     "_category": "Savings stablecoin",
@@ -5190,7 +5259,19 @@
   },
   "MF-ONE": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x238a700ed6165261cf8b2e544ba797bc11e466ba"
+    "ethereum": "0x238a700ed6165261cf8b2e544ba797bc11e466ba",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x8D51DBC85cEef637c97D02bdaAbb5E274850e68C",
+        "token": "0x238a700ed6165261cf8b2e544ba797bc11e466ba",
+        "description": "mF-ONE/USD",
+        "decimals": 8,
+        "label": "Midas mF-ONE/USD native NAV oracle",
+        "evidence": "https://github.com/midas-apps/contracts/blob/013a1493607ae21db33c1b7666f72088ffd37dd9/config/constants/addresses.ts"
+      }
+    ]
   },
   "TEMPLE": {
     "_category": "Other",
@@ -5496,7 +5577,19 @@
     "_category": "Savings stablecoin",
     "ethereum": "0x9b5528528656dbc094765e2abb79f293c21191b9",
     "monad": "0xd90f6bfed23ffde40106fc4498dd2e9edb95e4e7",
-    "plasma": "0xb31bea5c2a43f942a3800558b1aa25978da75f8a"
+    "plasma": "0xb31bea5c2a43f942a3800558b1aa25978da75f8a",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68",
+        "token": "0x9b5528528656dbc094765e2abb79f293c21191b9",
+        "description": "mHYPER/USD",
+        "decimals": 8,
+        "label": "Midas mHYPER/USD native NAV oracle",
+        "evidence": "https://github.com/midas-apps/contracts/blob/013a1493607ae21db33c1b7666f72088ffd37dd9/config/constants/addresses.ts"
+      }
+    ]
   },
   "USDU#cg-universal-usd": {
     "_category": "Stablecoin",
@@ -8862,7 +8955,20 @@
   },
   "Hastra-PRIME": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x19ebb35279a16207ec4ba82799cc64715065f7f6"
+    "ethereum": "0x19ebb35279a16207ec4ba82799cc64715065f7f6",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0xf17C0EdcAA28371e9c8012D7699bF40ECF0F58d1",
+        "token": "0x19ebb35279a16207ec4ba82799cc64715065f7f6",
+        "description": "PRIME / WYLDS Exchange Rate",
+        "decimals": 18,
+        "label": "Hastra PRIME/wYLDS raw exchange-rate oracle",
+        "evidence": "https://sourcify.dev/server/v2/contract/1/0x335e5718bC20028d5e357473a3736C187Ca6b07e?fields=all",
+        "note": "Hastra PRIME is distinct from the Echelon PRIME governance token. This is growth in wYLDS per PRIME from the market’s direct base feed; lending APR, incentives and market-price changes are separate."
+      }
+    ]
   },
   "KRAQX": {
     "_category": "Other",

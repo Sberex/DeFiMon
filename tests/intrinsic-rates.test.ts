@@ -108,3 +108,16 @@ it('adds a separate intrinsic component to supplied sUSDai across all protocol f
   expect(failed[0].positions[0].assets[0].supplyRate?.apr).toBe(.02);
   expect(JSON.stringify(failed)).not.toContain('private-provider-secret');
 });
+
+it('reads round history from the provided configured chain/feed instead of a hardcoded oracle address', async () => {
+  const { readOracleRoundRate } = await import('../server/oracle-rounds');
+  const configuredFeed = '0x1111111111111111111111111111111111111111';
+  const base = fixture(), read = vi.fn(async (args: any) => {
+    expect(args.address).toBe(configuredFeed);
+    return base.client.readContract({ ...args, address: SUSDAI_FEED });
+  });
+  const result = await readOracleRoundRate({ ...base.client, readContract: read } as any, 123n, { network: 'ethereum', kind: 'chainlink', token: SUSDAI, address: configuredFeed, description: 'SUSDAI / USDAI Exchange Rate', decimals: 18, history: 'rounds', label: 'Configured rate source' });
+  expect(result.apr).toBeCloseTo(.01 * 365 / 30);
+  expect(result.source.oracle).toBe(configuredFeed);
+  expect(read).toHaveBeenCalled();
+});

@@ -96,12 +96,11 @@ it('explains historical-access failures without disclosing provider credentials'
 });
 
 it('uses configured mHYPER NAV for wallet earnings and preserves plain iUSD as a non-yield stablecoin', async () => {
-  const { readFileSync } = await import('node:fs');
   const { configuredTokenRegistry } = await import('../server/token-registry');
   const { applyWalletInterest } = await import('../server/wallet-interest');
   const { totalMonthlyInterest } = await import('../src/monthly-interest');
   const { walletInterestIssues } = await import('../src/wallet-interest');
-  const sources = JSON.parse(readFileSync(new URL('../config/savings-oracles.json', import.meta.url), 'utf8'));
+  const sources = Object.fromEntries(Object.entries(configuredTokenRegistry).filter(([, t]) => t.intrinsicOracles?.length).map(([name, t]) => [name, t.intrinsicOracles![0]]));
   const reads: { address: string; block: bigint }[] = [];
   const client = {
     getChainId: async () => 1, getBlockNumber: async () => END,
@@ -172,11 +171,10 @@ it('retries pruned history once through an independent verified archive snapshot
 });
 
 it('enriches the reported Hastra PRIME/PYUSD collateral with its exact oracle, excluding unrelated PRIME tickers', async () => {
-  const { readFileSync } = await import('node:fs');
   const { configuredTokenRegistry } = await import('../server/token-registry');
   const { savingsGroup } = await import('../server/savings-rates');
   const { annualizedNplApr, totalMonthlyInterest } = await import('../src/monthly-interest');
-  const sources = JSON.parse(readFileSync(new URL('../config/savings-oracles.json', import.meta.url), 'utf8'));
+  const sources = Object.fromEntries(Object.entries(configuredTokenRegistry).filter(([, t]) => t.intrinsicOracles?.length).map(([name, t]) => [name, t.intrinsicOracles![0]]));
   const source = sources['Hastra-PRIME'];
   expect(source.token).toBe('0x19ebb35279a16207ec4ba82799cc64715065f7f6');
   expect(savingsGroup('ethereum', source.token)).toBe('Hastra-PRIME');
@@ -233,4 +231,34 @@ it('ignores matching names with different contracts or chains and rejects ambigu
   const q = await createSavingsRateService({ clientFor: () => f.client, registry: f.registry, sources: { one: f.source, two: { ...f.source, address: other } } }).quote('reUSD', { network: 'ethereum' });
   expect(q.apr).toBeNull();
   expect(q.note).toContain('Multiple configured rate sources');
+});
+
+it('uses ordered inline oracle sources for lending and wallet balances without mixing their historical observations', async () => {
+  const { applyWalletInterest } = await import('../server/wallet-interest');
+  const { intrinsicTokenRate } = await import('../server/intrinsic-rates');
+  const { totalMonthlyInterest } = await import('../src/monthly-interest');
+  const f = fixture(), alternate = '0x1111111111111111111111111111111111111111';
+  const registry: import('../server/token-registry').TokenRegistry = { reUSD: { ...f.registry.reUSD, intrinsicOracles: [f.source, { ...f.source, address: alternate, label: 'Alternative verified oracle' }] } };
+  const reads: { address: string; block: bigint }[] = [];
+  const client = { ...f.client, readContract: async (args: any) => {
+    reads.push({ address: args.address, block: args.blockNumber });
+    if (args.address === feed && args.functionName === 'latestRoundData') {
+      if (args.blockNumber <= OLD) throw new Error('Old source unavailable');
+      return [0n, 900n * 10n ** 18n, NOW - 60n, NOW - 60n, 0n];
+    }
+    return f.client.readContract(args);
+  } } as unknown as ChainClient;
+  const service = createSavingsRateService({ clientFor: () => client, registry });
+  const quote = await service.quote('reUSD', { network: 'base' });
+  expect(quote.apr).toBeCloseTo(.02 * 365 / 30);
+  expect(quote.source).toMatchObject({ oracle: alternate, startRate: 1, endRate: 1.02, chain: 'Ethereum' });
+  expect(reads.some(r => r.address === alternate && r.block === OLD)).toBe(true);
+  expect(reads.some(r => r.address === alternate && r.block === END)).toBe(true);
+  const asset = { symbol: 'Label does not select the oracle', address: token, supplied: 100, borrowed: 0, priceUsd: 1.1, collateral: true, liquidationThreshold: .9, liquidationPriceUsd: null, supplyRate: { apr: 0, note: '' } };
+  const protocol: ProtocolResult = { id: 'morpho', name: 'Morpho', status: 'ok', coverage: '', positions: [{ id: 'loan', label: '', suppliedUsd: 110, debtUsd: 0, risk: 'no-debt', healthFactor: null, notes: [], assets: [asset] }] };
+  const enriched = await applyIntrinsicRates([protocol], 'ethereum', undefined, service.quote);
+  expect(enriched[0].positions[0].assets[0].intrinsicSupplyRate).toEqual(quote);
+  const wallet = await applyWalletInterest({ chain: 'Ethereum', status: 'ok', tokens: [{ symbol: 'Different wallet label', address: token, category: 'Savings stablecoin', balance: 100, priceUsd: 1.1, valueUsd: 110 }], pricedValueUsd: 110, unpricedCount: 0, coverage: '', interestDiscoveryComplete: true }, 'ethereum', [], (network, address) => intrinsicTokenRate(network, address, {}, undefined, service.quote));
+  expect(wallet.tokens[0].intrinsicSupplyRate).toEqual(quote);
+  expect(totalMonthlyInterest(enriched, [wallet]).earnedUsd).toBeCloseTo(220 * quote.apr! / 12);
 });

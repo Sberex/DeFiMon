@@ -1,10 +1,11 @@
-import { readFileSync } from 'node:fs';
 import { isAddress, parseAbi, type Address } from 'viem';
 import type { IntrinsicRate, NetworkId, ProtocolResult } from '../src/types.js';
 import { networkNames, networkOrder } from '../src/networks.js';
 import { networks } from './networks.js';
 import { configuredTokenRegistry, type TokenRegistry } from './token-registry.js';
 import { makeClient, type ChainClient } from './rpc.js';
+import type { IntrinsicOracle } from './intrinsic-oracles.js';
+import { readOracleRoundRate } from './oracle-rounds.js';
 const DAY = 86400n, WINDOW = 30n * DAY;
 // Public Ethereum archive service; used only when no explicit archive RPC is set
 // and the normal provider reports pruned historical state. No wallet is sent.
@@ -15,10 +16,9 @@ const chainlinkAbi = parseAbi(['function decimals() view returns(uint8)', 'funct
 const vaultAbi = parseAbi(['function asset() view returns(address)', 'function decimals() view returns(uint8)', 'function convertToAssets(uint256) view returns(uint256)']);
 const providerAbi = parseAbi(['function getPriceOracle() view returns(address)', 'function getSourceOfAsset(address) view returns(address)']);
 const morphoAbi = parseAbi(['function idToMarketParams(bytes32) view returns(address loanToken,address collateralToken,address oracle,address irm,uint256 lltv)', 'function BASE_FEED_1() view returns(address)', 'function BASE_FEED_2() view returns(address)', 'function BASE_VAULT() view returns(address)']);
-export interface SavingsSource { network: NetworkId; kind: 'chainlink' | 'erc4626'; address: Address; token: Address; description?: string; decimals?: number; underlying?: Address; computed?: boolean; tokenGetter?: 'receiptToken'; note?: string; label: string }
+export type SavingsSource = IntrinsicOracle;
 type Snapshot = { client: ChainClient; end: { number: bigint; timestamp: bigint }; start: { number: bigint; timestamp: bigint } };
 type Context = { network: NetworkId; protocol?: string; position?: string; address?: string };
-const configuredSources = JSON.parse(readFileSync(new URL('../config/savings-oracles.json', import.meta.url), 'utf8')) as Record<string, SavingsSource>;
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 export function savingsApr(start: bigint, end: bigint): number | null {
   if (start <= 0n || end <= 0n) return null;
@@ -67,7 +67,7 @@ function unavailable(group: string, network: NetworkId, address = '', reason = '
   return { apr: null, estimated: true, note: `${group} is marked Savings stablecoin. Its current and 30-day-old on-chain rate could not both be verified. ${reason} Intrinsic earnings are unknown, not zero.`, source: { chain: networkNames[network], oracle: address, kind: 'unavailable', label: `${group} rate history unavailable` } };
 }
 export function createSavingsRateService(options: { clientFor?: (network: NetworkId) => ChainClient; archiveFallbackFor?: (network: NetworkId) => ChainClient | undefined; registry?: TokenRegistry; sources?: Record<string, SavingsSource>; now?: () => number } = {}) {
-  const clientFor = options.clientFor ?? ((network: NetworkId) => makeClient(network, process.env[`${network.toUpperCase()}_ARCHIVE_RPC_URL`])), registry = options.registry ?? configuredTokenRegistry, sources = options.sources ?? configuredSources, now = options.now ?? Date.now;
+  const clientFor = options.clientFor ?? ((network: NetworkId) => makeClient(network, process.env[`${network.toUpperCase()}_ARCHIVE_RPC_URL`])), registry = options.registry ?? configuredTokenRegistry, sources = options.sources, now = options.now ?? Date.now;
   const archiveFallbackFor = options.archiveFallbackFor ?? (options.clientFor ? () => undefined : (network: NetworkId) => network === 'ethereum' && !process.env.ETHEREUM_ARCHIVE_RPC_URL ? makeClient(network, ETHEREUM_SAVINGS_ARCHIVE_FALLBACK) : undefined);
   const snapshots = new Map<string, { expires: number; promise: Promise<Snapshot> }>();
   const quotes = new Map<string, { expires: number; promise: Promise<IntrinsicRate> }>();
@@ -79,16 +79,17 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
     entry.promise.catch(() => { if (snapshots.get(key) === entry) snapshots.delete(key); });
     return entry.promise;
   }
-  async function discover(group: string, context: Context, fallback = false): Promise<SavingsSource> {
+  async function discover(group: string, context: Context, fallback = false, sourceIndex = 0): Promise<SavingsSource> {
     const token = registry[group];
     if (!token || token.category !== 'Savings stablecoin') throw new Error('Not a configured savings asset');
     // Group names and tickers are editable labels, never asset identities.
     // A source belongs to this asset only when its exact chain/token pair is
     // present in the token-matches group resolved from the held contract.
-    const matches = Object.values(sources).filter(source => networkOrder.includes(source.network) && same(token.addresses[source.network] ?? '', source.token));
-    if (matches.length > 1) throw new Error('Ambiguous configured savings-rate sources');
-    if (matches.length === 1) {
-      const source = matches[0];
+    const matches = sources ? Object.values(sources).filter(source => networkOrder.includes(source.network) && same(token.addresses[source.network] ?? '', source.token)) : token.intrinsicOracles ?? [];
+    if (sources && matches.length > 1) throw new Error('Ambiguous configured savings-rate sources');
+    if (matches.length) {
+      const source = matches[sourceIndex];
+      if (!source) throw new Error('No configured oracle remains');
       if (!networkOrder.includes(source.network) || !isAddress(source.address, { strict: false }) || zero.test(source.address) || !same(token.addresses[source.network] ?? '', source.token)) throw new Error('Savings source identity mismatch');
       if (source.computed && (source.kind !== 'chainlink' || source.tokenGetter !== 'receiptToken' || !source.description || source.decimals === undefined)) throw new Error('Unverified computed oracle');
       if (source.kind !== 'chainlink' && source.kind !== 'erc4626') throw new Error('Unknown savings adapter');
@@ -126,10 +127,16 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
     }
     throw new Error('No verified savings rate source');
   }
-  async function load(group: string, context: Context, fallback = false): Promise<IntrinsicRate> {
+  async function load(group: string, context: Context, fallback = false, sourceIndex = 0): Promise<IntrinsicRate> {
     let source: SavingsSource | undefined;
     try {
-      source = await discover(group, context, fallback);
+      source = await discover(group, context, fallback, sourceIndex);
+      if (source.history === 'rounds') {
+        const client = clientFor(source.network);
+        const result = await readOracleRoundRate(client, await client.getBlockNumber(), source);
+        if (result.apr === null) throw new Error('Configured oracle round history unavailable');
+        return result;
+      }
       const s = await snapshot(source.network, fallback);
       let start: bigint, end: bigint, decimals: number;
       if (source.kind === 'chainlink') {
@@ -177,7 +184,8 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
       return { apr, estimated: true, note: `Past-month ${group} intrinsic APR: (current on-chain rate − rate 30 days ago) × 365 ÷ (30 × rate 30 days ago). Simple annualization, not compounded APY. Uses ${source.label}; market prices, lending interest and incentives are separate. Past growth is not a promised future return.${source.note ? ` ${source.note}` : ''}`, source: { chain: networkNames[source.network], oracle: source.address, kind: source.kind, label: source.label, blockNumber: String(s.end.number), startBlockNumber: String(s.start.number), startTimestamp: Number(s.start.timestamp), endTimestamp: Number(s.end.timestamp), startRate: Number(start) / 10 ** decimals, endRate: Number(end) / 10 ** decimals, windowDays: 30 } };
     } catch (error) {
       const network = source?.network ?? context.network;
-      if (!fallback && historicalStateUnavailable(error) && archiveFallbackFor(network)) return load(group, context, true);
+      if (!fallback && historicalStateUnavailable(error) && archiveFallbackFor(network)) return load(group, context, true, sourceIndex);
+      if (!sources && sourceIndex + 1 < (registry[group]?.intrinsicOracles?.length ?? 0)) return load(group, context, false, sourceIndex + 1);
       return unavailable(group, network, source?.address, savingsFailureReason(error));
     }
   }
