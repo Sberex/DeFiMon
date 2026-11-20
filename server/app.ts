@@ -1,3 +1,4 @@
+import type { TestCasesStore } from './test-cases.js';
 import type { CookbookStore } from './cookbook-store.js';
 import { emptyCookbook } from '../src/cookbook.js';
 import { applyMerklApr } from '../src/merkl-rates.js';
@@ -11,7 +12,7 @@ import type { ExtraTokens, MerklRewards, NetworkId, Portfolio } from '../src/typ
 import { isNetworkId } from '../src/networks.js';
 import { readMerklRewards, unavailableMerkl } from './merkl.js';
 import { networks } from './networks.js';
-export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore) {
+export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
@@ -90,6 +91,10 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
       if (cookbook) {
         try { await cookbook.record(applyMerklApr(portfolio, await rewardsSnapshot).portfolio); }
         catch { res.setHeader('X-Cookbook-Save', 'unavailable'); }
+      }
+      if (testCases) {
+        try { await testCases.record(portfolio); }
+        catch { res.setHeader('X-Test-Cases-Save', 'unavailable'); }
       }
       res.json(portfolio);
     }

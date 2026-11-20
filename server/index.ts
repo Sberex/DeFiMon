@@ -2,10 +2,11 @@ import 'dotenv/config';
 import { EnvHttpProxyAgent, setGlobalDispatcher } from 'undici';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
+import { createTestCasesStore } from './test-cases.js';
 import { createCookbookStore } from './cookbook-store.js';
 import { createApp } from './app.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy) setGlobalDispatcher(new EnvHttpProxyAgent());
-const app = createApp(undefined, undefined, undefined, createCookbookStore());
+const app = createApp(undefined, undefined, undefined, createCookbookStore(), createTestCasesStore());
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 app.use(express.static(dist));
 app.get('/{*path}', (req, res) => {

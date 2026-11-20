@@ -532,3 +532,9 @@ npm run refresh:cookbook -- 0xWalletAddress
 ```
 
 The refresh script retains previous snapshots on a failed address lookup. Review and commit the JSON after a local refresh.
+
+## Automatic test-case discovery
+
+After each successful wallet analysis, addresses with **at least three verified active lending positions** are added to `analysis/test-cases.json`. Positions may be in the same or different protocols and networks; no APR minimum applies. A position counts once regardless of its number of asset rows. A verified positive supplied or borrowed balance is required; zero-deposit curator listings, unreadable placeholders and wallet-held tokens do not count. Shared Spark/Morpho holdings and repeated position IDs are counted once.
+
+The existing server-only `COOKBOOK_GITHUB_TOKEN` saves new addresses to GitHub. No additional credential is needed. Appends preserve existing entries, deduplicate addresses regardless of letter case, and retry concurrent GitHub updates. A later analysis with fewer positions does not remove an existing test case. Data commits skip website builds and Render deployments. A failed save retains the address locally for retry and does not discard the wallet result.

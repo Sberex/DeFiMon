@@ -33,3 +33,18 @@ it('keeps a successful portfolio response when Cookbook persistence fails', asyn
     expect(await response.json()).toEqual(portfolio);
   } finally { await new Promise<void>((resolve, reject) => server.close(e => e ? reject(e) : resolve())); }
 });
+
+it('records test-case candidates from server results even when Cookbook saving fails', async () => {
+  const portfolio = snapshot(), record = vi.fn(async (_portfolio: Portfolio) => {});
+  const server = createApp(async () => portfolio, async () => unavailableMerkl(wallet), undefined, { record: async () => { throw Error('cookbook failure'); }, read: async () => { throw Error(); } }, { record }).listen(0, '127.0.0.1');
+  await new Promise<void>(resolve => server.once('listening', resolve));
+  const address = server.address(); if (!address || typeof address === 'string') throw Error();
+  try {
+    const response = await fetch(`http://127.0.0.1:${address.port}/api/portfolio/${wallet}`);
+    expect(response.status).toBe(200); expect(record).toHaveBeenCalledWith(portfolio);
+    record.mockRejectedValueOnce(new Error('private-test-case-token'));
+    const failedSave = await fetch(`http://127.0.0.1:${address.port}/api/portfolio/${wallet}`);
+    expect(failedSave.status).toBe(200); expect(failedSave.headers.get('x-test-cases-save')).toBe('unavailable');
+    expect(await failedSave.json()).toEqual(portfolio);
+  } finally { await new Promise<void>((resolve, reject) => server.close(e => e ? reject(e) : resolve())); }
+});
