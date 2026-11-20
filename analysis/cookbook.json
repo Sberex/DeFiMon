@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-20T11:08:37.863Z",
+  "updatedAt": "2026-11-20T11:29:14.269Z",
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
@@ -730,71 +730,71 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-20T11:08:37.863Z",
-          "blockNumber": "38227854",
+          "checkedAt": "2026-11-20T11:29:14.269Z",
+          "blockNumber": "38229083",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-20T11:08:37.863Z",
-              "blockNumber": "38227854",
-              "apr": 0.20498860748744685,
-              "netValueUsd": 172254.0607429787,
-              "monthlyNplUsd": 2942.5100038134406,
+              "snapshotAt": "2026-11-20T11:29:14.269Z",
+              "blockNumber": "38229083",
+              "apr": 0.21070128500516772,
+              "netValueUsd": 172195.75992545974,
+              "monthlyNplUsd": 3023.4889907279776,
               "verification": "verified",
               "position": {
                 "marketAddress": "0x6E0cDB09eb33cD3894C905E0DFF9289b95a86FFF",
                 "liquidationModel": "oracle-ratio",
                 "id": "fluid-nft-2517",
                 "label": "Vault 33 · GHO/USDT0 / GHO/USDT0 · NFT 2517",
-                "suppliedUsd": 2061671.6182875936,
-                "debtUsd": 1889417.557544615,
-                "healthFactor": 1.0360055667901706,
+                "suppliedUsd": 2061645.810704956,
+                "debtUsd": 1889450.0507794963,
+                "healthFactor": 1.0359975362348643,
                 "risk": "high",
                 "assets": [
                   {
                     "symbol": "GHO",
                     "address": "0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3",
-                    "supplied": 1204178.8703436758,
-                    "borrowed": 787215.3463032565,
+                    "supplied": 1183539.2170059464,
+                    "borrowed": 806133.59223605,
                     "priceUsd": 1,
                     "collateral": true,
                     "liquidationThreshold": 0.95,
                     "liquidationPriceUsd": null,
                     "supplyRate": {
-                      "apr": 0.0552,
+                      "apr": 0.0582,
                       "note": "Current per-token interest component plus the vault’s signed fee/reward adjustment. Excludes pool trading income, which cannot be determined from an instant snapshot.",
                       "estimated": true
                     },
                     "borrowRate": {
-                      "apr": 0.0669,
+                      "apr": 0.0697,
                       "note": "Current per-token interest component plus the vault’s signed fee/reward adjustment. Excludes pool trading income, which cannot be determined from an instant snapshot.",
                       "estimated": true
                     },
                     "lltvNote": "Vault LLTV applies to collateral pool shares. Underlying token prices cannot be calculated independently.",
                     "merklBorrowRate": {
-                      "apr": 0.013652791853755803,
+                      "apr": 0.013653092880097664,
                       "estimated": true,
                       "note": "Estimated Merkl incentives, paid separately from protocol interest. Headline rates, eligibility, caps and future earnings can change.",
                       "components": [
                         {
                           "id": "17442523260684284660",
                           "name": "Borrow GHO-USDT0 from Fluid GHO-USDT0/GHO-USDT0 Vault",
-                          "listedApr": 0.013652791853755803,
-                          "appliedApr": 0.013652791853755803,
+                          "listedApr": 0.013653092880097664,
+                          "appliedApr": 0.013653092880097664,
                           "note": "Applies only to this vault and this lending side. The same APR on each pool leg allocates one side-wide reward budget across its USD value; it does not duplicate the pool reward."
                         }
                       ]
                     },
                     "merklSupplyRate": {
-                      "apr": 0.012472663259126682,
+                      "apr": 0.012472502754690046,
                       "estimated": true,
                       "note": "Estimated Merkl incentives, paid separately from protocol interest. Headline rates, eligibility, caps and future earnings can change.",
                       "components": [
                         {
                           "id": "1682296689571099010",
                           "name": "Lend GHO-USDT0 on Fluid GHO-USDT0/GHO-USDT0 Vault",
-                          "listedApr": 0.012472663259126682,
-                          "appliedApr": 0.012472663259126682,
+                          "listedApr": 0.012472502754690046,
+                          "appliedApr": 0.012472502754690046,
                           "note": "Applies only to this vault and this lending side. The same APR on each pool leg allocates one side-wide reward budget across its USD value; it does not duplicate the pool reward."
                         }
                       ]
@@ -803,47 +803,47 @@
                   {
                     "symbol": "USDT0",
                     "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-                    "supplied": 858428.434938,
-                    "borrowed": 1103404.922607,
+                    "supplied": 879064.774303,
+                    "borrowed": 1084498.561976,
                     "priceUsd": 0.99891,
                     "collateral": true,
                     "liquidationThreshold": 0.95,
                     "liquidationPriceUsd": null,
                     "supplyRate": {
-                      "apr": 0.0465,
+                      "apr": 0.0458,
                       "note": "Current per-token interest component plus the vault’s signed fee/reward adjustment. Excludes pool trading income, which cannot be determined from an instant snapshot.",
                       "estimated": true
                     },
                     "borrowRate": {
-                      "apr": 0.0634,
+                      "apr": 0.0629,
                       "note": "Current per-token interest component plus the vault’s signed fee/reward adjustment. Excludes pool trading income, which cannot be determined from an instant snapshot.",
                       "estimated": true
                     },
                     "lltvNote": "Vault LLTV applies to collateral pool shares. Underlying token prices cannot be calculated independently.",
                     "merklBorrowRate": {
-                      "apr": 0.013652791853755803,
+                      "apr": 0.013653092880097664,
                       "estimated": true,
                       "note": "Estimated Merkl incentives, paid separately from protocol interest. Headline rates, eligibility, caps and future earnings can change.",
                       "components": [
                         {
                           "id": "17442523260684284660",
                           "name": "Borrow GHO-USDT0 from Fluid GHO-USDT0/GHO-USDT0 Vault",
-                          "listedApr": 0.013652791853755803,
-                          "appliedApr": 0.013652791853755803,
+                          "listedApr": 0.013653092880097664,
+                          "appliedApr": 0.013653092880097664,
                           "note": "Applies only to this vault and this lending side. The same APR on each pool leg allocates one side-wide reward budget across its USD value; it does not duplicate the pool reward."
                         }
                       ]
                     },
                     "merklSupplyRate": {
-                      "apr": 0.012472663259126682,
+                      "apr": 0.012472502754690046,
                       "estimated": true,
                       "note": "Estimated Merkl incentives, paid separately from protocol interest. Headline rates, eligibility, caps and future earnings can change.",
                       "components": [
                         {
                           "id": "1682296689571099010",
                           "name": "Lend GHO-USDT0 on Fluid GHO-USDT0/GHO-USDT0 Vault",
-                          "listedApr": 0.012472663259126682,
-                          "appliedApr": 0.012472663259126682,
+                          "listedApr": 0.012472502754690046,
+                          "appliedApr": 0.012472502754690046,
                           "note": "Applies only to this vault and this lending side. The same APR on each pool leg allocates one side-wide reward budget across its USD value; it does not duplicate the pool reward."
                         }
                       ]
@@ -856,7 +856,7 @@
                   "Smart collateral/debt changes with the pool composition. A single underlying token’s dollar liquidation price is not reliable, so the actual oracle-ratio boundary is shown instead. Pool share quotes use 10^18 raw share units."
                 ],
                 "liquidationQuote": {
-                  "current": 1.0146591429216831,
+                  "current": 1.014651277832319,
                   "threshold": 0.9793954544717122,
                   "unit": "debt pool share per collateral pool share"
                 }
