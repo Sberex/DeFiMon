@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-20T13:13:20.364Z",
+  "updatedAt": "2026-11-20T13:23:39.489Z",
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
@@ -1357,16 +1357,16 @@
           "protocolId": "morpho",
           "protocolName": "Morpho",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-20T13:13:20.364Z",
-          "blockNumber": "26456529",
+          "checkedAt": "2026-11-20T13:23:39.489Z",
+          "blockNumber": "26456580",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-20T13:13:20.364Z",
-              "blockNumber": "26456529",
-              "apr": 0.22619106940270242,
-              "netValueUsd": 29551.971929672232,
-              "monthlyNplUsd": 557.0326778109338,
+              "snapshotAt": "2026-11-20T13:23:39.489Z",
+              "blockNumber": "26456580",
+              "apr": 0.22849482400744106,
+              "netValueUsd": 29562.807388951158,
+              "monthlyNplUsd": 562.912372625356,
               "verification": "verified",
               "position": {
                 "collateralOracleChecks": [
@@ -1390,39 +1390,39 @@
                 "id": "morpho-market-0x1e9d614631a7df0ec07fb05b2c8cb2491575fd1a63a33bf187a6afb295a4fc64",
                 "label": "Morpho · PT-reUSD-10DEC2026 / USDC · 0x1e9d6146…",
                 "suppliedUsd": 179709.9429833016,
-                "debtUsd": 150157.97105362936,
-                "healthFactor": 1.0963549094739558,
+                "debtUsd": 150147.13559435043,
+                "healthFactor": 1.0963551045993682,
                 "risk": "high",
                 "assets": [
                   {
                     "supplyRate": {
-                      "apr": 0.0856041574463834,
+                      "apr": 0.08480254062366913,
                       "note": "Current Morpho market APR after its fee; excludes reward incentives and the underlying token’s intrinsic yield."
                     },
                     "borrowRate": {
-                      "apr": 0.09511105785696,
+                      "apr": 0.09465861575304,
                       "note": "Current Morpho IRM borrowing APR at the accrued market state; excludes reward incentives."
                     },
                     "symbol": "USDC",
                     "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                     "supplied": 0,
-                    "borrowed": 150164.873352,
-                    "priceUsd": 0.9999540352000001,
+                    "borrowed": 150165.155413,
+                    "priceUsd": 0.99988,
                     "collateral": false,
                     "liquidationThreshold": null,
                     "liquidationPriceUsd": null
                   },
                   {
                     "supplyRate": {
-                      "apr": 0.11666619697411407,
+                      "apr": 0.11667506058970689,
                       "estimated": true,
                       "pendlePt": {
                         "network": "ethereum",
                         "marketAddress": "0x13285bcbc27f92b47b4edb99d744c07b48c977c0",
                         "expiry": 1796860800,
-                        "updatedAt": "2026-11-20T13:09:00.000Z"
+                        "updatedAt": "2026-11-20T13:19:00.000Z"
                       },
-                      "note": "Pendle Implied APY is used directly as Supply APR for this PT collateral, as requested, without converting APY to APR. Monthly earnings = supplied value × this rate ÷ 12. This estimates PT price appreciation toward expiry rather than an interest payment. Rate observed 2026-11-20T13:09:00.000Z; expiry 2026-12-10T00:00:00.000Z."
+                      "note": "Pendle Implied APY is used directly as Supply APR for this PT collateral, as requested, without converting APY to APR. Monthly earnings = supplied value × this rate ÷ 12. This estimates PT price appreciation toward expiry rather than an interest payment. Rate observed 2026-11-20T13:19:00.000Z; expiry 2026-12-10T00:00:00.000Z."
                     },
                     "symbol": "PT-reUSD-10DEC2026",
                     "address": "0xeCfaFdC7741323a945A163ed068B5a3C43483957",
@@ -1431,12 +1431,12 @@
                     "priceUsd": 0.9929332965546361,
                     "collateral": true,
                     "liquidationThreshold": 0.915,
-                    "liquidationPriceUsd": 0.906724321828135
+                    "liquidationPriceUsd": 0.906658892238234
                   }
                 ],
                 "liquidationQuote": {
-                  "current": 0.9941373571052861,
-                  "threshold": 0.9067660011460243,
+                  "current": 0.994139401373902,
+                  "threshold": 0.9067677043627576,
                   "unit": "USDC per PT-reUSD-10DEC2026"
                 },
                 "notes": [
