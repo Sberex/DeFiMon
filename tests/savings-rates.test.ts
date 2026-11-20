@@ -211,3 +211,26 @@ it('enriches the reported Hastra PRIME/PYUSD collateral with its exact oracle, e
   const unrelated = structuredClone(protocol); unrelated.positions[0].assets[0].address = configuredTokenRegistry.PRIME.addresses.ethereum!;
   expect((await applyIntrinsicRates([unrelated], 'ethereum', undefined, service.quote))[0].positions[0].assets[0].intrinsicSupplyRate).toBeUndefined();
 });
+
+it('matches configured oracle sources by chain and contract even when both config labels are renamed', async () => {
+  const f = fixture();
+  const registry = { 'Arbitrary edited label': f.registry.reUSD };
+  const sources = { 'A different oracle label': f.source };
+  const q = await createSavingsRateService({ clientFor: () => f.client, registry, sources }).quote('Arbitrary edited label', { network: 'base' });
+  expect(q.apr).toBeCloseTo(.02 * 365 / 30);
+  expect(q.source.oracle).toBe(feed);
+});
+
+it('ignores matching names with different contracts or chains and rejects ambiguous oracle identities', async () => {
+  const f = fixture();
+  const client = { ...f.client, readContract: async () => { throw new Error('No automatic source'); } } as unknown as ChainClient;
+  const other = '0x1111111111111111111111111111111111111111';
+  for (const source of [{ ...f.source, token: other }, { ...f.source, network: 'arbitrum' as const }] satisfies SavingsSource[]) {
+    const q = await createSavingsRateService({ clientFor: () => client, registry: f.registry, sources: { reUSD: source } }).quote('reUSD', { network: 'ethereum' });
+    expect(q.apr).toBeNull();
+    expect(q.source.oracle).not.toBe(feed);
+  }
+  const q = await createSavingsRateService({ clientFor: () => f.client, registry: f.registry, sources: { one: f.source, two: { ...f.source, address: other } } }).quote('reUSD', { network: 'ethereum' });
+  expect(q.apr).toBeNull();
+  expect(q.note).toContain('Multiple configured rate sources');
+});

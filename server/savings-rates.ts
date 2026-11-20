@@ -57,6 +57,7 @@ export async function savingsSnapshot(client: ChainClient, network: NetworkId, n
 export function savingsFailureReason(error: unknown): string {
   // Inspect errors internally; never return provider URLs, keys or raw responses.
   const message = error instanceof Error ? String(error) : '';
+  if (/Ambiguous configured savings-rate sources/.test(message)) return 'Multiple configured rate sources match this asset’s chain and contract. Keep one verified source.';
   if (historicalStateUnavailable(error)) return 'The rate-source provider cannot read the required historical state. Configure an archive RPC for the source network on the server.';
   if (/No verified savings rate source|No canonical token/.test(message)) return 'No verified on-chain savings-rate source is configured for this asset.';
   if (/Invalid oracle observation|changed unit|unit changed|Wrong savings vault underlying/.test(message)) return 'The oracle observations failed the freshness or asset-identity checks.';
@@ -81,8 +82,13 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
   async function discover(group: string, context: Context, fallback = false): Promise<SavingsSource> {
     const token = registry[group];
     if (!token || token.category !== 'Savings stablecoin') throw new Error('Not a configured savings asset');
-    if (sources[group]) {
-      const source = sources[group];
+    // Group names and tickers are editable labels, never asset identities.
+    // A source belongs to this asset only when its exact chain/token pair is
+    // present in the token-matches group resolved from the held contract.
+    const matches = Object.values(sources).filter(source => networkOrder.includes(source.network) && same(token.addresses[source.network] ?? '', source.token));
+    if (matches.length > 1) throw new Error('Ambiguous configured savings-rate sources');
+    if (matches.length === 1) {
+      const source = matches[0];
       if (!networkOrder.includes(source.network) || !isAddress(source.address, { strict: false }) || zero.test(source.address) || !same(token.addresses[source.network] ?? '', source.token)) throw new Error('Savings source identity mismatch');
       if (source.computed && (source.kind !== 'chainlink' || source.tokenGetter !== 'receiptToken' || !source.description || source.decimals === undefined)) throw new Error('Unverified computed oracle');
       if (source.kind !== 'chainlink' && source.kind !== 'erc4626') throw new Error('Unknown savings adapter');
