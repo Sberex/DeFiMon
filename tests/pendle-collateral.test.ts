@@ -70,3 +70,44 @@ it('uses refreshed individual-market APY for PT collateral monthly income when t
   expect(result[0].positions[0].assets[0].supplyRate?.apr).toBe(.1416);
   expect(positionMonthlyInterest(result[0].positions[0]).earnedUsd).toBeCloseTo(990 * .1416 / 12);
 });
+
+it.each(['empty', 'failure'] as const)('sets expired bridged Lista PT to zero with an %s catalog and includes its zero income in NPL', async mode => {
+  const f = fixture(); f.protocols = [f.protocols[0]];
+  f.protocols[0].id = 'lista'; f.protocols[0].name = 'Lista DAO'; f.protocols[0].chain = 'Binance Smart Chain';
+  const token = f.protocols[0].positions[0].assets[0];
+  token.address = '0x7EB92A12a15E8a019A26A8b344F1e59b14cb8Ad3'; token.symbol = 'PT-sUSDE-9APR2026-(PLASMA)'; token.supplyRate = { apr: null, note: 'Previously unavailable' };
+  const expiry = 1775692800n;
+  const client = { getBlock: async () => ({ timestamp: BigInt(now) }), readContract: async ({ address, functionName, blockNumber }: any) => {
+    expect(address).toBe(token.address); expect(functionName).toBe('expiry'); expect(blockNumber).toBe(123n); return expiry;
+  } } as unknown as ChainClient;
+  const catalog = async () => { if (mode === 'failure') throw new Error('private-provider-details'); return []; };
+  const result = await applyPtCollateralRates(f.protocols, client, 'bsc', 123n, catalog);
+  const position = result[0].positions[0], quote = position.assets[0].supplyRate;
+  expect(quote).toMatchObject({ apr: 0, estimated: false, pendlePt: { network: 'bsc', expiry: Number(expiry), marketAddress: null } });
+  expect(quote?.note).toContain('2026-04-09T00:00:00.000Z');
+  expect(positionMonthlyInterest(position)).toEqual({ earnedUsd: 0, paidUsd: 2.5, nplUsd: -2.5 });
+  expect(totalMonthlyInterest(result).nplUsd).toBe(-2.5); expect(JSON.stringify(result)).not.toContain('private-provider-details');
+});
+it('applies the expired PT zero-rate rule to supplied deposits as well as collateral across protocols', async () => {
+  const f = fixture({ expired: true });
+  f.protocols.forEach(p => { p.positions[0].assets[0].collateral = false; p.positions[0].assets[0].intrinsicSupplyRate = { apr: .1, note: '', source: { chain: 'Ethereum', oracle: SY } }; });
+  const result = await applyPtCollateralRates(f.protocols, f.client, 'ethereum', 123n, async () => []);
+  expect(result.every(p => p.positions[0].assets[0].supplyRate?.apr === 0)).toBe(true);
+  expect(result.every(p => p.positions[0].assets[0].intrinsicSupplyRate === undefined)).toBe(true);
+});
+it.each([0n, 2n ** 256n - 1n, BigInt(now + 1), null])('keeps unlisted PT yield unknown when expiry is invalid, future or unreadable: %s', async expiry => {
+  const f = fixture();
+  const client = { getBlock: async () => ({ timestamp: BigInt(now) }), readContract: async () => { if (expiry === null) throw new Error('private-provider'); return expiry; } } as unknown as ChainClient;
+  const result = await applyPtCollateralRates(f.protocols, client, 'ethereum', 123n, async () => []);
+  expect(result[0].positions[0].assets[0].supplyRate?.apr).toBeNull();
+});
+it('does not guess expiry from a past date in a symbol when the contract reports a future maturity', async () => {
+  const f = fixture(); f.protocols[0].positions[0].assets[0].symbol = 'PT-sUSDE-9APR2026-(PLASMA)';
+  const result = await applyPtCollateralRates(f.protocols, f.client, 'ethereum', 123n, async () => []);
+  expect(result[0].positions[0].assets[0].supplyRate?.apr).toBeNull();
+});
+it('preserves protocol lending interest for an active non-collateral PT even if its Implied APY is zero', async () => {
+  const f = fixture({ rate: 0 }); f.protocols.forEach(p => { p.positions[0].assets[0].collateral = false; });
+  const result = await applyPtCollateralRates(f.protocols, f.client, 'ethereum', 123n, f.catalog);
+  expect(result.every(p => p.positions[0].assets[0].supplyRate?.apr === .02)).toBe(true);
+});

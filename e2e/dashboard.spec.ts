@@ -1869,3 +1869,24 @@ test('shows the Lista broker loan for the reported wallet while keeping unrelate
   await expect(page.getByText('Positions could not be fully checked.', { exact: false })).toHaveCount(0);
   await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
 });
+
+test('shows 0% for an expired bridged Lista PT absent from Pendle catalog and calculates total NPL', async ({ page }) => {
+  const { applyPtCollateralRates } = await import('../server/pendle-collateral');
+  const fixture = structuredClone(example); fixture.chain = 'Binance Smart Chain'; fixture.wallets = [];
+  const pt = '0x7EB92A12a15E8a019A26A8b344F1e59b14cb8Ad3', usd1 = '0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d';
+  const position = { ...fixture.protocols[0].positions[0], id: 'lista-market-0xc1264ae84203b5660478bba5cfe15d9f579aa98402fb073bff65c31040f12f1a', label: 'Lista DAO · expired PT-sUSDE / USD1', suppliedUsd: 1000, debtUsd: 500, healthFactor: 1.8, risk: 'lower' as const, assets: [
+    { address: pt, symbol: 'PT-sUSDE-9APR2026-(PLASMA)', supplied: 1000, borrowed: 0, priceUsd: 1, collateral: true, liquidationThreshold: .9, liquidationPriceUsd: .56, supplyRate: { apr: null, note: 'Previously unavailable' } },
+    { address: usd1, symbol: 'USD1', supplied: 0, borrowed: 500, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, borrowRate: { apr: .06, note: 'Current borrowing APR' } },
+  ] };
+  const client = { getBlock: async () => ({ timestamp: BigInt(Date.parse('2026-11-20T00:00:00Z') / 1000) }), readContract: async () => 1775692800n } as unknown as import('../server/rpc').ChainClient;
+  fixture.protocols = await applyPtCollateralRates([{ id: 'lista', name: 'Lista DAO', chain: 'Binance Smart Chain', status: 'ok', balanceDiscoveryComplete: true, coverage: 'Lista Moolah', positions: [position] }], client, 'bsc', 123n, async () => []);
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => route.fulfill({ json: { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.lista'), row = card.locator('tbody tr').filter({ hasText: 'PT-sUSDE-9APR2026-(PLASMA)' });
+  await expect(row.locator('.asset-rate').first()).toHaveText(/^0\.00%/);
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ -$2.50');
+  await expect(page.locator('.portfolio-apr > strong')).toHaveText('≈ -6.00%');
+  await expect(card.locator('.position-monthly-npl strong')).toHaveText('≈ -$2.50');
+  await expect(page.getByText('Supply APR unavailable', { exact: false })).toHaveCount(0);
+});
