@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-21T17:17:19.068Z",
+  "updatedAt": "2026-11-21T17:37:35.404Z",
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
@@ -10,25 +10,25 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Arbitrum",
-          "checkedAt": "2026-11-21T17:17:15.843Z",
-          "blockNumber": "526296226",
+          "checkedAt": "2026-11-21T17:37:32.994Z",
+          "blockNumber": "526300328",
           "complete": false,
           "positions": [
             {
-              "snapshotAt": "2026-11-21T14:58:01.611Z",
-              "blockNumber": "526268274",
-              "apr": 0.16421555958691855,
-              "netValueUsd": 27210.996097866126,
-              "monthlyNplUsd": 372.3724125940453,
-              "verification": "unavailable",
+              "snapshotAt": "2026-11-21T17:37:32.994Z",
+              "blockNumber": "526300328",
+              "apr": 0.16423011288790454,
+              "netValueUsd": 27208.048172782117,
+              "monthlyNplUsd": 372.3650685729626,
+              "verification": "verified",
               "position": {
                 "marketAddress": "0x1B4EC865915872AEc7A30423fdA2584C9fa894C5",
                 "liquidationModel": "linear",
                 "id": "fluid-nft-13655",
                 "label": "Vault 65 · sUSDai / USDC · NFT 13655",
-                "suppliedUsd": 226464.75908513824,
-                "debtUsd": 199253.76298727212,
-                "healthFactor": 1.02290807521484,
+                "suppliedUsd": 226474.58269737996,
+                "debtUsd": 199266.53452459784,
+                "healthFactor": 1.022886883208586,
                 "risk": "high",
                 "assets": [
                   {
@@ -36,10 +36,10 @@
                     "address": "0x0B2b2B2076d95dda7817e785989fE353fe955ef9",
                     "supplied": 200873.0000004403,
                     "borrowed": 0,
-                    "priceUsd": 1.1274026827131662,
+                    "priceUsd": 1.1274515873058277,
                     "collateral": true,
                     "liquidationThreshold": 0.9,
-                    "liquidationPriceUsd": 1.1021544457710721,
+                    "liquidationPriceUsd": 1.1022250903924429,
                     "supplyRate": {
                       "apr": 0,
                       "note": "Current Fluid vault APR after the vault’s rate magnifier/fee adjustment."
@@ -55,7 +55,7 @@
                         "kind": "chainlink",
                         "label": "sUSDai/USDai raw exchange-rate oracle",
                         "windowDays": 30,
-                        "blockNumber": "26464217",
+                        "blockNumber": "26465016",
                         "startRound": "18446744073709551741",
                         "endRound": "18446744073709551771",
                         "startTimestamp": 1792644971,
@@ -69,8 +69,8 @@
                     "symbol": "USDC",
                     "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
                     "supplied": 0,
-                    "borrowed": 199291.002504,
-                    "priceUsd": 0.99981314,
+                    "borrowed": 199295.131383,
+                    "priceUsd": 0.99985651,
                     "collateral": false,
                     "liquidationThreshold": null,
                     "liquidationPriceUsd": null,
@@ -88,7 +88,7 @@
                 ],
                 "liquidationQuote": {
                   "current": 1.127613388550951,
-                  "threshold": 1.1023604328415528,
+                  "threshold": 1.1023832713680515,
                   "unit": "USDC per sUSDai"
                 }
               }
@@ -99,16 +99,16 @@
           "protocolId": "morpho",
           "protocolName": "Morpho",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-21T17:17:19.068Z",
-          "blockNumber": "26464914",
+          "checkedAt": "2026-11-21T17:37:35.404Z",
+          "blockNumber": "26465015",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-21T17:17:19.068Z",
-              "blockNumber": "26464914",
-              "apr": 0.2708867188694458,
-              "netValueUsd": 63179.43429826066,
-              "monthlyNplUsd": 1426.2058047569633,
+              "snapshotAt": "2026-11-21T17:37:35.404Z",
+              "blockNumber": "26465015",
+              "apr": 0.27097530422682875,
+              "netValueUsd": 63157.53385458462,
+              "monthlyNplUsd": 1426.177662538525,
               "verification": "verified",
               "position": {
                 "collateralOracleChecks": [
@@ -131,25 +131,25 @@
                 },
                 "id": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
                 "label": "Morpho · sUSDai / USDC · 0xa88715ad…",
-                "suppliedUsd": 354581.3887110458,
-                "debtUsd": 291401.9544127851,
-                "healthFactor": 1.0523505065595953,
+                "suppliedUsd": 354593.495795312,
+                "debtUsd": 291435.9619407274,
+                "healthFactor": 1.05234893812003,
                 "risk": "high",
                 "assets": [
                   {
                     "supplyRate": {
-                      "apr": 0.034555515337282884,
+                      "apr": 0.03455551510192228,
                       "note": "Current Morpho market APR after its fee; excludes reward incentives and the underlying token’s intrinsic yield."
                     },
                     "borrowRate": {
-                      "apr": 0.038400270478704,
+                      "apr": 0.038400264486864,
                       "note": "Current Morpho IRM borrowing APR at the accrued market state; excludes reward incentives."
                     },
                     "symbol": "USDC",
                     "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                     "supplied": 0,
-                    "borrowed": 291445.128074,
-                    "priceUsd": 0.9998518635000001,
+                    "borrowed": 291445.562449,
+                    "priceUsd": 0.999967059,
                     "collateral": false,
                     "liquidationThreshold": null,
                     "liquidationPriceUsd": null
@@ -163,10 +163,10 @@
                     "address": "0x0B2b2B2076d95dda7817e785989fE353fe955ef9",
                     "supplied": 316292.74271299987,
                     "borrowed": 0,
-                    "priceUsd": 1.1210544562914255,
+                    "priceUsd": 1.121092734388363,
                     "collateral": true,
                     "liquidationThreshold": 0.86,
-                    "liquidationPriceUsd": 1.0712844024460917,
+                    "liquidationPriceUsd": 1.0714094247175576,
                     "intrinsicSupplyRate": {
                       "apr": 0.07982478614415713,
                       "estimated": true,
@@ -177,7 +177,7 @@
                         "kind": "chainlink",
                         "label": "sUSDai/USDai raw exchange-rate oracle",
                         "windowDays": 30,
-                        "blockNumber": "26464916",
+                        "blockNumber": "26465016",
                         "startRound": "18446744073709551741",
                         "endRound": "18446744073709551771",
                         "startTimestamp": 1792644971,
@@ -190,7 +190,7 @@
                 ],
                 "liquidationQuote": {
                   "current": 1.1275337124870415,
-                  "threshold": 1.0714431222801752,
+                  "threshold": 1.071444719178052,
                   "unit": "USDC per sUSDai"
                 },
                 "notes": [
@@ -207,34 +207,34 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-21T17:17:15.841Z",
-          "blockNumber": "38336368",
+          "checkedAt": "2026-11-21T17:37:31.795Z",
+          "blockNumber": "38337584",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-21T17:17:15.841Z",
-              "blockNumber": "38336368",
-              "apr": 0.21220000000000003,
-              "netValueUsd": 15.40117147923456,
-              "monthlyNplUsd": 0.2723440489911311,
+              "snapshotAt": "2026-11-21T17:37:31.795Z",
+              "blockNumber": "38337584",
+              "apr": 0.25670000000000004,
+              "netValueUsd": 15.401314203695737,
+              "monthlyNplUsd": 0.329459779674058,
               "verification": "verified",
               "position": {
                 "marketAddress": "0x96D7478219bFCc9B5d25F08ccb983815ee9D05e2",
                 "id": "fluid-lending-0x96D7478219bFCc9B5d25F08ccb983815ee9D05e2",
                 "label": "GHO lending deposit",
-                "suppliedUsd": 15.40117147923456,
+                "suppliedUsd": 15.401314203695737,
                 "debtUsd": 0,
                 "healthFactor": null,
                 "risk": "no-debt",
                 "assets": [
                   {
                     "supplyRate": {
-                      "apr": 0.2122,
+                      "apr": 0.2567,
                       "note": "Current Fluid lending APR including the underlying-token streaming bonus. Legacy bonus units are converted separately from liquidity-rate units."
                     },
                     "symbol": "GHO",
                     "address": "0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3",
-                    "supplied": 15.40117147923456,
+                    "supplied": 15.401314203695737,
                     "borrowed": 0,
                     "priceUsd": 1,
                     "collateral": false,
