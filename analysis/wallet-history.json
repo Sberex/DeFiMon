@@ -19,6 +19,11 @@
       ]
     },
     {
+      "address": "0xc6dd9976066f3364b4d6a72cd4f1fa0468327aa7",
+      "lastCheckedAt": "2026-11-21T12:51:33.720Z",
+      "manualLiquidationPrices": []
+    },
+    {
       "address": "0xe16be042f9433779909a972669be3a2003956348",
       "lastCheckedAt": "2026-11-21T10:47:57.031Z",
       "manualLiquidationPrices": []
