@@ -755,8 +755,9 @@ test('shows Fluid NPL separately for each vault and lending deposit, and keeps u
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(vaults.nth(0).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: ≈ $1.46 / month');
   await expect(vaults.nth(1).locator('.protocol-monthly-npl')).toHaveText('Monthly NPL: Unavailable');
-  await expect(total.locator('strong')).toHaveText('Unavailable');
-  await expect(total.getByText(/A complete total is unavailable/)).toBeVisible();
+  await expect(total.locator('strong')).toHaveText('≈ $41.46');
+  await expect(total).toContainText('partial');
+  await expect(total.getByText(/Unknown components are excluded/)).toBeVisible();
 });
 
 test('shows Merkl unclaimed and pending balances by network without changing net value or NPL', async ({ page }) => {
@@ -966,7 +967,7 @@ test('portfolio APR uses displayed net value including wallet tokens and matches
   await page.locator('.summary-grid').screenshot({ path: '/tmp/defimon-portfolio-apr-mobile.png' });
 });
 
-test('portfolio APR remains unavailable when net value is zero or total NPL cannot be checked', async ({ page }) => {
+test('portfolio APR guards zero net value and uses known partial NPL when a borrowing rate is missing', async ({ page }) => {
   let reads = 0;
   await page.route('**/api/portfolio/*', route => {
     reads++; const fixture = structuredClone(example); fixture.protocols = [fixture.protocols[0]];
@@ -981,8 +982,9 @@ test('portfolio APR remains unavailable when net value is zero or total NPL cann
   const apr = page.getByRole('region', { name: 'Portfolio APR', exact: true });
   await expect(apr.locator('strong')).toHaveText('Unavailable');
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('Unavailable');
-  await expect(apr.locator('strong')).toHaveText('Unavailable');
+  await expect(page.getByRole('region', { name: 'Total monthly NPL', exact: true }).locator('strong')).toHaveText('≈ $87.50');
+  await expect(apr.locator('strong')).toHaveText('≈ 8.75%');
+  await expect(apr).toContainText('partial');
 });
 
 
