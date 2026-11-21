@@ -101,10 +101,11 @@ function PositionView({ position: p, protocol, chain, fluid = false, lookupSnaps
   const [prices, setPrices] = useState<Record<string, string>>(saved.prices);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
-  const [calculated, setCalculated] = useState<ReturnType<typeof calculateLiquidation> | null>(null);
-  if (snapshot !== lookupSnapshot) { setSnapshot(lookupSnapshot); setPrices(saved.prices); setCalculated(null); setSaveMessage(''); }
-  const multiple = collateralAssets(p).length > 1 && p.debtUsd !== 0;
   const scenario = liquidationScenario(p);
+  const restoredCalculation = saved.updatedAt && scenario.target && scenario.others.every(a => Object.hasOwn(saved.prices, a.address)) ? calculateLiquidation(p, saved.prices) : null;
+  const [calculated, setCalculated] = useState<ReturnType<typeof calculateLiquidation> | null>(restoredCalculation);
+  if (snapshot !== lookupSnapshot) { setSnapshot(lookupSnapshot); setPrices(saved.prices); setCalculated(restoredCalculation); setSaveMessage(''); }
+  const multiple = collateralAssets(p).length > 1 && p.debtUsd !== 0;
   const netValue = p.suppliedUsd === null || p.debtUsd === null ? null : p.suppliedUsd - p.debtUsd;
   const monthly = positionMonthlyInterest(p);
   const netApr = annualizedNplApr(monthly.nplUsd, netValue);

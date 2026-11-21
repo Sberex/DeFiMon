@@ -1947,10 +1947,11 @@ test('restores saved collateral assumptions and saves only on Calculate across c
     { network: 'ethereum', protocol: 'aave-v3', positionId: p.id, updatedAt: '2026-11-21T09:00:00.000Z', pricesUsd: { [btc]: 30000, [usdt]: .8 } },
     { network: 'arbitrum', protocol: 'aave-v3', positionId: p.id, updatedAt: '2026-11-21T10:00:00.000Z', pricesUsd: { [btc]: 40000, [usdt]: .9 } },
   ] } };
-  let writes = 0, fail = false;
+  let writes = 0, fail = false, debtUsd = 30000;
   await page.route('**/api/portfolio/*', route => {
     const wallet = new URL(route.request().url()).pathname.split('/').at(-1)!.toLowerCase();
-    return route.fulfill({ json: { ...fixture, address: wallet, walletHistory: { wallet: entries[wallet] ?? { address: wallet, lastCheckedAt: '2026-11-21T10:00:00.000Z', manualLiquidationPrices: [] }, persistence: { mode: 'github', synced: true } } } });
+    const current = structuredClone(fixture); current.protocols[0].positions[0].debtUsd = debtUsd;
+    return route.fulfill({ json: { ...current, address: wallet, walletHistory: { wallet: entries[wallet] ?? { address: wallet, lastCheckedAt: '2026-11-21T10:00:00.000Z', manualLiquidationPrices: [] }, persistence: { mode: 'github', synced: true } } } });
   });
   await page.route('**/api/wallet-history/*/liquidation-prices', route => {
     writes++;
@@ -1966,15 +1967,17 @@ test('restores saved collateral assumptions and saves only on Calculate across c
   const card = page.locator('article.aave-v3');
   await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('30000');
   await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('0.8');
-  await expect(card.locator('.calculated-price strong')).toHaveText('—'); expect(writes).toBe(0);
+  await expect(card.locator('.calculated-price strong')).toHaveText('$993.75'); expect(writes).toBe(0);
   await card.getByLabel('USDT liquidation price (USD)').fill('0'); expect(writes).toBe(0);
+  await expect(card.locator('.calculated-price strong')).toHaveText('—');
   await card.getByRole('button', { name: 'Calculate', exact: true }).click();
   await expect(card.locator('.liquidation-save-message')).toHaveText('Collateral price assumptions saved.');
   expect(writes).toBe(1); expect(entries[address].manualLiquidationPrices[0].pricesUsd[usdt]).toBe(0);
   await expect(card.locator('.calculated-price strong')).toHaveText('$2,343.75');
+  debtUsd = 32000;
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('0');
-  await expect(card.locator('.calculated-price strong')).toHaveText('—'); expect(writes).toBe(1);
+  await expect(card.locator('.calculated-price strong')).toHaveText('$2,593.75'); expect(writes).toBe(1);
   await card.getByLabel('USDT liquidation price (USD)').fill('invalid'); await card.getByRole('button', { name: 'Calculate', exact: true }).click(); expect(writes).toBe(1);
   await card.getByLabel('USDT liquidation price (USD)').fill('0.7'); fail = true;
   await card.getByRole('button', { name: 'Calculate', exact: true }).click();
@@ -1983,4 +1986,10 @@ test('restores saved collateral assumptions and saves only on Calculate across c
   await page.getByLabel('Wallet address', { exact: true }).fill(secondWallet); await page.getByRole('button', { name: 'Check wallet' }).click();
   await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('');
   await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('');
+  await expect(card.locator('.calculated-price strong')).toHaveText('—');
+  entries[secondWallet] = { address: secondWallet, lastCheckedAt: '2026-11-21T12:00:00.000Z', manualLiquidationPrices: [{ network: 'ethereum', protocol: 'aave-v3', positionId: p.id, updatedAt: '2026-11-21T12:00:00.000Z', pricesUsd: { [btc]: 30000 } }] };
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('30000');
+  await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('');
+  await expect(card.locator('.calculated-price strong')).toHaveText('—');
 });
