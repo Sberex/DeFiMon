@@ -1933,3 +1933,54 @@ test('restores address NPL and APR with verified mHYPER growth and non-yield iUS
   await expect(other.locator('tbody tr').filter({ hasText: 'iUSD' }).first()).toContainText('Stablecoin');
   await expect(section.getByText('iUSD', { exact: true })).toHaveCount(0);
 });
+
+test('restores saved collateral assumptions and saves only on Calculate across checks, edits and wallet changes', async ({ page }) => {
+  const fixture = structuredClone(example);
+  const address = fixture.address.toLowerCase(), btc = '0x1111111111111111111111111111111111111111', usdt = '0x2222222222222222222222222222222222222222';
+  const secondWallet = '0x3333333333333333333333333333333333333333';
+  const protocol = fixture.protocols.find(p => p.id === 'aave-v3')!; fixture.protocols = [protocol];
+  const p = protocol.positions[0]; p.debtUsd = 30000; p.suppliedUsd = 70000; p.healthFactor = 1.8;
+  const eth = p.assets[0]; eth.liquidationThreshold = .8;
+  p.assets.push({ ...eth, address: btc, symbol: 'WBTC', supplied: .5, priceUsd: 50000, liquidationThreshold: .75 });
+  p.assets.push({ ...eth, address: usdt, symbol: 'USDT', supplied: 15000, priceUsd: 1, liquidationThreshold: .9 });
+  const entries: Record<string, any> = { [address]: { address, lastCheckedAt: '2026-11-21T10:00:00.000Z', manualLiquidationPrices: [
+    { network: 'ethereum', protocol: 'aave-v3', positionId: p.id, updatedAt: '2026-11-21T09:00:00.000Z', pricesUsd: { [btc]: 30000, [usdt]: .8 } },
+    { network: 'arbitrum', protocol: 'aave-v3', positionId: p.id, updatedAt: '2026-11-21T10:00:00.000Z', pricesUsd: { [btc]: 40000, [usdt]: .9 } },
+  ] } };
+  let writes = 0, fail = false;
+  await page.route('**/api/portfolio/*', route => {
+    const wallet = new URL(route.request().url()).pathname.split('/').at(-1)!.toLowerCase();
+    return route.fulfill({ json: { ...fixture, address: wallet, walletHistory: { wallet: entries[wallet] ?? { address: wallet, lastCheckedAt: '2026-11-21T10:00:00.000Z', manualLiquidationPrices: [] }, persistence: { mode: 'github', synced: true } } } });
+  });
+  await page.route('**/api/wallet-history/*/liquidation-prices', route => {
+    writes++;
+    if (fail) return route.fulfill({ status: 503, json: { error: 'Unavailable' } });
+    const wallet = new URL(route.request().url()).pathname.split('/').at(-2)!.toLowerCase();
+    const input = route.request().postDataJSON();
+    expect(input).toMatchObject({ network: 'ethereum', protocol: 'aave-v3', positionId: p.id });
+    expect(input.pricesUsd).not.toHaveProperty(eth.address.toLowerCase());
+    const entry = entries[wallet]; entry.manualLiquidationPrices[0] = { ...input, updatedAt: '2026-11-21T11:00:00.000Z' };
+    return route.fulfill({ json: { wallet: entry, persistence: { mode: 'github', synced: true } } });
+  });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const card = page.locator('article.aave-v3');
+  await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('30000');
+  await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('0.8');
+  await expect(card.locator('.calculated-price strong')).toHaveText('—'); expect(writes).toBe(0);
+  await card.getByLabel('USDT liquidation price (USD)').fill('0'); expect(writes).toBe(0);
+  await card.getByRole('button', { name: 'Calculate', exact: true }).click();
+  await expect(card.locator('.liquidation-save-message')).toHaveText('Collateral price assumptions saved.');
+  expect(writes).toBe(1); expect(entries[address].manualLiquidationPrices[0].pricesUsd[usdt]).toBe(0);
+  await expect(card.locator('.calculated-price strong')).toHaveText('$2,343.75');
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('0');
+  await expect(card.locator('.calculated-price strong')).toHaveText('—'); expect(writes).toBe(1);
+  await card.getByLabel('USDT liquidation price (USD)').fill('invalid'); await card.getByRole('button', { name: 'Calculate', exact: true }).click(); expect(writes).toBe(1);
+  await card.getByLabel('USDT liquidation price (USD)').fill('0.7'); fail = true;
+  await card.getByRole('button', { name: 'Calculate', exact: true }).click();
+  await expect(card.locator('.liquidation-save-message')).toContainText('could not be saved');
+  await expect(card.locator('.calculated-price strong')).not.toHaveText('—');
+  await page.getByLabel('Wallet address', { exact: true }).fill(secondWallet); await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('');
+  await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('');
+});

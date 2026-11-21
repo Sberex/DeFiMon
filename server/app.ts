@@ -1,3 +1,5 @@
+import type { WalletHistoryStore } from './wallet-history-store.js';
+import { parseManualPriceInput } from '../src/wallet-history.js';
 import type { TestCasesStore } from './test-cases.js';
 import type { CookbookStore } from './cookbook-store.js';
 import { emptyCookbook } from '../src/cookbook.js';
@@ -12,7 +14,7 @@ import type { ExtraTokens, MerklRewards, NetworkId, Portfolio } from '../src/typ
 import { isNetworkId } from '../src/networks.js';
 import { readMerklRewards, unavailableMerkl } from './merkl.js';
 import { networks } from './networks.js';
-export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore) {
+export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore, history?: WalletHistoryStore) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
@@ -60,6 +62,29 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     catch { res.status(503).json({ error: 'Market search is unavailable. Current wallet balances are unchanged.' }); }
     finally { activeMarkets--; }
   });
+  let activeHistoryWrites = 0;
+  const validHistoryWallet = (address: string) => isAddress(address, { strict: true }) && !/^0x0{40}$/i.test(address);
+  app.get('/api/wallet-history/:address', async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!validHistoryWallet(req.params.address) || Object.keys(req.query).length) { res.status(400).json({ error: 'Enter a valid wallet address without extra parameters.' }); return; }
+    if (!history) { res.status(503).json({ error: 'Wallet history is not configured on this server.' }); return; }
+    try { res.json(await history.readWallet(getAddress(req.params.address))); }
+    catch { res.status(503).json({ error: 'Saved wallet parameters are unavailable. Existing records have not been replaced.' }); }
+  });
+  app.post('/api/wallet-history/:address/liquidation-prices', express.json({ limit: '16kb' }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    let input;
+    try {
+      if (!validHistoryWallet(req.params.address) || Object.keys(req.query).length) throw new Error();
+      input = parseManualPriceInput(req.body);
+    } catch { res.status(400).json({ error: 'Provide a valid wallet, network, protocol, position ID and collateral contract prices in USD (zero or greater).' }); return; }
+    if (!history) { res.status(503).json({ error: 'Wallet history is not configured on this server.' }); return; }
+    if (activeHistoryWrites >= 2) { res.setHeader('Retry-After', '5'); res.status(429).json({ error: 'Saving prices is busy. Press Calculate again shortly.' }); return; }
+    activeHistoryWrites++;
+    try { res.json(await history.savePrices(getAddress(req.params.address), input)); }
+    catch { res.status(503).json({ error: 'Collateral price assumptions could not be saved. Your calculation is still available; press Calculate to retry.' }); }
+    finally { activeHistoryWrites--; }
+  });
   app.get('/api/portfolio/:address', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const network = req.query.chain ?? 'ethereum';
@@ -85,6 +110,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     }
     if (active >= 5) { res.setHeader('Retry-After', '10'); res.status(429).json({ error: 'The monitor is busy. Please try again shortly.' }); return; }
     active++;
+    const historySnapshot = history?.recordCheck(getAddress(req.params.address)).catch(() => ({ wallet: null, persistence: { mode: 'github' as const, synced: false, message: 'Wallet history could not be loaded or saved. Existing records have not been replaced.' } }));
     try {
       const rewardsSnapshot = cookbook ? rewardsFor(getAddress(req.params.address)) : null;
       const portfolio = network === 'all' ? await getCombinedPortfolio(req.params.address as Address, load, extraTokens) : await load(req.params.address as Address, network, extraTokens);
@@ -96,13 +122,14 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
         try { await testCases.record(portfolio); }
         catch { res.setHeader('X-Test-Cases-Save', 'unavailable'); }
       }
-      res.json(portfolio);
+      const saved = await historySnapshot;
+      res.json(saved ? { ...portfolio, walletHistory: saved } : portfolio);
     }
     catch {
       if (network === 'all') { res.status(503).json({ error: 'Could not complete the wallet lookup. Please refresh and try again.' }); return; }
       const config = networks[network];
       res.status(503).json({ error: process.env[config.rpcVariable] || config.defaultRpc ? `${config.name} data is unavailable. Check the server’s mainnet provider connection and try again.` : `Live data needs an ${config.name} provider connection. Set ${config.rpcVariable} on the server; no wallet connection is needed.` });
-    } finally { active--; }
+    } finally { await historySnapshot; active--; }
   });
   return app;
 }

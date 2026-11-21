@@ -65,6 +65,7 @@ export interface ProtocolResult {
   chain?: ChainName;
 }
 export interface Portfolio {
+  walletHistory?: import('./wallet-history').WalletHistoryResponse;
   address: string; chain: ChainName | 'Ethereum + Plasma' | 'Ethereum + Plasma + Arbitrum' | 'Ethereum + Plasma + Arbitrum + Base' | 'Ethereum + Plasma + Arbitrum + Base + Binance Smart Chain'; blockNumber: string | null; updatedAt: string;
   protocols: ProtocolResult[];
   wallets?: WalletBalances[];

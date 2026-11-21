@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-// Browsers on GitHub Pages need permission to read this public, read-only API.
+// Browsers on GitHub Pages need permission to read this public dashboard API.
 // This does not authenticate clients; provider secrets always stay on the server.
 export const apiCors: RequestHandler = (req, res, next) => {
   const origin = req.get('Origin');
