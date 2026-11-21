@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-21T12:52:21.031Z",
+  "updatedAt": "2026-11-21T14:57:07.975Z",
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
@@ -10,8 +10,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Arbitrum",
-          "checkedAt": "2026-11-21T11:09:16.628Z",
-          "blockNumber": "526219868",
+          "checkedAt": "2026-11-21T14:57:04.684Z",
+          "blockNumber": "526268075",
           "complete": false,
           "positions": [
             {
@@ -99,16 +99,16 @@
           "protocolId": "morpho",
           "protocolName": "Morpho",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-21T11:09:18.561Z",
-          "blockNumber": "26463084",
+          "checkedAt": "2026-11-21T14:57:07.975Z",
+          "blockNumber": "26464215",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-21T11:09:18.561Z",
-              "blockNumber": "26463084",
-              "apr": 0.2699341672451429,
-              "netValueUsd": 38278.726401948225,
-              "monthlyNplUsd": 861.06134454288,
+              "snapshotAt": "2026-11-21T14:57:07.975Z",
+              "blockNumber": "26464215",
+              "apr": 0.27070732764262356,
+              "netValueUsd": 63242.249406246585,
+              "monthlyNplUsd": 1426.6783609061092,
               "verification": "verified",
               "position": {
                 "collateralOracleChecks": [
@@ -131,25 +131,25 @@
                 },
                 "id": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
                 "label": "Morpho · sUSDai / USDC · 0xa88715ad…",
-                "suppliedUsd": 213455.1890466739,
-                "debtUsd": 175176.4626447257,
-                "healthFactor": 1.0526216234779164,
+                "suppliedUsd": 354660.34052424727,
+                "debtUsd": 291418.0911180007,
+                "healthFactor": 1.0523612858368592,
                 "risk": "high",
                 "assets": [
                   {
                     "supplyRate": {
-                      "apr": 0.03426208117746232,
+                      "apr": 0.03455551690390947,
                       "note": "Current Morpho market APR after its fee; excludes reward incentives and the underlying token’s intrinsic yield."
                     },
                     "borrowRate": {
-                      "apr": 0.038282989513824,
+                      "apr": 0.038400311601647995,
                       "note": "Current Morpho IRM borrowing APR at the accrued market state; excludes reward incentives."
                     },
                     "symbol": "USDC",
                     "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                     "supplied": 0,
-                    "borrowed": 175197.056831,
-                    "priceUsd": 0.9998824513000001,
+                    "borrowed": 291442.142818,
+                    "priceUsd": 0.9999174734999999,
                     "collateral": false,
                     "liquidationThreshold": null,
                     "liquidationPriceUsd": null
@@ -161,12 +161,12 @@
                     },
                     "symbol": "sUSDai",
                     "address": "0x0B2b2B2076d95dda7817e785989fE353fe955ef9",
-                    "supplied": 190182.74271299987,
+                    "supplied": 316292.74271299987,
                     "borrowed": 0,
-                    "priceUsd": 1.1223688648175294,
+                    "priceUsd": 1.1213040725568013,
                     "collateral": true,
                     "liquidationThreshold": 0.86,
-                    "liquidationPriceUsd": 1.0710412433276677,
+                    "liquidationPriceUsd": 1.071343726003613,
                     "intrinsicSupplyRate": {
                       "apr": 0.07982478614415713,
                       "estimated": true,
@@ -177,7 +177,7 @@
                         "kind": "chainlink",
                         "label": "sUSDai/USDai raw exchange-rate oracle",
                         "windowDays": 30,
-                        "blockNumber": "26463072",
+                        "blockNumber": "26464217",
                         "startRound": "18446744073709551741",
                         "endRound": "18446744073709551771",
                         "startTimestamp": 1792644971,
@@ -190,7 +190,7 @@
                 ],
                 "liquidationQuote": {
                   "current": 1.1275337124870415,
-                  "threshold": 1.0711671576345303,
+                  "threshold": 1.0714321475487376,
                   "unit": "USDC per sUSDai"
                 },
                 "notes": [
@@ -207,48 +207,10 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-21T11:09:16.631Z",
-          "blockNumber": "38314296",
+          "checkedAt": "2026-11-21T14:57:04.480Z",
+          "blockNumber": "38327956",
           "complete": true,
-          "positions": [
-            {
-              "snapshotAt": "2026-11-21T11:09:16.631Z",
-              "blockNumber": "38314296",
-              "apr": 0.3544,
-              "netValueUsd": 15.399092524014003,
-              "monthlyNplUsd": 0.45478653254254686,
-              "verification": "verified",
-              "position": {
-                "marketAddress": "0x96D7478219bFCc9B5d25F08ccb983815ee9D05e2",
-                "id": "fluid-lending-0x96D7478219bFCc9B5d25F08ccb983815ee9D05e2",
-                "label": "GHO lending deposit",
-                "suppliedUsd": 15.399092524014003,
-                "debtUsd": 0,
-                "healthFactor": null,
-                "risk": "no-debt",
-                "assets": [
-                  {
-                    "supplyRate": {
-                      "apr": 0.3544,
-                      "note": "Current Fluid lending APR including the underlying-token streaming bonus. Legacy bonus units are converted separately from liquidity-rate units."
-                    },
-                    "symbol": "GHO",
-                    "address": "0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3",
-                    "supplied": 15.399092524014003,
-                    "borrowed": 0,
-                    "priceUsd": 1,
-                    "collateral": false,
-                    "liquidationThreshold": null,
-                    "liquidationPriceUsd": null
-                  }
-                ],
-                "notes": [
-                  "fToken shares are converted to current underlying assets, including accrued interest. Shares are not added a second time.",
-                  "This is a lending-only deposit. It has no borrowing position or collateral liquidation price."
-                ]
-              }
-            }
-          ]
+          "positions": []
         }
       ]
     },
