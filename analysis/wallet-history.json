@@ -3,7 +3,7 @@
   "wallets": [
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
-      "lastCheckedAt": "2026-11-21T18:07:40.805Z",
+      "lastCheckedAt": "2026-11-21T20:25:37.856Z",
       "manualLiquidationPrices": [
         {
           "network": "ethereum",
