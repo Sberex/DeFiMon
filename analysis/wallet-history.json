@@ -4,7 +4,19 @@
     {
       "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
       "lastCheckedAt": "2026-11-21T10:50:38.330Z",
-      "manualLiquidationPrices": []
+      "manualLiquidationPrices": [
+        {
+          "network": "ethereum",
+          "protocol": "aave-v4",
+          "positionId": "aave-v4-0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+          "pricesUsd": {
+            "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf": 39500,
+            "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": 990,
+            "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9": 49
+          },
+          "updatedAt": "2026-11-21T10:52:04.586Z"
+        }
+      ]
     },
     {
       "address": "0xe16be042f9433779909a972669be3a2003956348",
