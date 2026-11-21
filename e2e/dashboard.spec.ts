@@ -1017,7 +1017,7 @@ test('shows Morpho creator/curator/owner vaults with zero deposits without addin
   await empty.screenshot({ path: '/tmp/defimon-morpho-zero-vault-mobile.png' });
 });
 
-test('explains unavailable total NPL and Portfolio APR with protocol, network, vault and missing rate', async ({ page }) => {
+test('shows partial total NPL and Portfolio APR with protocol, network, vault and missing rate', async ({ page }) => {
   let reads = 0;
   await page.route('**/api/portfolio/*', route => {
     const fixture = structuredClone(example);
@@ -1033,8 +1033,9 @@ test('explains unavailable total NPL and Portfolio APR with protocol, network, v
   const issues = page.getByRole('region', { name: 'Missing interest data', exact: true });
   await expect(issues.getByText(/Fluid · Plasma/)).toBeVisible();
   await expect(issues.getByText(/Borrow APR unavailable/)).toBeVisible();
-  await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
-  await expect(page.locator('.portfolio-apr > strong')).toHaveText('Unavailable');
+  await expect(page.locator('.total-npl > strong')).not.toHaveText('Unavailable');
+  await expect(page.locator('.total-npl')).toContainText('partial');
+  await expect(page.locator('.portfolio-apr > strong')).not.toHaveText('Unavailable');
   await expect(page.locator('.summary.primary > strong')).not.toHaveText('—');
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -1106,7 +1107,8 @@ test('shows Morpho vault supply interest without loan fields and counts own V1/V
   await vaults.first().screenshot({ path: '/tmp/defimon-morpho-vault-interest-mobile.png' });
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(vaults.nth(1).locator('tbody td').last()).toHaveText('Unavailable');
-  await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $24.00');
+  await expect(page.locator('.total-npl')).toContainText('partial');
 });
 
 test('shows supply-only Morpho msY and PT markets as USDC deposits without loan fields or invented collateral', async ({ page }) => {
@@ -1867,7 +1869,8 @@ test('shows the Lista broker loan for the reported wallet while keeping unrelate
   await expect(card.locator('.position-monthly-npl').first()).not.toContainText('Unavailable');
   await expect(card.locator('.position-market-links a').first()).toHaveAttribute('href', `https://lista.org/lending/market/bsc/${market}`);
   await expect(page.getByText('Positions could not be fully checked.', { exact: false })).toHaveCount(0);
-  await expect(page.locator('.total-npl > strong')).toHaveText('Unavailable');
+  await expect(page.locator('.total-npl > strong')).not.toHaveText('Unavailable');
+  await expect(page.locator('.total-npl')).toContainText('partial');
 });
 
 test('shows 0% for an expired bridged Lista PT absent from Pendle catalog and calculates total NPL', async ({ page }) => {
@@ -1992,4 +1995,32 @@ test('restores saved collateral assumptions and saves only on Calculate across c
   await expect(card.getByLabel('WBTC liquidation price (USD)')).toHaveValue('30000');
   await expect(card.getByLabel('USDT liquidation price (USD)')).toHaveValue('');
   await expect(card.locator('.calculated-price strong')).toHaveText('—');
+});
+
+test('shows known partial NPL and APR during wallet and protocol failures and restores complete totals on refresh', async ({ page }) => {
+  let complete = false;
+  await page.route('**/api/portfolio/*', route => {
+    const fixture = structuredClone(example), a = fixture.protocols[0].positions[0].assets[0];
+    fixture.protocols = [{ id: 'aave-v3', name: 'Aave v3', chain: 'Ethereum', status: 'ok', coverage: 'Main market', positions: [{ id: 'partial-test', label: 'USDC loan', suppliedUsd: 10000, debtUsd: 4000, healthFactor: 2, risk: 'lower', notes: [], assets: [{ ...a, symbol: 'USDC', supplied: 10000, borrowed: 4000, priceUsd: 1, collateral: true, liquidationThreshold: .8, supplyRate: { apr: .012, note: '' }, borrowRate: { apr: .06, note: '' } }] }] }, { id: 'morpho', name: 'Morpho', chain: 'Arbitrum', status: complete ? 'ok' : 'error', coverage: '', positions: [] }];
+    fixture.wallets = [{ chain: 'Ethereum', status: complete ? 'ok' : 'partial', pricedValueUsd: 3000, unpricedCount: 0, coverage: 'Wallet', interestDiscoveryComplete: complete, tokens: [
+      { address: '0x1111111111111111111111111111111111111111', symbol: 'Known saving', category: 'Savings stablecoin', balance: 2000, valueUsd: 2000, priceUsd: 1, intrinsicSupplyRate: { apr: .12, note: '', source: { chain: 'Ethereum', oracle: '' } } },
+      { address: '0x2222222222222222222222222222222222222222', symbol: 'Unknown saving', category: 'Savings stablecoin', balance: 1000, valueUsd: 1000, priceUsd: 1, intrinsicSupplyRate: { apr: complete ? .06 : null, note: '', source: { chain: 'Ethereum', oracle: '' } } },
+    ] }];
+    return route.fulfill({ json: fixture });
+  });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  await expect(page.locator('.summary.primary > strong')).toHaveText('$9,000.00');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $10.00');
+  await expect(page.locator('.portfolio-apr > strong')).toHaveText('≈ 1.33%');
+  await expect(page.locator('.total-npl > span')).toHaveText('Total NPL · partial');
+  await expect(page.locator('.portfolio-apr > span')).toHaveText('Portfolio APR · partial');
+  const issues = page.getByRole('region', { name: 'Missing interest data' });
+  await expect(issues).toContainText('Wallet tokens'); await expect(issues).toContainText('Unknown saving'); await expect(issues).toContainText('Morpho · Arbitrum');
+  await expect(issues).toContainText('Unknown balances, rates, prices and unreadable holdings are excluded');
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  complete = true; await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ $15.00');
+  await expect(page.locator('.portfolio-apr > strong')).toHaveText('≈ 2.00%');
+  await expect(page.locator('.total-npl > span')).toHaveText('Total NPL');
+  await expect(issues).toHaveCount(0);
 });

@@ -1,4 +1,4 @@
-import { walletCategoryInterest, walletInterestIssues } from './wallet-interest';
+import { walletCategoryInterest, walletInterestIssues, walletTokenInterest, interestBearingToken } from './wallet-interest';
 import { overviewProtocols } from './risk-assessment';
 import type { Asset, InterestRate, Position, ProtocolResult, WalletBalances } from './types';
 export interface MonthlyInterest { earnedUsd: number | null; paidUsd: number | null; nplUsd: number | null }
@@ -101,6 +101,47 @@ export function totalMonthlyInterest(protocols: ProtocolResult[], wallets: Walle
   const totals = protocols.map(protocolMonthlyInterest);
   const walletIncome = walletCategoryInterest(wallets);
   return { ...net(sum([...totals.map(p => p.earnedUsd), walletIncome.earnedUsd]), sum(totals.map(p => p.paidUsd))), partial: protocols.some(p => p.status !== 'ok') || wallets.some(w => w.status !== 'ok') || walletIncome.earnedUsd === null, issues: [...monthlyInterestIssues(protocols), ...walletInterestIssues(wallets)] };
+}
+/** Readable cash-flow subtotal for the dashboard; strict position totals stay unknown
+ * when a component is unreadable. Unknown income/costs are omitted explicitly,
+ * and a missing-only portfolio never becomes a fabricated zero subtotal. */
+export function availableMonthlyInterest(protocols: ProtocolResult[], wallets: WalletBalances[] = []): MonthlyInterest & { partial: boolean; issues: InterestIssue[] } {
+  const complete = totalMonthlyInterest(protocols, wallets);
+  if (complete.nplUsd !== null) return complete;
+  const earned: number[] = [], paid: number[] = [];
+  let activeKnown = false;
+  function add(amount: number, price: number | null, rate: InterestRate | undefined, values: number[], incentive = false, direction = 1) {
+    const value = usd(monthly(amount, rate?.apr), price);
+    if (!finite(value)) return;
+    values.push(value * direction);
+    if (amount > 0 && (!incentive || rate?.apr !== 0)) activeKnown = true;
+  }
+  for (const protocol of overviewProtocols(protocols)) {
+    if (!['ok', 'partial'].includes(protocol.status)) continue;
+    for (const position of protocol.positions) for (const a of position.assets) {
+      add(a.supplied, a.priceUsd, a.supplyRate, earned);
+      if (a.intrinsicSupplyRate) add(a.supplied, a.priceUsd, a.intrinsicSupplyRate, earned);
+      if (a.merklSupplyRate) add(a.supplied, a.priceUsd, a.merklSupplyRate, earned, true);
+      add(a.borrowed, a.priceUsd, a.borrowRate, paid);
+      if (a.merklBorrowRate) add(a.borrowed, a.priceUsd, a.merklBorrowRate, paid, true, -1);
+    }
+  }
+  for (const wallet of wallets) {
+    if (wallet.status === 'error') continue;
+    for (const token of wallet.tokens) {
+      if (!interestBearingToken(token) || token.excludedReason) continue;
+      const value = walletTokenInterest(token).earnedUsd;
+      if (!finite(value)) continue;
+      earned.push(value);
+      if (finite(token.balance) && token.balance > 0) activeKnown = true;
+    }
+  }
+  const earnedUsd = earned.length ? sum(earned) : complete.earnedUsd === 0 ? 0 : null;
+  const paidUsd = paid.length ? sum(paid) : complete.paidUsd === 0 ? 0 : null;
+  const nplUsd = activeKnown ? sum([...earned, ...paid.map(p => -p)]) : null;
+  const issues = [...complete.issues];
+  if (activeKnown && nplUsd === null) issues.push({ protocol: 'Portfolio', reason: 'The known interest subtotal exceeds supported values.' });
+  return { earnedUsd, paidUsd, nplUsd, partial: true, issues };
 }
 /** Annualized NPL as a fraction of net value. Negative equity retains the user's signed formula. */
 export function annualizedNplApr(monthlyNplUsd: number | null, netValueUsd: number | null): number | null {
