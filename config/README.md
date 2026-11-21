@@ -143,3 +143,5 @@ The import conflict checks can be run with:
 ```sh
 python3 -m unittest discover -s tests -p test_coingecko_import.py
 ```
+
+**PST (PayFi Strategy Token)** on Ethereum is classified **Savings stablecoin**. Its `_intrinsicOracles` entry pins the uncapped Chainlink **PST-USDC Exchange Rate (Calculated)** feed [`0x4BE50bE32dB1510240d542f77c5B36Ca0D0965E6`](https://etherscan.io/address/0x4BE50bE32dB1510240d542f77c5B36Ca0D0965E6#readContract), with six decimals and historical round lookup. Fluid Vault 165's oracle `0x2e95050bb3F06fe0c83Ee6E3E08ed3972c5D9263` references the capped rate wrapper `0x7Be47fb0679366B9F0aD5ed383f84fE735E047C5`, whose `configData().rateSource_` identifies that feed. Intrinsic APR uses the underlying uncapped reference rate, so Fluid's liquidation caps do not become token earnings. The rate is **USDC per PST**; it does not establish a USD peg. The same configured rate enriches held PST collateral and wallet balances by exact chain/contract match. Check it with `npm run check:savings-apr -- PST ethereum`.
