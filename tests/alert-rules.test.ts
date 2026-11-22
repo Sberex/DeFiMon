@@ -4,8 +4,8 @@ import { mergeWalletHistory, parseWalletHistory } from '../src/wallet-history';
 import { example } from '../src/example';
 const address = example.address.toLowerCase(), day = '2026-11-22T10:00:00.000Z', later = '2026-11-22T11:00:00.000Z';
 const input = { network: 'ethereum' as const, protocol: 'aave-v3', positionId: 'AAVE-MAIN', rules: defaultAlertRules() };
-it('validates all four rules with explicit percent units, zero and negative APR thresholds, and fixed health factor', () => {
-  const rules = { ...defaultAlertRules(), borrowAprAboveSupplyApr: true, utilizationAbove: { enabled: true, thresholdPercent: 0 }, healthFactorBelow: { enabled: true, threshold: 1.01 }, positionAprBelow: { enabled: true, thresholdPercent: -5 } };
+it('validates all five rules with explicit percent units, zero and negative APR thresholds, and fixed health factor', () => {
+  const rules = { ...defaultAlertRules(), borrowAprAboveSupplyApr: true, newLiquidityAdded: true, utilizationAbove: { enabled: true, thresholdPercent: 0 }, healthFactorBelow: { enabled: true, threshold: 1.01 }, positionAprBelow: { enabled: true, thresholdPercent: -5 } };
   expect(parsePositionAlertInput({ ...input, rules }).rules).toEqual(rules);
   for (const rules of [
     { ...input.rules, utilizationAbove: { enabled: true, thresholdPercent: null } },
@@ -36,4 +36,13 @@ it('lists only active overview lending/deposit positions, excluding bad debt, em
   p.protocols = [{ ...p.protocols[0], positions: [template, supply, empty, bad, { ...empty, id: 'unreadable', suppliedUsd: null }] }];
   expect(alertPositions(p).map(x => x.position.id)).toEqual([template.id, 'deposit']);
   p.protocols[0].status = 'error'; expect(alertPositions(p)).toEqual([]);
+});
+
+
+it('defaults older saved rules to no new-liquidity alert and rejects non-boolean selections', () => {
+  const { newLiquidityAdded, ...legacy } = defaultAlertRules();
+  expect(parsePositionAlertInput({ ...input, rules: legacy }).rules.newLiquidityAdded).toBe(false);
+  for (const value of [null, 'true', 1]) expect(() => parsePositionAlertInput({ ...input, rules: { ...legacy, newLiquidityAdded: value } })).toThrow();
+  const saved = parseWalletHistory({ version: 1, wallets: [{ address, lastCheckedAt: day, manualLiquidationPrices: [], alerts: [{ ...input, rules: { ...legacy, newLiquidityAdded: true }, updatedAt: later }] }] });
+  expect(saved.wallets[0].alerts?.[0].rules.newLiquidityAdded).toBe(true);
 });

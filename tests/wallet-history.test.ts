@@ -120,7 +120,7 @@ it('does not overwrite malformed remote history when a new lookup can only be re
 
 it('persists and restores alert preferences through rechecks, price saves, updates and restart without losing independent records', async () => {
   const { defaultAlertRules } = await import('../src/alert-rules');
-  const rule = { network: 'ethereum' as const, protocol: 'aave-v3', positionId: 'pool-1', rules: { ...defaultAlertRules(), utilizationAbove: { enabled: true, thresholdPercent: 90 }, positionAprBelow: { enabled: true, thresholdPercent: -2 } } };
+  const rule = { network: 'ethereum' as const, protocol: 'aave-v3', positionId: 'pool-1', rules: { ...defaultAlertRules(), newLiquidityAdded: true, utilizationAbove: { enabled: true, thresholdPercent: 90 }, positionAprBelow: { enabled: true, thresholdPercent: -2 } } };
   const g = github(), file = await path(); let now = Date.parse(day);
   const store = createWalletHistoryStore({ path: file, token: () => 'test', fetcher: g.fetcher, now: () => now });
   await store.recordCheck(a); const first = await store.saveAlerts(a, rule);
@@ -134,6 +134,7 @@ it('persists and restores alert preferences through rechecks, price saves, updat
   expect(restored.persistence.synced).toBe(true);
   expect(restored.wallet?.alerts?.find(x => x.network === 'ethereum')?.rules).toEqual(defaultAlertRules());
   expect(restored.wallet?.alerts?.find(x => x.network === 'arbitrum')?.rules.utilizationAbove.thresholdPercent).toBe(90);
+  expect(restored.wallet?.alerts?.find(x => x.network === 'arbitrum')?.rules.newLiquidityAdded).toBe(true);
   expect(JSON.parse(await readFile(file, 'utf8'))).toEqual(g.get());
 });
 
