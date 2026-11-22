@@ -2102,3 +2102,32 @@ test('Cookbook counts configured cross-chain collateral once, expands used netwo
   await expect(row.locator('td').nth(1)).toHaveText('Ethereum');
   await expect(extra.locator('summary')).toHaveText('Additional networks (1)');
 });
+
+test('shows Ethereum Horizon alongside the Aave main market with its own balances, health, link and recommendations', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.address = '0xE16BE042f9433779909a972669bE3A2003956348'; fixture.wallets = [];
+  const aave = fixture.protocols.find(p => p.id === 'aave-v3')!;
+  fixture.protocols = [aave];
+  const horizon = structuredClone(aave.positions[0]);
+  Object.assign(horizon, { id: 'aave-horizon-main', label: 'Ethereum Horizon market', marketAddress: '0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8', suppliedUsd: 138514.76, debtUsd: 97273.63, collateralValueUsd: 138349.45, healthFactor: 1.14, liquidationModel: 'unavailable', risk: 'watch' });
+  horizon.assets = [
+    { address: '0x7433806912Eae67919e66aea853d46Fa0aef98A8', symbol: 'mGLOBAL', supplied: 134602.56, borrowed: 0, priceUsd: 1.0278, collateral: true, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: 0, note: 'Horizon collateral has no protocol lending interest' } },
+    { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', supplied: 165.3392, borrowed: 1.2695, priceUsd: .99986, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .04, note: 'Horizon liquidity APR' }, borrowRate: { apr: .059, note: 'Horizon variable debt APR' } },
+    { address: '0x8292Bb45bf1Ee4d140127049757C2E0fF06317eD', symbol: 'RLUSD', supplied: .0018, borrowed: 97272.31, priceUsd: .99962, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: .03, note: 'Horizon liquidity APR' }, borrowRate: { apr: .041, note: 'Horizon variable debt APR' } },
+  ];
+  aave.positions.push(horizon);
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => route.fulfill({ json: { checkedAt: fixture.updatedAt, alternatives: [], coverage: [], targetIds: [] } }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const position = page.locator('.position').filter({ has: page.getByRole('heading', { name: 'Ethereum Horizon market' }) });
+  await expect(position).toBeVisible();
+  await expect(position.getByRole('link', { name: 'Ethereum Horizon market' })).toHaveAttribute('href', 'https://app.aave.com/?marketName=proto_horizon_v3');
+  await expect(position.locator('.position-stats')).toContainText('$138,514.76');
+  await expect(position.locator('.position-stats')).toContainText('$97,273.63');
+  await expect(position.locator('.position-stats')).toContainText('1.14');
+  await expect(position.locator('tbody')).toContainText('mGLOBAL');
+  await expect(position.locator('tbody')).toContainText('RLUSD');
+  await expect(page.locator('.summary.primary > strong')).toHaveText(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(aave.positions.reduce((sum, p) => sum + p.suppliedUsd! - p.debtUsd!, 0)));
+  await page.screenshot({ path: '/tmp/horizon-dashboard.png', fullPage: true });
+  await page.getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(page.locator('#recommendations-panel')).toContainText('Ethereum Horizon market');
+});

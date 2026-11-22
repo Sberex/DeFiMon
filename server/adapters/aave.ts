@@ -25,7 +25,7 @@ const dataAbi = parseAbi([
 ]);
 const oracleAbi = parseAbi(['function getAssetPrice(address asset) view returns (uint256)', 'function BASE_CURRENCY_UNIT() view returns (uint256)']);
 const n = (value: bigint, decimals: number) => Number(formatUnits(value, decimals));
-export interface AaveDeployment { provider: Address; id: string; name: string; legacyEMode?: boolean }
+export interface AaveDeployment { provider: Address; id: string; name: string; label?: string; legacyEMode?: boolean }
 export async function readAave(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId = 'ethereum', market?: AaveDeployment): Promise<ProtocolResult> {
   const deployment = networks[network];
   const provider = market?.provider ?? deployment.aaveProvider;
@@ -95,8 +95,8 @@ export async function readAave(client: ChainClient, wallet: Address, blockNumber
   const health = debtUsd > 0 ? n(account[5], 18) : null;
   const weighted = Number(account[0]) / Number(unit) * Number(account[3]) / 1e4;
   return {
-    id, name, status: 'ok', coverage: `${deployment.name} main market; excludes other Aave markets and vaults.`,
-    positions: assets.length ? [{ collateralValueUsd: Number(account[0]) / Number(unit), liquidationModel: emode === 0n ? 'linear' : 'unavailable', marketAddress: pool, id: market ? `${id}-main` : 'aave-main', label: `${deployment.name} main market`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
+    id, name, status: 'ok', coverage: market?.label ?? `${deployment.name} main market; excludes other Aave markets and vaults.`,
+    positions: assets.length ? [{ collateralValueUsd: Number(account[0]) / Number(unit), liquidationModel: emode === 0n ? 'linear' : 'unavailable', marketAddress: pool, id: market ? `${id}-main` : 'aave-main', label: market?.label ?? `${deployment.name} main market`, suppliedUsd, debtUsd, healthFactor: health, risk: riskLevel(debtUsd, health), assets: emode === 0n ? liquidationPrices(assets, debtUsd, weighted) : assets,
       notes: [ `Prices come from ${name}’s own oracle. Each liquidation price assumes other prices and balances stay fixed.`, ...(emode !== 0n ? ['Efficiency mode is enabled. Health factor is read directly; per-asset liquidation price estimates are unavailable for this mode.'] : [])] }] : [],
   };
 }

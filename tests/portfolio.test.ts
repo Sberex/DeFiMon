@@ -125,3 +125,9 @@ it('rejects a non-BSC provider before any BSC balances or positions are read', a
   await expect(getPortfolio(wallet, 'bsc')).rejects.toThrow('not Binance Smart Chain mainnet');
   expect(readers.aave).not.toHaveBeenCalled(); expect(readers.fluid).not.toHaveBeenCalled();
 });
+
+it('includes the Horizon deployment when checking Ethereum Aave positions', async () => {
+  const { AAVE_HORIZON } = await import('../server/deployments/aave-horizon');
+  await getPortfolio(wallet);
+  expect(readers.aave).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum', AAVE_HORIZON);
+});

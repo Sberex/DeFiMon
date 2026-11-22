@@ -1,6 +1,7 @@
 import { listaDeployments, listaLegacyVaults } from './deployments/lista.js';
 import { morphoFactoryAbi } from './abis/morpho.js';
 import { SPARK_LEND, sparkVaults } from './deployments/spark.js';
+import { AAVE_HORIZON } from './deployments/aave-horizon.js';
 import { formatUnits, getAddress, parseAbi, type Address } from 'viem';
 import type { NetworkId, ProtocolResult, WalletBalances, WalletToken } from '../src/types.js';
 import type { ChainClient } from './rpc.js';
@@ -77,7 +78,7 @@ export async function readWallet(client: ChainClient, wallet: Address, blockNumb
             // Both aTokens and variable/stable debt accounting tokens identify
             // their Aave pool. Debt balances must never be counted as assets.
             const pool = await client.readContract({ address: token.address, abi: tokenAbi, functionName: 'POOL', blockNumber });
-            if (pool.toLowerCase() === aavePool.value.toLowerCase() || (network === 'ethereum' && pool.toLowerCase() === SPARK_LEND.pool.toLowerCase())) excludedReason = 'Aave or Spark receipt or debt accounting token: excluded from wallet assets.';
+            if (pool.toLowerCase() === aavePool.value.toLowerCase() || (network === 'ethereum' && [SPARK_LEND.pool, AAVE_HORIZON.pool].some(p => pool.toLowerCase() === p.toLowerCase()))) excludedReason = 'Aave or Spark receipt or debt accounting token: excluded from wallet assets.';
           } catch { /* Ordinary ERC20 tokens do not expose an Aave pool. */ }
         }
         if (!excludedReason && protocols.some(p => p.id === 'euler')) {

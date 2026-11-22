@@ -17,7 +17,7 @@ import { applyIntrinsicRates } from './intrinsic-rates.js';
 import { makeClient } from './rpc.js';
 import { readEuler } from './adapters/euler.js';
 import { EULER_COVERAGE } from './euler.js';
-import { readAave } from './adapters/aave.js';
+import { readAaveV3Markets } from './adapters/aave-markets.js';
 import { readAaveV4, AAVE_V4_COVERAGE } from './adapters/aave-v4.js';
 import { readCompound } from './adapters/compound.js';
 import { readFluid, FLUID_COVERAGE } from './adapters/fluid.js';
@@ -37,7 +37,7 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
   const failure = `Could not read this protocol on ${deployment.name}. Its balances are unknown. Check the ${deployment.name} provider connection and try again.`;
   const readers: Record<string, () => Promise<ProtocolResult>> = {
     lista: () => isolateProtocol('lista', 'Lista DAO', LISTA_COVERAGE, () => readLista(client, address, blockNumber, network), failure),
-    'aave-v3': () => isolateProtocol('aave-v3', 'Aave v3', `${deployment.name} main market`, () => readAave(client, address, blockNumber, network), failure),
+    'aave-v3': () => isolateProtocol('aave-v3', 'Aave v3', `${deployment.name} main market${network === 'ethereum' ? ' and Aave Horizon' : ''}`, () => readAaveV3Markets(client, address, blockNumber, network), failure),
     spark: () => isolateProtocol('spark', 'Spark', sparkCoverage(network), () => readSpark(client, address, blockNumber, network), failure),
     'aave-v4': () => isolateProtocol('aave-v4', 'Aave v4', AAVE_V4_COVERAGE, () => readAaveV4(client, address, blockNumber), failure),
     morpho: () => isolateProtocol('morpho', 'Morpho', MORPHO_COVERAGE.replace('Ethereum', deployment.name), () => readMorpho(client, address, blockNumber, undefined, network), `Morpho lookup is unavailable on ${deployment.name}. Check access to api.morpho.org and this network’s provider. Its balances are unknown.`),

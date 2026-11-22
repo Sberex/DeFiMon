@@ -119,3 +119,12 @@ it('excludes a factory-registered Lista vault when protocol discovery failed', a
   expect(result.tokens.find(t => t.address === eul)).toMatchObject({ excludedReason: expect.stringContaining('Lista Earn receipt'), valueUsd: null });
   expect(result.pricedValueUsd).toBeCloseTo(6004.9);
 });
+
+it('excludes Horizon receipt and debt accounting tokens from Ethereum wallet totals', async () => {
+  const { AAVE_HORIZON } = await import('../server/deployments/aave-horizon');
+  const f = fixture();
+  const client = { ...f.client, readContract: async (args: any) => args.functionName === 'POOL' && args.address.toLowerCase() === eul ? AAVE_HORIZON.pool : f.client.readContract(args) } as unknown as ChainClient;
+  const result = await readWallet(client, wallet, 123n, 'ethereum', [], [], [...catalog], f.prices);
+  expect(result.tokens.find(t => t.address === eul)).toMatchObject({ valueUsd: null, excludedReason: expect.stringContaining('accounting token') });
+  expect(result.pricedValueUsd).toBeCloseTo(6004.9);
+});

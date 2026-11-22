@@ -151,3 +151,13 @@ it('uses the Spark provider and verifies legacy eMode membership without borrowi
   expect(result.positions[0].assets[0].supplyRate?.note).toContain('SparkLend');
   expect(result.positions[0].healthFactor).toBe(1.7);
 });
+
+it('uses Horizon’s provider and market identity without replacing the Ethereum main market', async () => {
+  const { AAVE_HORIZON } = await import('../server/deployments/aave-horizon');
+  const f = fixture();
+  const p = await readAave(f.client, wallet, 777n, 'ethereum', AAVE_HORIZON);
+  expect(f.addresses.slice(0, 3)).toEqual(Array(3).fill(AAVE_HORIZON.provider));
+  expect(p.positions[0]).toMatchObject({ id: 'aave-horizon-main', label: 'Ethereum Horizon market', suppliedUsd: 30000, debtUsd: 15000, healthFactor: 1.7 });
+  expect(p.positions[0].assets[0].supplyRate?.note).toContain('Aave Horizon');
+  expect(f.blocks.every(x => x === 777n)).toBe(true);
+});

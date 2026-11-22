@@ -3,6 +3,9 @@ import { portfolioNetwork, networkExplorers as explorers } from './networks';
 const contract = (value: string | undefined): value is string => /^0x[0-9a-f]{40}$/i.test(value ?? '');
 export function positionLinks(protocol: string, chain: ChainName, position: Position) {
   const network = portfolioNetwork(chain);
+  if (protocol === 'aave-v3' && chain === 'Ethereum' && position.id === 'aave-horizon-main' && contract(position.marketAddress)) {
+    return [{ label: 'Market contract', address: position.marketAddress, url: 'https://app.aave.com/?marketName=proto_horizon_v3' }];
+  }
   if (protocol === 'lista') {
     const vault = !!position.vault || position.id.startsWith('lista-vault-');
     const address = position.vault?.address ?? position.id.match(/0x[0-9a-f]{64}|0x[0-9a-f]{40}/i)?.[0];
