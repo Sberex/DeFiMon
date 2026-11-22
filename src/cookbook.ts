@@ -103,3 +103,19 @@ export function mergeCookbooks(a: CookbookFile, b: CookbookFile): CookbookFile {
 export function cookbookPositions(file: CookbookFile) {
   return file.wallets.flatMap(w => w.scopes.flatMap(s => s.positions.map(p => ({ ...p, address: w.address, protocolId: s.protocolId, protocolName: s.protocolName, chain: s.chain, checkedAt: s.checkedAt, blockNumber: p.blockNumber ?? s.blockNumber })))).sort((a, b) => b.apr - a.apr || b.netValueUsd - a.netValueUsd);
 }
+
+/** One supplied asset per chain/contract, with the latest saved intrinsic rate. */
+export function cookbookSuppliedAssets(entries: ReturnType<typeof cookbookPositions>) {
+  const assets = new Map<string, { address: string; symbol: string; chain: ChainName; intrinsicApr: number | null; snapshotAt: string }>();
+  for (const entry of entries) for (const asset of entry.position.assets) {
+    if (!finite(asset.supplied) || asset.supplied <= 0 || typeof asset.address !== 'string' || !asset.address) continue;
+    const key = `${entry.chain}:${asset.address.toLowerCase()}`;
+    const previous = assets.get(key);
+    if (previous && Date.parse(previous.snapshotAt) >= Date.parse(entry.snapshotAt)) continue;
+    // PT appreciation is stored as the base supply rate. Ordinary lending
+    // interest and rewards are not intrinsic yield and must not enter this list.
+    const rate = asset.supplyRate?.pendlePt ? asset.supplyRate : asset.intrinsicSupplyRate;
+    assets.set(key, { address: asset.address.toLowerCase(), symbol: asset.symbol, chain: entry.chain, intrinsicApr: rate ? finite(rate.apr) ? rate.apr : null : 0, snapshotAt: entry.snapshotAt });
+  }
+  return [...assets.values()].sort((a, b) => a.symbol.localeCompare(b.symbol) || a.chain.localeCompare(b.chain) || a.address.localeCompare(b.address));
+}

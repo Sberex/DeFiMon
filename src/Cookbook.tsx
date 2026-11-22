@@ -1,7 +1,7 @@
 import { networkExplorers as explorers } from './networks';
 import { useEffect, useState, type ReactNode } from 'react';
 import { apiUrl } from './api';
-import { COOKBOOK_MIN_APR, cookbookPositions, parseCookbook, type CookbookResponse } from './cookbook';
+import { COOKBOOK_MIN_APR, cookbookPositions, cookbookSuppliedAssets, parseCookbook, type CookbookResponse } from './cookbook';
 const source = 'https://github.com/Sberex/DeFiMon/blob/main/analysis/cookbook.json';
 const rawSource = 'https://raw.githubusercontent.com/Sberex/DeFiMon/main/analysis/cookbook.json';
 
@@ -34,6 +34,7 @@ export function Cookbook({ revision, renderPosition }: { revision: object | null
     return () => request.abort();
   }, [revision, retry]);
   const entries = result ? cookbookPositions(result.data) : [];
+  const suppliedAssets = cookbookSuppliedAssets(entries);
   const addresses = new Set(entries.map(entry => entry.address.toLowerCase())).size;
   const totalNetValue = entries.reduce((total, entry) => total + entry.netValueUsd, 0);
   const highestApr = entries.reduce<number | null>((highest, entry) => highest === null ? entry.apr : Math.max(highest, entry.apr), null);
@@ -43,11 +44,20 @@ export function Cookbook({ revision, renderPosition }: { revision: object | null
     <div className="section-label"><h2>Cookbook</h2><span>Position APR &gt; 14%</span></div>
     <section className="summary-grid cookbook-summary" aria-label="Cookbook summary">
       <div className="summary"><span>Number of positions</span><strong>{result ? entries.length.toLocaleString('en-US') : '—'}</strong><small>Saved position snapshots</small></div>
+      <div className="summary"><span>Number of collateral assets</span><strong>{result ? suppliedAssets.length.toLocaleString('en-US') : '—'}</strong><small>Unique supplied assets by chain and contract</small></div>
       <div className="summary"><span>Number of addresses</span><strong>{result ? addresses.toLocaleString('en-US') : '—'}</strong><small>Unique wallets with saved positions</small></div>
       <div className="summary cookbook-total-value"><span>Total Net Value</span><strong>{result ? money(totalNetValue) : '—'}</strong><small>Sum of saved position net values</small></div>
       <div className="summary"><span>Highest APR</span><strong>{highestApr === null ? '—' : `${(highestApr * 100).toFixed(2)}%`}</strong><small>Among saved snapshots</small></div>
       <div className="summary"><span>Threshold minimum APR</span><strong>{(threshold * 100).toFixed(0)}%</strong><small>Position APR must exceed this rate</small></div>
     </section>
+    {result && <section className="cookbook-assets" aria-label="Cookbook supplied assets">
+      <h3>Supplied assets</h3>
+      <p>Intrinsic APR from each asset’s latest saved snapshot, including Pendle PT Implied APY. Assets without intrinsic yield show 0%.</p>
+      {suppliedAssets.length ? <div className="table-wrap"><table><thead><tr><th>Asset</th><th>Network</th><th>Intrinsic APR</th></tr></thead><tbody>{suppliedAssets.map(asset => <tr key={`${asset.chain}:${asset.address}`}>
+        <td><strong>{asset.symbol}</strong><small>{/^0x[\da-f]{40}$/i.test(asset.address) ? <a href={`${explorers[asset.chain]}/token/${asset.address}`} target="_blank" rel="noreferrer" title={asset.address}>{asset.address.slice(0, 8)}…{asset.address.slice(-6)} <ExternalLinkIcon /></a> : asset.address}</small></td>
+        <td>{asset.chain}</td><td title={`Snapshot: ${asset.snapshotAt}`}><strong>{asset.intrinsicApr === null ? 'Unavailable' : asset.intrinsicApr === 0 ? '0%' : `${(asset.intrinsicApr * 100).toFixed(2)}%`}</strong></td>
+      </tr>)}</tbody></table></div> : <p>No supplied assets in the saved positions.</p>}
+    </section>}
     <p className="recommendations-intro">Snapshots of lending positions from analysed wallets. APR is monthly NPL × 12 ÷ net value, including the verified intrinsic yield and matched rewards shown in the snapshot. Rates, balances and risk can change after the snapshot.</p>
     <div className="cookbook-toolbar"><a href={source} target="_blank" rel="noreferrer">View source JSON <ExternalLinkIcon /></a><button type="button" className="secondary" disabled={loading} onClick={() => setRetry(n => n + 1)}>{loading ? 'Loading snapshots…' : 'Reload snapshots'}</button></div>
     {result?.persistence.message && <p className="notice cookbook-persistence" role="status">{result.persistence.message}</p>}

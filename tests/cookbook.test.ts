@@ -69,3 +69,33 @@ it('does not let a slower response from an older block resurrect a removed posit
   expect(cookbookPositions(updateCookbook(current, delayed))).toEqual([]);
   expect(cookbookPositions(mergeCookbooks(current, updateCookbook(emptyCookbook(), delayed)))).toEqual([]);
 });
+
+it('lists unique supplied contracts by chain with latest intrinsic rates, PT appreciation and no lending-rate substitution', async () => {
+  const { cookbookSuppliedAssets } = await import('../src/cookbook');
+  const first = snapshot(.3), latest = snapshot(.4, '2026-11-20T11:00:00.000Z', '0x4444444444444444444444444444444444444444');
+  const a = first.protocols[0].positions[0].assets[0];
+  a.intrinsicSupplyRate = { apr: .08, note: '', source: { chain: 'Ethereum', oracle: '' } };
+  const b = latest.protocols[0].positions[0].assets[0];
+  b.address = b.address.toUpperCase().replace('0X', '0x');
+  b.intrinsicSupplyRate = { apr: -.02, note: '', source: { chain: 'Ethereum', oracle: '' } };
+  let saved = updateCookbook(updateCookbook(emptyCookbook(), first), latest);
+  const entry = structuredClone(cookbookPositions(saved).find(x => x.address === latest.address)!);
+  const base = structuredClone(entry); base.chain = 'Base';
+  const pt = structuredClone(a); pt.address = '0x5555555555555555555555555555555555555555';
+  pt.supplyRate = { apr: .15, note: '', pendlePt: { network: 'ethereum', marketAddress: null, expiry: null, updatedAt: null } };
+  // PT metadata wins over a stale underlying intrinsic field; zero-balance rows
+  // and borrowed-only USDC never become collateral-list items.
+  const plain = { ...a, address: '0x6666666666666666666666666666666666666666', intrinsicSupplyRate: undefined };
+  const unknown = { ...a, address: '0x7777777777777777777777777777777777777777', intrinsicSupplyRate: { ...a.intrinsicSupplyRate, apr: null } };
+  entry.position.assets.push(pt, plain, unknown, { ...a, address: '0x8888888888888888888888888888888888888888', supplied: 0 });
+  const rows = cookbookSuppliedAssets([...cookbookPositions(saved), entry, base]);
+  expect(rows).toHaveLength(5);
+  expect(rows.find(x => x.chain === 'Ethereum' && x.address === a.address)?.intrinsicApr).toBe(-.02);
+  expect(rows.find(x => x.address === pt.address)?.intrinsicApr).toBe(.15);
+  expect(rows.find(x => x.address === plain.address)?.intrinsicApr).toBe(0);
+  expect(rows.find(x => x.address === unknown.address)?.intrinsicApr).toBeNull();
+  expect(rows.filter(x => x.address === a.address)).toHaveLength(2);
+  const closed = snapshot(.4, '2026-11-20T12:00:00.000Z', latest.address); closed.protocols[0].positions = [];
+  saved = updateCookbook(saved, closed);
+  expect(cookbookSuppliedAssets(cookbookPositions(saved))).toMatchObject([{ intrinsicApr: .08 }]);
+});
