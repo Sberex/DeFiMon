@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-22T17:38:19.728Z",
+  "updatedAt": "2026-11-22T18:16:51.795Z",
   "wallets": [
     {
       "address": "0x55fa9aac40af97faab697cc74d4da452abf0272c",
@@ -1712,8 +1712,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-21T18:28:49.220Z",
-          "blockNumber": "38340665",
+          "checkedAt": "2026-11-22T18:16:51.795Z",
+          "blockNumber": "38426340",
           "complete": true,
           "positions": []
         }
