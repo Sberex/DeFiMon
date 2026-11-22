@@ -6,6 +6,7 @@ import { example } from '../src/example';
 const records: string[] = [], saves: any[] = [];
 const saved = { address: example.address.toLowerCase(), lastCheckedAt: '2026-11-21T10:00:00.000Z', manualLiquidationPrices: [] };
 const store: WalletHistoryStore = {
+  saveAlerts: vi.fn(async (address, input) => ({ wallet: { ...saved, address: address.toLowerCase(), alerts: [{ ...input, updatedAt: '2026-11-22T11:00:00.000Z' }] }, persistence: { mode: 'github' as const, synced: true } })),
   recordCheck: vi.fn(async address => { records.push(address.toLowerCase()); return { wallet: { ...saved, address: address.toLowerCase() }, persistence: { mode: 'github' as const, synced: true } }; }),
   readWallet: vi.fn(async () => ({ wallet: saved, persistence: { mode: 'github' as const, synced: true } })),
   savePrices: vi.fn(async (address, input) => { saves.push({ address, input }); return { wallet: { ...saved, address: address.toLowerCase(), manualLiquidationPrices: [{ ...input, updatedAt: '2026-11-21T11:00:00.000Z' }] }, persistence: { mode: 'github' as const, synced: true } }; }),
@@ -52,4 +53,20 @@ it('does not turn a history save failure into a failed wallet analysis', async (
   expect(response.status).toBe(200);
   const data = await response.json(); expect(data.protocols.length).toBeGreaterThan(0); expect(data.walletHistory.persistence.synced).toBe(false);
   expect(JSON.stringify(data)).not.toContain('private-github-secret');
+});
+
+it('saves scoped alert rules with timestamps and rejects invalid thresholds without writing', async () => {
+  const { defaultAlertRules } = await import('../src/alert-rules');
+  const body = { network: 'ethereum', protocol: 'aave-v3', positionId: 'aave-main', rules: { ...defaultAlertRules(), utilizationAbove: { enabled: true, thresholdPercent: 95 }, positionAprBelow: { enabled: true, thresholdPercent: -1 } } };
+  const url = `${base}/api/wallet-history/${example.address}/alerts`;
+  const send = (body: unknown) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const response = await send(body);
+  expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store');
+  expect((await response.json()).wallet.alerts[0]).toMatchObject({ ...body, updatedAt: '2026-11-22T11:00:00.000Z' });
+  const count = vi.mocked(store.saveAlerts).mock.calls.length;
+  expect((await send({ ...body, rules: { ...body.rules, utilizationAbove: { enabled: true, thresholdPercent: 101 } } })).status).toBe(400);
+  expect((await send({ ...body, network: 'invalid' })).status).toBe(400);
+  expect(vi.mocked(store.saveAlerts)).toHaveBeenCalledTimes(count);
+  vi.mocked(store.saveAlerts).mockRejectedValueOnce(new Error('private-github-key'));
+  const failed = await send(body); expect(failed.status).toBe(503); expect(await failed.text()).not.toContain('private-github-key');
 });

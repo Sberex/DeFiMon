@@ -117,3 +117,40 @@ it('does not overwrite malformed remote history when a new lookup can only be re
   // Only read requests are permitted after parsing the remote contents fails.
   expect(fetcher.mock.calls.some((args: any) => args[1]?.method === 'PUT')).toBe(false);
 });
+
+it('persists and restores alert preferences through rechecks, price saves, updates and restart without losing independent records', async () => {
+  const { defaultAlertRules } = await import('../src/alert-rules');
+  const rule = { network: 'ethereum' as const, protocol: 'aave-v3', positionId: 'pool-1', rules: { ...defaultAlertRules(), utilizationAbove: { enabled: true, thresholdPercent: 90 }, positionAprBelow: { enabled: true, thresholdPercent: -2 } } };
+  const g = github(), file = await path(); let now = Date.parse(day);
+  const store = createWalletHistoryStore({ path: file, token: () => 'test', fetcher: g.fetcher, now: () => now });
+  await store.recordCheck(a); const first = await store.saveAlerts(a, rule);
+  await store.saveAlerts(a, { ...rule, network: 'arbitrum' });
+  await store.savePrices(a, input); now = Date.parse(later); await store.recordCheck(a);
+  const cleared = await store.saveAlerts(a, { ...rule, positionId: 'POOL-1', rules: defaultAlertRules() });
+  expect(cleared.wallet?.alerts).toHaveLength(2); expect(cleared.wallet?.manualLiquidationPrices).toHaveLength(1);
+  expect(cleared.wallet?.alerts?.find(x => x.network === 'ethereum')?.updatedAt).not.toBe(first.wallet?.alerts?.[0].updatedAt);
+  const restarted = createWalletHistoryStore({ path: await path(), token: () => 'test', fetcher: g.fetcher });
+  const restored = await restarted.readWallet(a);
+  expect(restored.persistence.synced).toBe(true);
+  expect(restored.wallet?.alerts?.find(x => x.network === 'ethereum')?.rules).toEqual(defaultAlertRules());
+  expect(restored.wallet?.alerts?.find(x => x.network === 'arbitrum')?.rules.utilizationAbove.thresholdPercent).toBe(90);
+  expect(JSON.parse(await readFile(file, 'utf8'))).toEqual(g.get());
+});
+
+it('keeps concurrent alert edits and price updates when a GitHub write conflicts', async () => {
+  const { defaultAlertRules } = await import('../src/alert-rules');
+  const rule = { network: 'ethereum' as const, protocol: 'aave-v3', positionId: 'pool-1', rules: defaultAlertRules() };
+  const g = github(); let conflict = true;
+  const fetcher = vi.fn(async (...args: Parameters<typeof fetch>) => {
+    if (args[1]?.method === 'PUT' && conflict) {
+      conflict = false;
+      g.change({ version: 1, wallets: [{ address: a, lastCheckedAt: day, manualLiquidationPrices: [{ ...input, updatedAt: later }], alerts: [{ ...rule, network: 'base', updatedAt: later }] }] });
+      return Response.json({}, { status: 409 });
+    }
+    return g.fetcher(...args);
+  });
+  const store = createWalletHistoryStore({ path: await path(), token: () => 'test', fetcher, now: () => Date.parse(day) });
+  const result = await store.saveAlerts(a, rule);
+  expect(result.persistence.synced).toBe(true);
+  expect(result.wallet?.alerts).toHaveLength(2); expect(result.wallet?.manualLiquidationPrices[0].updatedAt).toBe(later);
+});

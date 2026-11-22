@@ -1,5 +1,6 @@
 import type { WalletHistoryStore } from './wallet-history-store.js';
 import { parseManualPriceInput } from '../src/wallet-history.js';
+import { parsePositionAlertInput } from '../src/alert-rules.js';
 import type { TestCasesStore } from './test-cases.js';
 import type { CookbookStore } from './cookbook-store.js';
 import { emptyCookbook } from '../src/cookbook.js';
@@ -83,6 +84,20 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     activeHistoryWrites++;
     try { res.json(await history.savePrices(getAddress(req.params.address), input)); }
     catch { res.status(503).json({ error: 'Collateral price assumptions could not be saved. Your calculation is still available; press Calculate to retry.' }); }
+    finally { activeHistoryWrites--; }
+  });
+  app.post('/api/wallet-history/:address/alerts', express.json({ limit: '16kb' }), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    let input;
+    try {
+      if (!validHistoryWallet(req.params.address) || Object.keys(req.query).length) throw new Error();
+      input = parsePositionAlertInput(req.body);
+    } catch { res.status(400).json({ error: 'Provide a valid position and alert rules. Utilization must be 0–100%; enabled percentage rules require a threshold.' }); return; }
+    if (!history) { res.status(503).json({ error: 'Wallet history is not configured on this server.' }); return; }
+    if (activeHistoryWrites >= 2) { res.setHeader('Retry-After', '5'); res.status(429).json({ error: 'Saving preferences is busy. Press Save alerts again shortly.' }); return; }
+    activeHistoryWrites++;
+    try { res.json(await history.saveAlerts(getAddress(req.params.address), input)); }
+    catch { res.status(503).json({ error: 'Alert preferences could not be saved. Your selections are still available; press Save alerts to retry.' }); }
     finally { activeHistoryWrites--; }
   });
   app.get('/api/portfolio/:address', async (req, res) => {

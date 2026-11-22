@@ -1,12 +1,13 @@
 import { isNetworkId } from './networks';
 import type { NetworkId, Position } from './types';
 import { liquidationScenario } from './liquidation';
+import { alertScopeKey, parsePositionAlertInput, type PositionAlerts } from './alert-rules';
 export interface ManualLiquidationPrices {
   network: NetworkId; protocol: string; positionId: string; updatedAt: string;
   pricesUsd: Record<string, number>;
 }
 export type ManualPriceInput = Omit<ManualLiquidationPrices, 'updatedAt'>;
-export interface SavedWallet { address: string; lastCheckedAt: string; manualLiquidationPrices: ManualLiquidationPrices[] }
+export interface SavedWallet { address: string; lastCheckedAt: string; manualLiquidationPrices: ManualLiquidationPrices[]; alerts?: PositionAlerts[] }
 export interface WalletHistoryFile { version: 1; wallets: SavedWallet[] }
 export interface WalletHistoryResponse {
   wallet: SavedWallet | null;
@@ -40,7 +41,12 @@ function mergeWallet(a: SavedWallet, b: SavedWallet): SavedWallet {
     const old = rows.get(manualPriceKey(p));
     if (!old || p.updatedAt >= old.updatedAt) rows.set(manualPriceKey(p), p);
   }
-  return { address: walletKey(a.address), lastCheckedAt: a.lastCheckedAt > b.lastCheckedAt ? a.lastCheckedAt : b.lastCheckedAt, manualLiquidationPrices: [...rows.values()].sort((a, b) => manualPriceKey(a).localeCompare(manualPriceKey(b))) };
+  const alerts = new Map((a.alerts ?? []).map(p => [alertScopeKey(p), p]));
+  for (const p of b.alerts ?? []) {
+    const old = alerts.get(alertScopeKey(p));
+    if (!old || p.updatedAt >= old.updatedAt) alerts.set(alertScopeKey(p), p);
+  }
+  return { address: walletKey(a.address), lastCheckedAt: a.lastCheckedAt > b.lastCheckedAt ? a.lastCheckedAt : b.lastCheckedAt, manualLiquidationPrices: [...rows.values()].sort((a, b) => manualPriceKey(a).localeCompare(manualPriceKey(b))), ...(a.alerts || b.alerts ? { alerts: [...alerts.values()].sort((a, b) => alertScopeKey(a).localeCompare(alertScopeKey(b))) } : {}) };
 }
 export function mergeWalletHistory(a: WalletHistoryFile, b: WalletHistoryFile): WalletHistoryFile {
   const wallets = new Map<string, SavedWallet>();
@@ -56,13 +62,18 @@ export function parseWalletHistory(value: unknown): WalletHistoryFile {
   const v = value as Record<string, unknown>;
   if (!only(v, ['version', 'wallets']) || v.version !== 1 || !Array.isArray(v.wallets)) return fail();
   const wallets = v.wallets.map(w => {
-    if (!w || typeof w !== 'object' || Array.isArray(w) || !only(w, ['address', 'lastCheckedAt', 'manualLiquidationPrices']) || !validAddress(w.address) || !iso(w.lastCheckedAt) || !Array.isArray(w.manualLiquidationPrices)) return fail();
+    if (!w || typeof w !== 'object' || Array.isArray(w) || !only(w, ['address', 'lastCheckedAt', 'manualLiquidationPrices', 'alerts']) || !validAddress(w.address) || !iso(w.lastCheckedAt) || !Array.isArray(w.manualLiquidationPrices) || w.alerts !== undefined && !Array.isArray(w.alerts)) return fail();
     const manualLiquidationPrices = w.manualLiquidationPrices.map((p: any) => {
       if (!p || typeof p !== 'object' || !iso(p.updatedAt)) return fail();
       const { updatedAt, ...input } = p;
       return { ...parseManualPriceInput(input), updatedAt };
     });
-    return { address: walletKey(w.address), lastCheckedAt: w.lastCheckedAt, manualLiquidationPrices };
+    const alerts = w.alerts?.map((p: any) => {
+      if (!p || typeof p !== 'object' || !iso(p.updatedAt)) return fail();
+      const { updatedAt, ...input } = p;
+      return { ...parsePositionAlertInput(input), updatedAt };
+    });
+    return { address: walletKey(w.address), lastCheckedAt: w.lastCheckedAt, manualLiquidationPrices, ...(alerts ? { alerts } : {}) };
   });
   return mergeWalletHistory({ version: 1, wallets: [] }, { version: 1, wallets });
 }

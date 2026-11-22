@@ -1,11 +1,13 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parsePositionAlertInput, type PositionAlertInput } from '../src/alert-rules.js';
 import { mergeWalletHistory, parseManualPriceInput, parseWalletHistory, walletKey, type ManualPriceInput, type SavedWallet, type WalletHistoryFile, type WalletHistoryResponse } from '../src/wallet-history.js';
 export interface WalletHistoryStore {
   readWallet(address: string): Promise<WalletHistoryResponse>;
   recordCheck(address: string): Promise<WalletHistoryResponse>;
   savePrices(address: string, input: ManualPriceInput): Promise<WalletHistoryResponse>;
+  saveAlerts(address: string, input: PositionAlertInput): Promise<WalletHistoryResponse>;
 }
 export function createWalletHistoryStore(options: { path?: string; token?: () => string | undefined; repository?: string; branch?: string; fetcher?: typeof fetch; now?: () => number } = {}): WalletHistoryStore {
   const path = options.path ?? fileURLToPath(new URL('../analysis/wallet-history.json', import.meta.url));
@@ -59,7 +61,7 @@ export function createWalletHistoryStore(options: { path?: string; token?: () =>
         const latest = attempt === 0 && base ? base : await remote();
         const merged = mergeWalletHistory(latest.data, current!);
         if (JSON.stringify(merged) === JSON.stringify(latest.data)) { await save(merged); pending = false; warning = undefined; return result(key); }
-        const response = await fetcher(endpoint, { method: 'PUT', headers: { ...headers(), 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(8000), body: JSON.stringify({ branch, message: 'Update wallet history and manual collateral prices [skip ci] [skip render]', sha: latest.sha, content: Buffer.from(`${JSON.stringify(merged, null, 2)}\n`).toString('base64') }) });
+        const response = await fetcher(endpoint, { method: 'PUT', headers: { ...headers(), 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(8000), body: JSON.stringify({ branch, message: 'Update wallet history, collateral prices and alert preferences [skip ci] [skip render]', sha: latest.sha, content: Buffer.from(`${JSON.stringify(merged, null, 2)}\n`).toString('base64') }) });
         if ([409, 422].includes(response.status)) continue;
         if (!response.ok) throw new Error('Wallet history write unavailable.');
         await save(merged); pending = false; warning = undefined; return result(key);
@@ -71,7 +73,15 @@ export function createWalletHistoryStore(options: { path?: string; token?: () =>
   const timestamp = () => { clock = Math.max(now(), clock + 1); return new Date(clock).toISOString(); };
   return {
     readWallet: address => serial(() => update(address)),
-    recordCheck: address => serial(() => update(address, old => ({ address: walletKey(address), lastCheckedAt: timestamp(), manualLiquidationPrices: old?.manualLiquidationPrices ?? [] }))),
+    recordCheck: address => serial(() => update(address, old => ({ ...old, address: walletKey(address), lastCheckedAt: timestamp(), manualLiquidationPrices: old?.manualLiquidationPrices ?? [] }))),
+    saveAlerts: (address, input) => serial(() => {
+      const parsed = parsePositionAlertInput(input);
+      return update(address, old => {
+        const at = timestamp();
+        const next: SavedWallet = { address: walletKey(address), lastCheckedAt: old?.lastCheckedAt ?? at, manualLiquidationPrices: [], alerts: [{ ...parsed, updatedAt: at }] };
+        return old ? mergeWalletHistory({ version: 1, wallets: [old] }, { version: 1, wallets: [next] }).wallets[0] : next;
+      });
+    }),
     savePrices: (address, input) => serial(() => {
       const parsed = parseManualPriceInput(input);
       return update(address, old => {
