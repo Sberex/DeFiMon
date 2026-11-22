@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-22T12:49:21.796Z",
+  "updatedAt": "2026-11-22T14:20:16.210Z",
   "wallets": [
     {
       "address": "0x55fa9aac40af97faab697cc74d4da452abf0272c",
@@ -1726,130 +1726,25 @@
           "protocolId": "aave-v3",
           "protocolName": "Aave v3",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-22T09:10:41.659Z",
-          "blockNumber": "26469668",
+          "checkedAt": "2026-11-22T14:20:16.210Z",
+          "blockNumber": "26471212",
           "complete": true,
-          "positions": [
-            {
-              "snapshotAt": "2026-11-22T09:10:41.659Z",
-              "blockNumber": "26469668",
-              "apr": 0.14771803479843118,
-              "netValueUsd": 41241.04795598338,
-              "monthlyNplUsd": 507.6705464238101,
-              "verification": "verified",
-              "position": {
-                "collateralValueUsd": 138349.44879964,
-                "liquidationModel": "unavailable",
-                "marketAddress": "0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8",
-                "id": "aave-horizon-main",
-                "label": "Ethereum Horizon market",
-                "suppliedUsd": 138514.76699969338,
-                "debtUsd": 97273.71904371,
-                "healthFactor": 1.1378156415503768,
-                "risk": "watch",
-                "assets": [
-                  {
-                    "lltv": 0,
-                    "lltvNote": "Effective LLTV uses verified efficiency-mode category membership.",
-                    "supplyRate": {
-                      "apr": 0.04283396504784876,
-                      "note": "Current Aave Horizon liquidity APR, without compounding or reward-token incentives."
-                    },
-                    "borrowRate": {
-                      "apr": 0.059464621778031586,
-                      "note": "Current Aave Horizon borrowing APR; stable and variable debt are weighted by this wallet’s balances. Excludes reward-token incentives."
-                    },
-                    "symbol": "USDC",
-                    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-                    "supplied": 165.339548,
-                    "borrowed": 1.269489,
-                    "priceUsd": 0.99986,
-                    "collateral": false,
-                    "liquidationThreshold": null,
-                    "liquidationPriceUsd": null
-                  },
-                  {
-                    "lltv": 0,
-                    "lltvNote": "Effective LLTV uses verified efficiency-mode category membership.",
-                    "supplyRate": {
-                      "apr": 0.013854172917056366,
-                      "note": "Current Aave Horizon liquidity APR, without compounding or reward-token incentives."
-                    },
-                    "borrowRate": {
-                      "apr": 0.0292437319622095,
-                      "note": "Current Aave Horizon borrowing APR; stable and variable debt are weighted by this wallet’s balances. Excludes reward-token incentives."
-                    },
-                    "symbol": "RLUSD",
-                    "address": "0x8292Bb45bf1Ee4d140127049757C2E0fF06317eD",
-                    "supplied": 0.001799586868434877,
-                    "borrowed": 97272.44973244422,
-                    "priceUsd": 1,
-                    "collateral": false,
-                    "liquidationThreshold": null,
-                    "liquidationPriceUsd": null
-                  },
-                  {
-                    "lltv": 0.8,
-                    "lltvNote": "Effective LLTV uses verified efficiency-mode category membership.",
-                    "supplyRate": {
-                      "apr": 0,
-                      "note": "Current Aave Horizon liquidity APR, without compounding or reward-token incentives."
-                    },
-                    "borrowRate": {
-                      "apr": null,
-                      "note": "Current interest rate could not be read. This is unknown, not zero."
-                    },
-                    "symbol": "mGLOBAL",
-                    "address": "0x7433806912Eae67919e66aea853d46Fa0aef98A8",
-                    "supplied": 134602.56170821696,
-                    "borrowed": 0,
-                    "priceUsd": 1.02783667,
-                    "collateral": true,
-                    "liquidationThreshold": null,
-                    "liquidationPriceUsd": null,
-                    "intrinsicSupplyRate": {
-                      "apr": 0.06454416970294036,
-                      "estimated": true,
-                      "note": "Past-month intrinsic APR estimate: (end mGLOBAL/USD NAV oracle rate ÷ start rate − 1) × 365 ÷ 30 (oracle observations 29.76 days apart). Simple annualization, not compounded APY or the issuer’s current advertised APY. Excludes lending interest and incentives; bridged-token market prices may differ.",
-                      "source": {
-                        "chain": "Ethereum",
-                        "oracle": "0xe034De753a3d855B6daD1A4984de75a5c443E939",
-                        "kind": "chainlink",
-                        "label": "mGLOBAL/USD NAV oracle",
-                        "windowDays": 30,
-                        "blockNumber": "26469660",
-                        "startRound": "18446744073709551749",
-                        "endRound": "18446744073709551779",
-                        "startTimestamp": 1792690979,
-                        "endTimestamp": 1795261883,
-                        "startRate": 1.02241277,
-                        "endRate": 1.02783667
-                      }
-                    }
-                  }
-                ],
-                "notes": [
-                  "Prices come from Aave Horizon’s own oracle. Each liquidation price assumes other prices and balances stay fixed.",
-                  "Efficiency mode is enabled. Health factor is read directly; per-asset liquidation price estimates are unavailable for this mode."
-                ]
-              }
-            }
-          ]
+          "positions": []
         },
         {
           "protocolId": "morpho",
           "protocolName": "Morpho",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-22T09:10:41.659Z",
-          "blockNumber": "26469668",
+          "checkedAt": "2026-11-22T14:20:16.210Z",
+          "blockNumber": "26471212",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-22T09:10:41.659Z",
-              "blockNumber": "26469668",
-              "apr": 0.2758400186658101,
-              "netValueUsd": 29595.994960984972,
-              "monthlyNplUsd": 680.3133168726097,
+              "snapshotAt": "2026-11-22T14:20:16.210Z",
+              "blockNumber": "26471212",
+              "apr": 0.27825126299579184,
+              "netValueUsd": 29624.880327377003,
+              "monthlyNplUsd": 686.9300305993199,
               "verification": "verified",
               "position": {
                 "collateralOracleChecks": [
@@ -1872,54 +1767,54 @@
                 },
                 "id": "morpho-market-0x1e9d614631a7df0ec07fb05b2c8cb2491575fd1a63a33bf187a6afb295a4fc64",
                 "label": "Morpho · PT-reUSD-10DEC2026 / USDC · 0x1e9d6146…",
-                "suppliedUsd": 179798.21343435798,
-                "debtUsd": 150202.218473373,
-                "healthFactor": 1.0963519765625622,
+                "suppliedUsd": 179853.66307403854,
+                "debtUsd": 150228.78274666154,
+                "healthFactor": 1.0964177629827836,
                 "risk": "high",
                 "assets": [
                   {
                     "supplyRate": {
-                      "apr": 0.0707261852842064,
+                      "apr": 0.07029824960677074,
                       "note": "Current Morpho market APR after its fee; excludes reward incentives and the underlying token’s intrinsic yield."
                     },
                     "borrowRate": {
-                      "apr": 0.08681543207251201,
+                      "apr": 0.08645379371784,
                       "note": "Current Morpho IRM borrowing APR at the accrued market state; excludes reward incentives."
                     },
                     "symbol": "USDC",
                     "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                     "supplied": 0,
-                    "borrowed": 150232.672514,
-                    "priceUsd": 0.9997972875,
+                    "borrowed": 150240.339797,
+                    "priceUsd": 0.99992307625,
                     "collateral": false,
                     "liquidationThreshold": null,
                     "liquidationPriceUsd": null
                   },
                   {
                     "supplyRate": {
-                      "apr": 0.11793015009700425,
+                      "apr": 0.11804601695831995,
                       "estimated": true,
                       "pendlePt": {
                         "network": "ethereum",
                         "marketAddress": "0x13285bcbc27f92b47b4edb99d744c07b48c977c0",
                         "expiry": 1796860800,
-                        "updatedAt": "2026-11-22T09:04:00.000Z"
+                        "updatedAt": "2026-11-22T14:19:00.000Z"
                       },
-                      "note": "Pendle Implied APY is used directly as Supply APR for this PT collateral, as requested, without converting APY to APR. Monthly earnings = supplied value × this rate ÷ 12. This estimates PT price appreciation toward expiry rather than an interest payment. Rate observed 2026-11-22T09:04:00.000Z; expiry 2026-12-10T00:00:00.000Z."
+                      "note": "Pendle Implied APY is used directly as Supply APR for this PT collateral, as requested, without converting APY to APR. Monthly earnings = supplied value × this rate ÷ 12. This estimates PT price appreciation toward expiry rather than an interest payment. Rate observed 2026-11-22T14:19:00.000Z; expiry 2026-12-10T00:00:00.000Z."
                     },
                     "symbol": "PT-reUSD-10DEC2026",
                     "address": "0xeCfaFdC7741323a945A163ed068B5a3C43483957",
                     "supplied": 180988.938136,
                     "borrowed": 0,
-                    "priceUsd": 0.9934210084113135,
+                    "priceUsd": 0.993727378735664,
                     "collateral": true,
                     "liquidationThreshold": 0.915,
-                    "liquidationPriceUsd": 0.9069915085207771
+                    "liquidationPriceUsd": 0.907151916073659
                   }
                 ],
                 "liquidationQuote": {
-                  "current": 0.9945835476179953,
-                  "threshold": 0.9071754043149244,
+                  "current": 0.9946939901057873,
+                  "threshold": 0.9072217029691327,
                   "unit": "USDC per PT-reUSD-10DEC2026"
                 },
                 "notes": [
@@ -1936,16 +1831,16 @@
           "protocolId": "aave-v3",
           "protocolName": "Aave v3",
           "chain": "Plasma",
-          "checkedAt": "2026-11-22T09:10:41.169Z",
-          "blockNumber": "38393576",
+          "checkedAt": "2026-11-22T14:20:13.527Z",
+          "blockNumber": "38412144",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-22T09:10:41.169Z",
-              "blockNumber": "38393576",
-              "apr": 0.15658571108552782,
-              "netValueUsd": 28246.17614921526,
-              "monthlyNplUsd": 368.57896481432897,
+              "snapshotAt": "2026-11-22T14:20:13.527Z",
+              "blockNumber": "38412144",
+              "apr": 0.15520753740118254,
+              "netValueUsd": 28240.90672362139,
+              "monthlyNplUsd": 365.2667988791478,
               "verification": "verified",
               "position": {
                 "collateralValueUsd": 267504.12417363,
@@ -1953,26 +1848,26 @@
                 "marketAddress": "0x925a2A7214Ed92428B5b1B090F80b25700095e12",
                 "id": "aave-main",
                 "label": "Plasma main market",
-                "suppliedUsd": 267541.20226058527,
-                "debtUsd": 239295.02611137,
-                "healthFactor": 1.0284534461038097,
+                "suppliedUsd": 267541.2028535814,
+                "debtUsd": 239300.29612996,
+                "healthFactor": 1.028430796868236,
                 "risk": "high",
                 "assets": [
                   {
                     "lltv": 0.78,
                     "lltvNote": "Effective LLTV uses verified efficiency-mode category membership.",
                     "supplyRate": {
-                      "apr": 0.027144133072891395,
+                      "apr": 0.027358833607487677,
                       "note": "Current Aave v3 liquidity APR, without compounding or reward-token incentives."
                     },
                     "borrowRate": {
-                      "apr": 0.037393074454998544,
+                      "apr": 0.03754066620617164,
                       "note": "Current Aave v3 borrowing APR; stable and variable debt are weighted by this wallet’s balances. Excludes reward-token incentives."
                     },
                     "symbol": "USDT0",
                     "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-                    "supplied": 37.140855,
-                    "borrowed": 239700.119313,
+                    "supplied": 37.141449,
+                    "borrowed": 239705.398253,
                     "priceUsd": 0.99831,
                     "collateral": false,
                     "liquidationThreshold": null,
@@ -1998,7 +1893,7 @@
                     "liquidationThreshold": null,
                     "liquidationPriceUsd": null,
                     "intrinsicSupplyRate": {
-                      "apr": 0.04998023075210765,
+                      "apr": 0.04996438742189951,
                       "estimated": true,
                       "note": "Past-month sUSDe intrinsic APR: (current on-chain rate − rate 30 days ago) × 365 ÷ (30 × rate 30 days ago). Simple annualization, not compounded APY. Uses sUSDe/USDe on-chain redemption rate; market prices, lending interest and incentives are separate. Past growth is not a promised future return.",
                       "source": {
@@ -2006,12 +1901,12 @@
                         "oracle": "0x9d39a5de30e57443bff2a8307a4256c8797a3497",
                         "kind": "erc4626",
                         "label": "sUSDe/USDe on-chain redemption rate",
-                        "blockNumber": "26469660",
-                        "startBlockNumber": "26254331",
-                        "startTimestamp": 1792746515,
-                        "endTimestamp": 1795338515,
-                        "startRate": 1.254425980392478,
-                        "endRate": 1.2595791173756115,
+                        "blockNumber": "26471213",
+                        "startBlockNumber": "26255881",
+                        "startTimestamp": 1792765199,
+                        "endTimestamp": 1795357199,
+                        "startRate": 1.2544632274399061,
+                        "endRate": 1.2596148838811938,
                         "windowDays": 30
                       }
                     }
@@ -2029,8 +1924,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-22T09:10:41.169Z",
-          "blockNumber": "38393576",
+          "checkedAt": "2026-11-22T14:20:13.527Z",
+          "blockNumber": "38412144",
           "complete": false,
           "positions": []
         }
