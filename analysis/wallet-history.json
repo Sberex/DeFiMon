@@ -21,6 +21,29 @@
           },
           "updatedAt": "2026-11-21T10:52:04.586Z"
         }
+      ],
+      "alerts": [
+        {
+          "network": "ethereum",
+          "protocol": "morpho",
+          "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+          "rules": {
+            "borrowAprAboveSupplyApr": false,
+            "utilizationAbove": {
+              "enabled": false,
+              "thresholdPercent": 89.99
+            },
+            "healthFactorBelow": {
+              "enabled": false,
+              "threshold": 1.01
+            },
+            "positionAprBelow": {
+              "enabled": false,
+              "thresholdPercent": null
+            }
+          },
+          "updatedAt": "2026-11-22T14:22:02.821Z"
+        }
       ]
     },
     {
