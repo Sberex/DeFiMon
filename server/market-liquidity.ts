@@ -8,7 +8,7 @@ export function liquidityQuote(raw: bigint, decimals: number, symbol: string, to
   if (typeof raw !== 'bigint' || raw < 0n || !Number.isInteger(decimals) || decimals < 0 || decimals > 36 || typeof symbol !== 'string' || !symbol.length || symbol.length > 128) throw new Error('Invalid liquidity metadata');
   const amount = Number(formatUnits(raw, decimals));
   if (!Number.isFinite(amount)) throw new Error('Invalid liquidity amount');
-  return { amount, symbol, token, note };
+  return { amount, symbol, token, note, rawAmount: String(raw), decimals };
 }
 export async function tokenMetadata(client: ChainClient, token: Address, blockNumber: bigint) {
   const [decimals, symbol] = await Promise.all([

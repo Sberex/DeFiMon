@@ -25,6 +25,17 @@ const adapterAbi = parseAbi([
 ]);
 const erc20 = parseAbi(['function balanceOf(address) view returns (uint256)']);
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+export async function accruedMorphoMarket(client: ChainClient, morphoBlue: Address, id: Hex, blockNumber: bigint) {
+  const params = await client.readContract({ address: morphoBlue, abi: core, functionName: 'idToMarketParams', args: [id], blockNumber });
+  if (!same(keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [params.loanToken, params.collateralToken, params.oracle, params.irm, params.lltv])), id)) throw new Error('Market identity mismatch');
+  const calls = [encodeFunctionData({ abi: core, functionName: 'accrueInterest', args: [params] }), encodeFunctionData({ abi: core, functionName: 'market', args: [id] })];
+  const response = await client.call({ to: MULTICALL, data: encodeFunctionData({ abi: multi, functionName: 'aggregate3', args: [calls.map(callData => ({ target: morphoBlue, allowFailure: false, callData }))] }), blockNumber });
+  if (!response.data) throw new Error('Missing accrued market');
+  const results = decodeFunctionResult({ abi: multi, functionName: 'aggregate3', data: response.data });
+  if (results.length !== 2 || results.some(r => !r.success)) throw new Error('Market simulation failed');
+  const state = decodeFunctionResult({ abi: core, functionName: 'market', data: results[1].returnData });
+  return { params, state };
+}
 export function morphoSupplyApr(borrowApr: number, supply: bigint, borrow: bigint, fee: bigint) {
   if (fee > 10n ** 18n) throw new Error('Invalid market fee');
   return supply === 0n ? 0 : borrowApr * Number(borrow) / Number(supply) * (1 - Number(fee) / 1e18);
@@ -53,14 +64,7 @@ export function createMorphoRates(client: ChainClient, blockNumber: bigint, morp
   const markets = new Map<string, Promise<{ params: Params; state: Market; apr: number; borrowApr: number | null }>>();
   function marketData(id: Hex) {
     if (!markets.has(id)) markets.set(id, (async () => {
-      const params = await client.readContract({ address: morphoBlue, abi: core, functionName: 'idToMarketParams', args: [id], blockNumber });
-      if (!same(keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [params.loanToken, params.collateralToken, params.oracle, params.irm, params.lltv])), id)) throw new Error('Market identity mismatch');
-      const calls = [encodeFunctionData({ abi: core, functionName: 'accrueInterest', args: [params] }), encodeFunctionData({ abi: core, functionName: 'market', args: [id] })];
-      const response = await client.call({ to: MULTICALL, data: encodeFunctionData({ abi: multi, functionName: 'aggregate3', args: [calls.map(callData => ({ target: morphoBlue, allowFailure: false, callData }))] }), blockNumber });
-      if (!response.data) throw new Error('Missing accrued market');
-      const results = decodeFunctionResult({ abi: multi, functionName: 'aggregate3', data: response.data });
-      if (results.length !== 2 || results.some(r => !r.success)) throw new Error('Market simulation failed');
-      const state = decodeFunctionResult({ abi: core, functionName: 'market', data: results[1].returnData });
+      const { params, state } = await accruedMorphoMarket(client, morphoBlue, id, blockNumber);
       const interest = await market(params, state);
       if (interest.supplyRate.apr === null) throw new Error('Market rate unavailable');
       return { params, state, apr: interest.supplyRate.apr, borrowApr: interest.borrowRate.apr };
