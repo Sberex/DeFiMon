@@ -83,3 +83,6 @@ main{max-width:1600px}.dashboard-layout{display:grid;grid-template-columns:210px
 .cookbook-assets h3 { font-size: 15px; margin: 0 0 8px; }
 .cookbook-assets > p { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 0 0 16px; }
 .cookbook-assets td { vertical-align: top; }
+.cookbook-asset-networks { margin-top: 10px; white-space: normal; }
+.cookbook-asset-networks ul { list-style: none; padding: 0; margin: 8px 0 0; }
+.cookbook-asset-networks li { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 8px 0; border-top: 1px solid var(--border); }

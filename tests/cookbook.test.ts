@@ -99,3 +99,35 @@ it('lists unique supplied contracts by chain with latest intrinsic rates, PT app
   saved = updateCookbook(saved, closed);
   expect(cookbookSuppliedAssets(cookbookPositions(saved))).toMatchObject([{ intrinsicApr: .08 }]);
 });
+
+it('groups configured cross-chain contracts, preserves network rates and sorts intrinsic APR descending with unknowns last', async () => {
+  const { cookbookSuppliedAssets } = await import('../src/cookbook');
+  const { configuredTokenRegistry } = await import('../server/token-registry');
+  const template = cookbookPositions(updateCookbook(emptyCookbook(), snapshot(.3)))[0];
+  function entry(chain: typeof template.chain, contract: string, apr: number | null, time = '2026-11-20T10:00:00.000Z') {
+    const row = structuredClone(template); row.chain = chain; row.snapshotAt = time;
+    row.position.assets = [{ ...row.position.assets[0], address: contract.toUpperCase().replace('0X', '0x'), symbol: 'Same ticker', intrinsicSupplyRate: { apr, note: '', source: { chain, oracle: '' } } }];
+    return row;
+  }
+  const susdai = configuredTokenRegistry.sUSDai.addresses, usdc = configuredTokenRegistry.USDC.addresses;
+  const unknown = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd';
+  const entries = [
+    entry('Ethereum', susdai.ethereum!, .08, '2026-11-20T12:00:00.000Z'),
+    entry('Arbitrum', susdai.arbitrum!, .079), entry('Plasma', susdai.plasma!, .081),
+    entry('Ethereum', usdc.ethereum!, .10), entry('Arbitrum', usdc.arbitrum!, .09, '2026-11-20T11:00:00.000Z'),
+    entry('Ethereum', unknown, .20), entry('Base', unknown, .03),
+    entry('Ethereum', '0x5555555555555555555555555555555555555555', 0),
+    entry('Ethereum', '0x6666666666666666666666666666666666666666', -.01),
+    entry('Ethereum', '0x7777777777777777777777777777777777777777', null),
+  ];
+  const rows = cookbookSuppliedAssets(entries);
+  expect(rows).toHaveLength(7);
+  expect(rows.map(x => x.intrinsicApr)).toEqual([.20, .09, .08, .03, 0, -.01, null]);
+  const grouped = rows.find(x => x.address === susdai.ethereum)!;
+  expect(grouped.chain).toBe('Ethereum');
+  expect(grouped.additionalNetworks.map(x => [x.chain, x.intrinsicApr])).toEqual([['Arbitrum', .079], ['Plasma', .081]]);
+  const stable = rows.find(x => x.id === 'configured:USDC')!;
+  expect(stable.chain).toBe('Arbitrum'); expect(stable.additionalNetworks[0].address).toBe(usdc.ethereum);
+  expect(rows.filter(x => x.address === unknown)).toHaveLength(2);
+  expect(cookbookSuppliedAssets(entries.filter(x => x.chain !== 'Ethereum')).find(x => x.id === grouped.id)?.additionalNetworks).toHaveLength(1);
+});

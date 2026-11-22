@@ -40,11 +40,13 @@ export function Cookbook({ revision, renderPosition }: { revision: object | null
   const highestApr = entries.reduce<number | null>((highest, entry) => highest === null ? entry.apr : Math.max(highest, entry.apr), null);
   const threshold = result?.data.minimumApr ?? COOKBOOK_MIN_APR;
   const money = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(value);
+  const intrinsicApr = (value: number | null) => value === null ? 'Unavailable' : value === 0 ? '0%' : `${(value * 100).toFixed(2)}%`;
+  const tokenLink = (asset: { address: string; chain: keyof typeof explorers }) => /^0x[\da-f]{40}$/i.test(asset.address) ? <a href={`${explorers[asset.chain]}/token/${asset.address}`} target="_blank" rel="noreferrer" title={asset.address}>{asset.address.slice(0, 8)}…{asset.address.slice(-6)} <ExternalLinkIcon /></a> : asset.address;
   return <section className="cookbook" aria-label="Cookbook">
     <div className="section-label"><h2>Cookbook</h2><span>Position APR &gt; 14%</span></div>
     <section className="summary-grid cookbook-summary" aria-label="Cookbook summary">
       <div className="summary"><span>Number of positions</span><strong>{result ? entries.length.toLocaleString('en-US') : '—'}</strong><small>Saved position snapshots</small></div>
-      <div className="summary"><span>Number of collateral assets</span><strong>{result ? suppliedAssets.length.toLocaleString('en-US') : '—'}</strong><small>Unique supplied assets by chain and contract</small></div>
+      <div className="summary"><span>Number of collateral assets</span><strong>{result ? suppliedAssets.length.toLocaleString('en-US') : '—'}</strong><small>Unique assets across configured networks</small></div>
       <div className="summary"><span>Number of addresses</span><strong>{result ? addresses.toLocaleString('en-US') : '—'}</strong><small>Unique wallets with saved positions</small></div>
       <div className="summary cookbook-total-value"><span>Total Net Value</span><strong>{result ? money(totalNetValue) : '—'}</strong><small>Sum of saved position net values</small></div>
       <div className="summary"><span>Highest APR</span><strong>{highestApr === null ? '—' : `${(highestApr * 100).toFixed(2)}%`}</strong><small>Among saved snapshots</small></div>
@@ -52,10 +54,10 @@ export function Cookbook({ revision, renderPosition }: { revision: object | null
     </section>
     {result && <section className="cookbook-assets" aria-label="Cookbook supplied assets">
       <h3>Supplied assets</h3>
-      <p>Intrinsic APR from each asset’s latest saved snapshot, including Pendle PT Implied APY. Assets without intrinsic yield show 0%.</p>
-      {suppliedAssets.length ? <div className="table-wrap"><table><thead><tr><th>Asset</th><th>Network</th><th>Intrinsic APR</th></tr></thead><tbody>{suppliedAssets.map(asset => <tr key={`${asset.chain}:${asset.address}`}>
-        <td><strong>{asset.symbol}</strong><small>{/^0x[\da-f]{40}$/i.test(asset.address) ? <a href={`${explorers[asset.chain]}/token/${asset.address}`} target="_blank" rel="noreferrer" title={asset.address}>{asset.address.slice(0, 8)}…{asset.address.slice(-6)} <ExternalLinkIcon /></a> : asset.address}</small></td>
-        <td>{asset.chain}</td><td title={`Snapshot: ${asset.snapshotAt}`}><strong>{asset.intrinsicApr === null ? 'Unavailable' : asset.intrinsicApr === 0 ? '0%' : `${(asset.intrinsicApr * 100).toFixed(2)}%`}</strong></td>
+      <p>Sorted by intrinsic APR from each asset’s latest saved snapshot, including Pendle PT Implied APY. Configured cross-network matches count once; expand additional networks to see their saved rates. Assets without intrinsic yield show 0%.</p>
+      {suppliedAssets.length ? <div className="table-wrap"><table><thead><tr><th>Asset</th><th>Network</th><th>Intrinsic APR ↓</th></tr></thead><tbody>{suppliedAssets.map(asset => <tr key={asset.id}>
+        <td><strong>{asset.symbol}</strong><small>{tokenLink(asset)}</small>{asset.additionalNetworks.length > 0 && <details className="cookbook-asset-networks"><summary>Additional networks ({asset.additionalNetworks.length})</summary><ul>{asset.additionalNetworks.map(network => <li key={`${network.chain}:${network.address}`}><strong>{network.chain}</strong><span>{tokenLink(network)}</span><span title={`Snapshot: ${network.snapshotAt}`}>{intrinsicApr(network.intrinsicApr)}</span></li>)}</ul></details>}</td>
+        <td>{asset.chain}</td><td title={`Snapshot: ${asset.snapshotAt}`}><strong>{intrinsicApr(asset.intrinsicApr)}</strong></td>
       </tr>)}</tbody></table></div> : <p>No supplied assets in the saved positions.</p>}
     </section>}
     <p className="recommendations-intro">Snapshots of lending positions from analysed wallets. APR is monthly NPL × 12 ÷ net value, including the verified intrinsic yield and matched rewards shown in the snapshot. Rates, balances and risk can change after the snapshot.</p>

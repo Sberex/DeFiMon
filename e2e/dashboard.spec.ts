@@ -2059,3 +2059,46 @@ test('Cookbook lists supplied assets below its summary with intrinsic and PT rat
   await expect(assets).toContainText('No supplied assets');
   await expect(count.locator('strong')).toHaveText('0');
 });
+
+test('Cookbook counts configured cross-chain collateral once, expands used networks, and sorts by intrinsic APR', async ({ page }) => {
+  const { emptyCookbook, updateCookbook } = await import('../src/cookbook');
+  const { snapshot } = await import('../tests/fixtures/cookbook');
+  const first = snapshot(.3), arb = snapshot(.3, '2026-11-20T11:00:00.000Z', '0x4444444444444444444444444444444444444444'), plasma = snapshot(.3, '2026-11-20T09:00:00.000Z');
+  arb.chain = 'Arbitrum'; plasma.chain = 'Plasma';
+  for (const [portfolio, chain, rate] of [[first, 'Ethereum', .08], [arb, 'Arbitrum', .082], [plasma, 'Plasma', .079]] as const) {
+    const asset = portfolio.protocols[0].positions[0].assets[0];
+    Object.assign(asset, { address: '0x0B2b2B2076d95dda7817e785989fE353fe955ef9', symbol: 'sUSDai', intrinsicSupplyRate: { apr: rate, note: '', source: { chain, oracle: '' } } });
+  }
+  const collateral = first.protocols[0].positions[0].assets[0];
+  first.protocols[0].positions[0].assets.push({ ...collateral, address: '0x5555555555555555555555555555555555555555', symbol: 'Higher yield', intrinsicSupplyRate: { apr: .15, note: '', source: { chain: 'Ethereum', oracle: '' } } });
+  first.protocols[0].positions[0].assets.push({ ...collateral, address: '0x6666666666666666666666666666666666666666', symbol: 'Plain', intrinsicSupplyRate: undefined });
+  let saved = updateCookbook(updateCookbook(updateCookbook(emptyCookbook(), first), arb), plasma);
+  await page.route('**/api/cookbook', route => route.fulfill({ json: { data: saved, persistence: { mode: 'github', synced: true } } }));
+  await page.goto('/'); await page.getByRole('button', { name: 'Cookbook', exact: true }).click();
+  const cookbook = page.getByRole('region', { name: 'Cookbook', exact: true });
+  const assets = cookbook.getByRole('region', { name: 'Cookbook supplied assets', exact: true });
+  await expect(assets.locator('tbody > tr > td:first-child > strong')).toHaveText(['Higher yield', 'sUSDai', 'Plain']);
+  await expect(assets.locator('tbody > tr > td:last-child')).toHaveText(['15.00%', '8.20%', '0%']);
+  const count = cookbook.getByRole('region', { name: 'Cookbook summary' }).locator('.summary').filter({ hasText: 'Number of collateral assets' }).locator('strong');
+  await expect(count).toHaveText('3');
+  const row = assets.locator('tbody > tr').filter({ has: page.locator('td:first-child > strong', { hasText: 'sUSDai' }) });
+  await expect(row.locator('td').nth(1)).toHaveText('Arbitrum');
+  const extra = row.locator('details');
+  await expect(extra.locator('li').first()).toBeHidden();
+  await extra.getByText('Additional networks (2)', { exact: true }).click();
+  await expect(extra.locator('li')).toHaveCount(2);
+  await expect(extra.locator('li').nth(0)).toContainText('Ethereum');
+  await expect(extra.locator('li').nth(0)).toContainText('8.00%');
+  await expect(extra.locator('li').nth(1)).toContainText('Plasma');
+  await expect(extra.locator('li').nth(1)).toContainText('7.90%');
+  await expect(extra.locator('a').nth(1)).toHaveAttribute('href', /plasmascan.to\/token\//);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await assets.screenshot({ path: '/tmp/cookbook-grouped-assets-mobile.png' });
+  arb.updatedAt = '2026-11-20T12:00:00.000Z'; arb.protocols[0].positions = [];
+  saved = updateCookbook(saved, arb);
+  await cookbook.getByRole('button', { name: 'Reload snapshots' }).click();
+  await expect(count).toHaveText('3');
+  await expect(row.locator('td').nth(1)).toHaveText('Ethereum');
+  await expect(extra.locator('summary')).toHaveText('Additional networks (1)');
+});

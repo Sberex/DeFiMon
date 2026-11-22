@@ -2,6 +2,16 @@ import type { ChainName, Portfolio, Position } from './types';
 import { annualizedNplApr, positionMonthlyInterest } from './monthly-interest';
 import { isBadDebtPosition } from './risk-assessment';
 import { networkNames, portfolioNetwork } from './networks';
+import tokenMatches from '../config/token-matches.json' with { type: 'json' };
+
+// Only explicit configured chain/contract pairs establish cross-network identity.
+const configuredAssetGroups = new Map<string, string>();
+for (const [group, contracts] of Object.entries(tokenMatches as Record<string, Record<string, unknown>>)) {
+  for (const [network, chain] of Object.entries(networkNames)) {
+    const contract = contracts[network];
+    if (typeof contract === 'string' && /^0x[\da-f]{40}$/i.test(contract)) configuredAssetGroups.set(`${chain}:${contract.toLowerCase()}`, group);
+  }
+}
 export const COOKBOOK_MIN_APR = .14;
 export interface CookbookPosition {
   snapshotAt: string; blockNumber?: string | null; apr: number; netValueUsd: number; monthlyNplUsd: number;
@@ -104,9 +114,10 @@ export function cookbookPositions(file: CookbookFile) {
   return file.wallets.flatMap(w => w.scopes.flatMap(s => s.positions.map(p => ({ ...p, address: w.address, protocolId: s.protocolId, protocolName: s.protocolName, chain: s.chain, checkedAt: s.checkedAt, blockNumber: p.blockNumber ?? s.blockNumber })))).sort((a, b) => b.apr - a.apr || b.netValueUsd - a.netValueUsd);
 }
 
-/** One supplied asset per chain/contract, with the latest saved intrinsic rate. */
+/** Configured cross-chain identities count once; unknown contracts stay separate. */
 export function cookbookSuppliedAssets(entries: ReturnType<typeof cookbookPositions>) {
-  const assets = new Map<string, { address: string; symbol: string; chain: ChainName; intrinsicApr: number | null; snapshotAt: string }>();
+  type NetworkAsset = { address: string; symbol: string; chain: ChainName; intrinsicApr: number | null; snapshotAt: string };
+  const assets = new Map<string, NetworkAsset>();
   for (const entry of entries) for (const asset of entry.position.assets) {
     if (!finite(asset.supplied) || asset.supplied <= 0 || typeof asset.address !== 'string' || !asset.address) continue;
     const key = `${entry.chain}:${asset.address.toLowerCase()}`;
@@ -117,5 +128,14 @@ export function cookbookSuppliedAssets(entries: ReturnType<typeof cookbookPositi
     const rate = asset.supplyRate?.pendlePt ? asset.supplyRate : asset.intrinsicSupplyRate;
     assets.set(key, { address: asset.address.toLowerCase(), symbol: asset.symbol, chain: entry.chain, intrinsicApr: rate ? finite(rate.apr) ? rate.apr : null : 0, snapshotAt: entry.snapshotAt });
   }
-  return [...assets.values()].sort((a, b) => a.symbol.localeCompare(b.symbol) || a.chain.localeCompare(b.chain) || a.address.localeCompare(b.address));
+  const groups = new Map<string, NetworkAsset[]>();
+  for (const asset of assets.values()) {
+    const contract = `${asset.chain}:${asset.address}`, configured = configuredAssetGroups.get(contract);
+    const key = configured === undefined ? `contract:${contract}` : `configured:${configured}`;
+    groups.set(key, [...(groups.get(key) ?? []), asset]);
+  }
+  return [...groups].map(([id, networks]) => {
+    networks.sort((a, b) => Date.parse(b.snapshotAt) - Date.parse(a.snapshotAt) || a.chain.localeCompare(b.chain));
+    return { ...networks[0], id, additionalNetworks: networks.slice(1) };
+  }).sort((a, b) => a.intrinsicApr === null && b.intrinsicApr !== null ? 1 : b.intrinsicApr === null && a.intrinsicApr !== null ? -1 : (b.intrinsicApr ?? 0) - (a.intrinsicApr ?? 0) || a.symbol.localeCompare(b.symbol) || a.id.localeCompare(b.id));
 }
