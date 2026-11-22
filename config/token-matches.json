@@ -5541,9 +5541,22 @@
     "bsc": "0x59769630b236398c2471eb26e6a529448030d94f"
   },
   "MGLOBAL": {
-    "_category": "Other",
+    "_category": "Savings stablecoin",
     "avalanche": "0x25c2067d8b04931a6e2eb078ea8d65c8b8500031",
-    "ethereum": "0x7433806912eae67919e66aea853d46fa0aef98a8"
+    "ethereum": "0x7433806912eae67919e66aea853d46fa0aef98a8",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0xe034De753a3d855B6daD1A4984de75a5c443E939",
+        "token": "0x7433806912eae67919e66aea853d46fa0aef98a8",
+        "description": "mGlobal NAV - Aave Llamaguard",
+        "decimals": 8,
+        "history": "rounds",
+        "label": "mGLOBAL/USD NAV oracle",
+        "evidence": "User-specified Ethereum oracle. AaveV3EthereumHorizon.sol at bgd-labs/aave-address-book@dae05acef38c4d2305776695ac81c3cab7437e29 identifies mGLOBAL_UNDERLYING = 0x7433806912Eae67919e66aea853d46Fa0aef98A8 and mGLOBAL_ORACLE = 0xe034De753a3d855B6daD1A4984de75a5c443E939. Verified on-chain decimals() = 8 and description() = mGlobal NAV - Aave Llamaguard. https://etherscan.io/address/0xe034De753a3d855B6daD1A4984de75a5c443E939#readContract"
+      }
+    ]
   },
   "CX": {
     "_category": "Other",
