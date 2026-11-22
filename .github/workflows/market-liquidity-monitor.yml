@@ -1,12 +1,13 @@
 name: Track market liquidity alerts
 on:
+  # Offset checks from the top of the hour; GitHub may still delay cron events.
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/liquidity-alerts.yml'
+      - '.github/workflows/market-liquidity-monitor.yml'
       - 'scripts/track-liquidity.ts'
       - 'server/liquidity-alert-*.ts'
 permissions:
