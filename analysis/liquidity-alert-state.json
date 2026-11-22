@@ -1,5 +1,31 @@
 {
   "version": 1,
-  "lastRunAt": null,
-  "watches": []
+  "lastRunAt": "2026-11-22T16:16:11.689Z",
+  "watches": [
+    {
+      "watch": {
+        "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
+        "network": "ethereum",
+        "protocol": "morpho",
+        "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+        "ruleUpdatedAt": "2026-11-22T15:48:36.392Z"
+      },
+      "checkedAt": "2026-11-22T16:16:11.309Z",
+      "status": "ok",
+      "baselines": [
+        {
+          "market": "0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+          "marketAddress": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+          "label": "Market 0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+          "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "symbol": "USDC",
+          "decimals": 6,
+          "rawAmount": "98321771075",
+          "note": "Accrued market loan assets supplied minus borrowed; excludes collateral TVL.",
+          "checkedAt": "2026-11-22T16:16:11.309Z",
+          "blockNumber": "26471791"
+        }
+      ]
+    }
+  ]
 }
