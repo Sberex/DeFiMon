@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-22T08:59:27.581Z",
+  "updatedAt": "2026-11-22T09:00:25.369Z",
   "wallets": [
     {
       "address": "0x55fa9aac40af97faab697cc74d4da452abf0272c",
@@ -1726,16 +1726,16 @@
           "protocolId": "morpho",
           "protocolName": "Morpho",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-22T08:59:27.581Z",
-          "blockNumber": "26469612",
+          "checkedAt": "2026-11-22T09:00:25.369Z",
+          "blockNumber": "26469617",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-22T08:59:27.581Z",
-              "blockNumber": "26469612",
-              "apr": 0.286469347223942,
-              "netValueUsd": 29591.788782720076,
-              "monthlyNplUsd": 706.4283679812158,
+              "snapshotAt": "2026-11-22T09:00:25.369Z",
+              "blockNumber": "26469617",
+              "apr": 0.2864734801727522,
+              "netValueUsd": 29591.763970009255,
+              "monthlyNplUsd": 706.4379674116008,
               "verification": "verified",
               "position": {
                 "collateralOracleChecks": [
@@ -1759,23 +1759,23 @@
                 "id": "morpho-market-0x1e9d614631a7df0ec07fb05b2c8cb2491575fd1a63a33bf187a6afb295a4fc64",
                 "label": "Morpho · PT-reUSD-10DEC2026 / USDC · 0x1e9d6146…",
                 "suppliedUsd": 179798.21343435798,
-                "debtUsd": 150206.4246516379,
-                "healthFactor": 1.096323737803734,
+                "debtUsd": 150206.44946434873,
+                "healthFactor": 1.096323792489228,
                 "risk": "high",
                 "assets": [
                   {
                     "supplyRate": {
-                      "apr": 0.07073141406963404,
+                      "apr": 0.07073077978957254,
                       "note": "Current Morpho market APR after its fee; excludes reward incentives and the underlying token’s intrinsic yield."
                     },
                     "borrowRate": {
-                      "apr": 0.086823300115296,
+                      "apr": 0.086822518873968,
                       "note": "Current Morpho IRM borrowing APR at the accrued market state; excludes reward incentives."
                     },
                     "symbol": "USDC",
                     "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
                     "supplied": 0,
-                    "borrowed": 150232.389616,
+                    "borrowed": 150232.414433,
                     "priceUsd": 0.999827168,
                     "collateral": false,
                     "liquidationThreshold": null,
@@ -1800,12 +1800,12 @@
                     "priceUsd": 0.9934210084113135,
                     "collateral": true,
                     "liquidationThreshold": 0.915,
-                    "liquidationPriceUsd": 0.9070169073997575
+                    "liquidationPriceUsd": 0.9070170572305539
                   }
                 ],
                 "liquidationQuote": {
-                  "current": 0.9945560572864754,
-                  "threshold": 0.9071736960439921,
+                  "current": 0.9945562711903609,
+                  "threshold": 0.9071738459006886,
                   "unit": "USDC per PT-reUSD-10DEC2026"
                 },
                 "notes": [
@@ -1822,16 +1822,16 @@
           "protocolId": "aave-v3",
           "protocolName": "Aave v3",
           "chain": "Plasma",
-          "checkedAt": "2026-11-22T08:59:27.533Z",
-          "blockNumber": "38392902",
+          "checkedAt": "2026-11-22T09:00:24.835Z",
+          "blockNumber": "38392958",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-22T08:59:27.533Z",
-              "blockNumber": "38392902",
-              "apr": 0.15659175770855838,
-              "netValueUsd": 28246.367366512422,
-              "monthlyNplUsd": 368.5956929003203,
+              "snapshotAt": "2026-11-22T09:00:24.835Z",
+              "blockNumber": "38392958",
+              "apr": 0.1565915365058213,
+              "netValueUsd": 28246.35147940906,
+              "monthlyNplUsd": 368.5949649036786,
               "verification": "verified",
               "position": {
                 "collateralValueUsd": 267504.12417363,
@@ -1839,26 +1839,26 @@
                 "marketAddress": "0x925a2A7214Ed92428B5b1B090F80b25700095e12",
                 "id": "aave-main",
                 "label": "Plasma main market",
-                "suppliedUsd": 267541.2022386224,
-                "debtUsd": 239294.83487211,
-                "healthFactor": 1.0284542680215751,
+                "suppliedUsd": 267541.20224061905,
+                "debtUsd": 239294.85076121,
+                "healthFactor": 1.0284541997325474,
                 "risk": "high",
                 "assets": [
                   {
                     "lltv": 0.78,
                     "lltvNote": "Effective LLTV uses verified efficiency-mode category membership.",
                     "supplyRate": {
-                      "apr": 0.027143885606490323,
+                      "apr": 0.027143935015000526,
                       "note": "Current Aave v3 liquidity APR, without compounding or reward-token incentives."
                     },
                     "borrowRate": {
-                      "apr": 0.03739290400286758,
+                      "apr": 0.03739293803496721,
                       "note": "Current Aave v3 borrowing APR; stable and variable debt are weighted by this wallet’s balances. Excludes reward-token incentives."
                     },
                     "symbol": "USDT0",
                     "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-                    "supplied": 37.140833,
-                    "borrowed": 239699.92775,
+                    "supplied": 37.140835,
+                    "borrowed": 239699.943666,
                     "priceUsd": 0.99831,
                     "collateral": false,
                     "liquidationThreshold": null,
@@ -1915,8 +1915,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-22T08:59:27.533Z",
-          "blockNumber": "38392902",
+          "checkedAt": "2026-11-22T09:00:24.835Z",
+          "blockNumber": "38392958",
           "complete": false,
           "positions": []
         }
