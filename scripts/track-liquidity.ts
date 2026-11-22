@@ -22,8 +22,9 @@ try {
     }
   }));
   const runAt = new Date().toISOString();
-  const next = advanceLiquidityAlerts(history, state, notifications, observations, runAt);
-  const summary = publish ? await publishLiquidityObservations(observations, runAt, { token: process.env.GITHUB_TOKEN ?? '', repository: process.env.GITHUB_REPOSITORY ?? 'Sberex/DeFiMon', branch: process.env.LIQUIDITY_TRACKER_BRANCH ?? 'main' }) : { committed: false, added: next.added, watches: watches.length };
+  const runEvent = ['schedule', 'workflow_dispatch', 'push'].includes(process.env.GITHUB_EVENT_NAME ?? '') ? process.env.GITHUB_EVENT_NAME as 'schedule' | 'workflow_dispatch' | 'push' : 'local';
+  const next = advanceLiquidityAlerts(history, state, notifications, observations, runAt, runEvent);
+  const summary = publish ? await publishLiquidityObservations(observations, runAt, { token: process.env.GITHUB_TOKEN ?? '', repository: process.env.GITHUB_REPOSITORY ?? 'Sberex/DeFiMon', branch: process.env.LIQUIDITY_TRACKER_BRANCH ?? 'main', eventName: runEvent }) : { committed: false, added: next.added, watches: watches.length };
   const errors = observations.filter(o => ['error', 'unsupported'].includes(o.status));
   console.log(JSON.stringify({ mode: publish ? 'publish' : 'dry-run', checkedAt: runAt, ...summary, successful: observations.filter(o => o.status === 'ok').length, inactive: observations.filter(o => o.status === 'inactive').length, errors: errors.map(o => ({ address: o.watch.address, network: o.watch.network, protocol: o.watch.protocol, positionId: o.watch.positionId, status: o.status, message: o.message })), observations: observations.filter(o => o.status === 'ok').map(o => ({ address: o.watch.address, network: o.watch.network, protocol: o.watch.protocol, positionId: o.watch.positionId, blockNumber: o.blockNumber, readings: o.readings })) }, null, 2));
   if (process.env.GITHUB_STEP_SUMMARY) await writeFile(process.env.GITHUB_STEP_SUMMARY, `### Liquidity alerts\n\nChecked ${watches.length} enabled positions: ${observations.filter(o => o.status === 'ok').length} successful, ${errors.length} unavailable, ${summary.added} new increase notifications.\n\nNotifications: [${LIQUIDITY_NOTIFICATIONS_PATH}](https://github.com/${process.env.GITHUB_REPOSITORY ?? 'Sberex/DeFiMon'}/blob/main/${LIQUIDITY_NOTIFICATIONS_PATH})\n`, { flag: 'a' });

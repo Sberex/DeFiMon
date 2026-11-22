@@ -5,7 +5,7 @@ import { alertScopeKey, defaultAlertRules } from '../src/alert-rules.js';
 import type { LiquidityObservation, LiquidityReading, LiquidityWatch } from './liquidity-alert-reader.js';
 export interface LiquidityBaseline extends LiquidityReading { checkedAt: string; blockNumber: string }
 export interface LiquidityWatchState { watch: LiquidityWatch; checkedAt: string; status: LiquidityObservation['status'] | 'pending'; message?: string; baselines: LiquidityBaseline[] }
-export interface LiquidityTrackerState { version: 1; lastRunAt: string | null; watches: LiquidityWatchState[] }
+export interface LiquidityTrackerState { version: 1; lastRunAt: string | null; lastRunEvent?: string; lastScheduledRunAt?: string | null; watches: LiquidityWatchState[] }
 export interface LiquidityNotification {
   id: string; type: 'available-liquidity-increased'; address: string; network: LiquidityWatch['network']; protocol: string; positionId: string;
   market: string; marketAddress: string; marketLabel: string; token: string; symbol: string; decimals: number;
@@ -27,7 +27,7 @@ function validReading(q: LiquidityReading) {
 }
 export function parseLiquidityState(value: unknown): LiquidityTrackerState {
   const f = value as LiquidityTrackerState;
-  if (!f || f.version !== 1 || !(f.lastRunAt === null || iso(f.lastRunAt)) || !Array.isArray(f.watches)) throw Error('Invalid tracker state; existing file was not replaced.');
+  if (!f || f.version !== 1 || !(f.lastRunAt === null || iso(f.lastRunAt)) || f.lastScheduledRunAt !== undefined && f.lastScheduledRunAt !== null && !iso(f.lastScheduledRunAt) || f.lastRunEvent !== undefined && !['schedule', 'workflow_dispatch', 'push', 'local'].includes(f.lastRunEvent) || !Array.isArray(f.watches)) throw Error('Invalid tracker state; existing file was not replaced.');
   const seen = new Set<string>();
   for (const w of f.watches) {
     // Reuse the wallet-history validator for the saved scope and timestamp.
@@ -54,7 +54,7 @@ export function parseLiquidityNotifications(value: unknown): LiquidityNotificati
   return structuredClone(f);
 }
 /** Pure transition: baseline first, exact raw-unit increases only, independent wallets. */
-export function advanceLiquidityAlerts(history: WalletHistoryFile, previous: LiquidityTrackerState, previousNotifications: LiquidityNotifications, observations: LiquidityObservation[], runAt: string) {
+export function advanceLiquidityAlerts(history: WalletHistoryFile, previous: LiquidityTrackerState, previousNotifications: LiquidityNotifications, observations: LiquidityObservation[], runAt: string, runEvent?: 'schedule' | 'workflow_dispatch' | 'push' | 'local') {
   if (!iso(runAt)) throw Error('Invalid tracker time');
   const state = parseLiquidityState(previous), notifications = parseLiquidityNotifications(previousNotifications);
   const enabled = enabledLiquidityWatches(history), old = new Map(state.watches.map(w => [watchKey(w.watch), w]));
@@ -84,5 +84,7 @@ export function advanceLiquidityAlerts(history: WalletHistoryFile, previous: Liq
     });
     return { watch, checkedAt: observation.checkedAt, status: 'ok' as const, baselines };
   });
-  return { state: { version: 1 as const, lastRunAt: enabled.length || state.watches.length ? (state.lastRunAt && state.lastRunAt > runAt ? state.lastRunAt : runAt) : state.lastRunAt, watches }, notifications, added };
+  const advancesRun = (enabled.length > 0 || state.watches.length > 0) && (!state.lastRunAt || runAt >= state.lastRunAt);
+  const metadata = runEvent && advancesRun ? { lastRunEvent: runEvent, lastScheduledRunAt: runEvent === 'schedule' ? runAt : state.lastScheduledRunAt ?? null } : { ...(state.lastRunEvent ? { lastRunEvent: state.lastRunEvent } : {}), ...(state.lastScheduledRunAt !== undefined ? { lastScheduledRunAt: state.lastScheduledRunAt } : {}) };
+  return { state: { version: 1 as const, lastRunAt: enabled.length || state.watches.length ? (state.lastRunAt && state.lastRunAt > runAt ? state.lastRunAt : runAt) : state.lastRunAt, ...metadata, watches }, notifications, added };
 }

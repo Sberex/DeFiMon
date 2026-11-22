@@ -4,7 +4,7 @@ import type { LiquidityObservation } from './liquidity-alert-reader.js';
 export const LIQUIDITY_STATE_PATH = 'analysis/liquidity-alert-state.json';
 export const LIQUIDITY_NOTIFICATIONS_PATH = 'analysis/liquidity-alert-notifications.json';
 /** One Git commit atomically advances baselines and appends notifications. */
-export async function publishLiquidityObservations(observations: LiquidityObservation[], runAt: string, options: { token: string; repository: string; branch?: string; fetcher?: typeof fetch }) {
+export async function publishLiquidityObservations(observations: LiquidityObservation[], runAt: string, options: { token: string; repository: string; branch?: string; fetcher?: typeof fetch; eventName?: 'schedule' | 'workflow_dispatch' | 'push' | 'local' }) {
   const { token, repository } = options, branch = options.branch ?? 'main', fetcher = options.fetcher ?? fetch;
   if (!token || !/^[\w.-]+\/[\w.-]+$/.test(repository) || !/^[\w./-]+$/.test(branch)) throw Error('Tracker publishing requires a repository and contents-write token.');
   const root = `https://api.github.com/repos/${repository}`;
@@ -30,7 +30,7 @@ export async function publishLiquidityObservations(observations: LiquidityObserv
     const history = parseWalletHistory(await read('analysis/wallet-history.json', head)) as WalletHistoryFile;
     const state = parseLiquidityState(await read(LIQUIDITY_STATE_PATH, head, emptyLiquidityState()));
     const notifications = parseLiquidityNotifications(await read(LIQUIDITY_NOTIFICATIONS_PATH, head, emptyLiquidityNotifications()));
-    const next = advanceLiquidityAlerts(history, state, notifications, observations, runAt);
+    const next = advanceLiquidityAlerts(history, state, notifications, observations, runAt, options.eventName);
     if (JSON.stringify(next.state) === JSON.stringify(state) && JSON.stringify(next.notifications) === JSON.stringify(notifications)) return { committed: false, added: 0, watches: next.state.watches.length };
     const parent = await json(`/git/commits/${head}`), tree: { path: string; mode: string; type: string; sha: string }[] = [];
     for (const [path, value] of [[LIQUIDITY_STATE_PATH, next.state], [LIQUIDITY_NOTIFICATIONS_PATH, next.notifications]] as const) {

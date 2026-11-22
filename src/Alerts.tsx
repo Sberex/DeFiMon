@@ -1,3 +1,4 @@
+import { LiquidityMonitorStatus } from './LiquidityMonitorStatus';
 import { useEffect, useState, type ReactNode } from 'react';
 import { apiUrl } from './api';
 import { alertPositions, alertScopeKey, defaultAlertRules, parsePositionAlertInput, type AlertRules, type PositionAlerts } from './alert-rules';
@@ -49,6 +50,7 @@ export function Alerts({ portfolio, savedWallet, persistence, snapshot, demo, lo
   return <section aria-label="Alerts"><div className="section-label"><h2>Alerts</h2><span>Position preferences</span></div><p className="recommendations-intro">Save alert conditions for active lending and deposit positions. Supply APR includes intrinsic yield. Preferences are public in wallet-history.json. Liquidity alerts run on a five-minute GitHub Actions schedule; runs may be delayed. Monitoring of other rules and message delivery are not enabled yet.</p>
     <p className="recommendations-intro"><a href="https://github.com/Sberex/DeFiMon/blob/main/analysis/liquidity-alert-notifications.json" target="_blank" rel="noreferrer">Liquidity notifications JSON ↗</a> · <a href="https://github.com/Sberex/DeFiMon/actions/workflows/liquidity-alerts.yml" target="_blank" rel="noreferrer">Monitoring runs ↗</a></p>
     {loading ? <p role="status">Checking wallet positions…</p> : !portfolio ? <p className="recommendations-empty">Check a wallet address to configure position alerts.</p> : <>
+      {!demo && savedWallet && <LiquidityMonitorStatus wallet={savedWallet} />}
       {demo && <p className="notice">Example positions are shown for illustration. Check a wallet address to save alerts.</p>}
       {persistence && !persistence.synced && persistence.message && <p className="notice">{persistence.message}</p>}
       {!entries.length && <p className="recommendations-empty">No active lending or deposit positions were found in Wallet Overview.</p>}

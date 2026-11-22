@@ -51,3 +51,14 @@ it('does not compare rolled-back blocks or changed token precision, and rejects 
   expect(advanceLiquidityAlerts(history(), first.state, first.notifications, [changed], next).added).toBe(0);
   const corrupt = structuredClone(first.state); corrupt.watches[0].baselines[0].rawAmount = '-1'; expect(() => parseLiquidityState(corrupt)).toThrow();
 });
+
+it('distinguishes scheduled checks from manual recovery and preserves their timestamp on later manual runs', () => {
+  let result = advanceLiquidityAlerts(history(), emptyLiquidityState(), emptyLiquidityNotifications(), [observe('100')], day, 'push');
+  expect(result.state.lastScheduledRunAt).toBeNull();
+  result = advanceLiquidityAlerts(history(), result.state, result.notifications, [observe('110', '101', next)], next, 'schedule');
+  expect(result.state).toMatchObject({ lastScheduledRunAt: next, lastRunEvent: 'schedule' });
+  result = advanceLiquidityAlerts(history(), result.state, result.notifications, [observe('120', '102', later)], later, 'workflow_dispatch');
+  expect(parseLiquidityState(result.state)).toMatchObject({ lastScheduledRunAt: next, lastRunAt: later, lastRunEvent: 'workflow_dispatch' });
+  const stale = advanceLiquidityAlerts(history(), result.state, result.notifications, [], day, 'schedule');
+  expect(stale.state.lastScheduledRunAt).toBe(next); expect(stale.state.lastRunAt).toBe(later);
+});

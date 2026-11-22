@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { combinedExample, example } from '../src/example';
 import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtures/merkl-apr';
 test.beforeEach(async ({ page }) => {
+  await page.route('**/analysis/liquidity-alert-state.json*', route => route.fulfill({ json: { version: 1, lastRunAt: null, watches: [] } }));
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
 });
 test('sorts valuable Pendle PT/YT and collapses expired, zero and absent holdings without changing wallet value', async ({ page }) => {
@@ -2163,6 +2164,7 @@ test('Alerts saves and restores active loan and deposit preferences independentl
   await form.getByLabel('Position APR threshold (%)').fill('-1.5');
   await form.getByRole('button', { name: 'Save alerts', exact: true }).click();
   await expect(form.getByRole('status')).toHaveText('Alerts saved to GitHub.');
+  await expect(alerts.getByRole('region', { name: 'Liquidity monitoring status' })).toContainText('no scheduled run has been recorded');
   expect(writes[0]).toMatchObject({ network: 'ethereum', protocol: fixture.protocols[0].id, positionId: loan.id, rules: { borrowAprAboveSupplyApr: true, newLiquidityAdded: true, utilizationAbove: { enabled: true, thresholdPercent: 90 }, healthFactorBelow: { enabled: true, threshold: 1.01 }, positionAprBelow: { enabled: true, thresholdPercent: -1.5 } } });
   await nav.getByRole('button', { name: 'Wallet Overview', exact: true }).click(); await nav.getByRole('button', { name: 'Alerts', exact: true }).click();
   await expect(form.getByRole('checkbox', { name: 'Borrow APR higher than supply APR' })).toBeChecked();
