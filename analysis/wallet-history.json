@@ -30,7 +30,7 @@
           "rules": {
             "borrowAprAboveSupplyApr": false,
             "utilizationAbove": {
-              "enabled": false,
+              "enabled": true,
               "thresholdPercent": 89.99
             },
             "healthFactorBelow": {
@@ -42,7 +42,7 @@
               "thresholdPercent": null
             }
           },
-          "updatedAt": "2026-11-22T14:22:02.821Z"
+          "updatedAt": "2026-11-22T14:26:10.012Z"
         }
       ]
     },
