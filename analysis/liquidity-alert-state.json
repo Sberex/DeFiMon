@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-23T13:55:46.656Z",
+  "lastRunAt": "2026-11-23T14:01:32.690Z",
   "lastRunEvent": "external_scheduler",
   "lastScheduledRunAt": "2026-11-23T04:06:25.123Z",
-  "lastExternalRunAt": "2026-11-23T13:55:46.656Z",
+  "lastExternalRunAt": "2026-11-23T14:01:32.690Z",
   "watches": [
     {
       "watch": {
@@ -13,8 +13,9 @@
         "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
         "ruleUpdatedAt": "2026-11-23T05:57:38.673Z"
       },
-      "checkedAt": "2026-11-23T13:55:45.878Z",
-      "status": "ok",
+      "checkedAt": "2026-11-23T14:01:30.142Z",
+      "status": "error",
+      "message": "Market liquidity could not be verified. The last successful reading is retained.",
       "baselines": [
         {
           "market": "0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
