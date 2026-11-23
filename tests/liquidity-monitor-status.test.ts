@@ -25,3 +25,10 @@ it('requires recent successful readings for every currently enabled preference',
   expect(liquidityMonitorStatus(stale, wallet, now).warning).toBe(true);
   expect(liquidityMonitorStatus(state(), { ...wallet, alerts: [] }, now)).toMatchObject({ warning: false, text: expect.stringContaining('No liquidity alerts') });
 });
+
+it('checks utilization preferences independently of the liquidity checkbox', () => {
+  const utilizationWallet = { ...wallet, alerts: [{ ...rule, rules: { ...defaultAlertRules(), utilizationAbove: { enabled: true, thresholdPercent: 90 } } }] };
+  expect(liquidityMonitorStatus(state(), utilizationWallet, now, 'utilization')).toMatchObject({ warning: false, text: expect.stringContaining('Recent scheduled utilization checks') });
+  expect(liquidityMonitorStatus(state(), utilizationWallet, now).text).toContain('No liquidity alerts');
+  expect(liquidityMonitorStatus({ ...state(), lastScheduledRunAt: null }, utilizationWallet, now, 'utilization').warning).toBe(true);
+});

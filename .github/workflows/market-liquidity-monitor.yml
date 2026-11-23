@@ -1,4 +1,4 @@
-name: Track market liquidity alerts
+name: Track market liquidity and utilization alerts
 on:
   # Offset checks from the top of the hour; GitHub may still delay cron events.
   schedule:
@@ -9,6 +9,8 @@ on:
     paths:
       - '.github/workflows/market-liquidity-monitor.yml'
       - 'scripts/track-liquidity.ts'
+      - 'scripts/track-utilization.ts'
+      - 'server/utilization-alert-*.ts'
       - 'server/liquidity-alert-*.ts'
 permissions:
   contents: write
@@ -18,7 +20,7 @@ concurrency:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -34,6 +36,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           LIQUIDITY_TRACKER_BRANCH: main
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL || 'https://eth.drpc.org' }}
+          ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc' }}
+          PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL || 'https://rpc.plasma.to' }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL || 'https://mainnet.base.org' }}
+          BSC_RPC_URL: ${{ secrets.BSC_RPC_URL || 'https://bsc-rpc.publicnode.com' }}
+      - name: Check enabled utilization thresholds and save crossings
+        if: ${{ !cancelled() }}
+        run: npm run track:utilization -- --publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          UTILIZATION_TRACKER_BRANCH: main
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL || 'https://eth.drpc.org' }}
           ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc' }}
           PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL || 'https://rpc.plasma.to' }}

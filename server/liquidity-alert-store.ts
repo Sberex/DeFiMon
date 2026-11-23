@@ -3,8 +3,12 @@ import { advanceLiquidityAlerts, emptyLiquidityNotifications, emptyLiquidityStat
 import type { LiquidityObservation } from './liquidity-alert-reader.js';
 export const LIQUIDITY_STATE_PATH = 'analysis/liquidity-alert-state.json';
 export const LIQUIDITY_NOTIFICATIONS_PATH = 'analysis/liquidity-alert-notifications.json';
+export interface TrackerPublishOptions { token: string; repository: string; branch?: string; fetcher?: typeof fetch; eventName?: 'schedule' | 'workflow_dispatch' | 'push' | 'local' }
 /** One Git commit atomically advances baselines and appends notifications. */
-export async function publishLiquidityObservations(observations: LiquidityObservation[], runAt: string, options: { token: string; repository: string; branch?: string; fetcher?: typeof fetch; eventName?: 'schedule' | 'workflow_dispatch' | 'push' | 'local' }) {
+export async function publishLiquidityObservations(observations: LiquidityObservation[], runAt: string, options: TrackerPublishOptions) {
+  return publishTrackerFiles(runAt, options, { statePath: LIQUIDITY_STATE_PATH, notificationsPath: LIQUIDITY_NOTIFICATIONS_PATH, label: 'market liquidity', transition: (history, state, notifications) => advanceLiquidityAlerts(history, parseLiquidityState(state), parseLiquidityNotifications(notifications), observations, runAt, options.eventName) });
+}
+export async function publishTrackerFiles(runAt: string, options: TrackerPublishOptions, tracker: { statePath: string; notificationsPath: string; label: string; transition: (history: WalletHistoryFile, state: unknown, notifications: unknown) => { state: { watches: unknown[] }; notifications: unknown; added: number } }) {
   const { token, repository } = options, branch = options.branch ?? 'main', fetcher = options.fetcher ?? fetch;
   if (!token || !/^[\w.-]+\/[\w.-]+$/.test(repository) || !/^[\w./-]+$/.test(branch)) throw Error('Tracker publishing requires a repository and contents-write token.');
   const root = `https://api.github.com/repos/${repository}`;
@@ -28,17 +32,17 @@ export async function publishLiquidityObservations(observations: LiquidityObserv
     const ref = await json(`/git/ref/heads/${encodeURIComponent(branch)}`), head = ref.object?.sha;
     if (typeof head !== 'string' || !/^[\da-f]{40}$/.test(head)) throw Error('Invalid branch head.');
     const history = parseWalletHistory(await read('analysis/wallet-history.json', head)) as WalletHistoryFile;
-    const state = parseLiquidityState(await read(LIQUIDITY_STATE_PATH, head, emptyLiquidityState()));
-    const notifications = parseLiquidityNotifications(await read(LIQUIDITY_NOTIFICATIONS_PATH, head, emptyLiquidityNotifications()));
-    const next = advanceLiquidityAlerts(history, state, notifications, observations, runAt, options.eventName);
+    const state = await read(tracker.statePath, head, emptyLiquidityState());
+    const notifications = await read(tracker.notificationsPath, head, emptyLiquidityNotifications());
+    const next = tracker.transition(history, state, notifications);
     if (JSON.stringify(next.state) === JSON.stringify(state) && JSON.stringify(next.notifications) === JSON.stringify(notifications)) return { committed: false, added: 0, watches: next.state.watches.length };
     const parent = await json(`/git/commits/${head}`), tree: { path: string; mode: string; type: string; sha: string }[] = [];
-    for (const [path, value] of [[LIQUIDITY_STATE_PATH, next.state], [LIQUIDITY_NOTIFICATIONS_PATH, next.notifications]] as const) {
+    for (const [path, value] of [[tracker.statePath, next.state], [tracker.notificationsPath, next.notifications]] as const) {
       const blob = await json('/git/blobs', 'POST', { content: `${JSON.stringify(value, null, 2)}\n`, encoding: 'utf-8' });
       tree.push({ path, mode: '100644', type: 'blob', sha: blob.sha });
     }
     const mergedTree = await json('/git/trees', 'POST', { base_tree: parent.tree.sha, tree });
-    const commit = await json('/git/commits', 'POST', { message: `Track market liquidity: ${next.added} increase notifications [skip ci] [skip render]`, tree: mergedTree.sha, parents: [head] });
+    const commit = await json('/git/commits', 'POST', { message: `Track ${tracker.label}: ${next.added} increase notifications [skip ci] [skip render]`, tree: mergedTree.sha, parents: [head] });
     const update = await request(`/git/refs/heads/${encodeURIComponent(branch)}`, 'PATCH', { sha: commit.sha, force: false });
     if (update.ok) return { committed: true, added: next.added, watches: next.state.watches.length };
     if (![409, 422].includes(update.status)) throw Error(`Tracker commit could not be published (${update.status}).`);

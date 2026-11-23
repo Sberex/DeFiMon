@@ -1,0 +1,190 @@
+// Official Fluid LiquidityResolver getOverallTokenData, fluid-contracts-public@404d73f.
+export const fluidUtilizationAbi = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token_",
+        "type": "address"
+      }
+    ],
+    "name": "getOverallTokenData",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "borrowRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "supplyRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastStoredUtilization",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "storageUpdateThreshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdateTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "supplyExchangePrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "borrowExchangePrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "supplyRawInterest",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "supplyInterestFree",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "borrowRawInterest",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "borrowInterestFree",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBorrow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "revenue",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxUtilization",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "version",
+                "type": "uint256"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "kink",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "rateAtUtilizationZero",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "rateAtUtilizationKink",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "rateAtUtilizationMax",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct Structs.RateDataV1Params",
+                "name": "rateDataV1",
+                "type": "tuple"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "token",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "kink1",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "kink2",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "rateAtUtilizationZero",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "rateAtUtilizationKink1",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "rateAtUtilizationKink2",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "rateAtUtilizationMax",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct Structs.RateDataV2Params",
+                "name": "rateDataV2",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct Structs.RateData",
+            "name": "rateData",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct Structs.OverallTokenData",
+        "name": "overallTokenData_",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
