@@ -62,3 +62,11 @@ it('distinguishes scheduled checks from manual recovery and preserves their time
   const stale = advanceLiquidityAlerts(history(), result.state, result.notifications, [], day, 'schedule');
   expect(stale.state.lastScheduledRunAt).toBe(next); expect(stale.state.lastRunAt).toBe(later);
 });
+it('persists external-dispatch attribution without claiming a GitHub cron run and reads legacy states', () => {
+  const s = advanceLiquidityAlerts(history(), emptyLiquidityState(), emptyLiquidityNotifications(), [observe('100')], day, 'external_scheduler');
+  expect(parseLiquidityState(s.state)).toMatchObject({ lastExternalRunAt: day, lastScheduledRunAt: null, lastRunEvent: 'external_scheduler' });
+  const manual = advanceLiquidityAlerts(history(), s.state, s.notifications, [observe('100', '101', next)], next, 'workflow_dispatch');
+  expect(manual.state.lastExternalRunAt).toBe(day); expect(manual.state.lastScheduledRunAt).toBeNull();
+  expect(() => parseLiquidityState({ ...s.state, lastExternalRunAt: 'invalid' })).toThrow();
+  expect(parseLiquidityState(emptyLiquidityState())).toEqual(emptyLiquidityState());
+});

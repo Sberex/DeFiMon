@@ -1,9 +1,10 @@
+import type { AlertRunEvent } from './alert-run.js';
 import { parseWalletHistory, type WalletHistoryFile } from '../src/wallet-history.js';
 import { advanceLiquidityAlerts, emptyLiquidityNotifications, emptyLiquidityState, parseLiquidityNotifications, parseLiquidityState } from './liquidity-alert-tracker.js';
 import type { LiquidityObservation } from './liquidity-alert-reader.js';
 export const LIQUIDITY_STATE_PATH = 'analysis/liquidity-alert-state.json';
 export const LIQUIDITY_NOTIFICATIONS_PATH = 'analysis/liquidity-alert-notifications.json';
-export interface TrackerPublishOptions { token: string; repository: string; branch?: string; fetcher?: typeof fetch; eventName?: 'schedule' | 'workflow_dispatch' | 'push' | 'local' }
+export interface TrackerPublishOptions { token: string; repository: string; branch?: string; fetcher?: typeof fetch; eventName?: AlertRunEvent }
 /** One Git commit atomically advances baselines and appends notifications. */
 export async function publishLiquidityObservations(observations: LiquidityObservation[], runAt: string, options: TrackerPublishOptions) {
   return publishTrackerFiles(runAt, options, { statePath: LIQUIDITY_STATE_PATH, notificationsPath: LIQUIDITY_NOTIFICATIONS_PATH, label: 'market liquidity', transition: (history, state, notifications) => advanceLiquidityAlerts(history, parseLiquidityState(state), parseLiquidityNotifications(notifications), observations, runAt, options.eventName) });

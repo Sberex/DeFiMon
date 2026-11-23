@@ -18,5 +18,5 @@ export function LiquidityMonitorStatus({ wallet, kind = 'liquidity' }: { wallet:
   }, [wallet.address, enabled, kind]);
   const status = liquidityMonitorStatus(state, wallet, now, kind);
   const time = (value: string) => <time dateTime={value}>{new Date(value).toLocaleString(undefined, { timeZone: 'Europe/Kiev', timeZoneName: 'short' })}</time>;
-  return <section className="monitoring-status" aria-label={kind === 'liquidity' ? 'Liquidity monitoring status' : 'Utilization monitoring status'}><strong>{status.text}</strong>{status.lastRunAt && <p>Last tracker check: {time(status.lastRunAt)}</p>}{status.lastScheduledRunAt && <p>Last scheduled check: {time(status.lastScheduledRunAt)}</p>}</section>;
+  return <section className="monitoring-status" aria-label={kind === 'liquidity' ? 'Liquidity monitoring status' : 'Utilization monitoring status'}><strong>{status.text}</strong>{status.lastRunAt && <p>Last tracker check: {time(status.lastRunAt)}</p>}{status.lastScheduledRunAt && <p>Last scheduled check: {time(status.lastScheduledRunAt)}</p>}{status.lastExternalRunAt && <p>Last external trigger check: {time(status.lastExternalRunAt)}</p>}</section>;
 }

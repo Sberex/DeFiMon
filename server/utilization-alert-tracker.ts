@@ -1,3 +1,4 @@
+import { alertRunMetadata, isAlertRunEvent, type AlertRunEvent } from './alert-run.js';
 import { createHash } from 'node:crypto';
 import { parseWalletHistory, type WalletHistoryFile } from '../src/wallet-history.js';
 import { defaultAlertRules } from '../src/alert-rules.js';
@@ -5,7 +6,7 @@ import { watchKey } from './liquidity-alert-tracker.js';
 import type { UtilizationWatch, UtilizationReading, UtilizationObservation } from './utilization-alert-reader.js';
 export interface UtilizationBaseline extends UtilizationReading { checkedAt: string; blockNumber: string }
 export interface UtilizationWatchState { watch: UtilizationWatch; checkedAt: string; status: UtilizationObservation['status'] | 'pending'; message?: string; baselines: UtilizationBaseline[] }
-export interface UtilizationState { version: 1; lastRunAt: string | null; lastRunEvent?: string; lastScheduledRunAt?: string | null; watches: UtilizationWatchState[] }
+export interface UtilizationState { version: 1; lastRunAt: string | null; lastRunEvent?: string; lastScheduledRunAt?: string | null; lastExternalRunAt?: string | null; watches: UtilizationWatchState[] }
 export interface UtilizationNotification {
   id: string; type: 'utilization-above-threshold'; address: string; network: UtilizationWatch['network']; protocol: string; positionId: string;
   market: string; marketAddress: string; marketLabel: string; token: string; symbol: string; thresholdPercent: number;
@@ -29,7 +30,7 @@ export function enabledUtilizationWatches(history: WalletHistoryFile): Utilizati
 }
 export function parseUtilizationState(value: unknown): UtilizationState {
   const f = value as UtilizationState;
-  if (!f || f.version !== 1 || !(f.lastRunAt === null || iso(f.lastRunAt)) || f.lastScheduledRunAt != null && !iso(f.lastScheduledRunAt) || f.lastRunEvent !== undefined && !['schedule','workflow_dispatch','push','local'].includes(f.lastRunEvent) || !Array.isArray(f.watches)) throw Error('Invalid utilization state; existing data retained.');
+  if (!f || f.version !== 1 || !(f.lastRunAt === null || iso(f.lastRunAt)) || f.lastScheduledRunAt != null && !iso(f.lastScheduledRunAt) || f.lastRunEvent !== undefined && !isAlertRunEvent(f.lastRunEvent) || f.lastExternalRunAt != null && !iso(f.lastExternalRunAt) || !Array.isArray(f.watches)) throw Error('Invalid utilization state; existing data retained.');
   const seen = new Set<string>();
   for (const w of f.watches) {
     validateWatch(w.watch, w.checkedAt);
@@ -49,7 +50,7 @@ export function parseUtilizationNotifications(value: unknown): UtilizationNotifi
   }
   return structuredClone(f);
 }
-export function advanceUtilizationAlerts(history: WalletHistoryFile, previous: UtilizationState, previousNotifications: UtilizationNotifications, observations: UtilizationObservation[], runAt: string, runEvent?: 'schedule'|'workflow_dispatch'|'push'|'local') {
+export function advanceUtilizationAlerts(history: WalletHistoryFile, previous: UtilizationState, previousNotifications: UtilizationNotifications, observations: UtilizationObservation[], runAt: string, runEvent?: AlertRunEvent) {
   if (!iso(runAt)) throw Error('Invalid tracker time');
   const state = parseUtilizationState(previous), notifications = parseUtilizationNotifications(previousNotifications);
   const enabled = enabledUtilizationWatches(history), old = new Map(state.watches.map(w => [watchKey(w.watch), w])), incoming = new Map(observations.map(o => [watchKey(o.watch), o]));
@@ -75,5 +76,5 @@ export function advanceUtilizationAlerts(history: WalletHistoryFile, previous: U
     return { watch, checkedAt: observation.checkedAt, status: 'ok' as const, baselines };
   });
   const advance = (enabled.length || state.watches.length) && (!state.lastRunAt || runAt >= state.lastRunAt);
-  return { state: { version: 1 as const, lastRunAt: advance ? runAt : state.lastRunAt, ...(advance && runEvent ? { lastRunEvent: runEvent, lastScheduledRunAt: runEvent === 'schedule' ? runAt : state.lastScheduledRunAt ?? null } : { ...(state.lastRunEvent ? { lastRunEvent: state.lastRunEvent } : {}), ...(state.lastScheduledRunAt !== undefined ? { lastScheduledRunAt: state.lastScheduledRunAt } : {}) }), watches }, notifications, added };
+  return { state: { version: 1 as const, lastRunAt: advance ? runAt : state.lastRunAt, ...alertRunMetadata(state, runAt, runEvent, Boolean(advance)), watches }, notifications, added };
 }

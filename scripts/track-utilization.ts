@@ -1,3 +1,4 @@
+import { alertRunEvent } from '../server/alert-run.js';
 import 'dotenv/config';
 import { readFile, writeFile } from 'node:fs/promises';
 import { EnvHttpProxyAgent, setGlobalDispatcher } from 'undici';
@@ -22,7 +23,7 @@ try {
     }
   }));
   const runAt = new Date().toISOString();
-  const runEvent = ['schedule', 'workflow_dispatch', 'push'].includes(process.env.GITHUB_EVENT_NAME ?? '') ? process.env.GITHUB_EVENT_NAME as 'schedule' | 'workflow_dispatch' | 'push' : 'local';
+  const runEvent = alertRunEvent(process.env);
   const next = advanceUtilizationAlerts(history, state, notifications, observations, runAt, runEvent);
   const summary = publish ? await publishUtilizationObservations(observations, runAt, { token: process.env.GITHUB_TOKEN ?? '', repository: process.env.GITHUB_REPOSITORY ?? 'Sberex/DeFiMon', branch: process.env.UTILIZATION_TRACKER_BRANCH ?? 'main', eventName: runEvent }) : { committed: false, added: next.added, watches: watches.length };
   const errors = observations.filter(o => ['error', 'unsupported'].includes(o.status));

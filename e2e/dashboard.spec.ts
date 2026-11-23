@@ -2226,3 +2226,21 @@ test('Alerts retains selections after failed saves, validates thresholds, and ne
   await page.getByRole('button', { name: 'Explore an example' }).click();
   await expect(alerts.getByRole('button', { name: 'Save alerts', exact: true }).first()).toBeDisabled(); expect(writes).toBe(2);
 });
+
+test('Alerts shows fresh external-triggered monitoring separately from GitHub cron', async ({ page }) => {
+  const { defaultAlertRules } = await import('../src/alert-rules');
+  const fixture = structuredClone(example), position = fixture.protocols[0].positions[0], now = new Date().toISOString();
+  fixture.wallets = [];
+  const rule = { network: 'ethereum', protocol: fixture.protocols[0].id, positionId: position.id, updatedAt: now, rules: { ...defaultAlertRules(), newLiquidityAdded: true, utilizationAbove: { enabled: true, thresholdPercent: 90 } } };
+  const wallet = { address: fixture.address.toLowerCase(), lastCheckedAt: now, manualLiquidationPrices: [], alerts: [rule] };
+  const state = { version: 1, lastRunAt: now, lastRunEvent: 'external_scheduler', lastScheduledRunAt: null, lastExternalRunAt: now, watches: [{ watch: { address: wallet.address, network: rule.network, protocol: rule.protocol, positionId: rule.positionId, ruleUpdatedAt: now }, checkedAt: now, status: 'ok' }] };
+  await page.route('**/analysis/*-alert-state.json*', route => route.fulfill({ json: state }));
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, walletHistory: { wallet, persistence: { mode: 'github', synced: true } } } }));
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  await page.getByRole('button', { name: 'Alerts', exact: true }).click();
+  for (const kind of ['Liquidity', 'Utilization']) {
+    const status = page.getByRole('region', { name: `${kind} monitoring status`, exact: true });
+    await expect(status).toContainText(`Recent externally triggered ${kind.toLowerCase()} checks`);
+    await expect(status).toContainText('Last external trigger check:'); await expect(status).not.toContainText('Last scheduled check:');
+  }
+});

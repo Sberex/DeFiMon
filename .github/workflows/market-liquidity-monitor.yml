@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *'
   workflow_dispatch:
+    inputs:
+      source:
+        description: Trigger source (external-scheduler identifies an external dispatch, not GitHub cron)
+        type: choice
+        required: false
+        default: manual
+        options:
+          - manual
+          - external-scheduler
   push:
     branches: [main]
     paths:
@@ -12,6 +21,7 @@ on:
       - 'scripts/track-utilization.ts'
       - 'server/utilization-alert-*.ts'
       - 'server/liquidity-alert-*.ts'
+      - 'server/alert-run.ts'
 permissions:
   contents: write
 concurrency:
@@ -35,6 +45,7 @@ jobs:
         run: npm run track:liquidity -- --publish
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          TRACKER_DISPATCH_SOURCE: ${{ github.event.inputs.source || 'manual' }}
           LIQUIDITY_TRACKER_BRANCH: main
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL || 'https://eth.drpc.org' }}
           ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc' }}
@@ -46,6 +57,7 @@ jobs:
         run: npm run track:utilization -- --publish
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          TRACKER_DISPATCH_SOURCE: ${{ github.event.inputs.source || 'manual' }}
           UTILIZATION_TRACKER_BRANCH: main
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL || 'https://eth.drpc.org' }}
           ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc' }}

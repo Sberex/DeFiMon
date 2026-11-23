@@ -46,3 +46,10 @@ it('keeps independent wallets and token markets separate, including zero thresho
   const s = advanceUtilizationAlerts(h, emptyUtilizationState(), emptyUtilizationNotifications(), observations, time(0));
   expect(s.added).toBe(2); expect(new Set(s.notifications.notifications.map(n=>n.id)).size).toBe(2);
 });
+it('records external runs separately from native cron and preserves the heartbeat on later manual checks', () => {
+  const s = advanceUtilizationAlerts(history(), emptyUtilizationState(), emptyUtilizationNotifications(), [observe(89,0)], time(0), 'external_scheduler');
+  expect(parseUtilizationState(s.state)).toMatchObject({ lastExternalRunAt: time(0), lastScheduledRunAt: null, lastRunEvent: 'external_scheduler' });
+  const manual = advanceUtilizationAlerts(history(), s.state, s.notifications, [observe(89,1)], time(1), 'workflow_dispatch');
+  expect(manual.state.lastExternalRunAt).toBe(time(0)); expect(manual.state.lastScheduledRunAt).toBeNull();
+  expect(() => parseUtilizationState({ ...s.state, lastExternalRunAt: 'invalid' })).toThrow();
+});

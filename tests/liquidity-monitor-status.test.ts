@@ -32,3 +32,13 @@ it('checks utilization preferences independently of the liquidity checkbox', () 
   expect(liquidityMonitorStatus(state(), utilizationWallet, now).text).toContain('No liquidity alerts');
   expect(liquidityMonitorStatus({ ...state(), lastScheduledRunAt: null }, utilizationWallet, now, 'utilization').warning).toBe(true);
 });
+it('recognizes recent external triggers for both metrics without mistaking them for native cron', () => {
+  const external = { ...state(), lastScheduledRunAt: null, lastExternalRunAt: recent, lastRunEvent: 'external_scheduler' };
+  expect(liquidityMonitorStatus(external, wallet, now)).toMatchObject({ warning: false, text: expect.stringContaining('externally triggered liquidity'), lastScheduledRunAt: null, lastExternalRunAt: recent });
+  const utilizationWallet = { ...wallet, alerts: [{ ...rule, rules: { ...defaultAlertRules(), utilizationAbove: { enabled: true, thresholdPercent: 90 } } }] };
+  expect(liquidityMonitorStatus(external, utilizationWallet, now, 'utilization')).toMatchObject({ warning: false, text: expect.stringContaining('externally triggered utilization') });
+  expect(liquidityMonitorStatus({ ...external, lastExternalRunAt: '2026-11-22T18:00:00.000Z', lastRunEvent: 'workflow_dispatch' }, wallet, now)).toMatchObject({ warning: true, text: expect.stringContaining('overdue') });
+  expect(liquidityMonitorStatus({ ...external, lastExternalRunAt: 'invalid' }, wallet, now).warning).toBe(true);
+  expect(liquidityMonitorStatus({ ...external, watches: [] }, wallet, now).warning).toBe(true);
+  const failed = structuredClone(external); failed.watches[0].status = 'error'; expect(liquidityMonitorStatus(failed, wallet, now).warning).toBe(true);
+});
