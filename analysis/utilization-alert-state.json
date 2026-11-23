@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-23T16:45:58.608Z",
+  "lastRunAt": "2026-11-23T16:51:13.232Z",
   "lastRunEvent": "external_scheduler",
   "lastScheduledRunAt": "2026-11-23T14:29:05.468Z",
-  "lastExternalRunAt": "2026-11-23T16:45:58.608Z",
+  "lastExternalRunAt": "2026-11-23T16:51:13.232Z",
   "watches": [
     {
       "watch": {
@@ -14,7 +14,7 @@
         "ruleUpdatedAt": "2026-11-23T05:57:38.673Z",
         "thresholdPercent": 90
       },
-      "checkedAt": "2026-11-23T16:45:58.101Z",
+      "checkedAt": "2026-11-23T16:51:12.677Z",
       "status": "ok",
       "baselines": [
         {
@@ -23,12 +23,25 @@
           "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
           "symbol": "USDC",
           "label": "Market 0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
-          "utilizationPercent": 90.42936850598,
+          "utilizationPercent": 90.429372365443,
           "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL.",
-          "checkedAt": "2026-11-23T16:45:58.101Z",
-          "blockNumber": "26479116"
+          "checkedAt": "2026-11-23T16:51:12.677Z",
+          "blockNumber": "26479143"
         }
       ]
+    },
+    {
+      "watch": {
+        "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
+        "network": "ethereum",
+        "protocol": "morpho",
+        "positionId": "morpho-market-0xc4f56ec8f0e89af93a7146eadb9f4330c522aa19c5d2053b0685db1f68e87550",
+        "ruleUpdatedAt": "2026-11-23T16:51:02.099Z",
+        "thresholdPercent": 90
+      },
+      "checkedAt": "2026-11-23T16:51:13.232Z",
+      "status": "pending",
+      "baselines": []
     }
   ]
 }
