@@ -1,4 +1,26 @@
 {
   "version": 1,
-  "notifications": []
+  "notifications": [
+    {
+      "id": "1df820ef863252d1499c1613e00514c1df1f487a63cff1b86dd324ee25683fef",
+      "type": "utilization-above-threshold",
+      "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
+      "network": "ethereum",
+      "protocol": "morpho",
+      "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "market": "0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "marketAddress": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+      "marketLabel": "Market 0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "symbol": "USDC",
+      "thresholdPercent": 89.99,
+      "previousUtilizationPercent": null,
+      "utilizationPercent": 89.991412595369,
+      "utilizationChangePercentagePoints": null,
+      "previousCheckedAt": null,
+      "timestamp": "2026-11-23T05:55:16.539Z",
+      "blockNumber": "26475874",
+      "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL."
+    }
+  ]
 }
