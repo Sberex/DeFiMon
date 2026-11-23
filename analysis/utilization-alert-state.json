@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-23T21:41:01.438Z",
+  "lastRunAt": "2026-11-23T21:45:59.487Z",
   "lastRunEvent": "external_scheduler",
   "lastScheduledRunAt": "2026-11-23T14:29:05.468Z",
-  "lastExternalRunAt": "2026-11-23T21:41:01.438Z",
+  "lastExternalRunAt": "2026-11-23T21:45:59.487Z",
   "watches": [
     {
       "watch": {
@@ -14,7 +14,7 @@
         "ruleUpdatedAt": "2026-11-23T05:57:38.673Z",
         "thresholdPercent": 90
       },
-      "checkedAt": "2026-11-23T21:41:01.069Z",
+      "checkedAt": "2026-11-23T21:45:59.030Z",
       "status": "ok",
       "baselines": [
         {
@@ -23,10 +23,10 @@
           "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
           "symbol": "USDC",
           "label": "Market 0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
-          "utilizationPercent": 91.474059038317,
+          "utilizationPercent": 91.47406316115,
           "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL.",
-          "checkedAt": "2026-11-23T21:41:01.069Z",
-          "blockNumber": "26480586"
+          "checkedAt": "2026-11-23T21:45:59.030Z",
+          "blockNumber": "26480611"
         }
       ]
     },
@@ -39,7 +39,7 @@
         "ruleUpdatedAt": "2026-11-23T16:51:02.099Z",
         "thresholdPercent": 90
       },
-      "checkedAt": "2026-11-23T21:41:01.076Z",
+      "checkedAt": "2026-11-23T21:45:59.041Z",
       "status": "ok",
       "baselines": [
         {
@@ -48,10 +48,10 @@
           "token": "0xcacd6fd266af91b8aed52accc382b4e165586e29",
           "symbol": "frxUSD",
           "label": "Market 0xc4f56ec8f0e89af93a7146eadb9f4330c522aa19c5d2053b0685db1f68e87550",
-          "utilizationPercent": 89.936052324905,
+          "utilizationPercent": 89.936056163768,
           "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL.",
-          "checkedAt": "2026-11-23T21:41:01.076Z",
-          "blockNumber": "26480586"
+          "checkedAt": "2026-11-23T21:45:59.041Z",
+          "blockNumber": "26480611"
         }
       ]
     }
