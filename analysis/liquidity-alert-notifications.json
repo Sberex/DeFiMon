@@ -240,6 +240,30 @@
       "timestamp": "2026-11-24T08:05:44.919Z",
       "blockNumber": "26483706",
       "note": "Accrued market loan assets supplied minus borrowed; excludes collateral TVL."
+    },
+    {
+      "id": "fed54c4f23d2a53bfc499ff292c6d7cc387e7472ae29fee2c171e2c71dd0b068",
+      "type": "available-liquidity-increased",
+      "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
+      "network": "ethereum",
+      "protocol": "morpho",
+      "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "market": "0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "marketAddress": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+      "marketLabel": "Market 0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "symbol": "USDC",
+      "decimals": 6,
+      "previousLiquidity": "72458.102774",
+      "availableLiquidity": "72561.340029",
+      "liquidityChange": "103.237255",
+      "previousRaw": "72458102774",
+      "availableRaw": "72561340029",
+      "changeRaw": "103237255",
+      "previousCheckedAt": "2026-11-24T08:55:42.632Z",
+      "timestamp": "2026-11-24T09:01:23.451Z",
+      "blockNumber": "26483983",
+      "note": "Accrued market loan assets supplied minus borrowed; excludes collateral TVL."
     }
   ]
 }
