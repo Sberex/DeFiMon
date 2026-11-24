@@ -84,6 +84,27 @@
       "timestamp": "2026-11-24T04:01:29.891Z",
       "blockNumber": "26482487",
       "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL."
+    },
+    {
+      "id": "0006b7115e5c5d6dfd492ec07b7e83e2c035b3d8314c0154133756e79fd1e91f",
+      "type": "utilization-above-threshold",
+      "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
+      "network": "ethereum",
+      "protocol": "morpho",
+      "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "market": "0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "marketAddress": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+      "marketLabel": "Market 0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+      "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "symbol": "USDC",
+      "thresholdPercent": 90,
+      "previousUtilizationPercent": 89.991706986782,
+      "utilizationPercent": 92.667640477994,
+      "utilizationChangePercentagePoints": 2.6759334912119925,
+      "previousCheckedAt": "2026-11-24T06:55:46.341Z",
+      "timestamp": "2026-11-24T07:01:33.592Z",
+      "blockNumber": "26483385",
+      "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL."
     }
   ]
 }
