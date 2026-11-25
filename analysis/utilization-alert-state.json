@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-25T12:35:52.017Z",
+  "lastRunAt": "2026-11-25T12:41:06.911Z",
   "lastRunEvent": "external_scheduler",
   "lastScheduledRunAt": "2026-11-25T04:30:49.996Z",
-  "lastExternalRunAt": "2026-11-25T12:35:52.017Z",
+  "lastExternalRunAt": "2026-11-25T12:41:06.911Z",
   "watches": [
     {
       "watch": {
@@ -14,7 +14,7 @@
         "ruleUpdatedAt": "2026-11-23T16:51:02.099Z",
         "thresholdPercent": 90
       },
-      "checkedAt": "2026-11-25T12:35:51.524Z",
+      "checkedAt": "2026-11-25T12:41:06.457Z",
       "status": "ok",
       "baselines": [
         {
@@ -23,10 +23,10 @@
           "token": "0xcacd6fd266af91b8aed52accc382b4e165586e29",
           "symbol": "frxUSD",
           "label": "Market 0xc4f56ec8f0e89af93a7146eadb9f4330c522aa19c5d2053b0685db1f68e87550",
-          "utilizationPercent": 89.937844790324,
+          "utilizationPercent": 89.937848781474,
           "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL.",
-          "checkedAt": "2026-11-25T12:35:51.524Z",
-          "blockNumber": "26492233"
+          "checkedAt": "2026-11-25T12:41:06.457Z",
+          "blockNumber": "26492259"
         }
       ]
     }
