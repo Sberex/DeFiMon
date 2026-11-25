@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-25T18:35:46.308Z",
+  "lastRunAt": "2026-11-25T18:40:54.556Z",
   "lastRunEvent": "external_scheduler",
   "lastScheduledRunAt": "2026-11-25T14:50:36.083Z",
-  "lastExternalRunAt": "2026-11-25T18:35:46.308Z",
+  "lastExternalRunAt": "2026-11-25T18:40:54.556Z",
   "watches": [
     {
       "watch": {
@@ -13,7 +13,7 @@
         "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
         "ruleUpdatedAt": "2026-11-25T08:52:41.549Z"
       },
-      "checkedAt": "2026-11-25T18:35:45.686Z",
+      "checkedAt": "2026-11-25T18:40:53.567Z",
       "status": "ok",
       "baselines": [
         {
@@ -25,8 +25,8 @@
           "decimals": 6,
           "rawAmount": "82927492028",
           "note": "Accrued market loan assets supplied minus borrowed; excludes collateral TVL.",
-          "checkedAt": "2026-11-25T18:35:45.686Z",
-          "blockNumber": "26494026"
+          "checkedAt": "2026-11-25T18:40:53.567Z",
+          "blockNumber": "26494052"
         }
       ]
     }
