@@ -1,5 +1,15 @@
 {
   "version": 1,
   "enabledAt": "2026-11-26T11:08:12.669Z",
-  "deliveries": []
+  "deliveries": [
+    {
+      "notificationId": "da9c4878d6c90102d5cbd2fb0c169c952b00f31216f66fc14255c57900cf0144",
+      "kind": "test",
+      "status": "sending",
+      "attempts": 1,
+      "lastAttemptAt": "2026-11-26T11:09:16.579Z",
+      "nextAttemptAt": "2026-11-26T11:14:16.579Z",
+      "owner": "83c0bb83-d0f9-4c89-9bb3-97644bc26039"
+    }
+  ]
 }
