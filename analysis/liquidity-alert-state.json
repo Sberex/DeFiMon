@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-26T16:10:54.408Z",
-  "lastRunEvent": "external_scheduler",
+  "lastRunAt": "2026-11-26T16:14:37.297Z",
+  "lastRunEvent": "push",
   "lastScheduledRunAt": "2026-11-26T15:17:52.899Z",
   "lastExternalRunAt": "2026-11-26T16:10:54.408Z",
   "watches": [
@@ -13,20 +13,20 @@
         "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
         "ruleUpdatedAt": "2026-11-25T08:52:41.549Z"
       },
-      "checkedAt": "2026-11-26T16:10:53.973Z",
+      "checkedAt": "2026-11-26T16:14:36.745Z",
       "status": "ok",
       "baselines": [
         {
           "market": "0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
           "marketAddress": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
-          "label": "Market 0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
+          "label": "sUSDai / USDC",
           "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
           "symbol": "USDC",
           "decimals": 6,
           "rawAmount": "65623618921",
           "note": "Accrued market loan assets supplied minus borrowed; excludes collateral TVL.",
-          "checkedAt": "2026-11-26T16:10:53.973Z",
-          "blockNumber": "26500482"
+          "checkedAt": "2026-11-26T16:14:36.745Z",
+          "blockNumber": "26500501"
         }
       ]
     }
