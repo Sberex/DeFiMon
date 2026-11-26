@@ -25,7 +25,7 @@ function fixture(fail = false, inactive = false) {
 it('reads pinned, accrued Morpho liquidity exactly and shares market reads across watched wallets', async () => {
   const f = fixture(), reader = createLiquidityAlertReader(() => f.client);
   const first = await reader(watch), second = await reader({ ...watch, address: '0x2222222222222222222222222222222222222222' });
-  expect(first.status).toBe('ok'); expect(first.readings[0]).toMatchObject({ rawAmount: '300000000', decimals: 6, market: id, symbol: 'USDC' });
+  expect(first.status).toBe('ok'); expect(first.readings[0]).toMatchObject({ rawAmount: '300000000', decimals: 6, market: id, symbol: 'USDC', label: 'USDC / USDC' });
   expect(second.readings).toEqual(first.readings); expect(f.call).toHaveBeenCalledTimes(1);
 });
 it('separates unreadable liquidity and inactive positions from real zero and never leaks RPC details', async () => {

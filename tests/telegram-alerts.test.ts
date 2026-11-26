@@ -6,7 +6,9 @@ function memory(value = snapshot()) {
   return { store, value };
 }
 it('formats both alert types with wallet, market, values, change and original timestamp; keeps text within Telegram limits', () => {
-  const text = telegramAlertText(liquidity); expect(text).toContain(liquidity.address); expect(text).toContain(liquidity.marketAddress); expect(text).toContain('Increase: +1 USDC'); expect(text).toContain(at(1)); expect(text).toContain('Kyiv');
+  const text = telegramAlertText({ ...liquidity, marketLabel: 'sUSDai / USDC', timestamp: '2026-11-26T15:31:18.984Z' });
+  expect(text.split('\n')).toEqual(['New market liquidity', `Wallet: ${liquidity.address}`, 'Chain: Ethereum', 'Market: Morpho · sUSDai / USDC', 'Asset: USDC', 'Available: 1 → 2 USDC', 'Increase: +1 USDC', 'Observed: 26/11/2026, 17:31:18 EET (Kyiv)']);
+  expect(text).not.toContain(liquidity.marketAddress); expect(text).not.toContain(liquidity.token); expect(text).not.toContain(liquidity.id); expect(text).not.toContain('https://');
   expect(telegramAlertText(utilization)).toContain('Change: +2 percentage points');
   const first = { ...utilization, previousUtilizationPercent: null, previousCheckedAt: null, utilizationChangePercentagePoints: null } as typeof utilization;
   expect(telegramAlertText(first)).toContain('unknown (first observation)');

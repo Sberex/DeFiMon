@@ -6,7 +6,7 @@ import { makeClient } from './rpc.js';
 import { networks } from './networks.js';
 import { accruedMorphoMarket } from './morpho-rates.js';
 import { morphoCoreAbi } from './abis/morpho.js';
-import { aaveLiquidity, compoundLiquidity, liquidityQuote, tokenMetadata, v4Liquidity } from './market-liquidity.js';
+import { aaveLiquidity, compoundLiquidity, liquidityQuote, liquidityTokenAbi, tokenMetadata, v4Liquidity } from './market-liquidity.js';
 import { fluidMarketLiquidity } from './fluid-market-liquidity.js';
 import { vaultResolverAbi } from './abis/fluid.js';
 import { fluidLegacyLendingRatesAbi } from './abis/fluid-rates.js';
@@ -53,7 +53,14 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
     if (!marketReads.has(key)) marketReads.set(key, (async () => {
       const { params, state } = await accruedMorphoMarket(client, core, id, block), info = await tokenMetadata(client, params.loanToken, block);
       if (state.totalSupplyAssets < state.totalBorrowAssets) throw Error('Negative market liquidity');
-      return quote(id, core, `Market ${id}`, liquidityQuote(state.totalSupplyAssets - state.totalBorrowAssets, info.decimals, info.symbol, params.loanToken, 'Accrued market loan assets supplied minus borrowed; excludes collateral TVL.'));
+      let collateral = 'No collateral';
+      if (!/^0x0{40}$/i.test(params.collateralToken)) {
+        try {
+          const symbol = await client.readContract({ address: params.collateralToken, abi: liquidityTokenAbi, functionName: 'symbol', blockNumber: block });
+          collateral = typeof symbol === 'string' && symbol.trim() && symbol.length <= 128 ? symbol.replace(/\s+/g, ' ').trim() : 'Unknown collateral';
+        } catch { collateral = 'Unknown collateral'; }
+      }
+      return quote(id, core, `${collateral} / ${info.symbol}`, liquidityQuote(state.totalSupplyAssets - state.totalBorrowAssets, info.decimals, info.symbol, params.loanToken, 'Accrued market loan assets supplied minus borrowed; excludes collateral TVL.'));
     })());
     return marketReads.get(key)!;
   }

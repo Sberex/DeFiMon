@@ -37,12 +37,17 @@ export function telegramAlertEnabled(n: TelegramAlert, history: WalletHistoryFil
 }
 const clip = (s: string, length: number) => s.length > length ? s.slice(0, length - 1).replace(/[\uD800-\uDBFF]$/, '') + '…' : s;
 export function telegramAlertText(n: TelegramAlert) {
-  const common = [`Wallet: ${n.address}`, `Chain: ${networkNames[n.network]}`, `Market: ${clip(n.marketLabel, 200)}`, `Market ID: ${clip(n.market, 512)}`, `Market contract: ${n.marketAddress}`, `Asset: ${n.symbol} (${n.token})`];
-  const values = n.type === 'available-liquidity-increased'
-    ? ['DeFiMon · New market liquidity', `Available: ${n.previousLiquidity} → ${n.availableLiquidity} ${n.symbol}`, `Increase: +${n.liquidityChange} ${n.symbol}`]
-    : ['DeFiMon · Utilization above threshold', `Threshold: ${n.thresholdPercent}%`, `Utilization: ${n.utilizationPercent}%`, `Previous: ${n.previousUtilizationPercent === null ? 'unknown (first observation)' : `${n.previousUtilizationPercent}%`}`, `Change: ${n.utilizationChangePercentagePoints === null ? 'unknown (first observation)' : `${n.utilizationChangePercentagePoints >= 0 ? '+' : ''}${n.utilizationChangePercentagePoints} percentage points`}`];
   const at = new Date(n.timestamp).toLocaleString('en-GB', { timeZone: 'Europe/Kiev', timeZoneName: 'short', hour12: false });
-  const path = n.type === 'available-liquidity-increased' ? 'liquidity' : 'utilization';
+  if (n.type === 'available-liquidity-increased') {
+    const names: Record<string, string> = { morpho: 'Morpho', lista: 'Lista DAO', spark: 'Spark', 'aave-v3': 'Aave v3', 'aave-v4': 'Aave v4', euler: 'Euler', compound: 'Compound', fluid: 'Fluid' };
+    const protocol = names[n.protocol] ?? n.protocol, label = clip(n.marketLabel.replace(/\s+/g, ' ').trim(), 200);
+    const market = label.toLowerCase().startsWith(protocol.toLowerCase() + ' · ') || label === protocol ? label : `${protocol} · ${label}`;
+    const symbol = n.symbol.replace(/\s+/g, ' ').trim();
+    return clip(['New market liquidity', `Wallet: ${n.address}`, `Chain: ${networkNames[n.network]}`, `Market: ${market}`, `Asset: ${symbol}`, `Available: ${n.previousLiquidity} → ${n.availableLiquidity} ${symbol}`, `Increase: +${n.liquidityChange} ${symbol}`, `Observed: ${at} (Kyiv)`].join('\n'), 3800);
+  }
+  const common = [`Wallet: ${n.address}`, `Chain: ${networkNames[n.network]}`, `Market: ${clip(n.marketLabel, 200)}`, `Market ID: ${clip(n.market, 512)}`, `Market contract: ${n.marketAddress}`, `Asset: ${n.symbol} (${n.token})`];
+  const values = ['DeFiMon · Utilization above threshold', `Threshold: ${n.thresholdPercent}%`, `Utilization: ${n.utilizationPercent}%`, `Previous: ${n.previousUtilizationPercent === null ? 'unknown (first observation)' : `${n.previousUtilizationPercent}%`}`, `Change: ${n.utilizationChangePercentagePoints === null ? 'unknown (first observation)' : `${n.utilizationChangePercentagePoints >= 0 ? '+' : ''}${n.utilizationChangePercentagePoints} percentage points`}`];
+  const path = 'utilization';
   return clip([values[0], ...common, ...values.slice(1), `Observed: ${at} (Kyiv)`, `UTC: ${n.timestamp}`, `Block: ${n.blockNumber}`, `Alert ID: ${n.id}`, `https://github.com/Sberex/DeFiMon/blob/main/analysis/${path}-alert-notifications.json`].join('\n'), 3800);
 }
 /** Never return Telegram descriptions or transport exceptions: they may contain credentials or chat data. */
