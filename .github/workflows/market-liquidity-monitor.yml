@@ -13,6 +13,11 @@ on:
         options:
           - manual
           - external-scheduler
+      telegram_test:
+        description: Send a one-time Telegram connection test
+        type: boolean
+        required: false
+        default: false
   push:
     branches: [main]
     paths:
@@ -22,6 +27,8 @@ on:
       - 'server/utilization-alert-*.ts'
       - 'server/liquidity-alert-*.ts'
       - 'server/alert-run.ts'
+      - 'scripts/deliver-telegram.ts'
+      - 'server/telegram-alert*.ts'
 permissions:
   contents: write
 concurrency:
@@ -30,7 +37,7 @@ concurrency:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -64,3 +71,12 @@ jobs:
           PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL || 'https://rpc.plasma.to' }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL || 'https://mainnet.base.org' }}
           BSC_RPC_URL: ${{ secrets.BSC_RPC_URL || 'https://bsc-rpc.publicnode.com' }}
+      - name: Deliver new and retryable alerts to Telegram
+        if: ${{ !cancelled() }}
+        run: npm run deliver:telegram -- --publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TELEGRAM_TRACKER_BRANCH: main
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_SEND_TEST: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'true' }}

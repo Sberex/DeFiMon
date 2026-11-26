@@ -34,7 +34,8 @@
     "refresh:cookbook": "tsx scripts/refresh-cookbook.ts",
     "check:bsc": "tsx scripts/check-network.ts bsc",
     "check:lista": "tsx scripts/check-lista.ts",
-    "track:utilization": "tsx scripts/track-utilization.ts"
+    "track:utilization": "tsx scripts/track-utilization.ts",
+    "deliver:telegram": "tsx scripts/deliver-telegram.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

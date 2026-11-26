@@ -2168,6 +2168,7 @@ test('Alerts saves and restores active loan and deposit preferences independentl
   await expect(alerts.getByRole('region', { name: 'Liquidity monitoring status' })).toContainText('no scheduled run has been recorded');
   await expect(alerts.getByRole('region', { name: 'Utilization monitoring status' })).toContainText('no scheduled run has been recorded');
   await expect(alerts.getByRole('link', { name: 'Utilization notifications JSON' })).toHaveAttribute('href', 'https://github.com/Sberex/DeFiMon/blob/main/analysis/utilization-alert-notifications.json');
+  await expect(alerts.getByRole('link', { name: 'Telegram delivery status JSON' })).toHaveAttribute('href', 'https://github.com/Sberex/DeFiMon/blob/main/analysis/telegram-deliveries.json');
   expect(writes[0]).toMatchObject({ network: 'ethereum', protocol: fixture.protocols[0].id, positionId: loan.id, rules: { borrowAprAboveSupplyApr: true, newLiquidityAdded: true, utilizationAbove: { enabled: true, thresholdPercent: 90 }, healthFactorBelow: { enabled: true, threshold: 1.01 }, positionAprBelow: { enabled: true, thresholdPercent: -1.5 } } });
   await nav.getByRole('button', { name: 'Wallet Overview', exact: true }).click(); await nav.getByRole('button', { name: 'Alerts', exact: true }).click();
   await expect(form.getByRole('checkbox', { name: 'Borrow APR higher than supply APR' })).toBeChecked();
