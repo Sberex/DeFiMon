@@ -1,3 +1,5 @@
+import { readCurveLlamalend } from './adapters/curve-llamalend.js';
+import { CURVE_NAME, curveCoverage } from './deployments/curve-llamalend.js';
 import { readLista } from './adapters/lista.js';
 import { LISTA_COVERAGE } from './deployments/lista.js';
 import { readSpark, deduplicateSparkPositions } from './adapters/spark.js';
@@ -36,6 +38,7 @@ export async function getPortfolio(wallet: Address, network: NetworkId = 'ethere
   if (chainId !== deployment.id) throw new Error(`The configured provider is not ${deployment.name} mainnet.`);
   const failure = `Could not read this protocol on ${deployment.name}. Its balances are unknown. Check the ${deployment.name} provider connection and try again.`;
   const readers: Record<string, () => Promise<ProtocolResult>> = {
+    'curve-llamalend': () => isolateProtocol('curve-llamalend', CURVE_NAME, curveCoverage(network), () => readCurveLlamalend(client, address, blockNumber, network), failure),
     lista: () => isolateProtocol('lista', 'Lista DAO', LISTA_COVERAGE, () => readLista(client, address, blockNumber, network), failure),
     'aave-v3': () => isolateProtocol('aave-v3', 'Aave v3', `${deployment.name} main market${network === 'ethereum' ? ' and Aave Horizon' : ''}`, () => readAaveV3Markets(client, address, blockNumber, network), failure),
     spark: () => isolateProtocol('spark', 'Spark', sparkCoverage(network), () => readSpark(client, address, blockNumber, network), failure),
@@ -62,7 +65,7 @@ export async function getCombinedPortfolio(wallet: Address, load: (wallet: Addre
   const snapshots: NonNullable<Portfolio['networks']> = [];
   const protocols: ProtocolResult[] = [];
   const wallets: WalletBalances[] = [];
-  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid'], ['euler', 'Euler'], ['spark', 'Spark'], ['lista', 'Lista DAO']];
+  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid'], ['euler', 'Euler'], ['spark', 'Spark'], ['lista', 'Lista DAO'], ['curve-llamalend', CURVE_NAME]];
   results.forEach((result, i) => {
     const network = networkIds[i];
     const chain = networks[network].name;

@@ -14,7 +14,7 @@ export interface TokenDiscoveryReport {
   sources: { provider: 'CoinGecko' | 'CoinMarketCap'; assetId: string; url: string }[];
   warnings: string[];
 }
-export interface MarketSearch { tokenDiscovery?: TokenDiscoveryReport[]; targetIds?: string[]; checkedAt: string; alternatives: MarketAlternative[]; coverage: { protocol: string; network: NetworkId; status: 'ok' | 'partial' | 'error'; message?: string }[] }
+export interface MarketSearch { tokenDiscovery?: TokenDiscoveryReport[]; targetIds?: string[]; checkedAt: string; alternatives: MarketAlternative[]; coverage: { protocol: string; network: NetworkId; status: 'ok' | 'partial' | 'error' | 'unsupported'; message?: string }[] }
 
 /** Compare normalized debt-token units; equality can cover the full borrowing. */
 export function groupAlternativesByLiquidity<T extends MarketAlternative>(alternatives: T[], borrowedAmount?: number) {

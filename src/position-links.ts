@@ -6,6 +6,12 @@ export function positionLinks(protocol: string, chain: ChainName, position: Posi
   if (protocol === 'aave-v3' && chain === 'Ethereum' && position.id === 'aave-horizon-main' && contract(position.marketAddress)) {
     return [{ label: 'Market contract', address: position.marketAddress, url: 'https://app.aave.com/?marketName=proto_horizon_v3' }];
   }
+  if (protocol === 'curve-llamalend') {
+    const controller = position.id.match(/^curve-(?:loan|vault)-(0x[0-9a-f]{40})$/i)?.[1];
+    if (!controller || !contract(position.marketAddress)) return [];
+    const url = `https://www.curve.finance/llamalend/${network}/markets/${controller}`;
+    return position.depositOnly ? [{ label: 'Vault contract', address: position.marketAddress, url: `${url}/vault` }, { label: 'Market controller', address: controller, url }] : [{ label: 'Market controller', address: controller, url }];
+  }
   if (protocol === 'lista') {
     const vault = !!position.vault || position.id.startsWith('lista-vault-');
     const address = position.vault?.address ?? position.id.match(/0x[0-9a-f]{64}|0x[0-9a-f]{40}/i)?.[0];

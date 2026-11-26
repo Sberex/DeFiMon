@@ -17,8 +17,8 @@ export function recommendationPositions(protocols: ProtocolResult[], fallbackCha
       const supplied = position.assets.filter(a => Number.isFinite(a.supplied) && a.supplied > 0);
       const borrowed = position.assets.filter(a => Number.isFinite(a.borrowed) && a.borrowed > 0);
       if (protocol.id === 'fluid' && sameTwoAssetBasket(supplied.map(a => a.address), borrowed.map(a => a.address))) return [];
-      const vault = ['morpho', 'spark', 'lista'].includes(protocol.id) && isMorphoVaultPosition(position);
-      const deposit = ['morpho', 'spark', 'lista'].includes(protocol.id) && isMorphoDepositPosition(position);
+      const vault = ['morpho', 'spark', 'lista', 'curve-llamalend'].includes(protocol.id) && isMorphoVaultPosition(position);
+      const deposit = ['morpho', 'spark', 'lista', 'curve-llamalend'].includes(protocol.id) && isMorphoDepositPosition(position);
       if (deposit ? !supplied.length : !supplied.length && !borrowed.length) return [];
       const rows = deposit ? supplied.map(asset => ({ supplied: asset })) :
         (supplied.length ? supplied : [undefined]).flatMap(supply =>

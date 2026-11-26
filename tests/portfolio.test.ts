@@ -1,9 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 const rpc = vi.hoisted(() => ({ chainId: 1 }));
-const readers = vi.hoisted(() => ({ aave: vi.fn(), aaveV4: vi.fn(), morpho: vi.fn(), compound: vi.fn(), fluid: vi.fn(), euler: vi.fn(), spark: vi.fn(), lista: vi.fn() }));
+const readers = vi.hoisted(() => ({ curve: vi.fn(), aave: vi.fn(), aaveV4: vi.fn(), morpho: vi.fn(), compound: vi.fn(), fluid: vi.fn(), euler: vi.fn(), spark: vi.fn(), lista: vi.fn() }));
 vi.mock('../server/rpc', () => ({ makeClient: () => ({ getChainId: async () => rpc.chainId, getBlockNumber: async () => 456n }) }));
 vi.mock('../server/wallet', () => ({ readWallet: async (_client: unknown, _wallet: unknown, _block: unknown, network: string) => ({ chain: network === 'arbitrum' ? 'Arbitrum' : network === 'plasma' ? 'Plasma' : 'Ethereum', status: 'ok', tokens: [], pricedValueUsd: 0, unpricedCount: 0, coverage: 'test' }), unavailableWallet: () => ({ status: 'error' }) }));
 vi.mock('../server/adapters/spark', async importOriginal => ({ ...await importOriginal<typeof import('../server/adapters/spark')>(), readSpark: readers.spark }));
+vi.mock('../server/adapters/curve-llamalend', () => ({ readCurveLlamalend: readers.curve }));
 vi.mock('../server/adapters/lista', () => ({ readLista: readers.lista }));
 vi.mock('../server/adapters/euler', () => ({ readEuler: readers.euler }));
 vi.mock('../server/adapters/aave', () => ({ readAave: readers.aave }));
@@ -17,6 +18,7 @@ import { readPendle } from '../server/pendle';
 const wallet = '0x1111111111111111111111111111111111111111';
 beforeEach(() => {
   rpc.chainId = 1;
+  readers.curve.mockReset().mockResolvedValue({ id:'curve-llamalend',name:'Curve LlamaLend',status:'ok',positions:[] });
   readers.lista.mockReset().mockResolvedValue({ id: 'lista', name: 'Lista DAO', status: 'ok', positions: [] });
   readers.spark.mockReset().mockResolvedValue({ id: 'spark', name: 'Spark', status: 'ok', positions: [] });
   readers.aave.mockReset().mockResolvedValue({ id: 'aave-v3', name: 'Aave v3', status: 'ok', positions: [] });
@@ -28,9 +30,10 @@ beforeEach(() => {
 });
 it('includes the live Fluid reader at the same wallet and block as other protocols', async () => {
   const result = await getPortfolio(wallet);
+  expect(readers.curve).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
   expect(readers.fluid).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
   expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum');
-  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista']);
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista', 'curve-llamalend']);
   expect(result.protocols.find(p => p.id === 'fluid')?.status).toBe('ok');
   expect(result.protocols.filter(p => p.status === 'not-integrated')).toHaveLength(0);
   expect(readers.aaveV4).toHaveBeenCalledWith(expect.anything(), wallet, 456n);
@@ -87,7 +90,7 @@ it('reads the five supported Arbitrum protocols at one block and skips Aave v4',
   const result = await getPortfolio(wallet, 'arbitrum');
   expect(result.chain).toBe('Arbitrum');
   expect(readPendle).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
-  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'morpho', 'compound', 'fluid', 'euler', 'spark']);
+  expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'curve-llamalend']);
   expect(readers.aave).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
   expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'arbitrum');
   expect(readers.compound).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'arbitrum');
@@ -130,4 +133,12 @@ it('includes the Horizon deployment when checking Ethereum Aave positions', asyn
   const { AAVE_HORIZON } = await import('../server/deployments/aave-horizon');
   await getPortfolio(wallet);
   expect(readers.aave).toHaveBeenCalledWith(expect.anything(), wallet, 456n, 'ethereum', AAVE_HORIZON);
+});
+
+it('isolates Curve failures while retaining verified positions from other protocols', async () => {
+  readers.curve.mockRejectedValueOnce(new Error('private-curve-provider-key'));
+  const result = await getPortfolio(wallet);
+  expect(result.protocols.find(p => p.id === 'curve-llamalend')?.status).toBe('error');
+  expect(result.protocols.find(p => p.id === 'fluid')?.status).toBe('ok');
+  expect(JSON.stringify(result)).not.toContain('private-curve-provider-key');
 });

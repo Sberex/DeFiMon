@@ -39,7 +39,7 @@ const clip = (s: string, length: number) => s.length > length ? s.slice(0, lengt
 export function telegramAlertText(n: TelegramAlert) {
   const at = new Date(n.timestamp).toLocaleString('en-GB', { timeZone: 'Europe/Kiev', timeZoneName: 'short', hour12: false });
   if (n.type === 'available-liquidity-increased') {
-    const names: Record<string, string> = { morpho: 'Morpho', lista: 'Lista DAO', spark: 'Spark', 'aave-v3': 'Aave v3', 'aave-v4': 'Aave v4', euler: 'Euler', compound: 'Compound', fluid: 'Fluid' };
+    const names: Record<string, string> = { 'curve-llamalend': 'Curve LlamaLend', morpho: 'Morpho', lista: 'Lista DAO', spark: 'Spark', 'aave-v3': 'Aave v3', 'aave-v4': 'Aave v4', euler: 'Euler', compound: 'Compound', fluid: 'Fluid' };
     const protocol = names[n.protocol] ?? n.protocol, label = clip(n.marketLabel.replace(/\s+/g, ' ').trim(), 200);
     const market = label.toLowerCase().startsWith(protocol.toLowerCase() + ' · ') || label === protocol ? label : `${protocol} · ${label}`;
     const symbol = n.symbol.replace(/\s+/g, ' ').trim();

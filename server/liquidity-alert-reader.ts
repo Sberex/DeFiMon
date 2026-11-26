@@ -1,3 +1,4 @@
+import { createCurveReader } from './curve-llamalend.js';
 import { decodeFunctionResult, encodeFunctionData, encodeFunctionResult, parseAbi, type Address, type Hex } from 'viem';
 import type { Position, NetworkId } from '../src/types.js';
 import type { MarketLiquidity } from '../src/market-comparison.js';
@@ -138,6 +139,17 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
           return quote(pool, pool, p.label, enabled ? await aaveLiquidity(client, data, pool, token, config.data, metadata.decimals, state[3] + state[4], block, watch.protocol !== 'spark') : liquidityQuote(0n, metadata.decimals, metadata.symbol, token, 'Borrowing is disabled, paused or frozen for this reserve.'));
         }));
         return result('ok', readings);
+      }
+      if (watch.protocol === 'curve-llamalend') {
+        const match = id.match(/^curve-(loan|vault)-(0x[\da-f]{40})$/i);
+        if (!match) throw Error('Unknown Curve position');
+        const reader = createCurveReader(client, network, block), catalog = await reader.catalog();
+        const market = catalog.markets.find(m => same(m.controller, match[2]));
+        if (!market) { if (!catalog.complete) throw Error('Incomplete Curve catalog'); return result('inactive'); }
+        const owned = await reader.ownership(market, wallet);
+        if (match[1] === 'loan' ? !owned.loan : owned.shares + owned.staked === 0n) return result('inactive');
+        const q = await reader.quote(market);
+        return result('ok', [quote(market.controller, market.controller, q.label, q.liquidity)]);
       }
       if (watch.protocol === 'compound') {
         const portfolio = await readCompound(client, wallet, block, network), p = portfolio.positions.find(p => same(p.id, id)); if (!p) { if (portfolio.status !== 'ok') throw Error('Incomplete positions'); return result('inactive'); }

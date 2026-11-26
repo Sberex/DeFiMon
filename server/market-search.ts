@@ -1,3 +1,5 @@
+import { readCurveMarkets } from './market-curve-llamalend.js';
+import { CURVE_FACTORIES, CURVE_NAME, curveCoverage } from './deployments/curve-llamalend.js';
 import { readListaMarkets } from './market-lista.js';
 import { readSparkMarkets } from './market-spark.js';
 import type { ComparisonTarget, MarketSearch } from '../src/market-comparison.js';
@@ -12,6 +14,7 @@ import { readV4Markets } from './market-v4.js';
 import { readFluidMarkets } from './market-fluid.js';
 import { readMorphoMarkets } from './market-morpho.js';
 export const marketReaders: Record<string, { name: string; read: Reader }> = {
+ 'curve-llamalend': { name: CURVE_NAME, read: readCurveMarkets },
  'aave-v3': { name: 'Aave v3', read: readAaveMarkets }, 'aave-v4': { name: 'Aave v4', read: readV4Markets },
  spark: { name: 'Spark', read: readSparkMarkets }, lista: { name: 'Lista DAO', read: readListaMarkets },
  euler: { name: 'Euler', read: readEulerMarkets },
@@ -23,6 +26,7 @@ export async function searchMarkets(targets: ComparisonTarget[], clientFor: (net
     const coverage: MarketSearch['coverage'] = [], alternatives: MarketSearch['alternatives'] = [];
     const expanded = expandTargets(targets, network, tokenMatches.matches);
     if (!expanded.length) return { coverage, alternatives };
+    if (sources['curve-llamalend'] && !CURVE_FACTORIES[network].length) coverage.push({ protocol: CURVE_NAME, network, status: 'unsupported', message: curveCoverage(network) });
     try {
       const client = clientFor(network);
       const [chain, block] = await Promise.all([client.getChainId(), client.getBlockNumber()]);

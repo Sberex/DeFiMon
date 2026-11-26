@@ -1,3 +1,4 @@
+import { createCurveReader } from './curve-llamalend.js';
 import { parseAbi, type Address, type Hex } from 'viem';
 import type { ChainClient } from './rpc.js';
 import type { NetworkId } from '../src/types.js';
@@ -58,6 +59,12 @@ export function createUtilizationAlertReader(clientFor: (n: NetworkId) => ChainC
           } else if (watch.protocol === 'euler') {
             const [cash, debt] = await Promise.all([c.readContract({ address: market, abi, functionName: 'cash', blockNumber: block }), c.readContract({ address: market, abi, functionName: 'totalBorrows', blockNumber: block })]);
             percent = utilizationPercent(debt, cash + debt); note = 'Euler total borrows / (cash + total borrows) × 100, before borrow caps.';
+          } else if (watch.protocol === 'curve-llamalend') {
+            const reader = createCurveReader(c, watch.network, block), catalog = await reader.catalog();
+            const m = catalog.markets.find(m => m.controller.toLowerCase() === q.marketAddress.toLowerCase());
+            if (!m) throw Error('Unknown Curve market');
+            const stats = await reader.quote(m);
+            percent = utilizationPercent(stats.debt, stats.total); note = 'Curve total outstanding loan debt / total lending vault assets × 100. Borrow caps do not change utilization.';
           } else if (watch.protocol === 'compound') {
             percent = Number(await c.readContract({ address: market, abi, functionName: 'getUtilization', blockNumber: block })) / 1e16; note = 'Compound Comet native on-chain utilization × 100.';
           } else if (watch.protocol === 'fluid') {

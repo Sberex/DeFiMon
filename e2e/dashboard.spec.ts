@@ -2245,3 +2245,27 @@ test('Alerts shows fresh external-triggered monitoring separately from GitHub cr
     await expect(status).toContainText('Last external trigger check:'); await expect(status).not.toContainText('Last scheduled check:');
   }
 });
+
+test('shows Curve loans and vault deposits with native rates, links and cheaper alternatives', async ({ page }) => {
+  const fixture = structuredClone(example); fixture.protocols = []; fixture.wallets = [];
+  const controller = '0x1111111111111111111111111111111111111111', vault = '0x2222222222222222222222222222222222222222';
+  const collateral = { address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', symbol: 'WETH', supplied: 10, borrowed: 0, priceUsd: 2000, collateral: true, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: 0, note: '' } };
+  const loan = { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', supplied: 0, borrowed: 10000, priceUsd: 1, collateral: false, liquidationThreshold: null, liquidationPriceUsd: null, supplyRate: { apr: 0, note: '' }, borrowRate: { apr: .06, note: 'Native borrowing APR' } };
+  fixture.protocols = [{ id: 'curve-llamalend', name: 'Curve LlamaLend', status: 'ok', coverage: 'Ethereum v1/v2', positions: [
+    { id: `curve-loan-${controller}`, label: 'Curve LlamaLend · WETH / USDC', marketAddress: controller, suppliedUsd: 20000, debtUsd: 10000, collateralValueUsd: 20000, healthFactor: null, risk: 'lower', assets: [collateral, loan], notes: ['Curve health: 30.00%. LLAMMA uses soft liquidation.'] },
+    { id: `curve-vault-${controller}`, label: 'Curve lending vault · WETH / USDC', marketAddress: vault, suppliedUsd: 1000, debtUsd: 0, healthFactor: null, risk: 'no-debt', depositOnly: true, notes: [], assets: [{ ...loan, supplied: 1000, borrowed: 0, supplyRate: { apr: .12, note: 'Native vault APR' } }] },
+  ] }];
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
+  await page.route('**/api/recommendations', route => {
+    const targets = route.request().postDataJSON().targets;
+    return route.fulfill({ json: { checkedAt: new Date().toISOString(), coverage: [{ protocol: 'Curve LlamaLend', network: 'base', status: 'unsupported', message: 'No verified deployment.' }], alternatives: targets.filter((t: any) => t.borrowed).map((t: any) => ({ targetId: t.id, protocol: 'Curve LlamaLend', network: 'arbitrum', market: '0x3333333333333333333333333333333333333333', label: 'Curve cheaper WETH / USDC', supplyApr: 0, borrowApr: .03, lltv: null, block: '100', url: 'https://www.curve.finance/llamalend/arbitrum/markets/0x3333333333333333333333333333333333333333', liquidity: { amount: 50000, symbol: 'USDC', token: loan.address, note: 'Native controller liquidity' }, note: 'LLAMMA bands, no fixed LLTV.' })) } });
+  });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
+  const protocol = page.locator('.protocol.curve-llamalend'); await expect(protocol.getByRole('heading', { name: 'Curve LlamaLend · Ethereum' })).toBeVisible();
+  await expect(protocol.getByRole('link', { name: vault, exact: true })).toHaveAttribute('href', `https://www.curve.finance/llamalend/ethereum/markets/${controller}/vault`);
+  await expect(protocol.locator('.vault-stats strong').nth(1)).toHaveText('≈ 12.00%');
+  await expect(page.locator('.total-npl > strong')).toHaveText('≈ -$40.00');
+  await page.getByRole('button', { name: 'Recommendations', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Curve cheaper WETH / USDC' })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

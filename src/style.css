@@ -99,3 +99,5 @@ main{max-width:1600px}.dashboard-layout{display:grid;grid-template-columns:210px
 @media(max-width:850px) { .dashboard-nav { flex-wrap: wrap; } .dashboard-nav > button, .dashboard-nav > .dashboard-subnav { flex: 1 1 40%; min-width: 0; } .dashboard-nav .dashboard-subnav { margin: 0; padding: 0; } .dashboard-nav .dashboard-subnav button { width: 100%; } }
 @media(max-width:560px) { .alert-form { padding: 18px 14px; } }
 @media(max-width:560px) { .alert-option:has(input[type=number]) > label { flex-basis: 100%; } .alert-option > input[type=number] { margin-left: 25px; } }
+
+.curve-llamalend .protocol-logo,.tile-logo.curve-llamalend { background:#e0f2f1; color:#167e80; }

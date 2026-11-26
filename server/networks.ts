@@ -45,7 +45,7 @@ export const networks: Record<NetworkId, NetworkConfig> = {
     ],
   },
   ethereum: {
-    protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista'],
+    protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista', 'curve-llamalend'],
     morphoBlue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',
     compoundMarkets: [{ address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3', label: 'USDC market' }, { address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94', label: 'WETH market' }],
     id: 1, name: 'Ethereum', rpcVariable: 'ETHEREUM_RPC_URL', nativeSymbol: 'ETH',
@@ -68,7 +68,7 @@ export const networks: Record<NetworkId, NetworkConfig> = {
     // morpho-org/sdks@56f1ed6 packages/morpho-ts/src/addresses.ts.
     morphoBlue: '0x6c247b1F6182318877311737BaC0844bAa518F5e',
     fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
-    protocolIds: ['aave-v3', 'morpho', 'compound', 'fluid', 'euler', 'spark'],
+    protocolIds: ['aave-v3', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'curve-llamalend'],
     // compound-finance/comet@f766f51583c23acc33b2a7824654ef2029a96804 deployments/arbitrum/*/roots.json.
     compoundMarkets: [
       { address: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf', label: 'USDC market' },
