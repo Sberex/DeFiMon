@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-26T13:56:41.071Z",
+  "updatedAt": "2026-11-26T14:08:17.552Z",
   "wallets": [
     {
       "address": "0x55fa9aac40af97faab697cc74d4da452abf0272c",
@@ -1861,32 +1861,32 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-26T13:56:35.439Z",
-          "blockNumber": "38727938",
+          "checkedAt": "2026-11-26T14:08:17.552Z",
+          "blockNumber": "38728655",
           "complete": true,
           "positions": [
             {
-              "snapshotAt": "2026-11-26T13:56:35.439Z",
-              "blockNumber": "38727938",
-              "apr": 0.9992880517617395,
-              "netValueUsd": 22679.772283418744,
-              "monthlyNplUsd": 1888.635454958118,
+              "snapshotAt": "2026-11-26T14:08:17.552Z",
+              "blockNumber": "38728655",
+              "apr": 0.9990092033583406,
+              "netValueUsd": 22679.228354558843,
+              "monthlyNplUsd": 1888.0631542724768,
               "verification": "verified",
               "position": {
                 "marketAddress": "0x6E0cDB09eb33cD3894C905E0DFF9289b95a86FFF",
                 "liquidationModel": "oracle-ratio",
                 "id": "fluid-nft-2517",
                 "label": "Vault 33 · GHO/USDT0 / GHO/USDT0 · NFT 2517",
-                "suppliedUsd": 274480.03834772855,
-                "debtUsd": 251800.2660643098,
-                "healthFactor": 1.0364035170249957,
+                "suppliedUsd": 274480.0713099079,
+                "debtUsd": 251800.84295534904,
+                "healthFactor": 1.0364030463696172,
                 "risk": "high",
                 "assets": [
                   {
                     "symbol": "GHO",
                     "address": "0xb77E872A68C62CfC0dFb02C067Ecc3DA23B4bbf3",
-                    "supplied": 10676.64243668266,
-                    "borrowed": 242032.3656988541,
+                    "supplied": 10493.674194851534,
+                    "borrowed": 242200.32817349752,
                     "priceUsd": 1,
                     "collateral": true,
                     "liquidationThreshold": 0.95,
@@ -1934,8 +1934,8 @@
                   {
                     "symbol": "USDT0",
                     "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-                    "supplied": 264149.048148,
-                    "borrowed": 9780.698899,
+                    "supplied": 264332.289132,
+                    "borrowed": 9613.093996,
                     "priceUsd": 0.99869145,
                     "collateral": true,
                     "liquidationThreshold": 0.95,
@@ -1987,7 +1987,7 @@
                   "Smart collateral/debt changes with the pool composition. A single underlying token’s dollar liquidation price is not reliable, so the actual oracle-ratio boundary is shown instead. Pool share quotes use 10^18 raw share units."
                 ],
                 "liquidationQuote": {
-                  "current": 1.0131328066246117,
+                  "current": 1.013132346537014,
                   "threshold": 0.9775466697882472,
                   "unit": "debt pool share per collateral pool share"
                 }
