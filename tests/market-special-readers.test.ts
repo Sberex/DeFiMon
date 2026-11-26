@@ -35,7 +35,7 @@ it('Fluid smart vaults require the entire source basket and select the correct t
   } } as unknown as ChainClient;
   expect(await readFluidMarkets(client, 'ethereum', 100n, expandTargets([baseTarget], 'ethereum'), () => {})).toEqual([]);
   const result = await readFluidMarkets(client, 'ethereum', 100n, expandTargets([{ ...baseTarget, supplyBasket: [supply, other], borrowBasket: [debt] }], 'ethereum'), () => {});
-  expect(result).toHaveLength(1); expect(result[0]).toMatchObject({ supplyApr: .02, borrowApr: .03, lltv: .85, liquidity: { amount: 700, symbol: 'USDT', token: debt } });
+  expect(result).toHaveLength(1); expect(result[0]).toMatchObject({ url: 'https://fluid.io/1/borrowing/vaults/10', supplyApr: .02, borrowApr: .03, lltv: .85, liquidity: { amount: 700, symbol: 'USDT', token: debt } });
 });
 it('Morpho vault searches survive a failed direct-market query and reject wrong-asset metadata', async () => {
   vi.stubGlobal('fetch', async (_url: string, options: RequestInit) => {
@@ -99,5 +99,5 @@ it('Fluid discovery exposes matching components plus the entire required pool ba
  }} as unknown as ChainClient;
  const t={...expandTargets([baseTarget],'ethereum')[0],discovery:true,anyBorrow:true,borrows:[]};
  const rows=await readFluidMarkets(client,'ethereum',100n,[t],()=>{});
- expect(rows).toHaveLength(1);expect(rows[0]).toMatchObject({marketTokens:{supplied:supply,borrowed:debt},requiredTokens:{supplied:[other,supply],borrowed:[debt]},supplyApr:.02,borrowApr:.03});
+ expect(rows).toHaveLength(1);expect(rows[0]).toMatchObject({marketTokens:{supplied:supply,borrowed:debt},requiredTokens:{supplied:[other,supply],borrowed:[debt]},url:'https://fluid.io/1/borrowing/vaults/10',supplyApr:.02,borrowApr:.03});
 });
