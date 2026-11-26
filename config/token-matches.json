@@ -981,6 +981,26 @@
     "bsc": "0x7324c7c0d95cebc73eea7e85cbaac0dbdf88a05b",
     "ethereum": "0xa2cd3d43c775978a96bdbf12d733d5a1ed94fb18"
   },
+  "syrupUSDT": {
+    "_category": "Savings stablecoin",
+    "ethereum": "0x356b8d89c1e1239cbbb9de4815c39a1474d5ba7d",
+    "plasma": "0xc4374775489cb9c56003bf2c9b12495fc64f0771",
+    "bsc": "0x8e9d4cea39299323fe8eda678cad449718556c4e",
+    "_intrinsicOracles": [
+      {
+        "network": "plasma",
+        "kind": "chainlink",
+        "address": "0x89a0e204591Fce2611e89CA7634c12B400d347fe",
+        "token": "0xc4374775489cb9c56003bf2c9b12495fc64f0771",
+        "description": "SYRUPUSDT-USDT Exchange Rate",
+        "decimals": 18,
+        "history": "rounds",
+        "label": "syrupUSDT/USDT uncapped exchange-rate oracle",
+        "note": "USDT per syrupUSDT. Uses the uncapped exchange-rate reference, not Aave CAPO’s capped USD liquidation price; USDT market prices and protocol lending interest are separate.",
+        "evidence": "https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV3Plasma.sol: syrupUSDT_UNDERLYING = 0xC4374775489CB9C56003BF2C9b12495fC64F0771; syrupUSDT_ORACLE = 0x0A3F8218a98337Ef37dCAE4F8a8cfaB0711C64cF. The CAPO oracle RATIO_PROVIDER() returns this feed. https://www.coingecko.com/en/coins/syrupusdt"
+      }
+    ]
+  },
   "SYRUP": {
     "_category": "Other",
     "base": "0x688aee022aa544f150678b8e5720b6b96a9e9a2f",
