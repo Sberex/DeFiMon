@@ -12,7 +12,7 @@ const DAY = 86400n, WINDOW = 30n * DAY;
 export const ETHEREUM_SAVINGS_ARCHIVE_FALLBACK = 'https://eth.drpc.org';
 const historicalStateUnavailable = (error: unknown) => /archive|missing trie|historical state|state.*pruned/i.test(error instanceof Error ? String(error) : '');
 const zero = /^0x0{40}$/i;
-const chainlinkAbi = parseAbi(['function decimals() view returns(uint8)', 'function description() view returns(string)', 'function latestRoundData() view returns(uint80,int256,uint256,uint256,uint80)', 'function receiptToken() view returns(address)']);
+const chainlinkAbi = parseAbi(['function decimals() view returns(uint8)', 'function description() view returns(string)', 'function latestRoundData() view returns(uint80,int256,uint256,uint256,uint80)', 'function receiptToken() view returns(address)', 'function token() view returns(address)']);
 const vaultAbi = parseAbi(['function asset() view returns(address)', 'function decimals() view returns(uint8)', 'function convertToAssets(uint256) view returns(uint256)']);
 const providerAbi = parseAbi(['function getPriceOracle() view returns(address)', 'function getSourceOfAsset(address) view returns(address)']);
 const morphoAbi = parseAbi(['function idToMarketParams(bytes32) view returns(address loanToken,address collateralToken,address oracle,address irm,uint256 lltv)', 'function BASE_FEED_1() view returns(address)', 'function BASE_FEED_2() view returns(address)', 'function BASE_VAULT() view returns(address)']);
@@ -91,7 +91,8 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
       const source = matches[sourceIndex];
       if (!source) throw new Error('No configured oracle remains');
       if (!networkOrder.includes(source.network) || !isAddress(source.address, { strict: false }) || zero.test(source.address) || !same(token.addresses[source.network] ?? '', source.token)) throw new Error('Savings source identity mismatch');
-      if (source.computed && (source.kind !== 'chainlink' || source.tokenGetter !== 'receiptToken' || !source.description || source.decimals === undefined)) throw new Error('Unverified computed oracle');
+      if (source.computed && (source.kind !== 'chainlink' || !source.tokenGetter || !['receiptToken', 'token'].includes(source.tokenGetter) || !source.description || source.decimals === undefined)) throw new Error('Unverified computed oracle');
+      if (source.computedTimestamp !== undefined && (!source.computed || !['block','none'].includes(source.computedTimestamp))) throw new Error('Unverified computed oracle');
       if (source.kind !== 'chainlink' && source.kind !== 'erc4626') throw new Error('Unknown savings adapter');
       if (source.kind === 'erc4626' && !same(source.address, source.token)) throw new Error('Redemption source is not the canonical token');
       return source;
@@ -146,17 +147,18 @@ export function createSavingsRateService(options: { clientFor?: (network: Networ
             s.client.readContract({ address: source!.address, abi: chainlinkAbi, functionName: 'decimals', blockNumber }),
             s.client.readContract({ address: source!.address, abi: chainlinkAbi, functionName: 'description', blockNumber }),
           ]);
-          // InfiniFi's explicitly configured computed adapter has no stored rounds:
-          // startedAt=0, updatedAt=the queried block timestamp. Verify its token at
-          // BOTH blocks; never relax stored-feed freshness checks for other assets.
+          // Computed NAV adapters must explicitly pin their metadata and canonical token getter.
+          // InfiniFi uses the queried block timestamp; Aladdin's token.nav() adapter returns zero timestamps.
+          // Only the configured computed mode may replace a missing timestamp with the pinned observation block.
           if (source!.tokenGetter) {
             const token = await s.client.readContract({ address: source!.address, abi: chainlinkAbi, functionName: source!.tokenGetter, blockNumber });
             if (!same(token, source!.token)) throw new Error('Invalid oracle observation');
           }
           const validStart = source!.computed
-            ? round[0] === 0n && round[2] === 0n && round[3] === timestamp && round[4] === 0n
+            ? round[0] === 0n && round[2] === 0n && round[3] === (source!.computedTimestamp === 'none' ? 0n : timestamp) && round[4] === 0n
             : round[2] > 0n;
-          if (!validStart || round[1] <= 0n || round[3] < round[2] || round[3] > timestamp || timestamp - round[3] > 3n * DAY || round[4] < round[0] || precision > 36 || !description || (source!.description && description !== source!.description) || (source!.decimals !== undefined && precision !== source!.decimals)) throw new Error('Invalid oracle observation');
+          const observedAt = source!.computed && source!.computedTimestamp === 'none' ? timestamp : round[3];
+          if (!validStart || round[1] <= 0n || round[3] < round[2] || observedAt > timestamp || timestamp - observedAt > 3n * DAY || round[4] < round[0] || precision > 36 || !description || (source!.description && description !== source!.description) || (source!.decimals !== undefined && precision !== source!.decimals)) throw new Error('Invalid oracle observation');
           return { value: round[1], decimals: precision, description };
         };
         const [a, b] = await Promise.all([read(s.start.number, s.start.timestamp), read(s.end.number, s.end.timestamp)]);

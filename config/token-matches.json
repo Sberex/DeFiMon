@@ -4913,15 +4913,63 @@
   "strUSD": {
     "_category": "Savings stablecoin",
     "ethereum": "0x280839980a7ed0d7717f64125fe241012e5f5815",
-    "monad": "0x683fb58ee77172626d5b49087ddac71ef7825d20"
+    "monad": "0x683fb58ee77172626d5b49087ddac71ef7825d20",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x7fdA577c085330E69df3179A2A5867751A9D0cAA",
+        "token": "0x280839980a7ed0d7717f64125fe241012e5f5815",
+        "description": "RedStone Price Feed for strUSD_FUNDAMENTAL",
+        "decimals": 8,
+        "label": "RedStone strUSD_FUNDAMENTAL intrinsic NAV/exchange-rate oracle",
+        "note": "RedStone AggregatorV3-compatible feed. Historical observations use archive block reads; multi-feed getRoundData does not preserve attributable month-old rounds. Quote units are the provider-published fundamental value per token, excluding external lending interest and incentives.",
+        "evidence": "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main/relayer-manifests-multi-feed/ethereumMultiFeed.json; exact deployed priceFeedAddress for strUSD_FUNDAMENTAL. Morpho market 0xcb0f31c185ad82b6d2bdbe87f73b6889cfbbf5b1890e94d8e411005611674daa binds this exact collateral contract to this single direct base feed (no second base feed/vault)."
+      },
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x280839980a7ed0d7717f64125fe241012e5f5815",
+        "token": "0x280839980a7ed0d7717f64125fe241012e5f5815",
+        "underlying": "0xd0580192e98ea6ceb9c7b6191ed2e27560911697",
+        "label": "strUSD/trUSD canonical ERC-4626 redemption rate",
+        "note": "trUSD per whole strUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x280839980a7ed0d7717f64125fe241012e5f5815#readContract"
+      }
+    ]
   },
   "USD3": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc"
+    "ethereum": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc",
+        "token": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "USD3/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole USD3 share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc#readContract; https://www.coingecko.com/en/coins/3jane-usd3; Morpho market 0xe3df58f9d3011b7481ff36b939fa5f8da642f34ea5792d25d3958dbf1efa26d7 resolves BASE_VAULT to this exact token."
+      }
+    ]
   },
   "etrUSD": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x6f20ae2c98c2d34e6a57f3411f2c5af92e32592d"
+    "ethereum": "0x6f20ae2c98c2d34e6a57f3411f2c5af92e32592d",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x835Cfff06A60a16FD1880C3b0BEFac9968ABd659",
+        "token": "0x6f20ae2c98c2d34e6a57f3411f2c5af92e32592d",
+        "description": "RedStone Price Feed for etrUSD_FUNDAMENTAL/USD",
+        "decimals": 8,
+        "label": "RedStone etrUSD_FUNDAMENTAL/USD intrinsic NAV/exchange-rate oracle",
+        "note": "RedStone AggregatorV3-compatible feed. Historical observations use archive block reads; multi-feed getRoundData does not preserve attributable month-old rounds. Quote units are the provider-published fundamental value per token, excluding external lending interest and incentives.",
+        "evidence": "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main/relayer-manifests-multi-feed/ethereumMultiFeed.json; exact deployed priceFeedAddress for etrUSD_FUNDAMENTAL/USD. Morpho market 0xff836cc9796e2889ebf73b26c2de2de74b35f985bb83e9d79380deb4229e365b binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/tori-ecosystem-vault"
+      }
+    ]
   },
   "WBT": {
     "_category": "Other",
@@ -4938,7 +4986,21 @@
     "base": "0xd879846cbe20751bde8a9342a3cca00a3e56ca47",
     "ethereum": "0x0990b149e915cb08e2143a5c6f669c907eddc8b0",
     "etherlink": "0x35dfec1813c43d82e6b87c682f560bbb8ea0c121",
-    "polygon": "0x272ea767712cc4839f4a27ee35eb73116158c8a2"
+    "polygon": "0x272ea767712cc4839f4a27ee35eb73116158c8a2",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x799fdc55150583b5Baa0b47065E1C901862c95d5",
+        "token": "0x0990b149e915cb08e2143a5c6f669c907eddc8b0",
+        "description": "EURSAFO NAV",
+        "decimals": 6,
+        "label": "Chainlink EURSAFO NAV intrinsic NAV/exchange-rate oracle",
+        "history": "rounds",
+        "note": "EUR-denominated per-share NAV; EUR/USD FX fluctuations are not treated as intrinsic yield.",
+        "evidence": "https://reference-data-directory.vercel.app/feeds-mainnet.json; Chainlink EURSAFO NAV proxy, issuer Spiko, NAVLink, six decimals. The direct base feed of the EURSAFO Morpho market also resolves to this contract. Morpho market 0x36da61bf253b8a7e07888cb96dbcde65001508159928801aeca932a5b5548119 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/spiko-amundi-overnight-swap-fund-eur"
+      }
+    ]
   },
   "OKB": {
     "_category": "Other",
@@ -5058,7 +5120,19 @@
     "_category": "Savings stablecoin",
     "base": "0x2c271ddf484ac0386d216eb7eb9ff02d4dc0f6aa",
     "bsc": "0xa14556f13516c53ff035858ffd21e1625e7eadfd",
-    "ethereum": "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a"
+    "ethereum": "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a",
+        "token": "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a",
+        "underlying": "0x98a878b1cd98131b271883b390f68d2c90674665",
+        "label": "apyUSD/apxUSD canonical ERC-4626 redemption rate",
+        "note": "apxUSD per whole apyUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a#readContract; https://www.coingecko.com/en/coins/apyusd; Morpho market 0xe23380494e365453f72f736f2d941959ae945773eb67a06cf4f538c7c4201264 resolves BASE_VAULT to this exact token."
+      }
+    ]
   },
   "CRVUSD": {
     "_category": "Stablecoin",
@@ -5123,7 +5197,20 @@
   "NOPAL": {
     "_category": "Savings stablecoin",
     "ethereum": "0x119dd7daff816f29d7ee47596ae5e4bdc4299165",
-    "plume-network": "0x119dd7daff816f29d7ee47596ae5e4bdc4299165"
+    "plume-network": "0x119dd7daff816f29d7ee47596ae5e4bdc4299165",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x1b2aA45CC3e7a88Bb0496c1e3e389bA11C208389",
+        "token": "0x119dd7daff816f29d7ee47596ae5e4bdc4299165",
+        "description": "RedStone Price Feed for nOPAL_FUNDAMENTAL",
+        "decimals": 8,
+        "label": "RedStone nOPAL_FUNDAMENTAL intrinsic NAV/exchange-rate oracle",
+        "note": "RedStone AggregatorV3-compatible feed. Historical observations use archive block reads; multi-feed getRoundData does not preserve attributable month-old rounds. Quote units are the provider-published fundamental value per token, excluding external lending interest and incentives.",
+        "evidence": "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main/relayer-manifests-multi-feed/ethereumMultiFeed.json; exact deployed priceFeedAddress for nOPAL_FUNDAMENTAL. Morpho market 0xbc32188b61522b84140ca39b8c9ecf94fdf97acb64a6c1a5a987f025f927f9a7 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/nest-blackopal-liquidstone-ii-vault"
+      }
+    ]
   },
   "PC0000015": {
     "_category": "Other",
@@ -5212,7 +5299,19 @@
   },
   "CGUSD": {
     "_category": "Savings stablecoin",
-    "base": "0xca72827a3d211cfd8f6b00ac98824872b72cab49"
+    "base": "0xca72827a3d211cfd8f6b00ac98824872b72cab49",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0xca72827a3d211cfd8f6b00ac98824872b72cab49",
+        "token": "0xca72827a3d211cfd8f6b00ac98824872b72cab49",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "cgUSD/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole cgUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical base token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://basescan.org/address/0xca72827a3d211cfd8f6b00ac98824872b72cab49#readContract; https://www.coingecko.com/en/coins/cygnus-finance-global-usd"
+      }
+    ]
   },
   "FEUSD": {
     "_category": "Stablecoin",
@@ -5253,7 +5352,20 @@
     "etherlink": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
     "oasis-sapphire": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
     "plume-network": "0xe85f2b707ec5ae8e07238f99562264f304e30109",
-    "rootstock": "0xdd629e5241cbc5919847783e6c96b2de4754e438"
+    "rootstock": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
+        "token": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
+        "description": "mTBILL/USD",
+        "decimals": 8,
+        "label": "Midas mTBILL/USD issuer NAV oracle",
+        "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
+        "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mTBILL.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Morpho market 0xb98ad8501bd97ce0684b30b3645e31713e658e98d1955e8b677fb2585eaa9893 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/midas-mtbill"
+      }
+    ]
   },
   "APES": {
     "_category": "Other",
@@ -5373,7 +5485,23 @@
   },
   "FXSAVE": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x7743e50f534a7f9f1791dde7dcd89f7783eefc39"
+    "ethereum": "0x7743e50f534a7f9f1791dde7dcd89f7783eefc39",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x9dD65b6d956E31F4dc093372D975275986695827",
+        "token": "0x7743e50f534a7f9f1791dde7dcd89f7783eefc39",
+        "description": "Net Asset Value in USD",
+        "decimals": 18,
+        "computed": true,
+        "tokenGetter": "token",
+        "computedTimestamp": "none",
+        "label": "Aladdin fxSAVE canonical USD NAV adapter",
+        "note": "Computed token.nav() in USD at each pinned archive block. The verified adapter deliberately returns zero round IDs and timestamps; token() must equal the canonical fxSAVE contract at both blocks. This captures full fxSAVE NAV rather than only its fxSP-denominated ERC-4626 share ratio. Stored-feed freshness rules are not relaxed.",
+        "evidence": "https://sourcify.dev/server/v2/contract/1/0x9dD65b6d956E31F4dc093372D975275986695827?fields=all; Aladdin DAO NetAssetValueChainlinkAdapter. token() was verified as 0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39. Morpho market 0x43e925e52d7873fa8acac90dd5f246087d55b3a34c344b71884a6352491ff459 uses this direct base feed."
+      }
+    ]
   },
   "NUSD": {
     "_category": "Stablecoin",
@@ -5468,7 +5596,19 @@
   },
   "ARMUSDCS": {
     "_category": "Savings stablecoin",
-    "ethereum": "0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd"
+    "ethereum": "0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd",
+        "token": "0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "armUSDCs/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole armUSDCs share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd#readContract; https://www.coingecko.com/en/coins/wintermute-usdc-select; Morpho market 0x46025292596c50feb9c6b736d5760373152c7536bac1cb02a1e3939b11be3409 resolves BASE_VAULT to this exact token."
+      }
+    ]
   },
   "EBTC": {
     "_category": "Other",
@@ -5604,7 +5744,19 @@
     "mode": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
     "sei-v2": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
     "sonic": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
-    "x-layer": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0"
+    "x-layer": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xcf62f905562626cfcdd2261162a51fd02fc9c5b6",
+        "token": "0xcf62f905562626cfcdd2261162a51fd02fc9c5b6",
+        "underlying": "0xcacd6fd266af91b8aed52accc382b4e165586e29",
+        "label": "sfrxUSD/frxUSD canonical ERC-4626 redemption rate",
+        "note": "frxUSD per whole sfrxUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xcf62f905562626cfcdd2261162a51fd02fc9c5b6#readContract; https://www.coingecko.com/en/coins/staked-frax-usd"
+      }
+    ]
   },
   "MHYPER": {
     "_category": "Savings stablecoin",
@@ -5637,7 +5789,20 @@
     "arbitrum": "0x0e389c83bc1d16d86412476f6103027555c03265",
     "base": "0x4f33acf823e6eeb697180d553ce0c710124c8d59",
     "ethereum": "0x3868d4e336d14d38031cf680329d31e4712e11cc",
-    "polygon": "0x99f70a0e1786402a6796c6b0aa997ef340a5c6da"
+    "polygon": "0x99f70a0e1786402a6796c6b0aa997ef340a5c6da",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x4B2C406f0Dbf7624a32971277DA7B4C43A7A942b",
+        "token": "0x3868d4e336d14d38031cf680329d31e4712e11cc",
+        "description": "Redstone Price Feed",
+        "decimals": 8,
+        "label": "RedStone eurSPKCC_NAV intrinsic NAV/exchange-rate oracle",
+        "note": "RedStone AggregatorV3-compatible feed. Historical observations use archive block reads; multi-feed getRoundData does not preserve attributable month-old rounds. Quote units are EUR NAV per share.",
+        "evidence": "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main/relayer-manifests/ethereumEurspkccNav.json; exact deployed priceFeedAddress for eurSPKCC_NAV. Asset identity: https://www.coingecko.com/en/coins/spiko-digital-assets-cash-carry-fund-euro-share-class"
+      }
+    ]
   },
   "GPT": {
     "_category": "Other",
@@ -5645,7 +5810,20 @@
   },
   "REUSDE": {
     "_category": "Savings stablecoin",
-    "ethereum": "0xddc0f880ff6e4e22e4b74632fbb43ce4df6ccc5a"
+    "ethereum": "0xddc0f880ff6e4e22e4b74632fbb43ce4df6ccc5a",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x7844441f13C61CBD3d297F5d2D7fcaBf17f0b843",
+        "token": "0xddc0f880ff6e4e22e4b74632fbb43ce4df6ccc5a",
+        "description": "reUSDe/USD exchange rate",
+        "decimals": 18,
+        "label": "Re Protocol reUSDe/USD issuer NAV oracle",
+        "note": "Re Protocol published NAV in USD per reUSDe. Uses actual NAVConsumer timestamps at both archive blocks; it is not the distinct reUSD token or a fabricated $1 peg.",
+        "evidence": "https://sourcify.dev/server/v2/contract/1/0x7844441f13C61CBD3d297F5d2D7fcaBf17f0b843?fields=all; ReProtocolExchangeRateChainlinkAdapter with immutable navDataProvider 0x105f7f110eD2293b3d34FC8871204d20A631D717. Morpho market 0x904142eba80012455c361f3c442b9c89c0dd0fb86c7d8f062c4425bfa2314eb9 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/re-protocol-reusde"
+      }
+    ]
   },
   "NAT": {
     "_category": "Other",
@@ -5755,7 +5933,19 @@
   },
   "STEAKCUSDC": {
     "_category": "Savings stablecoin",
-    "ethereum": "0xbeef00a59b577423653a1526c7009bde103f542b"
+    "ethereum": "0xbeef00a59b577423653a1526c7009bde103f542b",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbeef00a59b577423653a1526c7009bde103f542b",
+        "token": "0xbeef00a59b577423653a1526c7009bde103f542b",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "steakcUSDC/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole steakcUSDC share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xbeef00a59b577423653a1526c7009bde103f542b#readContract; https://www.coingecko.com/en/coins/steakhouse-confidential-prime-usdc"
+      }
+    ]
   },
   "XT": {
     "_category": "Other",
@@ -6001,7 +6191,19 @@
   },
   "3F-STEAKUSDC": {
     "_category": "Savings stablecoin",
-    "ethereum": "0xbeef3f3a04e28895f3d5163d910474901981183d"
+    "ethereum": "0xbeef3f3a04e28895f3d5163d910474901981183d",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbeef3f3a04e28895f3d5163d910474901981183d",
+        "token": "0xbeef3f3a04e28895f3d5163d910474901981183d",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "3F-steakUSDC/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole 3F-steakUSDC share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xbeef3f3a04e28895f3d5163d910474901981183d#readContract; https://www.coingecko.com/en/coins/3f-x-steakhouse-usdc-morpho-vault"
+      }
+    ]
   },
   "MWIN": {
     "_category": "Other",
@@ -6140,7 +6342,20 @@
   "NALPHA": {
     "_category": "Savings stablecoin",
     "ethereum": "0x593ccca4c4bf58b7526a4c164ceef4003c6388db",
-    "plume-network": "0x593ccca4c4bf58b7526a4c164ceef4003c6388db"
+    "plume-network": "0x593ccca4c4bf58b7526a4c164ceef4003c6388db",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0xbAacCa3D7E7056549a3654DbBe9e265aC0821920",
+        "token": "0x593ccca4c4bf58b7526a4c164ceef4003c6388db",
+        "description": "RedStone Price Feed for nALPHA_FUNDAMENTAL",
+        "decimals": 8,
+        "label": "RedStone nALPHA_FUNDAMENTAL intrinsic NAV/exchange-rate oracle",
+        "note": "RedStone AggregatorV3-compatible feed. Historical observations use archive block reads; multi-feed getRoundData does not preserve attributable month-old rounds. Quote units are the provider-published fundamental value per token, excluding external lending interest and incentives.",
+        "evidence": "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main/relayer-manifests-multi-feed/ethereumMultiFeed.json; exact deployed priceFeedAddress for nALPHA_FUNDAMENTAL. Morpho market 0xdacb18fea25c9ef5340a7cef4328d4721d2bb93d64c5d607a1fe7b7b8ecbd68d binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/nest-alpha-vault"
+      }
+    ]
   },
   "HANDY": {
     "_category": "Other",
@@ -6234,7 +6449,19 @@
   },
   "ETH:GUSDTQ": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x71ffb6a81786ec285d429d531cf655107b9d878d"
+    "ethereum": "0x71ffb6a81786ec285d429d531cf655107b9d878d",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x71ffb6a81786ec285d429d531cf655107b9d878d",
+        "token": "0x71ffb6a81786ec285d429d531cf655107b9d878d",
+        "underlying": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "label": "gUSDTq/USDT canonical ERC-4626 redemption rate",
+        "note": "USDT per whole gUSDTq share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x71ffb6a81786ec285d429d531cf655107b9d878d#readContract; https://www.coingecko.com/en/coins/galaxy-usdt-quality"
+      }
+    ]
   },
   "YUSD#cg-yieldfi-ytoken": {
     "_category": "Savings stablecoin",
@@ -6244,7 +6471,19 @@
     "katana": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
     "optimism": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
     "plume-network": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
-    "sonic": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121"
+    "sonic": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x19ebd191f7a24ece672ba13a302212b5ef7f35cb",
+        "token": "0x19ebd191f7a24ece672ba13a302212b5ef7f35cb",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "yUSD/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole yUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x19ebd191f7a24ece672ba13a302212b5ef7f35cb#readContract; https://www.coingecko.com/en/coins/yieldfi-ytoken; Morpho market 0x60154d71ec96b7aee2864326662cb731172f1ebd6ca0e64af9bc8659831ed0ff resolves BASE_VAULT to this exact token."
+      }
+    ]
   },
   "RIO": {
     "_category": "Other",
@@ -6294,7 +6533,19 @@
     "_category": "Savings stablecoin",
     "base": "0x83db73ef5192de4b6a4c92bd0141ba1a0dc87c65",
     "bsc": "0x64748ea3e31d0b7916f0ff91b017b9f404ded8ef",
-    "ethereum": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0"
+    "ethereum": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0",
+        "token": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0",
+        "underlying": "0x8238884ec9668ef77b90c6dff4d1a9f4f4823bfe",
+        "label": "cUSDO/USDO canonical ERC-4626 redemption rate",
+        "note": "USDO per whole cUSDO share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0#readContract; https://www.coingecko.com/en/coins/compounding-open-dollar; Morpho market 0x15f30b939b8590be30aa22cd8d6367cf90a0ae460ce7f644ddbf58b8442e619a resolves BASE_VAULT to this exact token."
+      }
+    ]
   },
   "BMMF": {
     "_category": "Savings stablecoin",
@@ -6308,7 +6559,19 @@
   },
   "ETH:GUSDCQ": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x91600e31fbedc72433d4a57f16639cfe661be7d8"
+    "ethereum": "0x91600e31fbedc72433d4a57f16639cfe661be7d8",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x91600e31fbedc72433d4a57f16639cfe661be7d8",
+        "token": "0x91600e31fbedc72433d4a57f16639cfe661be7d8",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "gUSDCq/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole gUSDCq share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x91600e31fbedc72433d4a57f16639cfe661be7d8#readContract; https://www.coingecko.com/en/coins/galaxy-usdc-quality"
+      }
+    ]
   },
   "DEFI.SSI": {
     "_category": "Other",
@@ -6495,7 +6758,20 @@
   },
   "MAPOLLO": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x7cf9dec92ca9fd46f8d86e7798b72624bc116c05"
+    "ethereum": "0x7cf9dec92ca9fd46f8d86e7798b72624bc116c05",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x84303e5568C7B167fa4fEBc6253CDdfe12b7Ee4B",
+        "token": "0x7cf9dec92ca9fd46f8d86e7798b72624bc116c05",
+        "description": "mAPOLLO/USD",
+        "decimals": 8,
+        "label": "Midas mAPOLLO/USD issuer NAV oracle",
+        "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
+        "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mAPOLLO.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Morpho market 0x031c7333014af51e4fd18031d14e4eaada58348cde3f6dc6ea8cca16f7387fb2 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/midas-mapollo"
+      }
+    ]
   },
   "COD": {
     "_category": "Other",
@@ -6648,7 +6924,19 @@
   },
   "YOUSD": {
     "_category": "Savings stablecoin",
-    "base": "0x0000000f2eb9f69274678c76222b35eec7588a65"
+    "base": "0x0000000f2eb9f69274678c76222b35eec7588a65",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0x0000000f2eb9f69274678c76222b35eec7588a65",
+        "token": "0x0000000f2eb9f69274678c76222b35eec7588a65",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "yoUSD/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole yoUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical base token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://basescan.org/address/0x0000000f2eb9f69274678c76222b35eec7588a65#readContract; https://www.coingecko.com/en/coins/yield-optimizer-usd"
+      }
+    ]
   },
   "EXAETH": {
     "_category": "Other",
@@ -6981,7 +7269,20 @@
   "MROX": {
     "_category": "Savings stablecoin",
     "ethereum": "0x67e1f506b148d0fc95a4e3ffb49068ceb6855c05",
-    "monad": "0x6cf55183ea297ba200cf88419bba156eba2ed206"
+    "monad": "0x6cf55183ea297ba200cf88419bba156eba2ed206",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x7fF56C3a31476c231e74E4F64e9d9718572B54Aa",
+        "token": "0x67e1f506b148d0fc95a4e3ffb49068ceb6855c05",
+        "description": "mROX/USD",
+        "decimals": 8,
+        "label": "Midas mROX/USD issuer NAV oracle",
+        "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
+        "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mROX.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Asset identity: https://www.coingecko.com/en/coins/midas-rockaway-market-neutral"
+      }
+    ]
   },
   "DIMO": {
     "_category": "Other",
@@ -7265,7 +7566,20 @@
     "_category": "Savings stablecoin",
     "ethereum": "0x87c9053c819bb28e0d73d33059e1b3da80afb0cf",
     "etherlink": "0x733d504435a49fc8c4e9759e756c2846c92f0160",
-    "tac": "0x0a72ed3c34352ab2dd912b30f2252638c873d6f0"
+    "tac": "0x0a72ed3c34352ab2dd912b30f2252638c873d6f0",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
+        "token": "0x87c9053c819bb28e0d73d33059e1b3da80afb0cf",
+        "description": "mRe7YIELD/USD",
+        "decimals": 8,
+        "label": "Midas mRe7YIELD/USD issuer NAV oracle",
+        "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
+        "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mRE7.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Morpho market 0x921afaedabc6597ac12ce8c0f1a8d562a2326c401ef1e3c77e861988890fc3ce binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/midas-mre7yield"
+      }
+    ]
   },
   "THQ": {
     "_category": "Other",
@@ -7352,7 +7666,20 @@
     "base": "0x1c2757c1fef1038428b5bef062495ce94bbe92b2",
     "ethereum": "0x2a8c22e3b10036f3aef5875d04f8441d4188b656",
     "etherlink": "0x2247b5a46bb79421a314ab0f0b67ffd11dd37ee4",
-    "plume-network": "0x0c78ca789e826fe339de61934896f5d170b66d78"
+    "plume-network": "0x0c78ca789e826fe339de61934896f5d170b66d78",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "chainlink",
+        "address": "0xE4f2AE539442e1D3Fb40F03ceEbF4A372a390d24",
+        "token": "0x2a8c22e3b10036f3aef5875d04f8441d4188b656",
+        "description": "mBASIS/USD",
+        "decimals": 8,
+        "label": "Midas mBASIS/USD issuer NAV oracle",
+        "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
+        "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mBASIS.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Morpho market 0x6f461100bb410de265f49dbc70a6c19555bd8cdc696322951b3a11a2e7fafc39 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/midas-basis-trading-token"
+      }
+    ]
   },
   "BEM": {
     "_category": "Other",
@@ -7654,7 +7981,19 @@
   },
   "SRUSDAT": {
     "_category": "Savings stablecoin",
-    "ethereum": "0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066"
+    "ethereum": "0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066",
+        "token": "0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066",
+        "underlying": "0x23238f20b894f29041f48d88ee91131c395aaa71",
+        "label": "srUSDat/USDat canonical ERC-4626 redemption rate",
+        "note": "USDat per whole srUSDat share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066#readContract; https://www.coingecko.com/en/coins/strata-senior-usdat"
+      }
+    ]
   },
   "ANY#cg-anyspend": {
     "_category": "Other",
@@ -8616,7 +8955,31 @@
     "base": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de",
     "ethereum": "0x2e3c5e514eef46727de1fe44618027a9b70d92fc",
     "optimism": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de",
-    "sonic": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de"
+    "sonic": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "chainlink",
+        "address": "0x99C098FA069B120dd81E56c0f2178093cc7a851f",
+        "token": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de",
+        "description": "vyUSD-USD Exchange Rate",
+        "decimals": 18,
+        "label": "Chainlink vyUSD/USD exchange-rate oracle",
+        "history": "rounds",
+        "note": "Published exchange rate for the exact Base vyUSD deployment, consistent with the canonical Ethereum redemption rate. A verified unchanged monthly rate is 0%, not an assumed yield; USD market prices and rewards remain separate.",
+        "evidence": "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-base-1.json; attributeType=exchange_rate, baseAsset=vyUSD, quoteAsset=USD, proxyAddress=0x99C098FA069B120dd81E56c0f2178093cc7a851f. https://www.coingecko.com/en/coins/yieldfi-vyusd lists this Base contract. Canonical Ethereum vault asset/convertToAssets observations were checked independently."
+      },
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x2e3c5e514eef46727de1fe44618027a9b70d92fc",
+        "token": "0x2e3c5e514eef46727de1fe44618027a9b70d92fc",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "vyUSD/USDC canonical ERC-4626 redemption rate",
+        "note": "USDC per whole vyUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
+        "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x2e3c5e514eef46727de1fe44618027a9b70d92fc#readContract; https://www.coingecko.com/en/coins/yieldfi-vyusd"
+      }
+    ]
   },
   "IJHON": {
     "_category": "Other",

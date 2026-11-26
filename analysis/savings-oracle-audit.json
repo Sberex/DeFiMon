@@ -1,0 +1,1564 @@
+{
+  "checkedAt": "2026-11-26T20:11:11.377423+00:00",
+  "scope": "All Savings stablecoin entries without _intrinsicOracles before this audit; existing token identities, categories and configured sources were preserved. This is not proof that an unverified token has no oracle.",
+  "summary": {
+    "savingsTokenGroups": 60,
+    "previouslyConfiguredGroups": 12,
+    "auditedMissingGroups": 48,
+    "newlyConfiguredGroups": 27,
+    "newSourceEntries": 29,
+    "newLiveVerifiedGroups": 27,
+    "stillUnconfiguredGroups": 21
+  },
+  "method": [
+    "Inspect issuer/provider deployment registries and exact chain/token identities. Prefer identifiable Chainlink/RedStone fundamental NAV or exchange-rate feeds, not generic USD pegs or reserves.",
+    "Verify current and month-old observations and units using live RPC. Use canonical share conversions when no preferable verified provider NAV source is attributable.",
+    "Do not combine observations from different sources, reinterpret distributions/rebases as price growth, accept stale stored feeds, or substitute same-symbol assets.",
+    "Keep timestamp-free computed NAV limited to explicitly configured metadata and exact canonical token() identity at both pinned archive blocks."
+  ],
+  "references": {
+    "chainlinkEthereum": "https://reference-data-directory.vercel.app/feeds-mainnet.json",
+    "chainlinkBase": "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-base-1.json",
+    "chainlinkArbitrum": "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-arbitrum-1.json",
+    "chainlinkBNB": "https://reference-data-directory.vercel.app/feeds-bsc-mainnet.json",
+    "chainlinkPlasma": "https://reference-data-directory.vercel.app/feeds-plasma-mainnet.json",
+    "redstoneRegistry": "https://github.com/redstone-finance/redstone-oracles-monorepo/tree/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main",
+    "midasDeployments": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts"
+  },
+  "tokens": [
+    {
+      "group": "USDY",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0x35e050d3c0ec2d29d269a8ecea763a183bdf9a9d",
+        "bsc": "0x608593d17a2decbbc4399e4185be4922f97ed32e",
+        "ethereum": "0x96f6ef951840721adbf46ac996b59e0235cb985c",
+        "mantle": "0x5be26527e817998a7206475496fde1e68957c5a6",
+        "plume-network": "0xd2b65e851be3d80d3c2ce795eb2e78f16cb088b2",
+        "sei-v2": "0x54cd901491aef397084453f4372b93c33260e2a6",
+        "tempo": "0x20c000000000000000000000d479b9f6ec0ceff9"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No compatible, token-attributable NAV/exchange-rate feed with verified 30-day history was established in the checked provider directories and native-interface probe. Generic dollar or unrelated market feeds are not used.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "USDY"
+      }
+    },
+    {
+      "group": "GUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xaf6186b3521b60e27396b5d23b48abc34bf585c5"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "The configured Gate GUSD contract did not expose a usable canonical ERC-4626 rate, and no attributable compatible feed was verified. It is not Gemini GUSD.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 6,
+        "symbol": "GUSD"
+      }
+    },
+    {
+      "group": "vBUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "bsc": "0x95c78222b3d6e262426483d42cfa53685a67ab9d"
+      },
+      "status": "unconfigured",
+      "reasonCode": "adapter-required",
+      "reason": "This legacy Venus vToken exposes underlying(), not ERC-4626 asset()/convertToAssets(). A dedicated accrued vToken exchange-rate reader or verified wrapper feed is required. BUSD/USD prices do not measure vBUSD share growth.",
+      "nativeProbe": {
+        "network": "bsc",
+        "block": "135906119",
+        "underlying": "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+        "decimals": 8,
+        "symbol": "vBUSD"
+      }
+    },
+    {
+      "group": "strUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x280839980a7ed0d7717f64125fe241012e5f5815",
+        "monad": "0x683fb58ee77172626d5b49087ddac71ef7825d20"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x7fdA577c085330E69df3179A2A5867751A9D0cAA",
+          "kind": "chainlink",
+          "label": "RedStone strUSD_FUNDAMENTAL intrinsic NAV/exchange-rate oracle"
+        },
+        {
+          "network": "ethereum",
+          "address": "0x280839980a7ed0d7717f64125fe241012e5f5815",
+          "kind": "erc4626",
+          "label": "strUSD/trUSD canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.0965346592331229,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x7fdA577c085330E69df3179A2A5867751A9D0cAA",
+          "kind": "chainlink",
+          "label": "RedStone strUSD_FUNDAMENTAL intrinsic NAV/exchange-rate oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.03425413,
+          "endRate": 1.04246027,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "decimals": 18,
+        "symbol": "strUSD",
+        "underlyingSymbol": "trUSD",
+        "underlyingDecimals": 18
+      }
+    },
+    {
+      "group": "USD3",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc",
+          "kind": "erc4626",
+          "label": "USD3/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.06576055305590596,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc",
+          "kind": "erc4626",
+          "label": "USD3/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.185944,
+          "endRate": 1.192354,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 6,
+        "symbol": "USD3",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      },
+      "rejectedCandidate": "The published RedStone USD3 feed was materially different from canonical USD3/USDC convertToAssets at this check. Its uncapped intrinsic-NAV semantics were not established; canonical redemption growth is used rather than assuming the price feed measures the same return."
+    },
+    {
+      "group": "etrUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x6f20ae2c98c2d34e6a57f3411f2c5af92e32592d"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x835Cfff06A60a16FD1880C3b0BEFac9968ABd659",
+          "kind": "chainlink",
+          "label": "RedStone etrUSD_FUNDAMENTAL/USD intrinsic NAV/exchange-rate oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.06093599819263795,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x835Cfff06A60a16FD1880C3b0BEFac9968ABd659",
+          "kind": "chainlink",
+          "label": "RedStone etrUSD_FUNDAMENTAL/USD intrinsic NAV/exchange-rate oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.01695175,
+          "endRate": 1.02204509,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "etrUSD"
+      }
+    },
+    {
+      "group": "EURSAFO",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0x1412632f2b89e87bfa20c1318a43ced25f1d7b76",
+        "base": "0xd879846cbe20751bde8a9342a3cca00a3e56ca47",
+        "ethereum": "0x0990b149e915cb08e2143a5c6f669c907eddc8b0",
+        "etherlink": "0x35dfec1813c43d82e6b87c682f560bbb8ea0c121",
+        "polygon": "0x272ea767712cc4839f4a27ee35eb73116158c8a2"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x799fdc55150583b5Baa0b47065E1C901862c95d5",
+          "kind": "chainlink",
+          "label": "Chainlink EURSAFO NAV intrinsic NAV/exchange-rate oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.027977553381594484,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x799fdc55150583b5Baa0b47065E1C901862c95d5",
+          "kind": "chainlink",
+          "label": "Chainlink EURSAFO NAV intrinsic NAV/exchange-rate oracle",
+          "windowDays": 30,
+          "blockNumber": "26501663",
+          "startRound": "18446744073709551749",
+          "endRound": "18446744073709551783",
+          "startTimestamp": 1793117759,
+          "endTimestamp": 1795698659,
+          "startRate": 1.015862,
+          "endRate": 1.018198
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 5,
+        "symbol": "eurSAFO"
+      }
+    },
+    {
+      "group": "BUIDL",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0xa6525ae43edcd03dc08e775774dcabd3bb925872",
+        "avalanche": "0x53fc82f14f009009b440a706e31c9021e1196a2f",
+        "bsc": "0x2d5bdc96d9c8aabbdb38c9a27398513e7e5ef84f",
+        "ethereum": "0x7712c34205737192402172409a8f7ccef8aa2aec",
+        "optimism": "0xa1cdab15bba75a80df4089cafba013e376957cf5",
+        "polygon": "0x2893ef551b6dd69f661ac00f11d93e5dc5dc0e99"
+      },
+      "status": "unconfigured",
+      "reasonCode": "distribution-model",
+      "reason": "Constant $1 NAV does not include the fund earnings distributed/reinvested as additional tokens. Fundamental/peg price feeds alone cannot establish intrinsic income under the current price-growth formula.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 6,
+        "symbol": "BUIDL"
+      }
+    },
+    {
+      "group": "A7A5",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x6fa0be17e4bea2fcfa22ef89bf8ac9aab0ab0fc9"
+      },
+      "status": "unconfigured",
+      "reasonCode": "yield-model-not-verified",
+      "reason": "No compatible per-token intrinsic rate was verified independently of RUB/USD FX changes and balance/distribution mechanics. A USD market-price feed is not assigned as a substitute.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 6,
+        "symbol": "A7A5"
+      }
+    },
+    {
+      "group": "APYUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0x2c271ddf484ac0386d216eb7eb9ff02d4dc0f6aa",
+        "bsc": "0xa14556f13516c53ff035858ffd21e1625e7eadfd",
+        "ethereum": "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a",
+          "kind": "erc4626",
+          "label": "apyUSD/apxUSD canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.13413530424513395,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a",
+          "kind": "erc4626",
+          "label": "apyUSD/apxUSD canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.4488252178474388,
+          "endRate": 1.4647982544003695,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0x98A878b1Cd98131B271883B390f68D2c90674665",
+        "decimals": 18,
+        "symbol": "apyUSD",
+        "underlyingSymbol": "apxUSD",
+        "underlyingDecimals": 18
+      }
+    },
+    {
+      "group": "NOPAL",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x119dd7daff816f29d7ee47596ae5e4bdc4299165",
+        "plume-network": "0x119dd7daff816f29d7ee47596ae5e4bdc4299165"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x1b2aA45CC3e7a88Bb0496c1e3e389bA11C208389",
+          "kind": "chainlink",
+          "label": "RedStone nOPAL_FUNDAMENTAL intrinsic NAV/exchange-rate oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.10443570698614163,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x1b2aA45CC3e7a88Bb0496c1e3e389bA11C208389",
+          "kind": "chainlink",
+          "label": "RedStone nOPAL_FUNDAMENTAL intrinsic NAV/exchange-rate oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.109654,
+          "endRate": 1.119179,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 6,
+        "symbol": "nOPAL"
+      }
+    },
+    {
+      "group": "CGUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0xca72827a3d211cfd8f6b00ac98824872b72cab49"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "base",
+          "address": "0xca72827a3d211cfd8f6b00ac98824872b72cab49",
+          "kind": "erc4626",
+          "label": "cgUSD/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0,
+        "source": {
+          "chain": "Base",
+          "oracle": "0xca72827a3d211cfd8f6b00ac98824872b72cab49",
+          "kind": "erc4626",
+          "label": "cgUSD/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "62666731",
+          "startBlockNumber": "53171187",
+          "startTimestamp": 1793131721,
+          "endTimestamp": 1795723721,
+          "startRate": 1.222629,
+          "endRate": 1.222629,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "base",
+        "block": "62662453",
+        "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "decimals": 6,
+        "symbol": "cgUSD",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "MTBILL",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
+        "ethereum": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
+        "etherlink": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
+        "oasis-sapphire": "0xdd629e5241cbc5919847783e6c96b2de4754e438",
+        "plume-network": "0xe85f2b707ec5ae8e07238f99562264f304e30109",
+        "rootstock": "0xdd629e5241cbc5919847783e6c96b2de4754e438"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
+          "kind": "chainlink",
+          "label": "Midas mTBILL/USD issuer NAV oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.032030076734675034,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
+          "kind": "chainlink",
+          "label": "Midas mTBILL/USD issuer NAV oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.07626311,
+          "endRate": 1.07909649,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "mTBILL"
+      }
+    },
+    {
+      "group": "EARNUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x4ce1ac8f43e0e5bd7a346a98af777bf8fbea1981"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "The configured share-token contract did not expose a usable direct ERC-4626 redemption interface. No attributable compatible adapter with verified month-old observations was established.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "earnUSD"
+      }
+    },
+    {
+      "group": "FXSAVE",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x7743e50f534a7f9f1791dde7dcd89f7783eefc39"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x9dD65b6d956E31F4dc093372D975275986695827",
+          "kind": "chainlink",
+          "label": "Aladdin fxSAVE canonical USD NAV adapter"
+        }
+      ],
+      "validation": {
+        "apr": 0.06816160293358166,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x9dD65b6d956E31F4dc093372D975275986695827",
+          "kind": "chainlink",
+          "label": "Aladdin fxSAVE canonical USD NAV adapter",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.126313320092631,
+          "endRate": 1.1326232917065726,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0x65C9A641afCEB9C0E6034e558A319488FA0FA3be",
+        "decimals": 18,
+        "symbol": "fxSAVE",
+        "underlyingSymbol": "fxSP",
+        "underlyingDecimals": 18
+      }
+    },
+    {
+      "group": "BRSRV",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x3078bcf707e457d3af2f938a2a478bbeea50a942"
+      },
+      "status": "unconfigured",
+      "reasonCode": "distribution-model-review",
+      "reason": "The published RedStone fundamental feed was $1 at both snapshots. This does not establish how the Daily Reinvestment fund credits earnings, so it is not used to infer zero income.",
+      "candidates": [
+        {
+          "address": "0xC90Ddc83Be297b8C66aE7C3F92BA84cea9107eAA",
+          "provider": "RedStone",
+          "description": "RedStone Price Feed for BRSRV_ETHEREUM_FUNDAMENTAL",
+          "ageSecondsAtCheck": 20856,
+          "observedRate": 1.0
+        }
+      ],
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 6,
+        "symbol": "BRSRV"
+      }
+    },
+    {
+      "group": "FIUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0xcded6b899edba762d793f44ed295248049440e1e",
+        "zksync": "0x2ab105a3ead22731082b790ca9a00d9a3a7627f9"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No supported-chain, token-attributable compatible NAV oracle with usable history was verified. Public fund/share naming alone is insufficient.",
+      "nativeProbe": {
+        "network": "arbitrum",
+        "block": "527815572",
+        "decimals": 2,
+        "symbol": "FIUSD"
+      }
+    },
+    {
+      "group": "ARMUSDCS",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd",
+          "kind": "erc4626",
+          "label": "armUSDCs/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.05909096977268872,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd",
+          "kind": "erc4626",
+          "label": "armUSDCs/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.023721,
+          "endRate": 1.028693,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 18,
+        "symbol": "armUSDCs",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "USDU",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "bsc": "0xea953ea6634d55dac6697c436b1e81a679db5882"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-a-unit-price",
+      "reason": "Chainlink publishes a USDu reserves feed and a NAV Data Stream. The reserves feed measures reserve quantity, not per-token NAV; the Data Stream has no compatible push-oracle proxy address for this reader. Neither is substituted as a price-growth feed.",
+      "nativeProbe": {
+        "network": "bsc",
+        "block": "135906119",
+        "decimals": 18,
+        "symbol": "USDu"
+      }
+    },
+    {
+      "group": "SFRXUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+        "ethereum": "0xcf62f905562626cfcdd2261162a51fd02fc9c5b6",
+        "fraxtal": "0xfc00000000000000000000000000000000000008",
+        "katana": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+        "mode": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+        "sei-v2": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+        "sonic": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+        "x-layer": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xcf62f905562626cfcdd2261162a51fd02fc9c5b6",
+          "kind": "erc4626",
+          "label": "sfrxUSD/frxUSD canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.050142778844295056,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xcf62f905562626cfcdd2261162a51fd02fc9c5b6",
+          "kind": "erc4626",
+          "label": "sfrxUSD/frxUSD canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.217542536147216,
+          "endRate": 1.2225604237738095,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xCAcd6fd266aF91b8AeD52aCCc382b4e165586E29",
+        "decimals": 18,
+        "symbol": "sfrxUSD",
+        "underlyingSymbol": "frxUSD",
+        "underlyingDecimals": 18
+      }
+    },
+    {
+      "group": "EURSPKCC",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0x0e389c83bc1d16d86412476f6103027555c03265",
+        "base": "0x4f33acf823e6eeb697180d553ce0c710124c8d59",
+        "ethereum": "0x3868d4e336d14d38031cf680329d31e4712e11cc",
+        "polygon": "0x99f70a0e1786402a6796c6b0aa997ef340a5c6da"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x4B2C406f0Dbf7624a32971277DA7B4C43A7A942b",
+          "kind": "chainlink",
+          "label": "RedStone eurSPKCC_NAV intrinsic NAV/exchange-rate oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.002996841441143171,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x4B2C406f0Dbf7624a32971277DA7B4C43A7A942b",
+          "kind": "chainlink",
+          "label": "RedStone eurSPKCC_NAV intrinsic NAV/exchange-rate oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.002778,
+          "endRate": 1.003025,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 5,
+        "symbol": "eurSPKCC"
+      }
+    },
+    {
+      "group": "REUSDE",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xddc0f880ff6e4e22e4b74632fbb43ce4df6ccc5a"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x7844441f13C61CBD3d297F5d2D7fcaBf17f0b843",
+          "kind": "chainlink",
+          "label": "Re Protocol reUSDe/USD issuer NAV oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.11883465737144651,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x7844441f13C61CBD3d297F5d2D7fcaBf17f0b843",
+          "kind": "chainlink",
+          "label": "Re Protocol reUSDe/USD issuer NAV oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.436869637657026,
+          "endRate": 1.4509038769237446,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "reUSDe"
+      }
+    },
+    {
+      "group": "FILQ-A",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x54a4fc78431f9201824643e99bec891bb7462a1d"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No supported-chain, token-attributable compatible NAV oracle with verified history was established for this exact accumulating share class.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 2,
+        "symbol": "FILQ-A"
+      }
+    },
+    {
+      "group": "STEAKCUSDC",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xbeef00a59b577423653a1526c7009bde103f542b"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xbeef00a59b577423653a1526c7009bde103f542b",
+          "kind": "erc4626",
+          "label": "steakcUSDC/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.053774368335735866,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xbeef00a59b577423653a1526c7009bde103f542b",
+          "kind": "erc4626",
+          "label": "steakcUSDC/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.028777,
+          "endRate": 1.033324,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 18,
+        "symbol": "steakcUSDC",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "UMINT",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xc06036793272219179f846ef6bfc3b16e820df0b"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No publicly attributable compatible NAV oracle with verified 30-day history was established for this exact token.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "uMINT"
+      }
+    },
+    {
+      "group": "MM1-USD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xcc5c22c7a6bcc25e66726aef011dde74289ed203"
+      },
+      "status": "unconfigured",
+      "reasonCode": "stale-candidate",
+      "reason": "The issuer-published mM1USD/USD feed is attributable, but its current observation was about 15 days old and the historical snapshot was also outside the existing three-day freshness bound. It remains unconfigured rather than weakening freshness checks.",
+      "candidates": [
+        {
+          "address": "0xad316aA927c0970C2e8f0B903211D0bd19A10702",
+          "provider": "Midas",
+          "description": "mM1USD/USD",
+          "ageSecondsAtCheck": 1298712,
+          "observedRate": 1.05266875
+        }
+      ],
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "mM1-USD"
+      }
+    },
+    {
+      "group": "3F-STEAKUSDC",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xbeef3f3a04e28895f3d5163d910474901981183d"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xbeef3f3a04e28895f3d5163d910474901981183d",
+          "kind": "erc4626",
+          "label": "3F-steakUSDC/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.049854725317457785,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xbeef3f3a04e28895f3d5163d910474901981183d",
+          "kind": "erc4626",
+          "label": "3F-steakUSDC/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.030347,
+          "endRate": 1.034569,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 18,
+        "symbol": "3F-steakUSDC",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "USDO",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0",
+        "bsc": "0x302e52aff9815b9d1682473dbfb9c74f9b750aa8",
+        "ethereum": "0x8238884ec9668ef77b90c6dff4d1a9f4f4823bfe",
+        "klay-token": "0x87e617c7484ade79fcd90db58beb82b057facb48"
+      },
+      "status": "unconfigured",
+      "reasonCode": "rebasing-model",
+      "reason": "OpenDollar earnings accrue through rebasing, not a growing per-token dollar peg. Its cUSDO wrapper has been configured separately; a USDO/USD peg feed must not imply zero USDO income.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "USDO"
+      }
+    },
+    {
+      "group": "NALPHA",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x593ccca4c4bf58b7526a4c164ceef4003c6388db",
+        "plume-network": "0x593ccca4c4bf58b7526a4c164ceef4003c6388db"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xbAacCa3D7E7056549a3654DbBe9e265aC0821920",
+          "kind": "chainlink",
+          "label": "RedStone nALPHA_FUNDAMENTAL intrinsic NAV/exchange-rate oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.0938847402515885,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xbAacCa3D7E7056549a3654DbBe9e265aC0821920",
+          "kind": "chainlink",
+          "label": "RedStone nALPHA_FUNDAMENTAL intrinsic NAV/exchange-rate oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.128483,
+          "endRate": 1.137191,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 6,
+        "symbol": "nALPHA"
+      }
+    },
+    {
+      "group": "ETH:GUSDTQ",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x71ffb6a81786ec285d429d531cf655107b9d878d"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x71ffb6a81786ec285d429d531cf655107b9d878d",
+          "kind": "erc4626",
+          "label": "gUSDTq/USDT canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.0372697639712524,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x71ffb6a81786ec285d429d531cf655107b9d878d",
+          "kind": "erc4626",
+          "label": "gUSDTq/USDT canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.01852,
+          "endRate": 1.02164,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "decimals": 18,
+        "symbol": "gUSDTq",
+        "underlyingSymbol": "USDT",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "YUSD#cg-yieldfi-ytoken",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+        "base": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+        "ethereum": "0x19ebd191f7a24ece672ba13a302212b5ef7f35cb",
+        "katana": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+        "optimism": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+        "plume-network": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+        "sonic": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x19ebd191f7a24ece672ba13a302212b5ef7f35cb",
+          "kind": "erc4626",
+          "label": "yUSD/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x19ebd191f7a24ece672ba13a302212b5ef7f35cb",
+          "kind": "erc4626",
+          "label": "yUSD/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 0.998453,
+          "endRate": 0.998453,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 18,
+        "symbol": "yUSD",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      },
+      "rejectedCandidate": "RedStone YUSD_FUNDAMENTAL does not establish identity for this YieldFi ERC-4626 token; its $1 value is not this vault redemption rate. The canonical token/USDC conversion is used instead."
+    },
+    {
+      "group": "CUSDO",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0x83db73ef5192de4b6a4c92bd0141ba1a0dc87c65",
+        "bsc": "0x64748ea3e31d0b7916f0ff91b017b9f404ded8ef",
+        "ethereum": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0",
+          "kind": "erc4626",
+          "label": "cUSDO/USDO canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.034535205026507705,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0",
+          "kind": "erc4626",
+          "label": "cUSDO/USDO canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.0649801699298482,
+          "endRate": 1.0680031267943162,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0x8238884Ec9668Ef77B90C6dfF4D1a9F4F4823BFe",
+        "decimals": 18,
+        "symbol": "cUSDO",
+        "underlyingSymbol": "USDO",
+        "underlyingDecimals": 18
+      }
+    },
+    {
+      "group": "BMMF",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0x50b95509e8fc9cda3860c2ef80308467ab6534cc"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No attributable compatible NAV feed or direct canonical ERC-4626 rate with verified 30-day observations was established for the configured Base token.",
+      "nativeProbe": {
+        "network": "base",
+        "block": "62662453",
+        "decimals": 18,
+        "symbol": "BMMF"
+      }
+    },
+    {
+      "group": "ETH:GUSDCQ",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x91600e31fbedc72433d4a57f16639cfe661be7d8"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x91600e31fbedc72433d4a57f16639cfe661be7d8",
+          "kind": "erc4626",
+          "label": "gUSDCq/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.04416638691266749,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x91600e31fbedc72433d4a57f16639cfe661be7d8",
+          "kind": "erc4626",
+          "label": "gUSDCq/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.021731,
+          "endRate": 1.02544,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 18,
+        "symbol": "gUSDCq",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "BC3M",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
+        "avalanche": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
+        "base": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
+        "bsc": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
+        "ethereum": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
+        "gnosis": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
+        "polygon": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No attributable compatible oracle for the exact backed euro-government-bond share was established. Underlying instrument prices are not assigned by ticker alone.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "bC3M"
+      }
+    },
+    {
+      "group": "WEEUR",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "optimism": "0xcc476b1a49bcdf5192561e87b6fb8ea78aa28c13"
+      },
+      "status": "unconfigured",
+      "reasonCode": "unsupported-source-chain",
+      "reason": "The config only lists Optimism for this token. Optimism is not one of the intrinsic reader source networks; no attributable source on a supported chain was verified."
+    },
+    {
+      "group": "MAPOLLO",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x7cf9dec92ca9fd46f8d86e7798b72624bc116c05"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x84303e5568C7B167fa4fEBc6253CDdfe12b7Ee4B",
+          "kind": "chainlink",
+          "label": "Midas mAPOLLO/USD issuer NAV oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.07737770678443029,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x84303e5568C7B167fa4fEBc6253CDdfe12b7Ee4B",
+          "kind": "chainlink",
+          "label": "Midas mAPOLLO/USD issuer NAV oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.12775512,
+          "endRate": 1.13492743,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "mAPOLLO"
+      }
+    },
+    {
+      "group": "YOUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0x0000000f2eb9f69274678c76222b35eec7588a65"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "base",
+          "address": "0x0000000f2eb9f69274678c76222b35eec7588a65",
+          "kind": "erc4626",
+          "label": "yoUSD/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.04691190418047126,
+        "source": {
+          "chain": "Base",
+          "oracle": "0x0000000f2eb9f69274678c76222b35eec7588a65",
+          "kind": "erc4626",
+          "label": "yoUSD/USDC canonical ERC-4626 redemption rate",
+          "blockNumber": "62666731",
+          "startBlockNumber": "53171187",
+          "startTimestamp": 1793131721,
+          "endTimestamp": 1795723721,
+          "startRate": 1.068787,
+          "endRate": 1.072908,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "base",
+        "block": "62662453",
+        "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "decimals": 6,
+        "symbol": "yoUSD",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "MROX",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x67e1f506b148d0fc95a4e3ffb49068ceb6855c05",
+        "monad": "0x6cf55183ea297ba200cf88419bba156eba2ed206"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x7fF56C3a31476c231e74E4F64e9d9718572B54Aa",
+          "kind": "chainlink",
+          "label": "Midas mROX/USD issuer NAV oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.07548827259783698,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x7fF56C3a31476c231e74E4F64e9d9718572B54Aa",
+          "kind": "chainlink",
+          "label": "Midas mROX/USD issuer NAV oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.15811298,
+          "endRate": 1.16529851,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "mROX"
+      }
+    },
+    {
+      "group": "OUSD#cg-origin-dollar",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x2a8e1e676ec238d8a992307b495b45b3feaa5e86"
+      },
+      "status": "unconfigured",
+      "reasonCode": "rebasing-model",
+      "reason": "Origin Dollar rebases wallet balances. Its per-token USD peg does not measure that income; using the peg as an intrinsic yield oracle would incorrectly imply zero earnings.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "OUSD"
+      }
+    },
+    {
+      "group": "MRE7YIELD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x87c9053c819bb28e0d73d33059e1b3da80afb0cf",
+        "etherlink": "0x733d504435a49fc8c4e9759e756c2846c92f0160",
+        "tac": "0x0a72ed3c34352ab2dd912b30f2252638c873d6f0"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
+          "kind": "chainlink",
+          "label": "Midas mRe7YIELD/USD issuer NAV oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.019150882084538894,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
+          "kind": "chainlink",
+          "label": "Midas mRe7YIELD/USD issuer NAV oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.08351406,
+          "endRate": 1.08521956,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "mRe7YIELD"
+      }
+    },
+    {
+      "group": "MBASIS",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "base": "0x1c2757c1fef1038428b5bef062495ce94bbe92b2",
+        "ethereum": "0x2a8c22e3b10036f3aef5875d04f8441d4188b656",
+        "etherlink": "0x2247b5a46bb79421a314ab0f0b67ffd11dd37ee4",
+        "plume-network": "0x0c78ca789e826fe339de61934896f5d170b66d78"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xE4f2AE539442e1D3Fb40F03ceEbF4A372a390d24",
+          "kind": "chainlink",
+          "label": "Midas mBASIS/USD issuer NAV oracle"
+        }
+      ],
+      "validation": {
+        "apr": 0.0778155888071352,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xE4f2AE539442e1D3Fb40F03ceEbF4A372a390d24",
+          "kind": "chainlink",
+          "label": "Midas mBASIS/USD issuer NAV oracle",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.22147781,
+          "endRate": 1.22929014,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "mBASIS"
+      }
+    },
+    {
+      "group": "SRUSDAT",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "ethereum",
+          "address": "0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066",
+          "kind": "erc4626",
+          "label": "srUSDat/USDat canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0.07824893580137528,
+        "source": {
+          "chain": "Ethereum",
+          "oracle": "0xfaa9a0e1db9e22ae3a20b2b58a68dc24d053d066",
+          "kind": "erc4626",
+          "label": "srUSDat/USDat canonical ERC-4626 redemption rate",
+          "blockNumber": "26501663",
+          "startBlockNumber": "26286342",
+          "startTimestamp": 1793131715,
+          "endTimestamp": 1795723715,
+          "startRate": 1.03834,
+          "endRate": 1.045018,
+          "windowDays": 30
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0x23238f20b894f29041f48D88eE91131C395Aaa71",
+        "decimals": 18,
+        "symbol": "srUSDat",
+        "underlyingSymbol": "USDat",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "USP",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x098697ba3fee4ea76294c5d6a466a4e3b3e95fe6"
+      },
+      "status": "unconfigured",
+      "reasonCode": "source-policy-not-verified",
+      "reason": "A Morpho-referenced issuer adapter exists but selects issuance pricing and reports the read-block timestamp rather than an independently verified publisher-update time. Issuance/redemption policy and underlying oracle freshness were not established, so it is retained as an audit candidate only.",
+      "candidates": [
+        {
+          "address": "0xb52eb13139905Eb11c472100a1E86cB1961b8EF3",
+          "provider": "Market reference (requires attribution)",
+          "description": "USP / USD",
+          "ageSecondsAtCheck": 0,
+          "observedRate": 1.160436
+        }
+      ],
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "USP"
+      }
+    },
+    {
+      "group": "NTBILL",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0xe72fe64840f4ef80e3ec73a1c749491b5c938cb9",
+        "ethereum": "0xe72fe64840f4ef80e3ec73a1c749491b5c938cb9",
+        "plume-network": "0xe72fe64840f4ef80e3ec73a1c749491b5c938cb9"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No supported-chain, attributable compatible NAV oracle with verified 30-day observations was established for this exact Nest Treasury token.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 6,
+        "symbol": "nTBILL"
+      }
+    },
+    {
+      "group": "VYUSD",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "arbitrum": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de",
+        "base": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de",
+        "ethereum": "0x2e3c5e514eef46727de1fe44618027a9b70d92fc",
+        "optimism": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de",
+        "sonic": "0xf4f447e6afa04c9d11ef0e2fc0d7f19c24ee55de"
+      },
+      "status": "configured-and-live-verified",
+      "sourceAddresses": [
+        {
+          "network": "base",
+          "address": "0x99C098FA069B120dd81E56c0f2178093cc7a851f",
+          "kind": "chainlink",
+          "label": "Chainlink vyUSD/USD exchange-rate oracle"
+        },
+        {
+          "network": "ethereum",
+          "address": "0x2e3c5e514eef46727de1fe44618027a9b70d92fc",
+          "kind": "erc4626",
+          "label": "vyUSD/USDC canonical ERC-4626 redemption rate"
+        }
+      ],
+      "validation": {
+        "apr": 0,
+        "source": {
+          "chain": "Base",
+          "oracle": "0x99C098FA069B120dd81E56c0f2178093cc7a851f",
+          "kind": "chainlink",
+          "label": "Chainlink vyUSD/USD exchange-rate oracle",
+          "windowDays": 30,
+          "blockNumber": "62666731",
+          "startRound": "36893488147419108625",
+          "endRound": "36893488147419109344",
+          "startTimestamp": 1793130383,
+          "endTimestamp": 1795722427,
+          "startRate": 0.923628,
+          "endRate": 0.923628
+        },
+        "formula": "(endRate - startRate) * 365 / (30 * startRate)"
+      },
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "asset": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 18,
+        "symbol": "vyUSD",
+        "underlyingSymbol": "USDC",
+        "underlyingDecimals": 6
+      }
+    },
+    {
+      "group": "USDM#cg-monetrix-usd",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "hyperevm": "0xe2d2959f89b6389deb624bf076fe7d9e5401f377"
+      },
+      "status": "unconfigured",
+      "reasonCode": "unsupported-source-chain",
+      "reason": "The config only lists HyperEVM for Monetrix USDM. HyperEVM is not a supported intrinsic source network; a same-symbol USDM feed for another project must not be used."
+    },
+    {
+      "group": "FXARBUSDTRY",
+      "category": "Savings stablecoin",
+      "contracts": {
+        "ethereum": "0x633748335ee5b33dea9fc25c9ecc6f92270c713f"
+      },
+      "status": "unconfigured",
+      "reasonCode": "not-verified",
+      "reason": "No attributable compatible NAV/redemption oracle was established. USD/TRY foreign-exchange movement is not substituted for the token intrinsic return.",
+      "nativeProbe": {
+        "network": "ethereum",
+        "block": "26501591",
+        "decimals": 18,
+        "symbol": "FXArbUSDTRY"
+      }
+    }
+  ]
+}

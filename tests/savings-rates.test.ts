@@ -262,3 +262,18 @@ it('uses ordered inline oracle sources for lending and wallet balances without m
   expect(wallet.tokens[0].intrinsicSupplyRate).toEqual(quote);
   expect(totalMonthlyInterest(enriched, [wallet]).earnedUsd).toBeCloseTo(220 * quote.apr! / 12);
 });
+
+it('reads zero-timestamp on-chain NAV only with explicit computed metadata and a matching canonical token at both blocks', async () => {
+  const f = fixture();
+  const source: SavingsSource = { ...f.source, computed: true, tokenGetter: 'token', computedTimestamp: 'none' };
+  for (const variant of ['valid', 'wrong-old-token', 'missing-opt-in', 'default-block-timestamp', 'nonzero-timestamp', 'wrong-round'] as const) {
+    const client = { ...f.client, readContract: async (args: any) => {
+      if (args.functionName === 'token') return variant === 'wrong-old-token' && args.blockNumber <= OLD ? feed : token;
+      if (args.functionName === 'latestRoundData') return [variant === 'wrong-round' ? 1n : 0n, args.blockNumber <= OLD ? 10n ** 18n : 102n * 10n ** 16n, 0n, variant === 'nonzero-timestamp' ? NOW : 0n, 0n];
+      return f.client.readContract(args);
+    } } as ChainClient;
+    const quote = await createSavingsRateService({ clientFor: () => client, registry: f.registry, sources: { test: { ...source, computed: variant === 'missing-opt-in' ? false : true, computedTimestamp: variant === 'missing-opt-in' || variant === 'default-block-timestamp' ? undefined : 'none' } } }).quote('reUSD', { network: 'ethereum' });
+    if (variant === 'valid') expect(quote.apr).toBeCloseTo(.02 * 365 / 30);
+    else expect(quote.apr).toBeNull();
+  }
+});

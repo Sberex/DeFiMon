@@ -80,3 +80,11 @@ it('validates inline intrinsic oracles as metadata and keeps them out of wallet 
     expect(() => parseTokenRegistry({ RENAMED: { _category: 'Savings stablecoin', ethereum: first, _intrinsicOracles: oracles } })).toThrow('_intrinsicOracles');
   }
 });
+
+it('permits explicitly identified timestamp-free NAV adapters without relaxing ordinary oracle validation', () => {
+  const source = { network: 'ethereum', kind: 'chainlink', address: second, token: first, description: 'Native NAV', decimals: 18, computed: true, tokenGetter: 'token', computedTimestamp: 'none', label: 'Canonical computed NAV' };
+  expect(parseTokenRegistry({ NAV: { _category: 'Savings stablecoin', ethereum: first, _intrinsicOracles: [source] } }).NAV.intrinsicOracles?.[0]).toEqual(source);
+  for (const invalid of [{ ...source, computed: false }, { ...source, tokenGetter: undefined }, { ...source, computedTimestamp: 'guess' }, { ...source, description: undefined }, { ...source, history: 'rounds' }]) {
+    expect(() => parseTokenRegistry({ NAV: { _category: 'Savings stablecoin', ethereum: first, _intrinsicOracles: [invalid] } })).toThrow('_intrinsicOracles');
+  }
+});
