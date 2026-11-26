@@ -9024,5 +9024,21 @@
         "evidence": "Ethereum Fluid Vault 165 (0x6724C81397512197BF981629795f7aF76557e183), resolver positionByNftId(18671). configs.oracle = 0x2e95050bb3F06fe0c83Ee6E3E08ed3972c5D9263; getOracleHopSources()[0].source = 0x7Be47fb0679366B9F0aD5ed383f84fE735E047C5; configData().rateSource_ = 0x4BE50bE32dB1510240d542f77c5B36Ca0D0965E6. https://etherscan.io/address/0x7Be47fb0679366B9F0aD5ed383f84fE735E047C5#readContract"
       }
     ]
+  },
+  "scrvUSD": {
+    "_category": "Savings stablecoin",
+    "ethereum": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
+        "token": "0x0655977feb2f289a4ab78af67bab0d17aab84367",
+        "underlying": "0xf939e0a03fb07f59a73314e73794be0e57ac1b4e",
+        "label": "scrvUSD/crvUSD canonical ERC-4626 redemption rate",
+        "note": "Uses convertToAssets for one whole scrvUSD share at the current block and the block 30 days earlier, verifying the crvUSD underlying and token decimals at both blocks. Rates are crvUSD per scrvUSD, not an assumed USD price. Protocol lending interest and incentives are separate.",
+        "evidence": "https://www.coingecko.com/en/coins/savings-crvusd; https://docs.curve.finance/developer/scrvusd/overview; https://github.com/curvefi/curve-llamalend.js/blob/d472168015e5e5db8a565a91fcedf224620dad8a/src/constants/aliases.ts (ALIASES_ETHEREUM.st_crvUSD); https://www.curve.finance/crvusd/ethereum/scrvUSD"
+      }
+    ]
   }
 }
