@@ -1,10 +1,10 @@
-import { isAddress, type Address, type Hex } from 'viem';
+import { parseAbi, isAddress, type Address, type Hex } from 'viem';
 import { createMorphoQuery } from './morpho-api.js';
 import { createMorphoRates } from './morpho-rates.js';
 import { morphoFactoryAbi } from './abis/morpho.js';
 import { liquidityQuote, tokenMetadata } from './market-liquidity.js';
 import { networks } from './networks.js';
-import { limited, option, type Reader } from './market-readers.js';
+import { matchesSupply, matchesBorrow, marketPair, limited, option, type Reader } from './market-readers.js';
 type Obj = Record<string, unknown>;
 const object = (value: unknown): Obj => { if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid metadata'); return value as Obj; };
 export const readMorphoMarkets: Reader = async (client, network, block, targets, warn) => {
@@ -29,31 +29,35 @@ export const readMorphoMarkets: Reader = async (client, network, block, targets,
   }
   const results = await limited(targets, async target => {
     const supplyList = JSON.stringify(target.supplies), borrowList = JSON.stringify(target.borrows);
-    const filters = target.borrowed ? `collateralAssetAddress_in:${supplyList},loanAssetAddress_in:${borrowList}` : `loanAssetAddress_in:${supplyList}`;
+    const filters = target.borrowed ? [!target.anySupply ? `collateralAssetAddress_in:${supplyList}` : '', !target.anyBorrow ? `loanAssetAddress_in:${borrowList}` : ''].filter(Boolean).join(',') : `loanAssetAddress_in:${supplyList}`;
     let records: Obj[] = [];
     try { records = await pages('markets', filters, 'uniqueKey: marketId'); } catch { warn('Morpho direct-market discovery was unavailable.'); }
     const markets = await limited(records, async row => {
       if (typeof row.uniqueKey !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(row.uniqueKey)) throw new Error('Invalid ID');
       const entry = await rates.marketQuote(row.uniqueKey as Hex);
+      if (target.discovery && !/^0x0{40}$/i.test(entry.params.collateralToken)) {
+        const price = await client.readContract({address:entry.params.oracle,abi:parseAbi(['function price() view returns(uint256)']),functionName:'price',blockNumber:block});
+        if(price<=0n){warn('A Morpho collateral oracle returned no valid price; that market is omitted.');return [];}
+      }
       if (target.borrowed) {
-        if (!target.supplies.includes(entry.params.collateralToken.toLowerCase()) || !target.borrows.includes(entry.params.loanToken.toLowerCase()) || entry.params.lltv === 0n || entry.state.totalSupplyAssets <= entry.state.totalBorrowAssets || entry.borrowApr === null) return [];
+        if (!matchesSupply(target, entry.params.collateralToken.toLowerCase()) || !matchesBorrow(target, entry.params.loanToken.toLowerCase()) || entry.params.lltv === 0n || (target.discovery ? entry.state.totalSupplyAssets < entry.state.totalBorrowAssets : entry.state.totalSupplyAssets <= entry.state.totalBorrowAssets) || entry.borrowApr === null) return [];
         let liquidity = null;
         try { const metadata = await tokenMetadata(client, entry.params.loanToken, block); liquidity = liquidityQuote(entry.state.totalSupplyAssets - entry.state.totalBorrowAssets, metadata.decimals, metadata.symbol, entry.params.loanToken, 'Morpho total available market liquidity: accrued supplied loan assets minus accrued borrowed loan assets. Collateral TVL is not included.'); } catch { /* Keep verified rates when liquidity metadata is unavailable. */ }
-        return [{ ...option(target, 'Morpho', network, block, row.uniqueKey, `Blue market ${row.uniqueKey.slice(0, 10)}…`, 0, entry.borrowApr, Number(entry.params.lltv) / 1e18, 'Isolated collateral earns no protocol lending interest. Instant IRM rate after simulated accrual; excludes reward-token incentives.'), liquidity }];
+        return [{ ...option(marketPair(target,entry.params.collateralToken,entry.params.loanToken), 'Morpho', network, block, row.uniqueKey, `Blue market ${row.uniqueKey.slice(0, 10)}…`, 0, entry.borrowApr, Number(entry.params.lltv) / 1e18, 'Isolated collateral earns no protocol lending interest. Instant IRM rate after simulated accrual; excludes reward-token incentives.'), liquidity }];
       }
-      if (!target.supplies.includes(entry.params.loanToken.toLowerCase())) return [];
-      return [option(target, 'Morpho', network, block, row.uniqueKey, `Blue lending market ${row.uniqueKey.slice(0, 10)}…`, entry.apr, null, null, 'Direct lending into one isolated market, not a diversified vault. Rate excludes reward-token incentives.')];
+      if (!matchesSupply(target, entry.params.loanToken.toLowerCase())) return [];
+      return [option(marketPair(target,entry.params.loanToken), 'Morpho', network, block, row.uniqueKey, `Blue lending market ${row.uniqueKey.slice(0, 10)}…`, entry.apr, null, null, 'Direct lending into one isolated market, not a diversified vault. Rate excludes reward-token incentives.')];
     }, warn);
     const vaultResults = target.borrowed ? [] : await Promise.allSettled(([1, 2] as const).map(async version => {
       const vaults = await pages(version === 1 ? 'vaults' : 'vaultV2s', `assetAddress_in:${supplyList}`, 'address name asset{address} factory{address}');
       return (await limited(vaults, async row => {
         const address = row.address, asset = object(row.asset).address, factory = object(row.factory).address;
-        if (typeof address !== 'string' || !isAddress(address, { strict: false }) || typeof factory !== 'string' || !isAddress(factory, { strict: false }) || typeof asset !== 'string' || !target.supplies.includes(asset.toLowerCase())) throw new Error('Invalid vault');
+        if (typeof address !== 'string' || !isAddress(address, { strict: false }) || typeof factory !== 'string' || !isAddress(factory, { strict: false }) || typeof asset !== 'string' || !matchesSupply(target, asset.toLowerCase())) throw new Error('Invalid vault');
         const registered = await client.readContract({ address: factory as Address, abi: morphoFactoryAbi, functionName: version === 1 ? 'isMetaMorpho' : 'isVaultV2', args: [address as Address], blockNumber: block });
         if (!registered) throw new Error('Unregistered vault');
         const rate = await rates.vault(address as Address, version, asset as Address);
         if (rate.apr === null) { warn('Some Morpho vault allocation rates are unavailable.'); return []; }
-        const candidate = option(target, 'Morpho', network, block, address, `Vault V${version} · ${typeof row.name === 'string' ? row.name.slice(0, 160) : address}`, rate.apr, null, null, 'Current allocation-weighted APR after vault fees. Deposit caps and access restrictions must be checked.');
+        const candidate = option(marketPair(target,asset), 'Morpho', network, block, address, `Vault V${version} · ${typeof row.name === 'string' ? row.name.slice(0, 160) : address}`, rate.apr, null, null, 'Current allocation-weighted APR after vault fees. Deposit caps and access restrictions must be checked.');
         candidate.url = `https://app.morpho.org/${network}/vault/${address}`;
         return [candidate];
       }, warn)).flat();

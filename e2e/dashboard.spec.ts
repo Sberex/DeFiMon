@@ -2269,3 +2269,48 @@ test('shows Curve loans and vault deposits with native rates, links and cheaper 
   await expect(page.getByRole('link', { name: 'Curve cheaper WETH / USDC' })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('Market Discovery searches configured prefixes without a wallet and groups markets by USD liquidity',async({page})=>{
+ const supply='0x0b2b2b2076d95dda7817e785989fe353fe955ef9',loan='0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+ const requests:any[]=[];
+ await page.route('**/api/market-discovery',route=>{
+  const query=route.request().postDataJSON();requests.push(query);
+  const market=(network:string,id:string,amount:number,usd:number|null)=>({protocol:'Morpho',network,market:`0x${id.repeat(64)}`,label:'Verified market',targetId:'discovery-loans',supplyApr:0,borrowApr:.04,lltv:.86,block:'123',url:`https://app.morpho.org/${network}/market/0x${id.repeat(64)}`,note:'Native snapshot',supplyAsset:{address:supply,name:'sUSDai',category:'Savings stablecoin',intrinsicApr:.08},borrowAsset:{address:loan,name:'USDC',category:'Stablecoin'},totalSupplyApr:.08,liquidity:{amount,symbol:'USDC',token:loan,note:'Cash available to borrow'},liquidityUsd:usd});
+  return route.fulfill({json:{query,checkedAt:'2026-11-26T17:00:00Z',messages:[],coverage:[{protocol:'Morpho',network:'ethereum',status:'ok'},{protocol:'Euler',network:'plasma',status:'error',message:'Provider unavailable'}],markets:[market('base','4',400,400),market('ethereum','1',100,100),market('arbitrum','3',200,200),market('ethereum','2',300,300),market('ethereum','5',500,null)]}});
+ });
+ await page.goto('/');const nav=page.getByRole('navigation',{name:'Dashboard sections'});
+ await expect(nav.getByRole('group',{name:'Recommendations subsections'}).getByRole('button').nth(1)).toHaveAccessibleName('Market Discovery');
+ await nav.getByRole('button',{name:'Market Discovery',exact:true}).click();
+ const section=page.getByRole('region',{name:'Market Discovery',exact:true});
+ await section.getByRole('combobox',{name:'Supply asset',exact:true}).fill('sUsDa');
+ await expect(section.getByRole('option').filter({hasText:/^sUSDai/})).toBeVisible();await section.getByRole('option').filter({hasText:/^sUSDai/}).click();
+ await section.getByRole('combobox',{name:'Borrow asset',exact:true}).fill('USDC');await section.getByRole('option',{name:'USDC Stablecoin',exact:true}).click();
+ await section.getByRole('button',{name:'Search',exact:true}).click();
+ await expect(section.getByRole('heading',{name:'5 markets found'})).toBeVisible();expect(requests[0]).toEqual({supply:'sUSDai',borrow:'USDC'});
+ await expect(section.locator('.discovery-chain>h3')).toHaveText(['Ethereum (3)','Arbitrum (1)','Base (1)']);
+ const eth=section.getByRole('region',{name:'Discovered markets on Ethereum',exact:true});
+ await expect(eth.locator('tbody tr td:nth-child(6) strong')).toHaveText(['300 USDC','100 USDC','500 USDC']);
+ await expect(eth.locator('tbody tr').first().getByRole('link',{name:/Morpho · sUSDai/})).toHaveAttribute('href',`https://app.morpho.org/ethereum/market/0x${'2'.repeat(64)}`);
+ await expect(eth.locator('tbody tr').first()).toContainText(supply);await expect(eth.locator('tbody tr').first()).toContainText('Savings stablecoin');await expect(eth.locator('tbody tr').first()).toContainText('8.00%');
+ await expect(section.getByText('Some sources could not be fully checked.',{exact:false})).toBeVisible();
+ await section.getByRole('combobox',{name:'Borrow asset',exact:true}).fill('any');await section.getByRole('option',{name:'Any asset All assets',exact:true}).click();
+ await section.getByRole('button',{name:'Search',exact:true}).click();await expect.poll(()=>requests.length).toBe(2);expect(requests[1]).toEqual({supply:'sUSDai',borrow:null});
+ await section.getByRole('combobox',{name:'Supply asset',exact:true}).fill('not-a-token');await expect(section.getByRole('button',{name:'Search',exact:true})).toBeDisabled();
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+});
+
+test('Market Discovery supports both Any filters, keyboard selection, large result lists and recoverable API errors',async({page})=>{
+ let fail=false;const requests:any[]=[];
+ await page.route('**/api/market-discovery',route=>{
+  const query=route.request().postDataJSON();requests.push(query);
+  if(fail)return route.fulfill({status:503,json:{error:'Market discovery is unavailable. Please retry.'}});
+  const markets=Array.from({length:54},(_,i)=>({protocol:'Morpho',network:'ethereum',market:`0x${String(i).padStart(64,'0')}`,label:'Native market',targetId:'discovery-loans',supplyApr:0,borrowApr:.05,lltv:.8,block:'123',url:'https://app.morpho.org/',note:'Verified',supplyAsset:{address:'0x1111111111111111111111111111111111111111',name:'Supply',category:'Other',intrinsicApr:0},borrowAsset:{address:'0x2222222222222222222222222222222222222222',name:'Debt',category:'Other'},totalSupplyApr:0,liquidity:{amount:i,symbol:'Debt',token:'0x2222222222222222222222222222222222222222',note:'Native liquidity'},liquidityUsd:i}));
+  return route.fulfill({json:{query,checkedAt:'2026-11-26T17:00:00Z',markets,coverage:[],messages:[]}});
+ });
+ await page.goto('/');await page.getByRole('button',{name:'Market Discovery',exact:true}).click();const section=page.getByRole('region',{name:'Market Discovery',exact:true});
+ await section.getByRole('button',{name:'Search',exact:true}).click();await expect(section.getByRole('heading',{name:'54 markets found'})).toBeVisible();expect(requests[0]).toEqual({supply:null,borrow:null});
+ await expect(section.locator('tbody tr')).toHaveCount(50);await section.getByRole('button',{name:/Show more markets/}).click();await expect(section.locator('tbody tr')).toHaveCount(54);await expect(section.getByRole('button',{name:/Show more markets/})).toHaveCount(0);
+ await section.getByRole('combobox',{name:'Supply asset',exact:true}).fill('sUsDa');await section.getByRole('combobox',{name:'Supply asset',exact:true}).press('Enter');await expect(section.getByRole('combobox',{name:'Supply asset',exact:true})).toHaveValue('sUSDai');
+ fail=true;await section.getByRole('button',{name:'Search',exact:true}).click();await expect(section.getByRole('alert')).toHaveText('Market discovery is unavailable. Please retry.');expect(requests[1]).toEqual({supply:'sUSDai',borrow:null});
+ fail=false;await section.getByRole('button',{name:'Search',exact:true}).click();await expect(section.getByRole('heading',{name:'54 markets found'})).toBeVisible();await expect(section.getByRole('alert')).toHaveCount(0);
+});

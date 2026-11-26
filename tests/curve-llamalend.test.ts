@@ -343,3 +343,10 @@ it('verifies ownership for liquidity and utilization alerts at the pinned block'
   expect(utilization.status).toBe('ok');
   expect(utilization.readings[0].utilizationPercent).toBe(60);
 });
+
+it('returns actual Curve contracts when discovery leaves the borrowed asset unrestricted',async()=>{
+ const read=createCurveMarketReader(async()=>new Map([[`ethereum:${controller}`,0]]));
+ const t={...target(),discovery:true,anyBorrow:true,borrows:[]};
+ const rows=await read(fixture().client,'ethereum',123n,[t],vi.fn());
+ expect(rows).toHaveLength(1);expect(rows[0].marketTokens).toEqual({supplied:collateral,borrowed});
+});

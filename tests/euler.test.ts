@@ -106,3 +106,9 @@ it('matches Euler compounded APY using its 365.2425-day year without changing AP
   expect(rates.supplyRate.apr).toBeCloseTo(.031556952 * (1 / 3) * .9, 12);
   expect(rates.borrowApy).toBeGreaterThan(rates.borrowRate.apr!);
 });
+
+it('finds all eligible Euler collateral vaults for an unrestricted supply filter without using ticker names',async()=>{
+ const f=eulerFixture();const t={...expandTargets([{id:'discovery',network:'ethereum',supplied:WETH,borrowed:USDC}],'ethereum')[0],discovery:true,anySupply:true,supplies:[]};
+ const rows=await readEulerMarkets(f.client,'ethereum',321n,[t],()=>{});
+ expect(rows).toHaveLength(1);expect(rows[0]).toMatchObject({marketTokens:{supplied:WETH.toLowerCase(),borrowed:USDC.toLowerCase()},route:collateral});
+});

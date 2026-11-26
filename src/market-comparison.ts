@@ -3,7 +3,7 @@ import type { NetworkId } from './types';
 export interface ComparisonTarget { id: string; network: NetworkId; supplied: string; borrowed?: string; supplyBasket?: string[]; borrowBasket?: string[] }
 export interface MarketLiquidity { amount: number; symbol: string; token: string; note: string; rawAmount?: string; decimals?: number }
 export interface MarketAlternative {
-  targetId: string; protocol: string; network: NetworkId; market: string; route?: string; label: string;
+  requiredTokens?: {supplied:string[]; borrowed:string[]}; marketTokens?: {supplied:string; borrowed?:string}; targetId: string; protocol: string; network: NetworkId; market: string; route?: string; label: string;
   collateralVault?: { address: string; label: string; url: string };
   borrowApy?: number | null; liquidity?: MarketLiquidity | null; supplyApr: number; borrowApr: number | null; lltv: number | null; block: string; url: string; note: string;
 }

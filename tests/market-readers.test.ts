@@ -47,3 +47,20 @@ it('isolates unavailable sources and networks while retaining verified alternati
   expect(result.coverage.filter(c => c.status === 'error')).toHaveLength(2);
   expect(JSON.stringify(result)).not.toContain('private-provider-key');
 });
+
+it('discovers wildcard Aave pairs with their actual token contracts without loosening recommendation matching', async () => {
+  const { discoveryTargets } = await import('../server/market-discovery');
+  const { configuredTokenRegistry } = await import('../server/token-registry');
+  const usdc = configuredTokenRegistry.USDC.addresses.ethereum!;
+  const client = {readContract:async({functionName,args}:any)=>{
+    if(functionName==='getPoolDataProvider'||functionName==='getPool')return '0x1111111111111111111111111111111111111111';
+    if(functionName==='getAllReservesTokens')return [{tokenAddress:supply},{tokenAddress:usdc}];
+    if(functionName==='getReserveConfigurationData')return [18n,8000n,8500n,0n,0n,true,true,false,true,false];
+    if(functionName==='getReserveData')return [0n,0n,0n,0n,0n,2n*10n**25n,3n*10n**25n];
+    if(functionName==='getConfiguration')return {data:0n};
+    throw Error('No liquidity fixture');
+  }} as unknown as ChainClient;
+  const rows=await readAaveMarkets(client,'ethereum',100n,discoveryTargets({supply:null,borrow:'USDC'},'ethereum'),()=>{});
+  expect(rows).toHaveLength(2);expect(rows).toEqual(expect.arrayContaining([expect.objectContaining({marketTokens:{supplied:supply,borrowed:usdc}})]));
+  expect(rows.every(r=>r.marketTokens?.borrowed===usdc)).toBe(true);
+});

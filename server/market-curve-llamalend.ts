@@ -10,7 +10,7 @@ import {
   CURVE_DISABLED_CONTROLLERS,
   CURVE_V1_CREATED_CUTOFF,
 } from './deployments/curve-llamalend.js';
-import { limited, option, type Reader } from './market-readers.js';
+import { matchesSupply, matchesBorrow, marketPair, limited, option, type Reader } from './market-readers.js';
 let policyCache:
   { expires: number; promise: Promise<Map<string, number>> } | undefined;
 /** API provides deprecation/creation metadata only. Balances, addresses, rates, oracle and liquidity are on-chain. */
@@ -81,9 +81,9 @@ export function createCurveMarketReader(
       .filter((m) =>
         targets.some((t) =>
           t.borrowed
-            ? t.supplies.includes(m.collateral) &&
-              t.borrows.includes(m.borrowed)
-            : t.supplies.includes(m.borrowed),
+            ? matchesSupply(t, m.collateral) &&
+              matchesBorrow(t, m.borrowed)
+            : matchesSupply(t, m.borrowed),
         ),
       );
     return (
@@ -105,16 +105,16 @@ export function createCurveMarketReader(
             const borrow = !!t.borrowed;
             if (
               borrow
-                ? !t.supplies.includes(m.collateral) ||
-                  !t.borrows.includes(m.borrowed) ||
+                ? !matchesSupply(t, m.collateral) ||
+                  !matchesBorrow(t, m.borrowed) ||
                   q.cap <= q.debt
-                : !t.supplies.includes(m.borrowed) || !canDeposit
+                : !matchesSupply(t, m.borrowed) || !canDeposit
             )
               return [];
             return [
               {
                 ...option(
-                  t,
+                  marketPair(t,borrow?m.collateral:m.borrowed,borrow?m.borrowed:undefined),
                   CURVE_NAME,
                   network,
                   block,

@@ -80,3 +80,24 @@ it('skips same-two-token Fluid smart vault alternatives before reading rates or 
   expect(result).toEqual([]); expect(warnings).toEqual([]);
   expect(functions).toEqual(['getAllVaultsAddresses', 'getVaultEntireData']);
 });
+
+it('wildcard Morpho discovery omits only the unrestricted API filter, retains exact native contracts and rejects failed oracles',async()=>{
+ const queries:string[]=[];
+ vi.stubGlobal('fetch',async(_url:string,options:RequestInit)=>{queries.push(JSON.parse(String(options.body)).query);return new Response(JSON.stringify({data:{markets:{items:[{uniqueKey:`0x${'ab'.repeat(32)}`}],pageInfo:{count:1,countTotal:1,skip:0,limit:100}}}}));});
+ let price=1n;
+ const client={readContract:async({functionName}:any)=>functionName==='price'?price:functionName==='decimals'?6:'USDC'} as unknown as ChainClient;
+ const t={...expandTargets([baseTarget],'ethereum')[0],discovery:true,anySupply:true,supplies:[]};
+ const rows=await readMorphoMarkets(client,'ethereum',100n,[t],()=>{});expect(rows[0].marketTokens).toEqual({supplied:supply,borrowed:debt});
+ expect(queries[0]).not.toContain('collateralAssetAddress_in');expect(queries[0]).toContain('loanAssetAddress_in');
+ price=0n;expect(await readMorphoMarkets(client,'ethereum',100n,[t],()=>{})).toEqual([]);
+});
+it('Fluid discovery exposes matching components plus the entire required pool basket',async()=>{
+ const client={readContract:async({functionName}:any)=>{
+  if(functionName==='decimals')return 6;if(functionName==='symbol')return 'USDT';if(functionName==='getAllVaultsAddresses')return [vault];
+  if(functionName==='getVaultEntireData')return {vault,isSmartCol:true,isSmartDebt:false,constantVariables:{vaultId:10n,supply:vault,borrow:vault,supplyToken:{token0:other,token1:supply},borrowToken:{token0:debt}},configs:{collateralFactor:8000,liquidationThreshold:8500},limitsAndAvailability:{borrowable:700000000n},exchangePricesAndRates:{supplyRateVault:0n,borrowRateVault:0n}};
+  throw Error('Unexpected read');
+ }} as unknown as ChainClient;
+ const t={...expandTargets([baseTarget],'ethereum')[0],discovery:true,anyBorrow:true,borrows:[]};
+ const rows=await readFluidMarkets(client,'ethereum',100n,[t],()=>{});
+ expect(rows).toHaveLength(1);expect(rows[0]).toMatchObject({marketTokens:{supplied:supply,borrowed:debt},requiredTokens:{supplied:[other,supply],borrowed:[debt]},supplyApr:.02,borrowApr:.03});
+});

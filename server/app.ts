@@ -1,3 +1,4 @@
+import { discoverMarkets, parseDiscoveryQuery } from './market-discovery.js';
 import type { WalletHistoryStore } from './wallet-history-store.js';
 import { parseManualPriceInput } from '../src/wallet-history.js';
 import { parsePositionAlertInput } from '../src/alert-rules.js';
@@ -15,7 +16,7 @@ import type { ExtraTokens, MerklRewards, NetworkId, Portfolio } from '../src/typ
 import { isNetworkId } from '../src/networks.js';
 import { readMerklRewards, unavailableMerkl } from './merkl.js';
 import { networks } from './networks.js';
-export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore, history?: WalletHistoryStore) {
+export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore, history?: WalletHistoryStore, loadDiscovery = discoverMarkets) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
@@ -51,6 +52,23 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     finally { activeRewards--; }
   });
   let activeMarkets = 0;
+  const discoveryCache = new Map<string,{until:number;value:ReturnType<typeof discoverMarkets>}>();
+  app.post('/api/market-discovery', express.json({limit:'2kb'}), async(req,res)=>{
+    res.setHeader('Cache-Control','no-store');
+    let query;try { if(Object.keys(req.query).length)throw Error();query=parseDiscoveryQuery(req.body); }
+    catch {res.status(400).json({error:'Choose a configured Supply asset and Borrow asset, or Any asset.'});return;}
+    for(const [key,entry] of discoveryCache)if(entry.until<Date.now())discoveryCache.delete(key);
+    const key=JSON.stringify(query),cached=discoveryCache.get(key);
+    if(cached&&cached.until>Date.now()){try{res.json(await cached.value);}catch{res.status(503).json({error:'Market discovery is unavailable. Please retry.'});}return;}
+    if(activeMarkets>=2){res.setHeader('Retry-After','10');res.status(429).json({error:'Market searches are busy. Try again shortly.'});return;}
+    activeMarkets++;
+    const entry={until:Number.POSITIVE_INFINITY,value:Promise.resolve().then(()=>loadDiscovery(query))};
+    if(discoveryCache.size>=8){const oldest=[...discoveryCache].find(([,value])=>Number.isFinite(value.until));if(oldest)discoveryCache.delete(oldest[0]);}
+    discoveryCache.set(key,entry);
+    try{const result=await entry.value;entry.until=Date.now()+60000;res.json(result);}
+    catch{discoveryCache.delete(key);res.status(503).json({error:'Market discovery is unavailable. Please retry.'});}
+    finally{activeMarkets--;}
+  });
   app.post('/api/recommendations', express.json({ limit: '96kb' }), async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const targets = req.body?.targets;

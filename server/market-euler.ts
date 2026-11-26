@@ -1,6 +1,6 @@
 import { eulerRegistry, createEulerReader, eulerAddress, resolveEulerCap } from './euler.js';
 import { eulerVaultAbi } from './abis/euler.js';
-import { limited, option, type Reader } from './market-readers.js';
+import { matchesSupply, matchesBorrow, marketPair, limited, option, type Reader } from './market-readers.js';
 export const readEulerMarkets: Reader = async (client, network, block, targets, warn) => {
   const registry = await eulerRegistry(client, network, block, warn), reader = createEulerReader(client, network, block);
   const wanted = new Set(targets.flatMap(t => t.borrowed ? t.borrows : t.supplies));
@@ -12,7 +12,7 @@ export const readEulerMarkets: Reader = async (client, network, block, targets, 
     return rows.flatMap((row, index) => {
       if (row.status !== 'success' || typeof row.result !== 'string') { warn('Some Euler vault assets could not be discovered.'); return []; }
       assetsByVault.set(addresses[index].toLowerCase(), row.result.toLowerCase());
-      return wanted.has(row.result.toLowerCase()) ? [addresses[index]] : [];
+      return targets.some(t=>t.borrowed?t.anyBorrow:t.anySupply) || wanted.has(row.result.toLowerCase()) ? [addresses[index]] : [];
     });
   }, warn)).flat();
   return (await limited(relevant, async address => {
@@ -21,24 +21,24 @@ export const readEulerMarkets: Reader = async (client, network, block, targets, 
     const results = [];
     for (const target of targets) {
       if (!target.borrowed) {
-        if (!target.supplies.includes(info.asset.toLowerCase()) || (hooks[1] & 1) !== 0) continue;
+        if (!matchesSupply(target, info.asset.toLowerCase()) || (hooks[1] & 1) !== 0) continue;
         if (rates.supplyRate.apr === null) { warn('Some Euler supply APRs are unavailable.'); continue; }
         const caps = await client.readContract({ address, abi: eulerVaultAbi, functionName: 'caps', blockNumber: block });
         const cap = resolveEulerCap(caps[0]);
         if (cap !== null && rates.cash !== null && rates.borrowed !== null && cap <= rates.cash + rates.borrowed) continue;
-        const candidate = option(target, 'Euler', network, block, address, info.name, rates.supplyRate.apr, null, null, 'Euler V2 EVK direct vault deposit. APR is current interest after the vault fee; custom deposit hooks and exhausted caps are excluded.');
+        const candidate = option(marketPair(target,info.asset), 'Euler', network, block, address, info.name, rates.supplyRate.apr, null, null, 'Euler V2 EVK direct vault deposit. APR is current interest after the vault fee; custom deposit hooks and exhausted caps are excluded.');
         candidate.url = `https://app.euler.finance/vault/${address}?network=${network}`; results.push(candidate); continue;
       }
-      if (!target.borrows.includes(info.asset.toLowerCase()) || (hooks[1] & (1 << 6)) !== 0) continue;
+      if (!matchesBorrow(target, info.asset.toLowerCase()) || (hooks[1] & (1 << 6)) !== 0) continue;
       if (rates.borrowRate.apr === null) { warn('Some Euler borrow APRs are unavailable.'); continue; }
       const collateral = await client.readContract({ address, abi: eulerVaultAbi, functionName: 'LTVList', blockNumber: block });
       const liquidity = await reader.liquidity(address);
       const rows = await limited([...collateral], async raw => {
         const collateralAddress = eulerAddress(raw);
         const underlying = assetsByVault.get(collateralAddress.toLowerCase());
-        if (underlying && !target.supplies.includes(underlying)) return [];
+        if (underlying && !matchesSupply(target, underlying)) return [];
         const collateralInfo = await reader.vault(collateralAddress);
-        if (!target.supplies.includes(collateralInfo.asset.toLowerCase())) return [];
+        if (!matchesSupply(target, collateralInfo.asset.toLowerCase())) return [];
         const [borrowLtv, liquidationLtv, collateralRate, collateralHooks] = await Promise.all([
           client.readContract({ address, abi: eulerVaultAbi, functionName: 'LTVBorrow', args: [collateralAddress], blockNumber: block }),
           client.readContract({ address, abi: eulerVaultAbi, functionName: 'LTVLiquidation', args: [collateralAddress], blockNumber: block }),
@@ -47,7 +47,7 @@ export const readEulerMarkets: Reader = async (client, network, block, targets, 
         ]);
         if (borrowLtv === 0 || liquidationLtv > 10000 || (collateralHooks[1] & 1) !== 0) return [];
         if (collateralRate.supplyRate.apr === null) { warn('Some Euler collateral lending APRs are unavailable.'); return []; }
-        return [{ ...option(target, 'Euler', network, block, address, info.name, collateralRate.supplyRate.apr, rates.borrowRate.apr!, liquidationLtv / 10000, 'Euler V2 isolated debt vault with the listed receipt vault accepted as collateral. Current liquidation LTV may ramp over time. Borrow APR excludes compounding; Borrow APY uses Euler’s compounding formula at the same block. External incentives and custom borrow/deposit hooks are excluded.'), borrowApy: rates.borrowApy, route: collateralAddress.toLowerCase(), collateralVault: { address: collateralAddress, label: collateralInfo.name, url: `https://app.euler.finance/vault/${collateralAddress}?network=${network}` }, liquidity, url: `https://app.euler.finance/vault/${address}?network=${network}` }];
+        return [{ ...option(marketPair(target,collateralInfo.asset,info.asset), 'Euler', network, block, address, info.name, collateralRate.supplyRate.apr, rates.borrowRate.apr!, liquidationLtv / 10000, 'Euler V2 isolated debt vault with the listed receipt vault accepted as collateral. Current liquidation LTV may ramp over time. Borrow APR excludes compounding; Borrow APY uses Euler’s compounding formula at the same block. External incentives and custom borrow/deposit hooks are excluded.'), borrowApy: rates.borrowApy, route: collateralAddress.toLowerCase(), collateralVault: { address: collateralAddress, label: collateralInfo.name, url: `https://app.euler.finance/vault/${collateralAddress}?network=${network}` }, liquidity, url: `https://app.euler.finance/vault/${address}?network=${network}` }];
       }, warn);
       results.push(...rows.flat());
     }

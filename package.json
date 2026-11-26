@@ -36,7 +36,8 @@
     "check:lista": "tsx scripts/check-lista.ts",
     "track:utilization": "tsx scripts/track-utilization.ts",
     "deliver:telegram": "tsx scripts/deliver-telegram.ts",
-    "check:curve": "tsx scripts/check-curve-llamalend.ts"
+    "check:curve": "tsx scripts/check-curve-llamalend.ts",
+    "check:market-discovery": "tsx scripts/check-market-discovery.ts"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",
