@@ -1,8 +1,9 @@
 import { LiquidityMonitorStatus } from './LiquidityMonitorStatus';
 import { useEffect, useState, type ReactNode } from 'react';
 import { apiUrl } from './api';
-import { alertPositions, alertScopeKey, defaultAlertRules, parsePositionAlertInput, type AlertRules, type PositionAlerts } from './alert-rules';
+import { alertPositions, alertScopeKey, defaultAlertRules, parsePositionAlertInput, retainedAlertPositions, type AlertRules, type PositionAlerts } from './alert-rules';
 import { parseWalletHistory, type SavedWallet, type WalletHistoryResponse } from './wallet-history';
+import { positionLinks } from './position-links';
 import type { Portfolio } from './types';
 type Entry = ReturnType<typeof alertPositions>[number];
 function AlertForm({ entry, address, saved, snapshot, disabled, onSaved }: { entry: Entry; address: string; saved?: PositionAlerts; snapshot: object; disabled: boolean; onSaved: (response: WalletHistoryResponse) => void }) {
@@ -45,19 +46,33 @@ function AlertForm({ entry, address, saved, snapshot, disabled, onSaved }: { ent
     {message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
   </form>;
 }
-export function Alerts({ portfolio, savedWallet, persistence, snapshot, demo, loading, onSaved, renderPosition }: { portfolio: Portfolio | null; savedWallet?: SavedWallet | null; persistence?: WalletHistoryResponse['persistence']; snapshot: object | null; demo: boolean; loading: boolean; onSaved: (response: WalletHistoryResponse) => void; renderPosition: (entry: Entry) => ReactNode }) {
+export function Alerts({ portfolio, sourcePortfolio, savedWallet, persistence, snapshot, demo, loading, onSaved, renderPosition }: { portfolio: Portfolio | null; sourcePortfolio?: Portfolio | null; savedWallet?: SavedWallet | null; persistence?: WalletHistoryResponse['persistence']; snapshot: object | null; demo: boolean; loading: boolean; onSaved: (response: WalletHistoryResponse) => void; renderPosition: (entry: Entry) => ReactNode }) {
   const entries = portfolio ? alertPositions(portfolio) : [];
-  return <section aria-label="Alerts"><div className="section-label"><h2>Alerts</h2><span>Position preferences</span></div><p className="recommendations-intro">Save alert conditions for active lending and deposit positions. Supply APR includes intrinsic yield. Preferences are public in wallet-history.json. Liquidity and utilization alerts run in GitHub Actions, triggered by GitHub cron or a configured external scheduler. Runs may be delayed or skipped. New liquidity and utilization alerts are delivered to the configured Telegram chat when delivery is enabled in the workflow. Monitoring of other rules is not enabled yet.</p>
+  const savedAlerts = savedWallet?.address.toLowerCase() === portfolio?.address.toLowerCase() ? savedWallet?.alerts : [];
+  const retained = portfolio ? retainedAlertPositions(sourcePortfolio ?? portfolio, savedAlerts) : [];
+  return <section aria-label="Alerts"><div className="section-label"><h2>Alerts</h2><span>Position preferences</span></div><p className="recommendations-intro">Save alert conditions for active lending and deposit positions. Closed positions with enabled alerts remain below with zero balances until you disable and save their alerts. Supply APR includes intrinsic yield. Preferences are public in wallet-history.json. Liquidity and utilization alerts run in GitHub Actions, triggered by GitHub cron or a configured external scheduler. Runs may be delayed or skipped. New liquidity and utilization alerts are delivered to the configured Telegram chat when delivery is enabled in the workflow. Monitoring of other rules is not enabled yet.</p>
     <p className="recommendations-intro"><a href="https://github.com/Sberex/DeFiMon/blob/main/analysis/liquidity-alert-notifications.json" target="_blank" rel="noreferrer">Liquidity notifications JSON ↗</a> · <a href="https://github.com/Sberex/DeFiMon/blob/main/analysis/utilization-alert-notifications.json" target="_blank" rel="noreferrer">Utilization notifications JSON ↗</a> · <a href="https://github.com/Sberex/DeFiMon/blob/main/analysis/telegram-deliveries.json" target="_blank" rel="noreferrer">Telegram delivery status JSON ↗</a> · <a href="https://github.com/Sberex/DeFiMon/actions/workflows/market-liquidity-monitor.yml" target="_blank" rel="noreferrer">Monitoring runs ↗</a></p>
     {loading ? <p role="status">Checking wallet positions…</p> : !portfolio ? <p className="recommendations-empty">Check a wallet address to configure position alerts.</p> : <>
       {!demo && savedWallet && <><LiquidityMonitorStatus wallet={savedWallet} /><LiquidityMonitorStatus wallet={savedWallet} kind="utilization" /></>}
       {demo && <p className="notice">Example positions are shown for illustration. Check a wallet address to save alerts.</p>}
       {persistence && !persistence.synced && persistence.message && <p className="notice">{persistence.message}</p>}
-      {!entries.length && <p className="recommendations-empty">No active lending or deposit positions were found in Wallet Overview.</p>}
+      {!entries.length && !retained.length && <p className="recommendations-empty">No active lending or deposit positions were found in Wallet Overview.</p>}
       <div className="protocol-list">{entries.map(entry => {
         const scope = { network: entry.network, protocol: entry.protocol.id, positionId: entry.position.id };
         const key = alertScopeKey(scope), saved = savedWallet?.alerts?.find(a => alertScopeKey(a) === key);
         return <article className={`protocol alert-position ${entry.protocol.id}`} key={`${portfolio.address}:${key}`}><div className="protocol-heading"><h3>{entry.protocol.name} · {entry.chain}</h3></div>{renderPosition(entry)}<AlertForm entry={entry} address={portfolio.address} saved={saved} snapshot={snapshot ?? portfolio} disabled={demo} onSaved={onSaved} /></article>;
+      })}{retained.map(entry => {
+        const key = alertScopeKey({ network: entry.network, protocol: entry.protocol.id, positionId: entry.position.id });
+        const saved = savedAlerts?.find(a => alertScopeKey(a) === key);
+        return <article className={`protocol alert-position ${entry.protocol.id}`} key={`${portfolio.address}:${key}`}>
+          <div className="protocol-heading"><h3>{entry.protocol.name} · {entry.chain}</h3><span className="status">{entry.closed ? 'Closed position' : 'Position not verified'}</span></div>
+          <div className="position retained-alert-position"><div className="position-title"><h3>{entry.position.label}</h3></div>
+            {positionLinks(entry.protocol.id, entry.chain, entry.position).map(link => <p key={link.url}>{link.label}: <a href={link.url} target="_blank" rel="noreferrer">{link.address} ↗</a></p>)}
+            <p>{entry.closed ? 'No supplied assets or borrowings remain. Saved alerts are still enabled.' : 'The latest check could not confirm this position’s balances. Saved alerts are still enabled.'}</p>
+            <div className="position-stats">{['Supplied', 'Borrowed', 'Net value', 'Monthly NPL', 'Monthly interest earned', 'Monthly interest paid'].map(label => <div key={label}><span>{label}</span><strong>{entry.closed ? '$0.00' : 'Unavailable'}</strong></div>)}</div>
+          </div>
+          <AlertForm entry={entry} address={portfolio.address} saved={saved} snapshot={snapshot ?? portfolio} disabled={demo} onSaved={onSaved} />
+        </article>;
       })}</div>
     </>}
   </section>;

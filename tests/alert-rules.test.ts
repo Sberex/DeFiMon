@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { alertPositions, defaultAlertRules, parsePositionAlertInput } from '../src/alert-rules';
+import { alertPositions, retainedAlertPositions, defaultAlertRules, parsePositionAlertInput } from '../src/alert-rules';
 import { mergeWalletHistory, parseWalletHistory } from '../src/wallet-history';
 import { example } from '../src/example';
 const address = example.address.toLowerCase(), day = '2026-11-22T10:00:00.000Z', later = '2026-11-22T11:00:00.000Z';
@@ -45,4 +45,33 @@ it('defaults older saved rules to no new-liquidity alert and rejects non-boolean
   for (const value of [null, 'true', 1]) expect(() => parsePositionAlertInput({ ...input, rules: { ...legacy, newLiquidityAdded: value } })).toThrow();
   const saved = parseWalletHistory({ version: 1, wallets: [{ address, lastCheckedAt: day, manualLiquidationPrices: [], alerts: [{ ...input, rules: { ...legacy, newLiquidityAdded: true }, updatedAt: later }] }] });
   expect(saved.wallets[0].alerts?.[0].rules.newLiquidityAdded).toBe(true);
+});
+
+it('retains only enabled saved alerts for closed positions without changing overview or crossing chains', () => {
+  const p = structuredClone(example), protocol = p.protocols[0];
+  const saved = { network: 'ethereum' as const, protocol: protocol.id, positionId: 'closed', updatedAt: day, rules: { ...defaultAlertRules(), newLiquidityAdded: true } };
+  protocol.positions = []; p.protocols = [protocol];
+  expect(retainedAlertPositions(p, [saved, saved])).toMatchObject([{ closed: true, position: { id: 'closed', suppliedUsd: 0, debtUsd: 0 } }]);
+  expect(alertPositions(p)).toEqual([]);
+  expect(retainedAlertPositions(p, [{ ...saved, rules: defaultAlertRules() }])).toEqual([]);
+  expect(retainedAlertPositions(p, [{ ...saved, network: 'base' }])[0].closed).toBe(false);
+  for (const field of ['borrowAprAboveSupplyApr', 'newLiquidityAdded', 'utilizationAbove', 'healthFactorBelow', 'positionAprBelow'] as const) {
+    const rules = defaultAlertRules();
+    if (typeof rules[field] === 'boolean') Object.assign(rules, { [field]: true });
+    else Object.assign(rules, { [field]: { ...rules[field] as object, enabled: true } });
+    expect(retainedAlertPositions(p, [{ ...saved, rules }])).toHaveLength(1);
+  }
+});
+it('does not manufacture zero balances after incomplete checks or for active risk-excluded positions', () => {
+  const p = structuredClone(example), protocol = p.protocols[0], position = protocol.positions[0];
+  const saved = { network: 'ethereum' as const, protocol: protocol.id, positionId: position.id, updatedAt: day, rules: { ...defaultAlertRules(), borrowAprAboveSupplyApr: true } };
+  position.suppliedUsd = 1; position.debtUsd = 100; position.collateralValueUsd = 1;
+  expect(retainedAlertPositions(p, [saved])).toEqual([]);
+  protocol.positions = [];
+  protocol.status = 'error'; expect(retainedAlertPositions(p, [saved])[0]).toMatchObject({ closed: false, position: { suppliedUsd: null, debtUsd: null } });
+  protocol.status = 'partial'; expect(retainedAlertPositions(p, [saved])[0].closed).toBe(false);
+  protocol.balanceDiscoveryComplete = true; expect(retainedAlertPositions(p, [saved])[0].closed).toBe(true);
+  protocol.status = 'ok'; protocol.balanceDiscoveryComplete = false; expect(retainedAlertPositions(p, [saved])[0].closed).toBe(false);
+  protocol.balanceDiscoveryComplete = true; p.networks = [{ chain: 'Ethereum', status: 'error', blockNumber: null, updatedAt: day }];
+  expect(retainedAlertPositions(p, [saved])[0].closed).toBe(false);
 });

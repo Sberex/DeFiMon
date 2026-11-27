@@ -2314,3 +2314,35 @@ test('Market Discovery supports both Any filters, keyboard selection, large resu
  fail=true;await section.getByRole('button',{name:'Search',exact:true}).click();await expect(section.getByRole('alert')).toHaveText('Market discovery is unavailable. Please retry.');expect(requests[1]).toEqual({supply:'sUSDai',borrow:null});
  fail=false;await section.getByRole('button',{name:'Search',exact:true}).click();await expect(section.getByRole('heading',{name:'54 markets found'})).toBeVisible();await expect(section.getByRole('alert')).toHaveCount(0);
 });
+
+test('Alerts retains closed positions at zero, restores their rules and removes them after disabling', async ({ page }) => {
+  const { defaultAlertRules } = await import('../src/alert-rules');
+  const fixture = structuredClone(example); fixture.wallets = [];
+  const market = '0xc4f56ec8f0e89af93a7146eadb9f4330c522aa19c5d2053b0685db1f68e87550';
+  fixture.protocols = [{ id: 'morpho', name: 'Morpho', chain: 'Ethereum', status: 'ok', coverage: '', positions: [] }];
+  let wallet: import('../src/wallet-history').SavedWallet = { address: fixture.address.toLowerCase(), lastCheckedAt: '2026-11-27T10:00:00.000Z', manualLiquidationPrices: [], alerts: [{ network: 'ethereum', protocol: 'morpho', positionId: `morpho-market-${market}`, updatedAt: '2026-11-27T10:00:00.000Z', rules: { ...defaultAlertRules(), newLiquidityAdded: true, utilizationAbove: { enabled: true, thresholdPercent: 90 } } }] };
+  await page.route('**/api/portfolio/*', route => route.fulfill({ json: { ...fixture, walletHistory: { wallet, persistence: { mode: 'github', synced: true } } } }));
+  await page.route('**/api/wallet-history/*/alerts', async route => {
+    const input = route.request().postDataJSON();
+    expect(input.positionId).toBe(`morpho-market-${market}`);
+    wallet = { ...wallet, alerts: [{ ...input, updatedAt: '2026-11-27T11:00:00.000Z' }] };
+    await route.fulfill({ json: { wallet, persistence: { mode: 'github', synced: true } } });
+  });
+  await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(fixture.address); await page.getByRole('button', { name: 'Check wallet', exact: true }).click();
+  await page.getByRole('button', { name: 'Alerts', exact: true }).click();
+  const alerts = page.getByRole('region', { name: 'Alerts', exact: true }), card = alerts.locator('.alert-position');
+  await expect(card).toHaveCount(1); await expect(card).toContainText('Closed position');
+  await expect(card.locator('.position-stats strong')).toHaveText(Array(6).fill('$0.00'));
+  await expect(card.getByRole('link', { name: `${market} ↗` })).toHaveAttribute('href', `https://app.morpho.org/ethereum/market/${market}`);
+  await expect(card.getByRole('checkbox', { name: 'New liquidity added to the market' })).toBeChecked();
+  await expect(card.getByLabel('Utilization threshold (%)')).toHaveValue('90');
+  await card.getByRole('checkbox', { name: 'New liquidity added to the market' }).uncheck();
+  await card.getByRole('checkbox', { name: 'Utilization ratio higher than' }).uncheck();
+  await card.getByRole('button', { name: 'Save alerts', exact: true }).click();
+  await expect(card).toHaveCount(0);
+  // A failed protocol check preserves controls, but cannot confirm a zero balance.
+  wallet.alerts![0].rules.newLiquidityAdded = true; fixture.protocols[0].status = 'error';
+  await page.getByRole('button', { name: 'Check wallet', exact: true }).click();
+  await expect(card).toContainText('Position not verified');
+  await expect(card.locator('.position-stats strong')).toHaveText(Array(6).fill('Unavailable'));
+});
