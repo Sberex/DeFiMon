@@ -28,7 +28,7 @@
           "protocol": "morpho",
           "positionId": "morpho-market-0xa88715ad5edd5b3f6ef136b4c3b4b0ff1136ea75204a1cdb6f7acc3c51cf568f",
           "rules": {
-            "borrowAprAboveSupplyApr": true,
+            "borrowAprAboveSupplyApr": false,
             "newLiquidityAdded": true,
             "utilizationAbove": {
               "enabled": false,
@@ -43,7 +43,7 @@
               "thresholdPercent": null
             }
           },
-          "updatedAt": "2026-11-26T20:13:22.997Z"
+          "updatedAt": "2026-11-27T05:16:56.434Z"
         },
         {
           "network": "ethereum",
