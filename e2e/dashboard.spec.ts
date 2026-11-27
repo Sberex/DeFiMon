@@ -2427,3 +2427,17 @@ test('Market Discovery and leveraged results show net Merkl rates, protocol brea
     if(name==='Leveraged Borrowing Strategy Search')await expect(row.locator('td').last()).toContainText(`${((.0497-market.borrowApr!*.86/1.02)/(1-.86/1.02)*100).toFixed(2)}%`);
   }
 });
+
+test('Plasma sUSDe strategies choose verified eMode and show higher, distinct APR after Merkl incentives', async ({page}) => {
+ const {strategyMarket}=await import('../tests/fixtures/strategies');
+ const {merklMarketTokens:t,merklMarketPool:pool}=await import('../tests/fixtures/merkl-market');
+ const make=(name:string,address:string,native:number,reward:number)=>strategyMarket({protocol:'Aave v3',network:'plasma',market:pool,lltv:.001,collateralLtv:0,totalSupplyApr:.0497,supplyAsset:{address:t.susde,name:'sUSDe',category:'Savings stablecoin',intrinsicApr:.0497},borrowAsset:{address,name,category:'Stablecoin'},protocolBorrowApr:native,merklBorrowApr:reward,borrowApr:native-reward,borrowingModes:[{id:2,label:'sUSDe Stablecoins',ltv:.9,lltv:.92},{id:23,label:'sUSDe correlated stablecoins',ltv:.901,lltv:.921}]});
+ const rows=[make('GHO',t.gho,.04685177335954725,.006355804952053925),make('USDT0',t.usdt,.04355710376105666,.007766862253807777)];
+ await page.route('**/api/leveraged-strategies',route=>route.fulfill({json:{query:{supply:null,borrow:null},checkedAt:'2026-11-27T10:00:00Z',markets:rows,coverage:[],messages:[]}}));
+ await page.goto('/');await page.getByRole('button',{name:'Market Discovery',exact:true}).click();
+ const section=page.getByRole('region',{name:'Leveraged Borrowing Strategy Search',exact:true});await section.getByRole('button',{name:'Search',exact:true}).click();
+ const results=section.locator('tbody tr');await expect(results).toHaveCount(2);
+ await expect(results.nth(0).locator('td').nth(3)).toContainText('USDT0');await expect(results.nth(1).locator('td').nth(3)).toContainText('GHO');
+ await expect(results.nth(0).locator('td').last()).toContainText('17.63%');await expect(results.nth(1).locator('td').last()).toContainText('13.35%');
+ for(const row of [results.nth(0),results.nth(1)]){await expect(row.locator('td').nth(6)).toContainText('92.10%');await expect(row).toContainText('eMode 23');await expect(row).toContainText('Max LTV: 90.10%');await expect(row).toContainText('Health factor: 1.0222');await expect(row).toContainText('Limited by maximum entry LTV');await expect(row).toContainText('Debt / collateral: 90.10%');}
+});

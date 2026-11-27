@@ -95,11 +95,48 @@ export function leveragedMarkets(markets: DiscoveryMarket[]) {
       )
     )
       return [];
-    const debtRatio = m.lltv / STRATEGY_HEALTH_FACTOR;
-    const modelledApr =
-      (m.totalSupplyApr - m.borrowApr * debtRatio) / (1 - debtRatio);
-    if (!finite(modelledApr)) return [];
-    return [{ ...m, modelledApr, modelledDebtRatio: debtRatio }];
+    const modes = m.borrowingModes ?? [
+      {
+        id: 0,
+        label: 'Standard collateral',
+        ltv: m.collateralLtv ?? m.lltv,
+        lltv: m.lltv,
+      },
+    ];
+    const candidates = modes.flatMap((mode) => {
+      if (
+        !finite(mode.ltv) ||
+        !finite(mode.lltv) ||
+        mode.ltv <= 0 ||
+        mode.ltv > mode.lltv ||
+        mode.lltv > 1
+      )
+        return [];
+      const debtRatio = Math.min(mode.lltv / STRATEGY_HEALTH_FACTOR, mode.ltv);
+      const modelledApr =
+        (m.totalSupplyApr! - m.borrowApr! * debtRatio) / (1 - debtRatio);
+      if (!finite(modelledApr)) return [];
+      return [
+        {
+          ...m,
+          lltv: mode.lltv,
+          modelledApr,
+          modelledDebtRatio: debtRatio,
+          modelledHealthFactor: mode.lltv / debtRatio,
+          modelledMode: mode,
+          modelledEntryLtv:
+            m.borrowingModes !== undefined || finite(m.collateralLtv)
+              ? mode.ltv
+              : undefined,
+          modelledLtvLimited: mode.ltv < mode.lltv / STRATEGY_HEALTH_FACTOR,
+        },
+      ];
+    });
+    candidates.sort(
+      (a, b) =>
+        b.modelledApr - a.modelledApr || a.modelledMode.id - b.modelledMode.id,
+    );
+    return candidates.slice(0, 1);
   });
 }
 export function strategyDiscovery(result: DiscoveryResult): DiscoveryResult {

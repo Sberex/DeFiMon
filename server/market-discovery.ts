@@ -1,3 +1,4 @@
+import { aaveDiscoveryModes } from './aave-discovery-modes.js';
 import { applyMarketMerkl } from './market-merkl.js';
 import { applyPtCollateralRates } from './pendle-collateral.js';
 import { slisBnbStakingApr, SLISBNB } from './slisbnb-rates.js';
@@ -110,6 +111,7 @@ export function createMarketDiscovery(
     pt?: typeof applyPtCollateralRates;
     slis?: typeof slisBnbStakingApr;
     merkl?: typeof applyMarketMerkl;
+    modes?: typeof aaveDiscoveryModes;
   } = {},
 ) {
   const clientFor = options.clientFor ?? makeClient,
@@ -119,7 +121,8 @@ export function createMarketDiscovery(
     lido = options.lido ?? lidoStakingApr,
     pt = options.pt ?? applyPtCollateralRates,
     slis = options.slis ?? slisBnbStakingApr,
-    merkl = options.merkl ?? applyMarketMerkl;
+    merkl = options.merkl ?? applyMarketMerkl,
+    modes = options.modes ?? aaveDiscoveryModes;
   const horizon = createAaveMarketReader(
     () => AAVE_HORIZON.provider,
     'Aave Horizon',
@@ -508,7 +511,15 @@ export function createMarketDiscovery(
               } satisfies DiscoveryMarket;
             }),
           );
-          const rewarded = await merkl(enriched, client, network, block);
+          const configured = await modes(enriched, client, network, block);
+          coverage.push(...configured.coverage);
+          messages.push(...configured.messages);
+          const rewarded = await merkl(
+            configured.markets,
+            client,
+            network,
+            block,
+          );
           coverage.push(...rewarded.coverage);
           messages.push(...rewarded.messages);
           return rewarded.markets;

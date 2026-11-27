@@ -443,11 +443,45 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
                         <span className="muted">Unavailable</span>
                       )}
                     </td>
-                    <td>{market.lltv === null ? '—' : percent(market.lltv)}</td>
+                    <td>
+                      {market.lltv === null ? '—' : percent(market.lltv)}
+                      {!strategy &&
+                        market.borrowingModes?.some((mode) => mode.id > 0) && (
+                          <details>
+                            <summary>Eligible eModes</summary>
+                            {market.borrowingModes
+                              .filter((mode) => mode.id > 0)
+                              .map((mode) => (
+                                <p key={mode.id}>
+                                  eMode {mode.id} · {mode.label}: LLTV{' '}
+                                  {percent(mode.lltv)}, max LTV{' '}
+                                  {percent(mode.ltv)}
+                                </p>
+                              ))}
+                          </details>
+                        )}
+                      {strategy && market.modelledMode && (
+                        <small>
+                          {market.modelledMode.id
+                            ? `eMode ${market.modelledMode.id} · ${market.modelledMode.label}`
+                            : 'Standard collateral'}
+                          <br />
+                          {market.modelledEntryLtv !== undefined && (
+                            <>Max LTV: {percent(market.modelledEntryLtv)}</>
+                          )}
+                        </small>
+                      )}
+                    </td>
                     {strategy && (
                       <td>
                         <strong>{percent(market.modelledApr)}</strong>
-                        <small>Health factor: 1.02</small>
+                        <small>
+                          Health factor:{' '}
+                          {(market.modelledHealthFactor ?? 1.02).toFixed(4)}
+                        </small>
+                        {market.modelledLtvLimited && (
+                          <small>Limited by maximum entry LTV</small>
+                        )}
                         <small>
                           Debt / collateral: {percent(market.modelledDebtRatio)}
                         </small>
@@ -495,12 +529,13 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
         {strategy ? (
           <>
             Find Savings stablecoin collateral with verified intrinsic APR above
-            Stablecoin borrow APR. Modelled health factor: 1.02. Debt /
-            collateral = LLTV / 1.02; APR = (Supply APR − Borrow APR × debt
-            ratio) / (1 − debt ratio). Supply APR includes protocol interest and
-            intrinsic yield and verified Merkl incentives. Assumes constant
-            prices and rates, excluding unverified rewards and fees. This is a
-            model, not an execution quote.
+            Stablecoin borrow APR. Target health factor: 1.02 or higher.
+            Verified eligible Aave eMode is selected when it improves APR. Debt
+            / collateral = min(LLTV / 1.02, maximum entry LTV); APR = (Supply
+            APR − Borrow APR × debt ratio) / (1 − debt ratio). Supply APR
+            includes protocol interest and intrinsic yield and verified Merkl
+            incentives. Assumes constant prices and rates, excluding unverified
+            rewards and fees. This is a model, not an execution quote.
           </>
         ) : (
           <>

@@ -12,12 +12,32 @@ export interface DiscoveryAsset {
   category: TokenCategory;
   intrinsicApr?: number | null;
 }
+export interface BorrowingMode {
+  id: number;
+  label: string;
+  ltv: number;
+  lltv: number;
+}
 export interface DiscoveryMarket extends MarketAlternative {
+  borrowingModes?: BorrowingMode[];
+  modelledHealthFactor?: number;
+  modelledEntryLtv?: number;
+  modelledMode?: BorrowingMode;
+  modelledLtvLimited?: boolean;
   protocolBorrowApr?: number | null;
   protocolBorrowApy?: number;
   merklSupplyApr?: number;
   merklBorrowApr?: number;
-  merklPrograms?: { id: string; name: string; side: 'supply' | 'borrow'; apr: number; apy?: number; url: string; note: string; endAt: string }[];
+  merklPrograms?: {
+    id: string;
+    name: string;
+    side: 'supply' | 'borrow';
+    apr: number;
+    apy?: number;
+    url: string;
+    note: string;
+    endAt: string;
+  }[];
   modelledApr?: number;
   modelledDebtRatio?: number;
   requiredSupplyAssets?: DiscoveryAsset[];
