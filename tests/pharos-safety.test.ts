@@ -47,3 +47,16 @@ it('coalesces concurrent grade reads, expires its cache, and retries failed chec
   await expect(failed()).rejects.toThrow('temporarily unavailable'); await expect(failed()).rejects.toThrow(); expect(attempts).toBe(1);
   clock += 60001; await expect(failed()).rejects.toThrow(); expect(attempts).toBe(2);
 });
+
+it('keeps sUSDai rated D when unrelated Pharos entries have pipeline gaps', () => {
+  const feed = parsePharosGrades({ ...payload(), grades: [
+    { id: 'susdai-usd-ai', grade: 'D', score: 47, ratingStatus: 'rated' },
+    { id: 'tbrl-tenbin', grade: null, score: null, ratingStatus: 'pipeline-gap', partialEvidence: { reasonCode: 'partial-evidence-pipeline-gap', excludedPillars: ['backing', 'exit'], causes: [] } },
+    { id: 'tmxn-tenbin', grade: null, score: null, ratingStatus: 'pipeline-gap' },
+  ] }, now);
+  expect(feed.grades[0]).toMatchObject({ grade: 'D', score: 47 });
+  expect(feed.grades[1]).toMatchObject({ grade: 'NR', ratingStatus: 'pipeline-gap' });
+  const p = portfolio(); p.wallets = [{ chain: 'Ethereum', status: 'ok', pricedValueUsd: 100, unpricedCount: 0, coverage: '', tokens: [token(susdai, 'sUSDai', 100, 90)] }];
+  expect(assetSafetySummary(p, feed).groups.map(g => g.grade)).toEqual(['D']);
+  expect(parsePharosGrades(feed, now)).toEqual(feed);
+});

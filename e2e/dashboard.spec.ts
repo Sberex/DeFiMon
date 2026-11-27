@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { combinedExample, example } from '../src/example';
 import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtures/merkl-apr';
 test.beforeEach(async ({ page }) => {
+  await page.route('**/analysis/pharos-safety-grades.json*', route => route.fulfill({ status: 503, json: { error: 'Snapshot unavailable in this fixture' }, headers: { 'Access-Control-Allow-Origin': '*' } }));
   await page.route('**/api/safety-grades', route => route.fulfill({ json: { schemaVersion: 1, asOfSec: Math.floor(Date.now() / 1000), publicationStatus: 'current', methodologyVersion: '10.57', grades: [{ id: 'usdc-circle', grade: 'A+', score: 91, ratingStatus: 'rated' }] } }));
   await page.route('**/analysis/utilization-alert-state.json*', route => route.fulfill({ json: { version: 1, lastRunAt: null, watches: [] } }));
   await page.route('**/analysis/liquidity-alert-state.json*', route => route.fulfill({ json: { version: 1, lastRunAt: null, watches: [] } }));
@@ -2511,4 +2512,15 @@ test('Risk Assessment retains known amounts as Not Rated during a grade outage a
  await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(example.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();
  const section=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await expect(section).toContainText('temporarily grouped as Not Rated');await expect(section.locator('[data-grade="Not Rated"]')).toContainText('$100.00');await expect(section).toContainText('1 holding has no individual USD valuation');
  fail=false;await section.getByRole('button',{name:'Refresh grades',exact:true}).click();await expect(section.locator('[data-grade="A+"]')).toContainText('$100.00');await expect(section.locator('[data-grade="Not Rated"]')).toContainText('1 unpriced holding');await expect(section).not.toContainText('temporarily grouped as Not Rated');
+});
+
+test('sUSDai stays in D across wallet networks and Morpho when Render is missing the route and other tokens have Pharos pipeline gaps', async ({page}) => {
+ const fixture=structuredClone(combinedExample),address='0x0b2b2b2076d95dda7817e785989fe353fe955ef9';fixture.updatedAt=new Date().toISOString();
+ const wallet=(chain:'Ethereum'|'Plasma',balance:number,valueUsd:number)=>({chain,status:'ok' as const,pricedValueUsd:valueUsd,unpricedCount:0,coverage:'',tokens:[{address,symbol:'sUSDai',balance,priceUsd:1.1245,valueUsd}]});
+ fixture.wallets=[wallet('Ethereum',19651.87,22097.97),wallet('Plasma',0.000004465497,0)];
+ fixture.protocols=[{id:'morpho',name:'Morpho',chain:'Ethereum',status:'ok',coverage:'',positions:[{id:'susdai-usdc',label:'sUSDai / USDC',suppliedUsd:291730.88,debtUsd:200000,healthFactor:1.1,risk:'watch',notes:[],assets:[{address,symbol:'sUSDai',supplied:259549.8,borrowed:0,priceUsd:291730.88/259549.8,collateral:true,liquidationThreshold:.86,liquidationPriceUsd:null}]}]}];
+ await page.route('**/api/portfolio/*',route=>route.fulfill({json:fixture}));await page.route('**/api/safety-grades',route=>route.fulfill({status:404,json:{error:'Endpoint not found'}}));
+ await page.route('**/analysis/pharos-safety-grades.json*',route=>route.fulfill({headers:{'Access-Control-Allow-Origin':'*'},json:{schemaVersion:1,publicationStatus:'current',methodologyVersion:'10.57',asOfSec:Math.floor(Date.now()/1000),grades:[{id:'susdai-usd-ai',score:47,grade:'D',ratingStatus:'rated'},{id:'tbrl-tenbin',score:null,grade:null,ratingStatus:'pipeline-gap'},{id:'tmxn-tenbin',score:null,grade:null,ratingStatus:'pipeline-gap'}]}}));
+ await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(fixture.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();
+ const section=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await expect(section).toContainText('GitHub feed snapshot');const row=section.locator('[data-grade="D"]');await expect(row).toContainText('$313,828.85');await row.locator('summary').click();await expect(row).toContainText('Pharos score: 47/100');await expect(row).toContainText('Ethereum · Wallet');await expect(row).toContainText('Plasma · Wallet');await expect(row).toContainText('Morpho');await expect(section.locator('[data-grade="Not Rated"]')).toHaveCount(0);
 });

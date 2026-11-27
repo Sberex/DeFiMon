@@ -24,6 +24,8 @@ on:
       - '.github/workflows/market-liquidity-monitor.yml'
       - 'scripts/track-liquidity.ts'
       - 'scripts/track-utilization.ts'
+      - 'scripts/refresh-pharos-grades.ts'
+      - 'server/pharos-safety.ts'
       - 'server/utilization-alert-*.ts'
       - 'server/liquidity-alert-*.ts'
       - 'server/alert-run.ts'
@@ -48,6 +50,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Refresh public Pharos safety grades
+        continue-on-error: true
+        run: npx tsx scripts/refresh-pharos-grades.ts --publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Check enabled markets and save liquidity increases and decreases
         run: npm run track:liquidity -- --publish
         env:

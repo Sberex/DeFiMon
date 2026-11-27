@@ -5,7 +5,7 @@ export const safetyGrades = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 
 export type SafetyGrade = typeof safetyGrades[number];
 export interface PharosGrades {
   schemaVersion: 1; asOfSec: number; publicationStatus: 'current'; methodologyVersion: string;
-  grades: { id: string; grade: SafetyGrade | 'NR'; score: number | null; ratingStatus: 'rated' | 'not-rated' }[];
+  grades: { id: string; grade: SafetyGrade | 'NR'; score: number | null; ratingStatus: 'rated' | 'not-rated' | 'pipeline-gap' }[];
 }
 export function parsePharosGrades(value: unknown, now = Date.now()): PharosGrades {
   const data = value as PharosGrades;
@@ -15,6 +15,7 @@ export function parsePharosGrades(value: unknown, now = Date.now()): PharosGrade
   const grades = data.grades.map(row => {
     if (!row || typeof row.id !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(row.id) || seen.has(row.id)) return fail();
     seen.add(row.id);
+    if (row.ratingStatus === 'pipeline-gap' && (row.grade === null || row.grade === 'NR') && row.score === null) return { id: row.id, grade: 'NR' as const, score: null, ratingStatus: 'pipeline-gap' as const };
     if (row.ratingStatus === 'not-rated' && row.grade === 'NR') return { id: row.id, grade: 'NR' as const, score: null, ratingStatus: 'not-rated' as const };
     if (row.ratingStatus !== 'rated' || !safetyGrades.includes(row.grade as SafetyGrade) || typeof row.score !== 'number' || !Number.isFinite(row.score) || row.score < 0 || row.score > 100) return fail();
     return { id: row.id, grade: row.grade as SafetyGrade, score: row.score, ratingStatus: 'rated' as const };

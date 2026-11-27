@@ -1,0 +1,2156 @@
+{
+  "schemaVersion": 1,
+  "asOfSec": 1795789074,
+  "publicationStatus": "current",
+  "methodologyVersion": "10.57",
+  "grades": [
+    {
+      "id": "a7a5-old-vector",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "aa-falconx-mev-capital",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "aid-gaib",
+      "grade": "D",
+      "score": 48,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "alusd-alchemix",
+      "grade": "F",
+      "score": 36,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "apxusd-apyx",
+      "grade": "F",
+      "score": 17,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "apyusd-apyx",
+      "grade": "F",
+      "score": 7,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "arcusdc-galaxy",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "armusdcs-wintermute",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "asusdf-astherus",
+      "grade": "F",
+      "score": 38,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "audd-novatti",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "audf-forte",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "audm-macropod",
+      "grade": "B",
+      "score": 72,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "audm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "audx-aussie-dollar-token",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ausd-agora",
+      "grade": "B+",
+      "score": 76,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "autousd-auto-finance",
+      "grade": "B",
+      "score": 70,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "avusd-avant",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "axcnh-anchorx",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "bbqusdc-steakhouse",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "bbqusdc-steakhouse-v2",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "bnbusd-sigma-money",
+      "grade": "C-",
+      "score": 50,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "bold-liquity",
+      "grade": "A",
+      "score": 84,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "brl1-brl1",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "brla-brla-digital",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "brlm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "brlv-crown",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "brz-transfero",
+      "grade": "F",
+      "score": 38,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "btcusd-btcfi",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "buck-bucket-protocol",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "buidl-blackrock",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "busd0-usual",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cadc-cad-coin",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cadd-cad-digital",
+      "grade": "A-",
+      "score": 80,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cadm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cash-phantom",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cdp-enosys",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cetes-etherfuse",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "ceur-celo",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cgo-comtech",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cgusd-cygnus-finance",
+      "grade": "D",
+      "score": 44,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "chfau-allunity",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "chfm-mento",
+      "grade": "D",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cjpy-yamato",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cngn-compliant-naira",
+      "grade": "D",
+      "score": 44,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "copm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "copm-minteo",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "crvusd-curve",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cscbusdc-clearstar",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ctusd-citrea",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cusd-cap",
+      "grade": "B",
+      "score": 74,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cusd-celo",
+      "grade": "C-",
+      "score": 50,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "cusdo-openeden",
+      "grade": "D",
+      "score": 41,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "dai-makerdao",
+      "grade": "B",
+      "score": 71,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "deuro-deuro",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "dgld-gold-token-sa",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "dllr-sovryn",
+      "grade": "D",
+      "score": 41,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "doc-money-on-chain",
+      "grade": "B-",
+      "score": 67,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "dola-inverse-finance",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "dusd-alto",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "dusd-dialectic",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "dusd-standx",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "earnusd-lido",
+      "grade": "D",
+      "score": 44,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eearn-ember",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "emxn-telcoin",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ethenausdc-steakhouse",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eur0-usual",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eurau-allunity",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eurc-circle",
+      "grade": "A",
+      "score": 83,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eurcv-societe-generale-forge",
+      "grade": "A-",
+      "score": 80,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eure-monerium",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "euri-banking-circle",
+      "grade": "C-",
+      "score": 50,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "europ-schuman",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eurot-token-teknoloji",
+      "grade": "F",
+      "score": 18,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eurq-quantoz",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eurs-stasis",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eurw-newrails",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eusd-electronic-usd",
+      "grade": "B-",
+      "score": 67,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eusd-telcoin",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "eutbl-spiko",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "fdusd-first-digital",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "feusd-felix",
+      "grade": "B",
+      "score": 70,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "fidd-fidelity",
+      "grade": "A",
+      "score": 84,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "frax-frax",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "frnt-wyoming",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "frxusd-frax",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ftusd-flying-tulip",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "fusd-finchain",
+      "grade": "D",
+      "score": 48,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "fusd-freedom-dollar",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "fxsave-f-x-protocol",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "fxusd-f-x-protocol",
+      "grade": "B-",
+      "score": 68,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gbpa-agant",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gbpe-monerium",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gbpm-mento",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gdlr-doma",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ggbr-goldfish-gold",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gho-aave",
+      "grade": "B-",
+      "score": 68,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ghsm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gldt-gold-dao",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gldy-streamex",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gtusdc-gauntlet",
+      "grade": "B",
+      "score": 72,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gtusdcp-gauntlet",
+      "grade": "B-",
+      "score": 65,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gtusdtp-gauntlet",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gusd-gemini",
+      "grade": "B+",
+      "score": 75,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gusdcq-galaxy",
+      "grade": "B-",
+      "score": 65,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "gusdtq-galaxy",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "hbd-hive",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "hbusdt-hyperbeat",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "hchf-hedera-swiss-franc",
+      "grade": "B-",
+      "score": 65,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "hollar-hydrated",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "honey-berachain",
+      "grade": "C",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "hyperusdca-hyperithm",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "hyusd-hylo",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "idrt-rupiah-token",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "idrx-idrx",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "invusd-inverse-finance",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "itry-brix",
+      "grade": "D",
+      "score": 48,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "iusd-indigo-protocol",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "iusd-infinifi",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "iusd-initia",
+      "grade": "D",
+      "score": 40,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "jaaa-janus-henderson-anemoy",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "jltxx-jpmorgan",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "jpyc-jpyc",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "jpydf-deltaforesight",
+      "grade": "B-",
+      "score": 68,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "jpym-mento",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "jpyt-dephaser",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "jtrsy-anemoy",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "jupusd-jupiter",
+      "grade": "B-",
+      "score": 69,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "kag-kinesis",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "kau-kinesis",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "kesm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "kgst-kyrgyz-som",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "kpkusdcprime-kpk",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "kpkusdcyield-kpk",
+      "grade": "C+",
+      "score": 61,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "krusdc-keyrock",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "krwq-iq",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "lisusd-lista",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "lusd-liquity",
+      "grade": "A",
+      "score": 84,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "lvusd-leverup",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "m-m0",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "mai-qidao",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "mantrausd-mantra",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "meusd-mezo",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "mf-one-midas",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "mglobal-midas-fasanara",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "money-defi-money",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "moveusd-cfx",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "msusd-metronome",
+      "grade": "F",
+      "score": 0,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "musd-metamask",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "mxnb-juno",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "mxne-real-mxn",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "mxnt-tether",
+      "grade": "C-",
+      "score": 50,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "myrc-blox",
+      "grade": "B-",
+      "score": 65,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "nect-beraborrow",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "nusd-neutrl",
+      "grade": "F",
+      "score": 39,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "nusd-nexus",
+      "grade": "F",
+      "score": 22,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "nxusd-nereus",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "oned-gennius",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "onyc-onre",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "ousd-open-standard",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ousd-origin-protocol",
+      "grade": "B-",
+      "score": 67,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pathusd-bridge",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "paxg-paxos",
+      "grade": "A",
+      "score": 83,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pendleusdc-pendle",
+      "grade": "C+",
+      "score": 61,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pgold-pleasing",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pmusd-precious-metals",
+      "grade": "F",
+      "score": 0,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pusd-plume",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pusd-polymarket",
+      "grade": "B+",
+      "score": 76,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pyusd-paypal",
+      "grade": "B+",
+      "score": 76,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "pyusdx-moonpay",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "qcad-stablecorp",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "rcusd-r25",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "reusd-re-protocol",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "reusd-resupply",
+      "grade": "C-",
+      "score": 50,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "rlusd-ripple",
+      "grade": "A",
+      "score": 84,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "rusd-reservoir",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "said-gaib",
+      "grade": "F",
+      "score": 38,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "satusd-river",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "savusd-avant",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sbc-brale",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sbold-k3-capital",
+      "grade": "F",
+      "score": 39,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "scrvusd-curve",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "scusd-rings",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sdai-gnosis",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sdai-sky",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sdlr-doma",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sdola-inverse-finance",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "senpathusd-sentora",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "senpyusdmain-sentora",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "senpyusdmwin-sentora",
+      "grade": "C+",
+      "score": 61,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "senpyusdprimev2-sentora",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "senpyusdpst-sentora",
+      "grade": "C+",
+      "score": 61,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "senrlusdv2-sentora",
+      "grade": "B-",
+      "score": 65,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sfrax-frax",
+      "grade": "D",
+      "score": 41,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sfrxusd-frax",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sgho-aave",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sirloinusdc-steakhouse",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "skymoneyusdsflagship-sky",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "skymoneyusdtsavings-sky",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sofid-sofi",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sparkusdc-spark",
+      "grade": "B",
+      "score": 72,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sparkusdtbc-spark",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sreusd-resupply",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "srusd-reservoir",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "srusde-strata",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "stbt-matrixdock",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "stcusd-cap",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "steakcusdc-steakhouse",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "steakeurcv-steakhouse",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "steakusdc-steakhouse",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "steakusdg-steakhouse",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "steakusdt-steakhouse",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "stkgho-umbrella-aave",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "strusd-tori",
+      "grade": "D",
+      "score": 41,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "stt-silvertimes",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "stusd-stoneyield",
+      "grade": "F",
+      "score": 18,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "stusds-sky",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "suiusde-sui",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susd-solayer",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susd1plus-lorenzo",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdai-usd-ai",
+      "grade": "D",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdat-saturn",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdc-spark",
+      "grade": "B-",
+      "score": 69,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdc-spark-v1",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdd-tron-dao-reserve",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susde-ethena",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdf-falcon",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susds-sky",
+      "grade": "B-",
+      "score": 69,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdt-spark",
+      "grade": "B-",
+      "score": 69,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susdx-axis",
+      "grade": "D",
+      "score": 44,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "susn-noon",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "swanusd-swan",
+      "grade": "B",
+      "score": 70,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "sxsrlusd-sentora",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "syrupusdc-maple",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "syrupusdg-maple",
+      "grade": "D",
+      "score": 48,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "syrupusdt-maple",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "syusd-aegis",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "syzusd-yuzu",
+      "grade": "D",
+      "score": 42,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "tbill-openeden",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "tbrl-tenbin",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "pipeline-gap"
+    },
+    {
+      "id": "tgbp-tokenised",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "thbill-theo",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "thusd-theo",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "tmxn-tenbin",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "pipeline-gap"
+    },
+    {
+      "id": "trusd-tori",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "tryb-bilira",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "tusd-trueusd",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "u-united-stables",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usat-tether",
+      "grade": "B+",
+      "score": 75,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usbd-bima",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usd0-usual",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usd1-world-liberty-financial",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usd3-3jane",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usda-alpha-partner",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usda-anzens",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdaf-asymmetry",
+      "grade": "B-",
+      "score": 68,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdai-usd-ai",
+      "grade": "B",
+      "score": 73,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdat-saturn",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdc-circle",
+      "grade": "A+",
+      "score": 87,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdcv-societe-generale-forge",
+      "grade": "A-",
+      "score": 81,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdcx-movement",
+      "grade": "C+",
+      "score": 63,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdd-tron-dao-reserve",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usde-ethena",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdf-astherus",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdf-falcon",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdfc-secured-finance",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdfr-forest-road",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdg-paxos",
+      "grade": "A+",
+      "score": 91,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdglo-glo",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdgo-osl",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdh-hermetica",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdh-hubble",
+      "grade": "D",
+      "score": 44,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdhl-felix",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdk-kast",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdm-mega",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdm-moneta",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdm-monetrix",
+      "grade": "C",
+      "score": 57,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdn-smardex",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdnr-nerona",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdo-openeden",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdon-ondo",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdp-parallel",
+      "grade": "C+",
+      "score": 61,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdp-paxos",
+      "grade": "B+",
+      "score": 78,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdplus-streamflow",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdpt-western-union",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdq-quantoz",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdq-quill",
+      "grade": "D",
+      "score": 41,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdr-rise",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdrf-realfi",
+      "grade": "D",
+      "score": 44,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdrif-rif",
+      "grade": "B",
+      "score": 71,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usds-sky",
+      "grade": "B",
+      "score": 74,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdsc-startale",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdsm-stable-mint",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdso-somnia",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdsui-sui",
+      "grade": "C+",
+      "score": 60,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdt-tether",
+      "grade": "A+",
+      "score": 87,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdtb-ethena",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdu-unitas",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdu-universal",
+      "grade": "B",
+      "score": 74,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdu-usdu-finance",
+      "grade": "D",
+      "score": 42,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdv-delpho",
+      "grade": "C",
+      "score": 55,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdv-solomon-v2",
+      "grade": "D",
+      "score": 42,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdx-axis",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdx-hex-trust",
+      "grade": "D",
+      "score": 41,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdx-kava",
+      "grade": "F",
+      "score": 25,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdxl-last",
+      "grade": "D",
+      "score": 46,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usdz-anzen",
+      "grade": "F",
+      "score": 38,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usg-tangent",
+      "grade": "B-",
+      "score": 66,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usn-noon",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ussd-sonic-labs",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ustb-superstate",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "ustbl-spiko",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "usx-solstice",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "usyc-hashnote",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "uty-xsy",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "uusd-anything-labs",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "uusd-youves",
+      "grade": "F",
+      "score": 37,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "vbill-vaneck",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "vchf-vnx",
+      "grade": "D",
+      "score": 48,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "vgbp-vnx",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "vnxau-vnx",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wars-argentine-peso",
+      "grade": "D",
+      "score": 48,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wbrl-ripio",
+      "grade": "D",
+      "score": 48,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wclp-ripio",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wcop-ripio",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "weusd-picwe",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "witry-brix",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wm-m0",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wmxn-ripio",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wpen-ripio",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wsrusd-reservoir",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "wtgxx-wisdomtree",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
+      "id": "xagm-matrixdock",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xauh-herculis",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xaum-matrixdock",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xaut-tether",
+      "grade": "A-",
+      "score": 80,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xdai-gnosis",
+      "grade": "C+",
+      "score": 64,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xgld-unitas",
+      "grade": "D",
+      "score": 45,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xgz-goldzip",
+      "grade": "D",
+      "score": 43,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xmd-metal-dollar",
+      "grade": "C+",
+      "score": 61,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xo-exodus",
+      "grade": "D",
+      "score": 42,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xofm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xsgd-straitsx",
+      "grade": "B+",
+      "score": 79,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xusd-babelfish",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "xusd-straitsx",
+      "grade": "B-",
+      "score": 67,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ybold-yearn",
+      "grade": "B",
+      "score": 74,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "ylds-figure",
+      "grade": "C+",
+      "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "yousd-yield-optimizer",
+      "grade": "D",
+      "score": 49,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "yusd-aegis",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "yusd-yieldfi",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "yvusdc-yearn",
+      "grade": "B",
+      "score": 71,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "yzusd-yuzu",
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "zarm-mento",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "zarp-zarp",
+      "grade": "C",
+      "score": 56,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "zarsc-supercoin",
+      "grade": "C",
+      "score": 59,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "zaru-blocktower",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "zchf-frankencoin",
+      "grade": "A",
+      "score": 84,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "zsd-zephyr-protocol",
+      "grade": "C",
+      "score": 58,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "zys-zephyr-protocol",
+      "grade": "C-",
+      "score": 53,
+      "ratingStatus": "rated"
+    }
+  ]
+}
