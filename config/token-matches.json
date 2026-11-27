@@ -9847,6 +9847,7 @@
   },
   "PST": {
     "ethereum": "0x22aE3D9a738471f405169Af055d31c687087d4c7",
+    "arc": "0xa6Db07ebF438d91Aa653746fc05523e435645525",
     "_category": "Savings stablecoin",
     "_intrinsicOracles": [
       {
