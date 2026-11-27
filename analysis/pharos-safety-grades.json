@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795814301,
+  "asOfSec": 1795817874,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -61,7 +61,7 @@
     {
       "id": "audd-novatti",
       "grade": "C+",
-      "score": 59,
+      "score": 60,
       "ratingStatus": "rated"
     },
     {
@@ -619,7 +619,7 @@
     {
       "id": "gpyusdse-galaxy",
       "grade": "C+",
-      "score": 63,
+      "score": 64,
       "ratingStatus": "rated"
     },
     {
@@ -1003,7 +1003,7 @@
     {
       "id": "paxg-paxos",
       "grade": "A",
-      "score": 83,
+      "score": 35,
       "ratingStatus": "rated"
     },
     {
@@ -1243,7 +1243,7 @@
     {
       "id": "sparkusdtbc-spark",
       "grade": "B-",
-      "score": 66,
+      "score": 67,
       "ratingStatus": "rated"
     },
     {
@@ -1309,7 +1309,7 @@
     {
       "id": "steakusdt-steakhouse",
       "grade": "B-",
-      "score": 66,
+      "score": 67,
       "ratingStatus": "rated"
     },
     {
@@ -2059,7 +2059,7 @@
     {
       "id": "xaut-tether",
       "grade": "B",
-      "score": 72,
+      "score": 53,
       "ratingStatus": "rated"
     },
     {
@@ -2071,7 +2071,7 @@
     {
       "id": "xgld-unitas",
       "grade": "D",
-      "score": 45,
+      "score": 43,
       "ratingStatus": "rated"
     },
     {
