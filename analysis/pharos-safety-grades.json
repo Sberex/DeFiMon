@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795789074,
+  "asOfSec": 1795792639,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -73,7 +73,7 @@
     {
       "id": "audm-macropod",
       "grade": "B",
-      "score": 72,
+      "score": 73,
       "ratingStatus": "rated"
     },
     {
@@ -252,7 +252,7 @@
     },
     {
       "id": "chfm-mento",
-      "grade": "D",
+      "grade": "C-",
       "score": 53,
       "ratingStatus": "rated"
     },
@@ -660,7 +660,7 @@
     },
     {
       "id": "honey-berachain",
-      "grade": "C",
+      "grade": "C-",
       "score": 54,
       "ratingStatus": "rated"
     },
@@ -913,7 +913,7 @@
     {
       "id": "myrc-blox",
       "grade": "B-",
-      "score": 65,
+      "score": 76,
       "ratingStatus": "rated"
     },
     {
@@ -1045,7 +1045,7 @@
     {
       "id": "rlusd-ripple",
       "grade": "A",
-      "score": 84,
+      "score": 83,
       "ratingStatus": "rated"
     },
     {
@@ -1321,7 +1321,7 @@
     {
       "id": "susdai-usd-ai",
       "grade": "D",
-      "score": 54,
+      "score": 47,
       "ratingStatus": "rated"
     },
     {
@@ -2053,7 +2053,7 @@
     {
       "id": "xsgd-straitsx",
       "grade": "B+",
-      "score": 79,
+      "score": 77,
       "ratingStatus": "rated"
     },
     {
