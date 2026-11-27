@@ -2350,3 +2350,38 @@ test('Alerts retains closed positions at zero, restores their rules and removes 
   await expect(card).toContainText('Position not verified');
   await expect(card.locator('.position-stats strong')).toHaveText(Array(6).fill('Unavailable'));
 });
+
+test('Leveraged Borrowing Strategy Search restricts token choices, models HF 1.02 and ranks APR independently of ordinary discovery', async ({page}) => {
+  const { strategyMarket } = await import('../tests/fixtures/strategies');
+  const requests: any[] = [];
+  await page.route('**/api/leveraged-strategies', route => {
+    const query = route.request().postDataJSON(); requests.push(query);
+    return route.fulfill({json:{query, checkedAt:'2026-11-27T10:00:00Z', coverage:[], messages:[], markets:[strategyMarket({market:'low',liquidityUsd:1000000}), strategyMarket({market:'high',borrowApr:.02,liquidityUsd:1}), strategyMarket({market:'excluded',borrowApr:.1}), strategyMarket({market:'unknown',lltv:null})]}});
+  });
+  await page.goto('/'); await page.getByRole('button',{name:'Market Discovery',exact:true}).click();
+  const ordinary = page.getByRole('region',{name:'Market Discovery',exact:true});
+  const strategy = page.getByRole('region',{name:'Leveraged Borrowing Strategy Search',exact:true});
+  await expect(ordinary).toBeVisible(); await expect(strategy).toBeVisible();
+  expect(await ordinary.evaluate(el => (el.compareDocumentPosition(document.querySelector('[aria-label="Leveraged Borrowing Strategy Search"]')!) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0)).toBe(true);
+  const supply = strategy.getByRole('combobox',{name:'Supply asset',exact:true});
+  const borrow = strategy.getByRole('combobox',{name:'Borrow asset',exact:true});
+  await supply.fill('USDC'); await expect(strategy.getByRole('option',{name:'USDC Stablecoin',exact:true})).toHaveCount(0);
+  await expect(strategy.getByRole('button',{name:'Search',exact:true})).toBeDisabled();
+  await supply.fill('sUsDa'); await strategy.getByRole('option',{name:'sUSDai Savings stablecoin',exact:true}).click();
+  await borrow.fill('sUSDai'); await expect(strategy.getByRole('option',{name:'sUSDai Savings stablecoin',exact:true})).toHaveCount(0);
+  await borrow.fill('USDC'); await strategy.getByRole('option',{name:'USDC Stablecoin',exact:true}).click();
+  await strategy.getByRole('button',{name:'Search',exact:true}).click();
+  await expect(strategy.getByRole('heading',{name:'2 markets found',exact:true})).toBeVisible();
+  expect(requests[0]).toEqual({supply:'sUSDai',borrow:'USDC'});
+  const rows = strategy.locator('tbody tr');
+  await expect(rows).toHaveCount(2); await expect(rows.nth(0)).toContainText('high');
+  await expect(rows.nth(0).locator('td').last()).toContainText('40.25%');
+  await expect(rows.nth(1).locator('td').last()).toContainText('29.50%');
+  await expect(strategy.getByRole('columnheader',{name:'APR ↓',exact:true})).toHaveAttribute('aria-sort','descending');
+  await expect(ordinary.locator('tbody tr')).toHaveCount(0);
+  await supply.fill('any'); await strategy.getByRole('option',{name:'Any asset All assets',exact:true}).click();
+  await borrow.fill('any'); await strategy.getByRole('option',{name:'Any asset All assets',exact:true}).click();
+  await strategy.getByRole('button',{name:'Search',exact:true}).click();
+  await expect.poll(() => requests.length).toBe(2); expect(requests[1]).toEqual({supply:null,borrow:null});
+  await page.setViewportSize({width:390,height:844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

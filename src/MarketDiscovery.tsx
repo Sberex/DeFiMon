@@ -1,7 +1,11 @@
+import {
+  strategySupplyChoices,
+  strategyBorrowChoices,
+  groupedStrategyMarkets,
+} from './leveraged-strategies';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { apiUrl } from './api';
 import {
-  discoveryChoices,
   discoveryTokenChoices,
   groupedDiscoveryMarkets,
   type DiscoveryAsset,
@@ -23,7 +27,9 @@ function AssetPicker({
   label,
   value,
   onChange,
+  choices = discoveryTokenChoices,
 }: {
+  choices?: { id: string; category: string }[];
   label: string;
   value: string | null | undefined;
   onChange: (value: string | null | undefined) => void;
@@ -32,9 +38,11 @@ function AssetPicker({
     [text, setText] = useState(value ?? 'Any asset'),
     [open, setOpen] = useState(false),
     [active, setActive] = useState(0);
-  const matches = discoveryChoices(
-      text.toLowerCase() === 'any asset' ? '' : text,
-    ),
+  const choicesFor = (text: string) =>
+    choices.filter((t) =>
+      t.id.toLowerCase().startsWith(text.trim().toLowerCase()),
+    );
+  const matches = choicesFor(text.toLowerCase() === 'any asset' ? '' : text),
     visible = matches.slice(0, 50);
   const options = [
     { id: null as string | null, category: 'All assets' },
@@ -73,11 +81,11 @@ function AssetPicker({
           const next = e.target.value;
           setText(next);
           setOpen(true);
-          setActive(discoveryChoices(next).length ? 1 : 0);
+          setActive(choicesFor(next).length ? 1 : 0);
           onChange(
             next.trim().toLowerCase() === 'any asset'
               ? null
-              : discoveryTokenChoices.find(
+              : choices.find(
                   (t) => t.id.toLowerCase() === next.trim().toLowerCase(),
                 )?.id,
           );
@@ -176,7 +184,7 @@ function AssetCell({
     </>
   );
 }
-export function MarketDiscovery() {
+function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
   const [supply, setSupply] = useState<string | null | undefined>(null),
     [borrow, setBorrow] = useState<string | null | undefined>(null),
     [result, setResult] = useState<DiscoveryResult | null>(null),
@@ -198,12 +206,17 @@ export function MarketDiscovery() {
     setResult(null);
     setVisibleCounts({});
     try {
-      const response = await fetch(apiUrl('/api/market-discovery'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ supply, borrow }),
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        apiUrl(
+          strategy ? '/api/leveraged-strategies' : '/api/market-discovery',
+        ),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ supply, borrow }),
+          signal: controller.signal,
+        },
+      );
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
         throw Error(
@@ -233,21 +246,57 @@ export function MarketDiscovery() {
       if (!controller.signal.aborted) setBusy(false);
     }
   }
-  const groups = groupedDiscoveryMarkets(result?.markets ?? []);
+  const groups = strategy
+    ? groupedStrategyMarkets(result?.markets ?? [])
+    : groupedDiscoveryMarkets(result?.markets ?? []);
+  const count = groups.reduce((n, group) => n + group.markets.length, 0);
   return (
-    <section className="market-discovery" aria-label="Market Discovery">
+    <section
+      className="market-discovery"
+      aria-label={
+        strategy ? 'Leveraged Borrowing Strategy Search' : 'Market Discovery'
+      }
+    >
       <div className="section-label">
-        <h2>Market Discovery</h2>
+        <h2>
+          {strategy
+            ? 'Leveraged Borrowing Strategy Search'
+            : 'Market Discovery'}
+        </h2>
         <span>Ethereum · Plasma · Arbitrum · Base · Binance Smart Chain</span>
       </div>
       <p className="recommendations-intro">
-        Find lending markets by supplied collateral and borrowed asset, without
-        checking a wallet. Choose Any asset to leave either side unrestricted.
-        When Borrow asset is Any asset, deposit-only markets are included too.
+        {strategy ? (
+          <>
+            Find Savings stablecoin collateral with verified intrinsic APR above
+            Stablecoin borrow APR. Modelled health factor: 1.02. Debt /
+            collateral = LLTV / 1.02; APR = (Supply APR − Borrow APR × debt
+            ratio) / (1 − debt ratio). Supply APR includes protocol interest and
+            intrinsic yield. Assumes constant prices and rates, excluding
+            rewards and fees. This is a model, not an execution quote.
+          </>
+        ) : (
+          <>
+            Find lending markets by supplied collateral and borrowed asset,
+            without checking a wallet. Choose Any asset to leave either side
+            unrestricted. When Borrow asset is Any asset, deposit-only markets
+            are included too.
+          </>
+        )}
       </p>
       <form className="market-discovery-search" onSubmit={search}>
-        <AssetPicker label="Supply asset" value={supply} onChange={setSupply} />
-        <AssetPicker label="Borrow asset" value={borrow} onChange={setBorrow} />
+        <AssetPicker
+          label="Supply asset"
+          value={supply}
+          onChange={setSupply}
+          choices={strategy ? strategySupplyChoices : undefined}
+        />
+        <AssetPicker
+          label="Borrow asset"
+          value={borrow}
+          onChange={setBorrow}
+          choices={strategy ? strategyBorrowChoices : undefined}
+        />
         <button
           type="submit"
           disabled={busy || supply === undefined || borrow === undefined}
@@ -270,15 +319,16 @@ export function MarketDiscovery() {
       {result && (
         <>
           <div className="discovery-results-summary">
-            <h3>{result.markets.length} markets found</h3>
+            <h3>{count} markets found</h3>
             <p>
               Supply: {result.query.supply ?? 'Any asset'} · Borrow:{' '}
               {result.query.borrow ?? 'Any asset'}
             </p>
             <p>
               Snapshot: {new Date(result.checkedAt).toLocaleString()} · Sorted
-              by available liquidity in USD, highest first. Unpriced liquidity
-              is placed last; same-token amounts remain comparable.
+              {strategy
+                ? 'by modelled APR at health factor 1.02, highest first.'
+                : 'by available liquidity in USD, highest first. Unpriced liquidity is placed last; same-token amounts remain comparable.'}
             </p>
           </div>
           {result.messages?.map((message) => (
@@ -294,7 +344,7 @@ export function MarketDiscovery() {
               markets verified below; additional markets may exist.
             </p>
           )}
-          {!result.markets.length && (
+          {!count && (
             <p className="recommendations-empty">
               No matching markets were verified. Check source coverage below
               before assuming no market exists.
@@ -313,7 +363,7 @@ export function MarketDiscovery() {
                 <table>
                   <caption className="sr-only">
                     Discovered markets on {networkNames[network]}, highest
-                    available liquidity first
+                    {strategy ? 'modelled APR' : 'available liquidity'} first
                   </caption>
                   <thead>
                     <tr>
@@ -322,8 +372,11 @@ export function MarketDiscovery() {
                       <th>Supply APR</th>
                       <th>Borrow Asset</th>
                       <th>Borrow APR</th>
-                      <th aria-sort="descending">Available Liquidity ↓</th>
+                      <th aria-sort={strategy ? undefined : 'descending'}>
+                        Available Liquidity{!strategy && ' ↓'}
+                      </th>
                       <th>LLTV</th>
+                      {strategy && <th aria-sort="descending">APR ↓</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -428,6 +481,16 @@ export function MarketDiscovery() {
                           <td>
                             {market.lltv === null ? '—' : percent(market.lltv)}
                           </td>
+                          {strategy && (
+                            <td>
+                              <strong>{percent(market.modelledApr)}</strong>
+                              <small>Health factor: 1.02</small>
+                              <small>
+                                Debt / collateral:{' '}
+                                {percent(market.modelledDebtRatio)}
+                              </small>
+                            </td>
+                          )}
                         </tr>
                       ))}
                   </tbody>
@@ -482,5 +545,14 @@ export function MarketDiscovery() {
         </>
       )}
     </section>
+  );
+}
+
+export function MarketDiscovery() {
+  return (
+    <>
+      <DiscoverySearch />
+      <DiscoverySearch strategy />
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { validateStrategyQuery, strategyDiscovery } from '../src/leveraged-strategies.js';
 import { discoverMarkets, parseDiscoveryQuery } from './market-discovery.js';
 import type { WalletHistoryStore } from './wallet-history-store.js';
 import { parseManualPriceInput } from '../src/wallet-history.js';
@@ -53,19 +54,21 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
   });
   let activeMarkets = 0;
   const discoveryCache = new Map<string,{until:number;value:ReturnType<typeof discoverMarkets>}>();
-  app.post('/api/market-discovery', express.json({limit:'2kb'}), async(req,res)=>{
+  app.post(['/api/market-discovery', '/api/leveraged-strategies'], express.json({limit:'2kb'}), async(req,res)=>{
     res.setHeader('Cache-Control','no-store');
-    let query;try { if(Object.keys(req.query).length)throw Error();query=parseDiscoveryQuery(req.body); }
-    catch {res.status(400).json({error:'Choose a configured Supply asset and Borrow asset, or Any asset.'});return;}
+    const strategy = req.path === '/api/leveraged-strategies';
+    let query;try { if(Object.keys(req.query).length)throw Error();query=parseDiscoveryQuery(req.body);if(strategy)validateStrategyQuery(query); }
+    catch {res.status(400).json({error:strategy ? 'Choose a Savings stablecoin with a configured intrinsic oracle for Supply asset and a Stablecoin for Borrow asset, or Any asset.' : 'Choose a configured Supply asset and Borrow asset, or Any asset.'});return;}
+    const respond = (result: Awaited<ReturnType<typeof discoverMarkets>>) => res.json(strategy ? strategyDiscovery(result) : result);
     for(const [key,entry] of discoveryCache)if(entry.until<Date.now())discoveryCache.delete(key);
     const key=JSON.stringify(query),cached=discoveryCache.get(key);
-    if(cached&&cached.until>Date.now()){try{res.json(await cached.value);}catch{res.status(503).json({error:'Market discovery is unavailable. Please retry.'});}return;}
+    if(cached&&cached.until>Date.now()){try{respond(await cached.value);}catch{res.status(503).json({error:'Market discovery is unavailable. Please retry.'});}return;}
     if(activeMarkets>=2){res.setHeader('Retry-After','10');res.status(429).json({error:'Market searches are busy. Try again shortly.'});return;}
     activeMarkets++;
     const entry={until:Number.POSITIVE_INFINITY,value:Promise.resolve().then(()=>loadDiscovery(query))};
     if(discoveryCache.size>=8){const oldest=[...discoveryCache].find(([,value])=>Number.isFinite(value.until));if(oldest)discoveryCache.delete(oldest[0]);}
     discoveryCache.set(key,entry);
-    try{const result=await entry.value;entry.until=Date.now()+60000;res.json(result);}
+    try{const result=await entry.value;entry.until=Date.now()+60000;respond(result);}
     catch{discoveryCache.delete(key);res.status(503).json({error:'Market discovery is unavailable. Please retry.'});}
     finally{activeMarkets--;}
   });

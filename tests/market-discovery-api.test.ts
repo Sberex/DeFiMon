@@ -89,3 +89,19 @@ it('shares in-flight work for broad wildcard requests', async () => {
   expect((await b).status).toBe(200);
   expect(load.mock.calls.length).toBe(before);
 });
+
+it('validates leveraged searches and shares cached reader work while filtering strategy responses only', async () => {
+  const { strategyMarket } = await import('./fixtures/strategies');
+  const strategyPost = (body: unknown) => fetch(`${base}/api/leveraged-strategies`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const before = load.mock.calls.length;
+  for (const body of [{ supply: 'USDC', borrow: null }, { supply: 'sUSDai', borrow: 'sUSDai' }, { supply: null, borrow: null, healthFactor: 2 }]) expect((await strategyPost(body)).status).toBe(400);
+  expect(load.mock.calls.length).toBe(before);
+  const query = { supply: 'sUSDai', borrow: null };
+  load.mockResolvedValueOnce({ query, checkedAt: '2026-11-27T00:00:00Z', markets: [strategyMarket(), strategyMarket({ borrowApr: .1 })], coverage: [], messages: [] });
+  const response = await strategyPost(query);
+  expect(response.status).toBe(200);
+  expect((await response.json()).markets).toMatchObject([{ modelledApr: expect.closeTo(.295, 10) }]);
+  const ordinary = await post(query);
+  expect((await ordinary.json()).markets).toHaveLength(2);
+  expect(load.mock.calls.length).toBe(before + 1);
+});

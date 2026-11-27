@@ -13,6 +13,8 @@ export interface DiscoveryAsset {
   intrinsicApr?: number | null;
 }
 export interface DiscoveryMarket extends MarketAlternative {
+  modelledApr?: number;
+  modelledDebtRatio?: number;
   requiredSupplyAssets?: DiscoveryAsset[];
   requiredBorrowAssets?: DiscoveryAsset[];
   supplyAsset: DiscoveryAsset;
