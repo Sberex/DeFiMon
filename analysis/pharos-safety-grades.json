@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795799916,
+  "asOfSec": 1795803428,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -61,7 +61,7 @@
     {
       "id": "audd-novatti",
       "grade": "C+",
-      "score": 60,
+      "score": 59,
       "ratingStatus": "rated"
     },
     {
@@ -138,7 +138,7 @@
     },
     {
       "id": "bread-bread-coop",
-      "grade": "C-",
+      "grade": "C+",
       "score": 61,
       "ratingStatus": "rated"
     },
@@ -618,7 +618,7 @@
     },
     {
       "id": "gpyusdse-galaxy",
-      "grade": "C-",
+      "grade": "C+",
       "score": 64,
       "ratingStatus": "rated"
     },
@@ -684,13 +684,13 @@
     },
     {
       "id": "honey-berachain",
-      "grade": "C-",
+      "grade": "C",
       "score": 55,
       "ratingStatus": "rated"
     },
     {
       "id": "hyperusdca-hyperithm",
-      "grade": "C-",
+      "grade": "C+",
       "score": 61,
       "ratingStatus": "rated"
     },
@@ -714,7 +714,7 @@
     },
     {
       "id": "invusd-inverse-finance",
-      "grade": "C-",
+      "grade": "C+",
       "score": 60,
       "ratingStatus": "rated"
     },
@@ -733,7 +733,7 @@
     {
       "id": "iusd-infinifi",
       "grade": "C",
-      "score": 57,
+      "score": 56,
       "ratingStatus": "rated"
     },
     {
@@ -925,7 +925,7 @@
     {
       "id": "mxnb-juno",
       "grade": "C",
-      "score": 58,
+      "score": 63,
       "ratingStatus": "rated"
     },
     {
@@ -1033,7 +1033,7 @@
     {
       "id": "pusd-polymarket",
       "grade": "B+",
-      "score": 77,
+      "score": 76,
       "ratingStatus": "rated"
     },
     {
@@ -1213,7 +1213,7 @@
     {
       "id": "siusd-infinifi",
       "grade": "D",
-      "score": 47,
+      "score": 19,
       "ratingStatus": "rated"
     },
     {
@@ -1296,7 +1296,7 @@
     },
     {
       "id": "steakusdc-steakhouse-base",
-      "grade": "C-",
+      "grade": "B",
       "score": 72,
       "ratingStatus": "rated"
     },
@@ -1363,7 +1363,7 @@
     {
       "id": "susdai-usd-ai",
       "grade": "D",
-      "score": 47,
+      "score": 54,
       "ratingStatus": "rated"
     },
     {
@@ -1428,7 +1428,7 @@
     },
     {
       "id": "svzchf-frankencoin",
-      "grade": "C-",
+      "grade": "C",
       "score": 56,
       "ratingStatus": "rated"
     },
@@ -1560,8 +1560,8 @@
     },
     {
       "id": "usd3-3jane",
-      "grade": "C",
-      "score": 54,
+      "grade": "C-",
+      "score": 52,
       "ratingStatus": "rated"
     },
     {
