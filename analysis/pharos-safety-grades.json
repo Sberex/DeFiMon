@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795796294,
+  "asOfSec": 1795799916,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -61,7 +61,7 @@
     {
       "id": "audd-novatti",
       "grade": "C+",
-      "score": 59,
+      "score": 60,
       "ratingStatus": "rated"
     },
     {
@@ -127,7 +127,7 @@
     {
       "id": "bnbusd-sigma-money",
       "grade": "C-",
-      "score": 50,
+      "score": 52,
       "ratingStatus": "rated"
     },
     {
@@ -139,7 +139,7 @@
     {
       "id": "bread-bread-coop",
       "grade": "C-",
-      "score": 52,
+      "score": 61,
       "ratingStatus": "rated"
     },
     {
@@ -258,7 +258,7 @@
     },
     {
       "id": "chfm-mento",
-      "grade": "C-",
+      "grade": "D",
       "score": 47,
       "ratingStatus": "rated"
     },
@@ -510,9 +510,9 @@
     },
     {
       "id": "fliteusd-fluid",
-      "grade": "NR",
-      "score": null,
-      "ratingStatus": "pipeline-gap"
+      "grade": "C+",
+      "score": 61,
+      "ratingStatus": "rated"
     },
     {
       "id": "frax-frax",
@@ -619,7 +619,7 @@
     {
       "id": "gpyusdse-galaxy",
       "grade": "C-",
-      "score": 50,
+      "score": 64,
       "ratingStatus": "rated"
     },
     {
@@ -685,13 +685,13 @@
     {
       "id": "honey-berachain",
       "grade": "C-",
-      "score": 54,
+      "score": 55,
       "ratingStatus": "rated"
     },
     {
       "id": "hyperusdca-hyperithm",
       "grade": "C-",
-      "score": 53,
+      "score": 61,
       "ratingStatus": "rated"
     },
     {
@@ -715,7 +715,7 @@
     {
       "id": "invusd-inverse-finance",
       "grade": "C-",
-      "score": 52,
+      "score": 60,
       "ratingStatus": "rated"
     },
     {
@@ -1021,7 +1021,7 @@
     {
       "id": "pmusd-precious-metals",
       "grade": "F",
-      "score": 0,
+      "score": 10,
       "ratingStatus": "rated"
     },
     {
@@ -1033,7 +1033,7 @@
     {
       "id": "pusd-polymarket",
       "grade": "B+",
-      "score": 76,
+      "score": 77,
       "ratingStatus": "rated"
     },
     {
@@ -1261,7 +1261,7 @@
     {
       "id": "srusde-strata",
       "grade": "D",
-      "score": 47,
+      "score": 48,
       "ratingStatus": "rated"
     },
     {
@@ -1297,7 +1297,7 @@
     {
       "id": "steakusdc-steakhouse-base",
       "grade": "C-",
-      "score": 52,
+      "score": 72,
       "ratingStatus": "rated"
     },
     {
@@ -1393,7 +1393,7 @@
     {
       "id": "susde-ethena",
       "grade": "C-",
-      "score": 52,
+      "score": 53,
       "ratingStatus": "rated"
     },
     {
@@ -1429,7 +1429,7 @@
     {
       "id": "svzchf-frankencoin",
       "grade": "C-",
-      "score": 54,
+      "score": 56,
       "ratingStatus": "rated"
     },
     {
@@ -1561,7 +1561,7 @@
     {
       "id": "usd3-3jane",
       "grade": "C",
-      "score": 55,
+      "score": 54,
       "ratingStatus": "rated"
     },
     {
@@ -1621,7 +1621,7 @@
     {
       "id": "usde-ethena",
       "grade": "C",
-      "score": 57,
+      "score": 58,
       "ratingStatus": "rated"
     },
     {
