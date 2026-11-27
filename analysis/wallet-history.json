@@ -30,7 +30,7 @@
           "rules": {
             "borrowAprAboveSupplyApr": false,
             "newLiquidityAdded": true,
-            "liquidityWithdrawn": false,
+            "liquidityWithdrawn": true,
             "utilizationAbove": {
               "enabled": false,
               "thresholdPercent": 90
@@ -44,7 +44,7 @@
               "thresholdPercent": null
             }
           },
-          "updatedAt": "2026-11-27T05:16:56.434Z"
+          "updatedAt": "2026-11-27T05:23:43.010Z"
         },
         {
           "network": "ethereum",
