@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795817874,
+  "asOfSec": 1795821523,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -25,7 +25,7 @@
     {
       "id": "alusd-alchemix",
       "grade": "F",
-      "score": 36,
+      "score": 31,
       "ratingStatus": "rated"
     },
     {
@@ -1003,7 +1003,7 @@
     {
       "id": "paxg-paxos",
       "grade": "A",
-      "score": 35,
+      "score": 83,
       "ratingStatus": "rated"
     },
     {
@@ -2059,7 +2059,7 @@
     {
       "id": "xaut-tether",
       "grade": "B",
-      "score": 53,
+      "score": 72,
       "ratingStatus": "rated"
     },
     {
@@ -2071,7 +2071,7 @@
     {
       "id": "xgld-unitas",
       "grade": "D",
-      "score": 43,
+      "score": 45,
       "ratingStatus": "rated"
     },
     {
