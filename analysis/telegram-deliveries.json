@@ -135,11 +135,12 @@
     {
       "notificationId": "48981b18a9096d38eab299eed7156a26d1cbb8f3a2e16e3b27fc51a9ff6d2cd5",
       "kind": "liquidity",
-      "status": "sending",
+      "status": "sent",
       "attempts": 1,
       "lastAttemptAt": "2026-11-27T18:31:22.040Z",
-      "nextAttemptAt": "2026-11-27T18:36:22.040Z",
-      "owner": "2ac85e73-af8b-40b5-a660-5c1d7fe97982"
+      "nextAttemptAt": null,
+      "messageId": 15,
+      "sentAt": "2026-11-27T18:31:25.702Z"
     }
   ]
 }
