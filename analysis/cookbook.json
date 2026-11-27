@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-27T13:01:54.571Z",
+  "updatedAt": "2026-11-27T14:03:03.153Z",
   "wallets": [
     {
       "address": "0x55fa9aac40af97faab697cc74d4da452abf0272c",
@@ -397,8 +397,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Arbitrum",
-          "checkedAt": "2026-11-27T13:01:50.913Z",
-          "blockNumber": "528012328",
+          "checkedAt": "2026-11-27T14:02:58.863Z",
+          "blockNumber": "528024956",
           "complete": false,
           "positions": [
             {
@@ -407,7 +407,7 @@
               "apr": 0.2117856963383337,
               "netValueUsd": 22050.568537579617,
               "monthlyNplUsd": 389.1662510322876,
-              "verification": "verified",
+              "verification": "unavailable",
               "position": {
                 "marketAddress": "0x1B4EC865915872AEc7A30423fdA2584C9fa894C5",
                 "liquidationModel": "linear",
@@ -486,7 +486,7 @@
               "apr": 0.2981926871468872,
               "netValueUsd": 10634.48498902918,
               "monthlyNplUsd": 264.26047127515386,
-              "verification": "verified",
+              "verification": "unavailable",
               "position": {
                 "marketAddress": "0x7503b58Bb29937e7E2980f70D3FD021B7ebeA6d0",
                 "liquidationModel": "linear",
@@ -565,8 +565,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-27T13:01:54.571Z",
-          "blockNumber": "26506707",
+          "checkedAt": "2026-11-27T14:03:03.153Z",
+          "blockNumber": "26507013",
           "complete": true,
           "positions": []
         },
@@ -574,8 +574,8 @@
           "protocolId": "morpho",
           "protocolName": "Morpho",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-27T13:01:54.571Z",
-          "blockNumber": "26506707",
+          "checkedAt": "2026-11-27T14:03:03.153Z",
+          "blockNumber": "26507013",
           "complete": true,
           "positions": []
         },
@@ -583,8 +583,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-27T13:01:49.917Z",
-          "blockNumber": "38808854",
+          "checkedAt": "2026-11-27T14:02:58.926Z",
+          "blockNumber": "38812522",
           "complete": true,
           "positions": []
         }
