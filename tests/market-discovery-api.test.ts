@@ -105,3 +105,13 @@ it('validates leveraged searches and shares cached reader work while filtering s
   expect((await ordinary.json()).markets).toHaveLength(2);
   expect(load.mock.calls.length).toBe(before + 1);
 });
+
+it('returns individual Aave eMode rows without expanding the shared cache used for the best leveraged strategy',async()=>{
+ const {strategyMarket}=await import('./fixtures/strategies');
+ const query={supply:'sUSDS',borrow:'USDC'};
+ const m=strategyMarket({protocol:'Aave v3',collateralLtv:.7,lltv:.75,borrowingModes:[{id:0,label:'Standard collateral',ltv:.7,lltv:.75},{id:2,label:'Stablecoin mode',ltv:.9,lltv:.92}]});
+ const before=load.mock.calls.length;load.mockResolvedValueOnce({query,checkedAt:'2026-11-27T00:00:00Z',markets:[m],coverage:[],messages:[]});
+ const result=await(await post(query)).json();expect(result.markets.map((m:any)=>m.borrowingMode.id)).toEqual([0,2]);
+ const strategy=await fetch(`${base}/api/leveraged-strategies`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(query)});
+ expect((await strategy.json()).markets).toHaveLength(1);expect(load.mock.calls.length).toBe(before+1);
+});

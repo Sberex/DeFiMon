@@ -80,9 +80,9 @@ export function leveragedMarkets(markets: DiscoveryMarket[]) {
         )) ||
       intrinsic <= m.borrowApr ||
       !finite(m.totalSupplyApr) ||
-      !finite(m.lltv) ||
-      m.lltv <= 0 ||
-      m.lltv > 1
+      (!m.borrowingModes &&
+        !m.borrowingMode &&
+        (!finite(m.lltv) || m.lltv <= 0 || m.lltv > 1))
     )
       return [];
     // A single collateral/debt model cannot account for compulsory additional assets.
@@ -95,14 +95,16 @@ export function leveragedMarkets(markets: DiscoveryMarket[]) {
       )
     )
       return [];
-    const modes = m.borrowingModes ?? [
-      {
-        id: 0,
-        label: 'Standard collateral',
-        ltv: m.collateralLtv ?? m.lltv,
-        lltv: m.lltv,
-      },
-    ];
+    const modes = m.borrowingMode
+      ? [m.borrowingMode]
+      : (m.borrowingModes ?? [
+          {
+            id: 0,
+            label: 'Standard collateral',
+            ltv: m.collateralLtv ?? m.lltv!,
+            lltv: m.lltv!,
+          },
+        ]);
     const candidates = modes.flatMap((mode) => {
       if (
         !finite(mode.ltv) ||

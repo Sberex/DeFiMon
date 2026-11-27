@@ -20,6 +20,7 @@ export interface BorrowingMode {
 }
 export interface DiscoveryMarket extends MarketAlternative {
   borrowingModes?: BorrowingMode[];
+  borrowingMode?: BorrowingMode;
   modelledHealthFactor?: number;
   modelledEntryLtv?: number;
   modelledMode?: BorrowingMode;
@@ -64,7 +65,53 @@ export function discoveryChoices(prefix: string) {
     t.id.toLocaleLowerCase().startsWith(search),
   );
 }
+/** Separate verified Aave risk configurations; their underlying pool liquidity is shared. */
+export function expandDiscoveryModes(
+  markets: DiscoveryMarket[],
+): DiscoveryMarket[] {
+  return markets.flatMap((m) => {
+    if (
+      !['Aave v3', 'Aave Horizon'].includes(m.protocol) ||
+      !m.borrowAsset ||
+      m.borrowingMode ||
+      m.borrowingModes === undefined
+    )
+      return [m];
+    const seen = new Set<number>();
+    return [...m.borrowingModes]
+      .sort((a, b) => a.id - b.id)
+      .flatMap((mode) => {
+        if (
+          !Number.isInteger(mode.id) ||
+          mode.id < 0 ||
+          mode.id > 255 ||
+          seen.has(mode.id) ||
+          !Number.isFinite(mode.ltv) ||
+          !Number.isFinite(mode.lltv) ||
+          mode.ltv <= 0 ||
+          mode.ltv > mode.lltv ||
+          mode.lltv > 1
+        )
+          return [];
+        seen.add(mode.id);
+        return [
+          {
+            ...m,
+            borrowingMode: mode,
+            lltv: mode.lltv,
+            collateralLtv: mode.ltv,
+            route: `${m.route ? m.route + ':' : ''}aave-emode-${mode.id}`,
+            note: `${mode.id ? `Requires eMode ${mode.id} (${mode.label}) to be enabled.` : 'Standard collateral configuration.'} ${m.note.replace('standard collateral configuration.', 'collateral limits shown for this row.')} Pool liquidity is shared across its mode variants.`,
+          },
+        ];
+      });
+  });
+}
+export function discoveryModeResult(result: DiscoveryResult): DiscoveryResult {
+  return { ...result, markets: expandDiscoveryModes(result.markets) };
+}
 export function groupedDiscoveryMarkets(markets: DiscoveryMarket[]) {
+  markets = expandDiscoveryModes(markets);
   return networkOrder
     .map((network) => ({
       network,

@@ -64,3 +64,16 @@ it('discovers wildcard Aave pairs with their actual token contracts without loos
   expect(rows).toHaveLength(2);expect(rows).toEqual(expect.arrayContaining([expect.objectContaining({marketTokens:{supplied:supply,borrowed:usdc}})]));
   expect(rows.every(r=>r.marketTokens?.borrowed===usdc)).toBe(true);
 });
+
+it('includes zero-standard-threshold collateral for discovery eMode verification without loosening recommendations',async()=>{
+ const client={readContract:async({functionName}:any)=>{
+  if(functionName==='getPoolDataProvider'||functionName==='getPool')return '0x1111111111111111111111111111111111111111';
+  if(functionName==='getAllReservesTokens')return[{tokenAddress:supply},{tokenAddress:borrow}];
+  if(functionName==='getReserveConfigurationData')return[18n,0n,0n,0n,0n,false,true,false,true,false];
+  if(functionName==='getReserveData')return[0n,0n,0n,0n,0n,2n*10n**25n,3n*10n**25n];
+  if(functionName==='getConfiguration')return{data:0n};
+  throw Error('Unsupported liquidity');
+ }} as unknown as ChainClient;
+ expect(await readAaveMarkets(client,'ethereum',100n,targets,()=>{})).toEqual([]);
+ expect(await readAaveMarkets(client,'ethereum',100n,targets.map(t=>({...t,discovery:true})),()=>{})).toHaveLength(1);
+});

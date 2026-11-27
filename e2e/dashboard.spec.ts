@@ -2441,3 +2441,24 @@ test('Plasma sUSDe strategies choose verified eMode and show higher, distinct AP
  await expect(results.nth(0).locator('td').last()).toContainText('17.63%');await expect(results.nth(1).locator('td').last()).toContainText('13.35%');
  for(const row of [results.nth(0),results.nth(1)]){await expect(row.locator('td').nth(6)).toContainText('92.10%');await expect(row).toContainText('eMode 23');await expect(row).toContainText('Max LTV: 90.10%');await expect(row).toContainText('Health factor: 1.0222');await expect(row).toContainText('Limited by maximum entry LTV');await expect(row).toContainText('Debt / collateral: 90.10%');}
 });
+
+test('Market Discovery lists verified Aave eModes separately with mode-specific limits and shared liquidity',async({page})=>{
+ const {strategyMarket}=await import('../tests/fixtures/strategies');
+ let onlyEmode=false;
+ await page.route('**/api/market-discovery',route=>{
+  const borrowingModes=[{id:2,label:'Correlated stablecoins',ltv:.9,lltv:.92},{id:23,label:'Stablecoins enhanced',ltv:.901,lltv:.921}];
+  if(!onlyEmode)borrowingModes.unshift({id:0,label:'Standard collateral',ltv:.7,lltv:.75});
+  return route.fulfill({json:{query:{supply:null,borrow:null},checkedAt:'2026-11-27T10:00:00Z',markets:[strategyMarket({protocol:'Aave v3',collateralLtv:onlyEmode?0:.7,lltv:onlyEmode?0:.75,borrowingModes})],coverage:[],messages:[]}});
+ });
+ await page.goto('/');await page.getByRole('button',{name:'Market Discovery',exact:true}).click();
+ const section=page.getByRole('region',{name:'Market Discovery',exact:true});await section.getByRole('button',{name:'Search',exact:true}).click();
+ const rows=section.locator('tbody tr');await expect(rows).toHaveCount(3);
+ await expect(rows.nth(0).locator('td').nth(6)).toContainText('Standard collateral');
+ await expect(rows.nth(0).locator('td').nth(6)).toContainText('75.00%');
+ await expect(rows.nth(1).locator('td').nth(6)).toContainText('eMode 2 · Correlated stablecoins');await expect(rows.nth(1).locator('td').nth(6)).toContainText('92.00%');await expect(rows.nth(1).locator('td').nth(6)).toContainText('Max LTV: 90.00%');
+ await expect(rows.nth(2).locator('td').nth(6)).toContainText('eMode 23 · Stablecoins enhanced');await expect(rows.nth(2).locator('td').nth(6)).toContainText('92.10%');
+ await expect(rows.nth(1).getByRole('link').first()).toContainText('eMode 2');await expect(rows.nth(2).getByRole('link').first()).toContainText('eMode 23');
+ expect(await rows.nth(0).getByRole('link').first().getAttribute('href')).toBe(await rows.nth(2).getByRole('link').first().getAttribute('href'));
+ await expect(section).toContainText('variants share the same pool liquidity');
+ onlyEmode=true;await section.getByRole('button',{name:'Search',exact:true}).click();await expect(rows).toHaveCount(2);await expect(rows.nth(0)).toContainText('eMode 2');
+});

@@ -310,7 +310,13 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
                         {market.borrowAsset
                           ? ` / ${market.borrowAsset.name}`
                           : ' deposit'}{' '}
-                        · {market.market.slice(0, 10)}… ↗
+                        · {market.market.slice(0, 10)}…
+                        {!strategy &&
+                          market.borrowingMode &&
+                          (market.borrowingMode.id
+                            ? ` · eMode ${market.borrowingMode.id}`
+                            : ' · Standard')}{' '}
+                        ↗
                       </a>
                       <details>
                         <summary>Market details</summary>
@@ -445,21 +451,15 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
                     </td>
                     <td>
                       {market.lltv === null ? '—' : percent(market.lltv)}
-                      {!strategy &&
-                        market.borrowingModes?.some((mode) => mode.id > 0) && (
-                          <details>
-                            <summary>Eligible eModes</summary>
-                            {market.borrowingModes
-                              .filter((mode) => mode.id > 0)
-                              .map((mode) => (
-                                <p key={mode.id}>
-                                  eMode {mode.id} · {mode.label}: LLTV{' '}
-                                  {percent(mode.lltv)}, max LTV{' '}
-                                  {percent(mode.ltv)}
-                                </p>
-                              ))}
-                          </details>
-                        )}
+                      {!strategy && market.borrowingMode && (
+                        <small>
+                          {market.borrowingMode.id
+                            ? `eMode ${market.borrowingMode.id} · ${market.borrowingMode.label}`
+                            : 'Standard collateral'}
+                          <br />
+                          Max LTV: {percent(market.borrowingMode.ltv)}
+                        </small>
+                      )}
                       {strategy && market.modelledMode && (
                         <small>
                           {market.modelledMode.id
@@ -542,7 +542,9 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
             Find lending markets by supplied collateral and borrowed asset,
             without checking a wallet. Choose Any asset to leave either side
             unrestricted. When Borrow asset is Any asset, deposit-only markets
-            are included too.
+            are included too. Verified Aave standard and eligible eMode
+            configurations appear as separate rows. Enable the indicated eMode
+            to use its limits; variants share the same pool liquidity.
           </>
         )}
       </p>

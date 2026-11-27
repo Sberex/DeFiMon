@@ -1,3 +1,4 @@
+import { discoveryModeResult } from '../src/market-discovery.js';
 import { validateStrategyQuery, strategyDiscovery } from '../src/leveraged-strategies.js';
 import { discoverMarkets, parseDiscoveryQuery } from './market-discovery.js';
 import type { WalletHistoryStore } from './wallet-history-store.js';
@@ -59,7 +60,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
     const strategy = req.path === '/api/leveraged-strategies';
     let query;try { if(Object.keys(req.query).length)throw Error();query=parseDiscoveryQuery(req.body);if(strategy)validateStrategyQuery(query); }
     catch {res.status(400).json({error:strategy ? 'Choose a Savings stablecoin with a configured intrinsic oracle for Supply asset and a Stablecoin for Borrow asset, or Any asset.' : 'Choose a configured Supply asset and Borrow asset, or Any asset.'});return;}
-    const respond = (result: Awaited<ReturnType<typeof discoverMarkets>>) => res.json(strategy ? strategyDiscovery(result) : result);
+    const respond = (result: Awaited<ReturnType<typeof discoverMarkets>>) => res.json(strategy ? strategyDiscovery(result) : discoveryModeResult(result));
     for(const [key,entry] of discoveryCache)if(entry.until<Date.now())discoveryCache.delete(key);
     const key=JSON.stringify(query),cached=discoveryCache.get(key);
     if(cached&&cached.until>Date.now()){try{respond(await cached.value);}catch{res.status(503).json({error:'Market discovery is unavailable. Please retry.'});}return;}

@@ -49,7 +49,7 @@ export function createAaveMarketReader(providerFor: (network: NetworkId) => Addr
   }, warn);
   return targets.flatMap(t => rows.filter(s => matchesSupply(t, s.address) && s.config[8] && !s.config[9] && (s.bits & (1n << 60n)) === 0n).flatMap(s => {
     if (!t.borrowed) return [{...option(marketPair(t,s.address), name, network, block, pool, 'Main market', rayApr(s.rates[5]), null, null),...(t.discovery?{liquidity:s.liquidity}:{})}];
-    if (!s.config[5] || s.config[2] === 0n) return [];
+    if ((!s.config[5] || s.config[2] === 0n) && !(t.discovery && ['Aave v3','Aave Horizon'].includes(name))) return [];
     return rows.filter(b => matchesBorrow(t, b.address) && b.config[6] && b.config[8] && !b.config[9] && (b.bits & (1n << 60n)) === 0n && ((((s.bits >> 212n) & ((1n << 40n) - 1n)) === 0n) || (b.bits & (1n << 61n)) !== 0n)).map(b => ({ ...option(marketPair(t,s.address,b.address), name, network, block, pool, 'Main market', rayApr(s.rates[5]), rayApr(b.rates[6]), Number(s.config[2]) / 10000, 'Variable borrowing APR; standard collateral configuration. Caps, eMode and available liquidity must be checked before moving a loan.'), liquidity: b.liquidity, collateralLtv: Number(s.config[1]) / 10000 }));
   }));
  };
