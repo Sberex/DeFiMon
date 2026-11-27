@@ -81,6 +81,15 @@
       "nextAttemptAt": null,
       "messageId": 9,
       "sentAt": "2026-11-27T04:31:25.101Z"
+    },
+    {
+      "notificationId": "a75b2fa96953480f570e09c91e90b3b30f0a58a47f17c8a379e5f2fa3a8ff68b",
+      "kind": "liquidity",
+      "status": "sending",
+      "attempts": 1,
+      "lastAttemptAt": "2026-11-27T06:01:40.785Z",
+      "nextAttemptAt": "2026-11-27T06:06:40.785Z",
+      "owner": "50b6c75a-ac67-4396-a2c7-09eaaaaf8467"
     }
   ]
 }
