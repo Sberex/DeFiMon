@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795807021,
+  "asOfSec": 1795810700,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -619,7 +619,7 @@
     {
       "id": "gpyusdse-galaxy",
       "grade": "C+",
-      "score": 64,
+      "score": 63,
       "ratingStatus": "rated"
     },
     {
@@ -1321,7 +1321,7 @@
     {
       "id": "strusd-tori",
       "grade": "D",
-      "score": 41,
+      "score": 44,
       "ratingStatus": "rated"
     },
     {
@@ -1363,7 +1363,7 @@
     {
       "id": "susdai-usd-ai",
       "grade": "C-",
-      "score": 54,
+      "score": 47,
       "ratingStatus": "rated"
     },
     {
@@ -1513,7 +1513,7 @@
     {
       "id": "trusd-tori",
       "grade": "D",
-      "score": 46,
+      "score": 49,
       "ratingStatus": "rated"
     },
     {
@@ -2058,7 +2058,7 @@
     },
     {
       "id": "xaut-tether",
-      "grade": "A-",
+      "grade": "B",
       "score": 72,
       "ratingStatus": "rated"
     },
@@ -2100,7 +2100,7 @@
     },
     {
       "id": "xsgd-straitsx",
-      "grade": "B+",
+      "grade": "A-",
       "score": 80,
       "ratingStatus": "rated"
     },
