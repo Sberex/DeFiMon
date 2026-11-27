@@ -53,7 +53,7 @@
             "borrowAprAboveSupplyApr": false,
             "newLiquidityAdded": false,
             "utilizationAbove": {
-              "enabled": true,
+              "enabled": false,
               "thresholdPercent": 90
             },
             "healthFactorBelow": {
@@ -65,7 +65,7 @@
               "thresholdPercent": null
             }
           },
-          "updatedAt": "2026-11-23T16:51:02.099Z"
+          "updatedAt": "2026-11-27T04:22:41.806Z"
         }
       ]
     },
