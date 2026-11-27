@@ -523,7 +523,7 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
             ? 'Leveraged Borrowing Strategy Search'
             : 'Market Discovery'}
         </h2>
-        <span>Ethereum · Plasma · Arbitrum · Base · Binance Smart Chain</span>
+        <span>Ethereum · Plasma · Arbitrum · Base · Binance Smart Chain · Arc</span>
       </div>
       <p className="recommendations-intro">
         {strategy ? (
@@ -570,7 +570,7 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
       </form>
       {busy && (
         <p role="status">
-          Checking supported market sources across all five chains… Broad
+          Checking supported market sources across all supported chains… Broad
           searches can take a few minutes. Markets with unavailable rates or
           prices are labeled or omitted with coverage details.
         </p>

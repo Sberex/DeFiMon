@@ -23,7 +23,7 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use('/api', apiCors);
-  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc), baseConfigured: Boolean(process.env.BASE_RPC_URL || networks.base.defaultRpc), bscConfigured: Boolean(process.env.BSC_RPC_URL || networks.bsc.defaultRpc) }));
+  app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc), baseConfigured: Boolean(process.env.BASE_RPC_URL || networks.base.defaultRpc), bscConfigured: Boolean(process.env.BSC_RPC_URL || networks.bsc.defaultRpc), arcConfigured: Boolean(process.env.ARC_RPC_URL || networks.arc.defaultRpc) }));
   app.get('/api/cookbook', async (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try { res.json(cookbook ? await cookbook.read() : { data: emptyCookbook(), persistence: { mode: 'local', synced: true } }); }

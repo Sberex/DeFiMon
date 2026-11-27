@@ -10,6 +10,7 @@ export const SPARK_LEND = {
 };
 export interface SparkVault { address: Address; kind: 'vsr' | 'ssr' | 'morpho'; oracle?: Address }
 export const sparkVaults: Record<NetworkId, SparkVault[]> = {
+  arc: [],
   ethereum: [
     { address: '0xfE6eb3b609a7C8352A241f7F3A21CEA4e9209B8f', kind: 'vsr' },
     { address: '0x80128DbB9f07b93DDE62A6daeadb69ED14a7D354', kind: 'vsr' },
@@ -28,6 +29,7 @@ export const sparkVaults: Record<NetworkId, SparkVault[]> = {
   plasma: [],
 };
 export const sparkIsolatedMarkets: Record<NetworkId, Hex[]> = {
+  arc: [],
   ethereum: [], arbitrum: [], plasma: [], bsc: [],
   base: [
     '0x8793cf302b8ffd655ab97bd1c695dbd967807e8367a65cb2f4edaf1380ba1bda',

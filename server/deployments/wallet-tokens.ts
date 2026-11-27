@@ -6,6 +6,7 @@ import type { NetworkId } from '../../src/types.js';
 // Uniswap/default-token-list@fc629302df08c20aa5ca368212b5e416b2299e27 src/tokens/{mainnet,arbitrum}.json (GPL-3.0; upstream license included alongside this file).
 // Plus AaveV3Ethereum/Plasma/Arbitrum address books and Fluid Plasma/Arbitrum vault underlyings @404d73f.
 export const walletTokenCatalog: Record<NetworkId, { address: Address; symbol: string }[]> = {
+  arc: [],
   // AaveV3BNB.sol @266429e. Token decimals/symbols are verified on chain.
   bsc: [
   {

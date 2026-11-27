@@ -8,6 +8,7 @@ export interface CurveFactory {
 // curvefi/curve-llamalend.js@d472168015e5e5db8a565a91fcedf224620dad8a, constants/aliases.ts.
 // Current official SDK/API publish no LlamaLend deployment on Base, BSC or Plasma.
 export const CURVE_FACTORIES: Record<NetworkId, CurveFactory[]> = {
+  arc: [],
   ethereum: [
     { address: '0xeA6876DDE9e3467564acBeE1Ed5bac88783205E0', version: 1 },
     {

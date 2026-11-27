@@ -36,7 +36,7 @@ it('includes the live Fluid reader at the same wallet and block as other protoco
   expect(result.protocols.map(p => p.id)).toEqual(['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista', 'curve-llamalend']);
   expect(result.protocols.find(p => p.id === 'fluid')?.status).toBe('ok');
   expect(result.protocols.filter(p => p.status === 'not-integrated')).toHaveLength(0);
-  expect(readers.aaveV4).toHaveBeenCalledWith(expect.anything(), wallet, 456n);
+  expect(readers.aaveV4).toHaveBeenCalledWith(expect.anything(), wallet, 456n, expect.objectContaining({spokes:expect.any(Array),tokenizations:expect.any(Array)}));
   expect(readers.morpho).toHaveBeenCalledWith(expect.anything(), wallet, 456n, undefined, 'ethereum');
 });
 it('isolates Fluid discovery failure without losing other protocols or exposing provider details', async () => {

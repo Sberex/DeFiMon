@@ -8,7 +8,7 @@ import { networks } from '../server/networks.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy) setGlobalDispatcher(new EnvHttpProxyAgent());
 const wallet = process.argv[2], network = process.argv[3] ?? 'ethereum';
 if (!isAddress(wallet ?? '', { strict: false }) || !isNetworkId(network)) {
-  console.error('Usage: npm run check:pendle -- 0xWallet ethereum|plasma|arbitrum|base|bsc'); process.exitCode = 1;
+  console.error('Usage: npm run check:pendle -- 0xWallet ethereum|plasma|arbitrum|base|bsc|arc'); process.exitCode = 1;
 } else {
   console.log('Reading public Pendle holdings and prices. Provider URLs and keys will not be printed.');
   try {

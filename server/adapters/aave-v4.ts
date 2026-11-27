@@ -8,7 +8,7 @@ import { aaveV4SpokeAbi as spokeAbi, aaveV4OracleAbi as oracleAbi, aaveV4TokenAb
 import { AAVE_V4_SPOKES, AAVE_V4_TOKENIZATION_SPOKES } from '../deployments/aave-v4.js';
 
 type Market = { readonly address: Address; readonly label: string };
-type Deployment = { readonly spokes: readonly Market[]; readonly tokenizations: readonly Market[] };
+type Deployment = { readonly spokes: readonly Market[]; readonly tokenizations: readonly Market[]; coverage?: string };
 type UserReserve = ContractFunctionReturnType<typeof spokeAbi, 'view', 'getUserPosition'>;
 export const AAVE_V4_COVERAGE = 'Ethereum: 14 lending markets and 37 tokenized-deposit contracts from the pinned official Aave address book. Direct positions only; excludes linked accounts and treasury infrastructure.';
 const deployed: Deployment = { spokes: AAVE_V4_SPOKES, tokenizations: AAVE_V4_TOKENIZATION_SPOKES };
@@ -180,5 +180,5 @@ export async function readAaveV4(client: ChainClient, wallet: Address, blockNumb
     mapLimited(deployment.tokenizations, readTokenization),
   ]);
   if (!verifiedChecks) throw new Error('Aave v4 deployment could not be read');
-  return { id: 'aave-v4', name: 'Aave v4', status: warnings.size ? 'partial' : 'ok', coverage: AAVE_V4_COVERAGE, message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...markets, ...tokenizations].filter((p): p is Position => p !== null) };
+  return { id: 'aave-v4', name: 'Aave v4', status: warnings.size ? 'partial' : 'ok', coverage: deployment.coverage ?? AAVE_V4_COVERAGE, message: warnings.size ? [...warnings].join(' ') : undefined, positions: [...markets, ...tokenizations].filter((p): p is Position => p !== null) };
 }

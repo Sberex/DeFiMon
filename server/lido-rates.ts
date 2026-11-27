@@ -2,7 +2,7 @@ import type { IntrinsicRate, NetworkId, ProtocolResult } from '../src/types.js';
 // Ethereum/Arbitrum/Base: lidofinance/docs@a7b0f5bd52d13e55a7cfcb6bf152bb695ddf304c,
 // docs/deployed-contracts/index.md. Plasma: bgd-labs/aave-address-book@
 // 266429eefae828d52c91ffcb3a75656ab18f7160/src/AaveV3Plasma.sol (wstETH_UNDERLYING).
-export const LIDO_WSTETH: Record<NetworkId, string> = {
+export const LIDO_WSTETH: Partial<Record<NetworkId, string>> & Record<Exclude<NetworkId, 'arc'>, string> = {
   ethereum: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
   arbitrum: '0x5979d7b546e38e414f7e9822514be443a4800529',
   plasma: '0xe48d935e6c9e735463cccf29a7f11e32bc09136e',

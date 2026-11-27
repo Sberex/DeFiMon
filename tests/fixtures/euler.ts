@@ -12,7 +12,7 @@ export const USDC = '0x6666666666666666666666666666666666666666' as Address;
 const ZERO = '0x0000000000000000000000000000000000000000';
 const E6 = 10n ** 6n, E18 = 10n ** 18n;
 export function eulerFixture(options: { network?: NetworkId; mainLoan?: boolean; noOwner?: boolean; badBalance?: boolean; badFactory?: boolean; oracleFailure?: boolean; rateFailure?: boolean; usdOracle?: boolean; collateralOracleFailure?: boolean; paused?: boolean; missingSlice?: boolean } = {}) {
-  const network = options.network ?? 'ethereum', deployment = eulerDeployments[network], account = options.mainLoan ? wallet : subaccount;
+  const network = options.network ?? 'ethereum', deployment = eulerDeployments[network]!, account = options.mainLoan ? wallet : subaccount;
   const vaults = [collateral, debt, deposit]; const calls: { name: string; address: string; args: readonly unknown[] }[] = [];
   const readContract = async ({ address, functionName, args = [], blockNumber }: any): Promise<any> => {
     if (blockNumber !== 321n) throw new Error('Wrong block');

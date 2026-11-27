@@ -1,3 +1,4 @@
+import { aaveV4Deployment } from './deployments/aave-v4.js';
 import { readCurveLlamalend } from './adapters/curve-llamalend.js';
 import { CURVE_NAME, curveCoverage } from './deployments/curve-llamalend.js';
 import { readLista } from './adapters/lista.js';
@@ -6,7 +7,13 @@ import { readSpark, deduplicateSparkPositions } from './adapters/spark.js';
 import { sparkCoverage } from './deployments/spark.js';
 import { MorphoDiscoveryUnavailable } from './morpho-errors.js';
 import { getAddress, type Address } from 'viem';
-import type { ExtraTokens, NetworkId, Portfolio, ProtocolResult, WalletBalances } from '../src/types.js';
+import type {
+  ExtraTokens,
+  NetworkId,
+  Portfolio,
+  ProtocolResult,
+  WalletBalances,
+} from '../src/types.js';
 import { applyWalletInterest } from './wallet-interest.js';
 import { applySlisBnbRates } from './slisbnb-rates.js';
 import { applyLidoRates } from './lido-rates.js';
@@ -20,70 +27,259 @@ import { makeClient } from './rpc.js';
 import { readEuler } from './adapters/euler.js';
 import { EULER_COVERAGE } from './euler.js';
 import { readAaveV3Markets } from './adapters/aave-markets.js';
-import { readAaveV4, AAVE_V4_COVERAGE } from './adapters/aave-v4.js';
+import { readAaveV4 } from './adapters/aave-v4.js';
 import { readCompound } from './adapters/compound.js';
 import { readFluid, FLUID_COVERAGE } from './adapters/fluid.js';
 import { readMorpho, MORPHO_COVERAGE } from './adapters/morpho.js';
-export async function isolateProtocol(id: string, name: string, coverage: string, run: () => Promise<ProtocolResult>, failureMessage = 'Could not read this protocol. Its balances are unknown. Check Ethereum provider access and try again.'): Promise<ProtocolResult> {
-  try { return await run(); } catch (error) {
+export async function isolateProtocol(
+  id: string,
+  name: string,
+  coverage: string,
+  run: () => Promise<ProtocolResult>,
+  failureMessage = 'Could not read this protocol. Its balances are unknown. Check Ethereum provider access and try again.',
+): Promise<ProtocolResult> {
+  try {
+    return await run();
+  } catch (error) {
     // Never send raw RPC errors: they can contain the server's provider URL / API key.
-    return { id, name, coverage, status: 'error', message: id === 'morpho' && error instanceof MorphoDiscoveryUnavailable ? error.publicMessage : failureMessage, positions: [] };
+    return {
+      id,
+      name,
+      coverage,
+      status: 'error',
+      message:
+        id === 'morpho' && error instanceof MorphoDiscoveryUnavailable
+          ? error.publicMessage
+          : failureMessage,
+      positions: [],
+    };
   }
 }
-export async function getPortfolio(wallet: Address, network: NetworkId = 'ethereum', extraTokens: ExtraTokens = {}): Promise<Portfolio> {
+export async function getPortfolio(
+  wallet: Address,
+  network: NetworkId = 'ethereum',
+  extraTokens: ExtraTokens = {},
+): Promise<Portfolio> {
   const address = getAddress(wallet);
   const deployment = networks[network];
   const client = makeClient(network);
-  const [chainId, blockNumber] = await Promise.all([client.getChainId(), client.getBlockNumber()]);
-  if (chainId !== deployment.id) throw new Error(`The configured provider is not ${deployment.name} mainnet.`);
+  const [chainId, blockNumber] = await Promise.all([
+    client.getChainId(),
+    client.getBlockNumber(),
+  ]);
+  if (chainId !== deployment.id)
+    throw new Error(
+      `The configured provider is not ${deployment.name} mainnet.`,
+    );
   const failure = `Could not read this protocol on ${deployment.name}. Its balances are unknown. Check the ${deployment.name} provider connection and try again.`;
   const readers: Record<string, () => Promise<ProtocolResult>> = {
-    'curve-llamalend': () => isolateProtocol('curve-llamalend', CURVE_NAME, curveCoverage(network), () => readCurveLlamalend(client, address, blockNumber, network), failure),
-    lista: () => isolateProtocol('lista', 'Lista DAO', LISTA_COVERAGE, () => readLista(client, address, blockNumber, network), failure),
-    'aave-v3': () => isolateProtocol('aave-v3', 'Aave v3', `${deployment.name} main market${network === 'ethereum' ? ' and Aave Horizon' : ''}`, () => readAaveV3Markets(client, address, blockNumber, network), failure),
-    spark: () => isolateProtocol('spark', 'Spark', sparkCoverage(network), () => readSpark(client, address, blockNumber, network), failure),
-    'aave-v4': () => isolateProtocol('aave-v4', 'Aave v4', AAVE_V4_COVERAGE, () => readAaveV4(client, address, blockNumber), failure),
-    morpho: () => isolateProtocol('morpho', 'Morpho', MORPHO_COVERAGE.replace('Ethereum', deployment.name), () => readMorpho(client, address, blockNumber, undefined, network), `Morpho lookup is unavailable on ${deployment.name}. Check access to api.morpho.org and this network’s provider. Its balances are unknown.`),
-    compound: () => isolateProtocol('compound', 'Compound', `${deployment.name} Compound v3 markets`, () => readCompound(client, address, blockNumber, network), failure),
-    euler: () => isolateProtocol('euler', 'Euler', EULER_COVERAGE, () => readEuler(client, address, blockNumber, network), failure),
-    fluid: () => isolateProtocol('fluid', 'Fluid', FLUID_COVERAGE.replace('Ethereum', deployment.name), () => readFluid(client, address, blockNumber, network), failure),
+    'curve-llamalend': () =>
+      isolateProtocol(
+        'curve-llamalend',
+        CURVE_NAME,
+        curveCoverage(network),
+        () => readCurveLlamalend(client, address, blockNumber, network),
+        failure,
+      ),
+    lista: () =>
+      isolateProtocol(
+        'lista',
+        'Lista DAO',
+        LISTA_COVERAGE,
+        () => readLista(client, address, blockNumber, network),
+        failure,
+      ),
+    'aave-v3': () =>
+      isolateProtocol(
+        'aave-v3',
+        'Aave v3',
+        `${deployment.name} main market${network === 'ethereum' ? ' and Aave Horizon' : ''}`,
+        () => readAaveV3Markets(client, address, blockNumber, network),
+        failure,
+      ),
+    spark: () =>
+      isolateProtocol(
+        'spark',
+        'Spark',
+        sparkCoverage(network),
+        () => readSpark(client, address, blockNumber, network),
+        failure,
+      ),
+    'aave-v4': () =>
+      isolateProtocol(
+        'aave-v4',
+        'Aave v4',
+        aaveV4Deployment(network).coverage,
+        () =>
+          readAaveV4(client, address, blockNumber, aaveV4Deployment(network)),
+        failure,
+      ),
+    morpho: () =>
+      isolateProtocol(
+        'morpho',
+        'Morpho',
+        MORPHO_COVERAGE.replace('Ethereum', deployment.name),
+        () => readMorpho(client, address, blockNumber, undefined, network),
+        `Morpho lookup is unavailable on ${deployment.name}. Check access to api.morpho.org and this network’s provider. Its balances are unknown.`,
+      ),
+    compound: () =>
+      isolateProtocol(
+        'compound',
+        'Compound',
+        `${deployment.name} Compound v3 markets`,
+        () => readCompound(client, address, blockNumber, network),
+        failure,
+      ),
+    euler: () =>
+      isolateProtocol(
+        'euler',
+        'Euler',
+        EULER_COVERAGE,
+        () => readEuler(client, address, blockNumber, network),
+        failure,
+      ),
+    fluid: () =>
+      isolateProtocol(
+        'fluid',
+        'Fluid',
+        FLUID_COVERAGE.replace('Ethereum', deployment.name),
+        () => readFluid(client, address, blockNumber, network),
+        failure,
+      ),
   };
-  const [protocolResults, pendle] = await Promise.all([Promise.all(deployment.protocolIds.map(id => readers[id]())), readPendle(client, address, blockNumber, network)]);
-  const intrinsicProtocols = await applyIntrinsicRates(deduplicateSparkPositions(protocolResults), network);
-  const ptProtocols = await applyPtCollateralRates(intrinsicProtocols, client, network, blockNumber);
-  const protocols = await applySlisBnbRates(await applyLidoRates(ptProtocols, network), network);
-  const walletBalances = await readWallet(client, address, blockNumber, network, protocols, extraTokens[network]).catch(() => unavailableWallet(network));
-  return { wallets: [await applyWalletInterest(mergePendleWallet(walletBalances, pendle), network, protocols)], address, chain: deployment.name, blockNumber: String(blockNumber), updatedAt: new Date().toISOString(), protocols };
+  const [protocolResults, pendle] = await Promise.all([
+    Promise.all(deployment.protocolIds.map((id) => readers[id]())),
+    network === 'arc'
+      ? Promise.resolve(null)
+      : readPendle(client, address, blockNumber, network),
+  ]);
+  const intrinsicProtocols = await applyIntrinsicRates(
+    deduplicateSparkPositions(protocolResults),
+    network,
+  );
+  const ptProtocols = await applyPtCollateralRates(
+    intrinsicProtocols,
+    client,
+    network,
+    blockNumber,
+  );
+  const protocols = await applySlisBnbRates(
+    await applyLidoRates(ptProtocols, network),
+    network,
+  );
+  const walletBalances = await readWallet(
+    client,
+    address,
+    blockNumber,
+    network,
+    protocols,
+    extraTokens[network],
+  ).catch(() => unavailableWallet(network));
+  return {
+    wallets: [
+      await applyWalletInterest(
+        pendle ? mergePendleWallet(walletBalances, pendle) : walletBalances,
+        network,
+        protocols,
+      ),
+    ],
+    address,
+    chain: deployment.name,
+    blockNumber: String(blockNumber),
+    updatedAt: new Date().toISOString(),
+    protocols,
+  };
 }
 
-export async function getCombinedPortfolio(wallet: Address, load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, extraTokens: ExtraTokens = {}): Promise<Portfolio> {
+export async function getCombinedPortfolio(
+  wallet: Address,
+  load: (
+    wallet: Address,
+    network: NetworkId,
+    extraTokens?: ExtraTokens,
+  ) => Promise<Portfolio> = getPortfolio,
+  extraTokens: ExtraTokens = {},
+): Promise<Portfolio> {
   const address = getAddress(wallet);
   const networkIds = networkOrder;
   // Each network pins its own block. One failed provider must not discard the
   // other network or turn unchecked positions into a verified empty balance.
-  const results = await Promise.allSettled(networkIds.map(network => load(address, network, extraTokens)));
+  const results = await Promise.allSettled(
+    networkIds.map((network) => load(address, network, extraTokens)),
+  );
   const snapshots: NonNullable<Portfolio['networks']> = [];
   const protocols: ProtocolResult[] = [];
   const wallets: WalletBalances[] = [];
-  const readers = [['aave-v3', 'Aave v3'], ['aave-v4', 'Aave v4'], ['morpho', 'Morpho'], ['compound', 'Compound'], ['fluid', 'Fluid'], ['euler', 'Euler'], ['spark', 'Spark'], ['lista', 'Lista DAO'], ['curve-llamalend', CURVE_NAME]];
+  const readers = [
+    ['aave-v3', 'Aave v3'],
+    ['aave-v4', 'Aave v4'],
+    ['morpho', 'Morpho'],
+    ['compound', 'Compound'],
+    ['fluid', 'Fluid'],
+    ['euler', 'Euler'],
+    ['spark', 'Spark'],
+    ['lista', 'Lista DAO'],
+    ['curve-llamalend', CURVE_NAME],
+  ];
   results.forEach((result, i) => {
     const network = networkIds[i];
     const chain = networks[network].name;
     if (result.status === 'fulfilled') {
       wallets.push(...(result.value.wallets ?? []));
-      snapshots.push({ chain, blockNumber: result.value.blockNumber, updatedAt: result.value.updatedAt, status: 'ok' });
-      protocols.push(...result.value.protocols.map(protocol => ({ ...protocol, chain })));
+      snapshots.push({
+        chain,
+        blockNumber: result.value.blockNumber,
+        updatedAt: result.value.updatedAt,
+        status: 'ok',
+      });
+      protocols.push(
+        ...result.value.protocols.map((protocol) => ({ ...protocol, chain })),
+      );
     } else {
-      wallets.push(mergePendleWallet(unavailableWallet(network), unavailablePendle(network)));
+      wallets.push(
+        network === 'arc'
+          ? unavailableWallet(network)
+          : mergePendleWallet(
+              unavailableWallet(network),
+              unavailablePendle(network),
+            ),
+      );
       const message = `${chain} connection unavailable. Its balances and risk are unknown. Check the ${chain} provider connection and refresh.`;
-      snapshots.push({ chain, blockNumber: null, updatedAt: new Date().toISOString(), status: 'error', message });
+      snapshots.push({
+        chain,
+        blockNumber: null,
+        updatedAt: new Date().toISOString(),
+        status: 'error',
+        message,
+      });
       for (const [id, name] of readers) {
         if (!networks[network].protocolIds.includes(id)) continue;
-        protocols.push({ id, name, chain, coverage: `${chain} · supported markets could not be checked`, status: 'error', message, positions: [] });
+        protocols.push({
+          id,
+          name,
+          chain,
+          coverage: `${chain} · supported markets could not be checked`,
+          status: 'error',
+          message,
+          positions: [],
+        });
       }
     }
   });
   const order = readers.map(([id]) => id);
-  protocols.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id) || networkIds.findIndex(id => networks[id].name === a.chain) - networkIds.findIndex(id => networks[id].name === b.chain));
-  return { address, chain: combinedNetworkName, blockNumber: null, updatedAt: new Date().toISOString(), networks: snapshots, protocols, wallets };
+  protocols.sort(
+    (a, b) =>
+      order.indexOf(a.id) - order.indexOf(b.id) ||
+      networkIds.findIndex((id) => networks[id].name === a.chain) -
+        networkIds.findIndex((id) => networks[id].name === b.chain),
+  );
+  return {
+    address,
+    chain: combinedNetworkName,
+    blockNumber: null,
+    updatedAt: new Date().toISOString(),
+    networks: snapshots,
+    protocols,
+    wallets,
+  };
 }

@@ -8,7 +8,7 @@ const currentPriceFields = 'price { usd timestamp }';
 export function createMorphoQuery(fetcher: typeof fetch, network: NetworkId, warnings: Set<string>) {
   const chainId = networks[network].id;
   async function query(document: string, variables: Record<string, unknown>): Promise<Obj> {
-    document = document.replaceAll('chainId_in: [1]', `chainId_in: [${chainId}]`).replaceAll('chainId: 1)', `chainId: ${chainId})`);
+    document = document.replace(/chainId_in\s*:\s*\[\s*1\s*\]/g, `chainId_in: [${chainId}]`).replace(/chainId\s*:\s*1\s*\)/g, `chainId: ${chainId})`);
     let response: Response;
     try { response = await fetcher(MORPHO_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: document, variables }), signal: AbortSignal.timeout(15000), cache: 'no-store' }); } catch (error) { throw morphoNetworkError(error); }
     if (!response.ok && ![400, 422].includes(response.status)) throw new MorphoLookupError('http', { httpStatus: response.status });

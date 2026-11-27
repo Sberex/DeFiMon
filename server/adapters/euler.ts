@@ -15,7 +15,9 @@ const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 const unknown = (id: string, label: string, receiptTokens: string[] = []): Position => ({ id, label, receiptTokens, assets: [], suppliedUsd: null, debtUsd: null, healthFactor: null, risk: 'unknown', notes: ['This Euler position could not be read. Its balances and risk are unknown, not zero.'] });
 export async function readEuler(client: ChainClient, wallet: Address, blockNumber: bigint, network: NetworkId = 'ethereum', pricesFor = walletPrices): Promise<ProtocolResult> {
   const warnings = new Set<string>(), warn = (message: string) => warnings.add(message);
-  const deployment = eulerDeployments[network], reader = createEulerReader(client, network, blockNumber);
+  const deployment = eulerDeployments[network];
+  if (!deployment) throw Error('Euler is not deployed on this network');
+  const reader = createEulerReader(client, network, blockNumber);
   const registry = await eulerRegistry(client, network, blockNumber, warn); let complete = registry.complete;
   const scanWarn = (message: string) => { complete = false; warn(message); };
   const owner = await client.readContract({ address: deployment.evc, abi: eulerEvcAbi, functionName: 'getAccountOwner', args: [wallet], blockNumber });

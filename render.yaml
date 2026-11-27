@@ -24,3 +24,5 @@ services:
         value: https://mainnet.base.org
       - key: BSC_RPC_URL
         value: https://bsc-rpc.publicnode.com
+      - key: ARC_RPC_URL
+        value: https://rpc.mainnet.arc.io

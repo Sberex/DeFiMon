@@ -24,7 +24,8 @@ export function resolveEulerCap(raw: number): bigint | null {
   return raw === 0 ? null : 10n ** BigInt(raw & 63) * BigInt(raw >> 6) / 100n;
 }
 export async function eulerRegistry(client: ChainClient, network: NetworkId, blockNumber: bigint, warn: (message: string) => void) {
-  const factory = eulerDeployments[network].eVaultFactory;
+  const factory = eulerDeployments[network]?.eVaultFactory;
+  if (!factory) throw Error('Euler is not deployed on this network');
   const length = await client.readContract({ address: factory, abi: eulerFactoryAbi, functionName: 'getProxyListLength', blockNumber });
   const end = length > 4096n ? 4096n : length, vaults: Address[] = []; let complete = end === length;
   if (!complete) warn('Euler factory discovery reached its 4096-vault limit. Additional deposits and markets may be missing.');
@@ -41,7 +42,9 @@ export async function eulerRegistry(client: ChainClient, network: NetworkId, blo
   return { vaults: unique, complete };
 }
 export function createEulerReader(client: ChainClient, network: NetworkId, blockNumber: bigint) {
-  const deployment = eulerDeployments[network];
+  const configuredDeployment = eulerDeployments[network];
+  if (!configuredDeployment) throw Error('Euler is not deployed on this network');
+  const deployment = configuredDeployment;
   const tokens = new Map<string, ReturnType<typeof tokenMetadata>>();
   const basics = new Map<string, ReturnType<typeof basic>>(), rates = new Map<string, ReturnType<typeof readRates>>();
   async function basic(address: Address) {

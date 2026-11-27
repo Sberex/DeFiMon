@@ -1,9 +1,17 @@
-import type { Address } from 'viem';
+import { zeroAddress, type Address } from 'viem';
 import type { ChainName, NetworkId } from '../src/types.js';
 
 interface NetworkConfig {
-  id: number; name: ChainName; rpcVariable: string; defaultRpc?: string;
-  nativeSymbol: string; wrappedNative: Address; aaveProvider: Address; chainlinkRegistry?: Address;
+  id: number;
+  name: ChainName;
+  rpcVariable: string;
+  defaultRpc?: string;
+  nativeTokenAddress?: Address;
+  nativeTokenDecimals?: number;
+  nativeSymbol: string;
+  wrappedNative: Address;
+  aaveProvider: Address;
+  chainlinkRegistry?: Address;
   fluid: { vault: Address; dex: Address; lending: Address };
   morphoBlue?: Address;
   compoundMarkets: { address: Address; label: string }[];
@@ -13,68 +21,180 @@ interface NetworkConfig {
 // Fluid: Instadapp/fluid-contracts-public@404d73f/deployments/{mainnet,plasma,arbitrum,base,bnb}.
 // Selected Plasma, Arbitrum and Base resolver ABIs match the pinned Ethereum ABIs in abis/fluid.ts.
 export const networks: Record<NetworkId, NetworkConfig> = {
+  arc: {
+    id: 5042,
+    name: 'Arc',
+    rpcVariable: 'ARC_RPC_URL',
+    defaultRpc: 'https://rpc.mainnet.arc.io',
+    nativeSymbol: 'USDC',
+    // Circle's native and ERC-20 interfaces share one USDC balance: 18 vs 6 decimals.
+    nativeTokenAddress: '0x3600000000000000000000000000000000000000',
+    nativeTokenDecimals: 6,
+    wrappedNative: '0x3600000000000000000000000000000000000000',
+    morphoBlue: '0x34CD04070dD72b14E241112F6d83812Df5Af7fCD',
+    protocolIds: ['aave-v4', 'morpho'],
+    compoundMarkets: [],
+    // Undeployed v3/Fluid are excluded by protocolIds; never use another chain's contracts.
+    aaveProvider: zeroAddress,
+    fluid: { vault: zeroAddress, dex: zeroAddress, lending: zeroAddress },
+  },
   bsc: {
-    id: 56, name: 'Binance Smart Chain', rpcVariable: 'BSC_RPC_URL', defaultRpc: 'https://bsc-rpc.publicnode.com', nativeSymbol: 'BNB',
+    id: 56,
+    name: 'Binance Smart Chain',
+    rpcVariable: 'BSC_RPC_URL',
+    defaultRpc: 'https://bsc-rpc.publicnode.com',
+    nativeSymbol: 'BNB',
     wrappedNative: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
     // bgd-labs/aave-address-book@266429e, src/AaveV3BNB.sol.
     aaveProvider: '0xff75B6da14FfbbfD355Daf7a2731456b3562Ba6D',
     // morpho-org/sdks@56f1ed6, BscMainnet (not the Ethereum core).
     morphoBlue: '0x01b0Bd309AA75547f7a37Ad7B1219A898E67a83a',
     // Instadapp/fluid-contracts-public@404d73f, deployments/bnb/*Resolver.json.
-    fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0xAf572EfC84d905926F7b05C1B7bE04e4E89542B0', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
+    fluid: {
+      vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC',
+      dex: '0xAf572EfC84d905926F7b05C1B7bE04e4E89542B0',
+      lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569',
+    },
     // Morpho's discovery API rejects chainId 56. Do not claim verified holdings or search results.
-    protocolIds: ['aave-v3', 'fluid', 'euler', 'lista'], compoundMarkets: [],
+    protocolIds: ['aave-v3', 'fluid', 'euler', 'lista'],
+    compoundMarkets: [],
   },
   base: {
-    id: 8453, name: 'Base', rpcVariable: 'BASE_RPC_URL', defaultRpc: 'https://mainnet.base.org', nativeSymbol: 'ETH',
+    id: 8453,
+    name: 'Base',
+    rpcVariable: 'BASE_RPC_URL',
+    defaultRpc: 'https://mainnet.base.org',
+    nativeSymbol: 'ETH',
     wrappedNative: '0x4200000000000000000000000000000000000006',
     // bgd-labs/aave-address-book@266429eefae828d52c91ffcb3a75656ab18f7160, src/AaveV3Base.sol.
     aaveProvider: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
     // morpho-org/sdks@56f1ed6, BaseMainnet addresses.
     morphoBlue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',
     // Instadapp/fluid-contracts-public@404d73f, deployments/base/*Resolver.json.
-    fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
+    fluid: {
+      vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC',
+      dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07',
+      lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569',
+    },
     protocolIds: ['aave-v3', 'morpho', 'compound', 'fluid', 'euler', 'spark'],
     // compound-finance/comet@f766f515, deployments/base/*/roots.json.
     compoundMarkets: [
-      { address: '0x784efeB622244d2348d4F2522f8860B96fbEcE89', label: 'AERO market' },
-      { address: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf', label: 'USDbC market' },
-      { address: '0xb125E6687d4313864e53df431d5425969c15Eb2F', label: 'USDC market' },
-      { address: '0x2c776041CCFe903071AF44aa147368a9c8EEA518', label: 'USDS market' },
-      { address: '0x46e6b214b524310239732D51387075E0e70970bf', label: 'WETH market' },
+      {
+        address: '0x784efeB622244d2348d4F2522f8860B96fbEcE89',
+        label: 'AERO market',
+      },
+      {
+        address: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf',
+        label: 'USDbC market',
+      },
+      {
+        address: '0xb125E6687d4313864e53df431d5425969c15Eb2F',
+        label: 'USDC market',
+      },
+      {
+        address: '0x2c776041CCFe903071AF44aa147368a9c8EEA518',
+        label: 'USDS market',
+      },
+      {
+        address: '0x46e6b214b524310239732D51387075E0e70970bf',
+        label: 'WETH market',
+      },
     ],
   },
   ethereum: {
-    protocolIds: ['aave-v3', 'aave-v4', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'lista', 'curve-llamalend'],
+    protocolIds: [
+      'aave-v3',
+      'aave-v4',
+      'morpho',
+      'compound',
+      'fluid',
+      'euler',
+      'spark',
+      'lista',
+      'curve-llamalend',
+    ],
     morphoBlue: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb',
-    compoundMarkets: [{ address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3', label: 'USDC market' }, { address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94', label: 'WETH market' }],
-    id: 1, name: 'Ethereum', rpcVariable: 'ETHEREUM_RPC_URL', nativeSymbol: 'ETH',
+    compoundMarkets: [
+      {
+        address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
+        label: 'USDC market',
+      },
+      {
+        address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94',
+        label: 'WETH market',
+      },
+    ],
+    id: 1,
+    name: 'Ethereum',
+    rpcVariable: 'ETHEREUM_RPC_URL',
+    nativeSymbol: 'ETH',
     wrappedNative: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     aaveProvider: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
     chainlinkRegistry: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
-    fluid: { vault: '0x6943Ed9E53e3713Bf24a92016984254311772F1A', dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
+    fluid: {
+      vault: '0x6943Ed9E53e3713Bf24a92016984254311772F1A',
+      dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07',
+      lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569',
+    },
   },
   plasma: {
-    protocolIds: ['aave-v3', 'fluid', 'euler'], compoundMarkets: [],
-    id: 9745, name: 'Plasma', rpcVariable: 'PLASMA_RPC_URL', defaultRpc: 'https://rpc.plasma.to', nativeSymbol: 'XPL',
+    protocolIds: ['aave-v3', 'fluid', 'euler'],
+    compoundMarkets: [],
+    id: 9745,
+    name: 'Plasma',
+    rpcVariable: 'PLASMA_RPC_URL',
+    defaultRpc: 'https://rpc.plasma.to',
+    nativeSymbol: 'XPL',
     wrappedNative: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     aaveProvider: '0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9',
-    fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0xAf572EfC84d905926F7b05C1B7bE04e4E89542B0', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
+    fluid: {
+      vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC',
+      dex: '0xAf572EfC84d905926F7b05C1B7bE04e4E89542B0',
+      lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569',
+    },
   },
   arbitrum: {
-    id: 42161, name: 'Arbitrum', rpcVariable: 'ARBITRUM_RPC_URL', defaultRpc: 'https://arb1.arbitrum.io/rpc', nativeSymbol: 'ETH',
+    id: 42161,
+    name: 'Arbitrum',
+    rpcVariable: 'ARBITRUM_RPC_URL',
+    defaultRpc: 'https://arb1.arbitrum.io/rpc',
+    nativeSymbol: 'ETH',
     wrappedNative: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
     aaveProvider: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
     // morpho-org/sdks@56f1ed6 packages/morpho-ts/src/addresses.ts.
     morphoBlue: '0x6c247b1F6182318877311737BaC0844bAa518F5e',
-    fluid: { vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC', dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07', lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569' },
-    protocolIds: ['aave-v3', 'morpho', 'compound', 'fluid', 'euler', 'spark', 'curve-llamalend'],
+    fluid: {
+      vault: '0xA5C3E16523eeeDDcC34706b0E6bE88b4c6EA95cC',
+      dex: '0x11D80CfF056Cef4F9E6d23da8672fE9873e5cC07',
+      lending: '0x48D32f49aFeAEC7AE66ad7B9264f446fc11a1569',
+    },
+    protocolIds: [
+      'aave-v3',
+      'morpho',
+      'compound',
+      'fluid',
+      'euler',
+      'spark',
+      'curve-llamalend',
+    ],
     // compound-finance/comet@f766f51583c23acc33b2a7824654ef2029a96804 deployments/arbitrum/*/roots.json.
     compoundMarkets: [
-      { address: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf', label: 'USDC market' },
-      { address: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA', label: 'USDC.e market' },
-      { address: '0xd98Be00b5D27fc98112BdE293e487f8D4cA57d07', label: 'USDT market' },
-      { address: '0x6f7D514bbD4aFf3BcD1140B7344b32f063dEe486', label: 'WETH market' },
+      {
+        address: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf',
+        label: 'USDC market',
+      },
+      {
+        address: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA',
+        label: 'USDC.e market',
+      },
+      {
+        address: '0xd98Be00b5D27fc98112BdE293e487f8D4cA57d07',
+        label: 'USDT market',
+      },
+      {
+        address: '0x6f7D514bbD4aFf3BcD1140B7344b32f063dEe486',
+        label: 'WETH market',
+      },
     ],
   },
 };

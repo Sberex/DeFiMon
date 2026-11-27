@@ -1,6 +1,6 @@
 export type TokenCategory = 'Other' | 'Stablecoin' | 'Savings stablecoin';
-export type NetworkId = 'ethereum' | 'plasma' | 'arbitrum' | 'base' | 'bsc';
-export type ChainName = 'Ethereum' | 'Plasma' | 'Arbitrum' | 'Base' | 'Binance Smart Chain';
+export type NetworkId = 'ethereum' | 'plasma' | 'arbitrum' | 'base' | 'bsc' | 'arc';
+export type ChainName = 'Ethereum' | 'Plasma' | 'Arbitrum' | 'Base' | 'Binance Smart Chain' | 'Arc';
 export type ExtraTokens = Partial<Record<NetworkId, string[]>>;
 export interface WalletToken {
   address: string; symbol: string; balance: number | null; priceUsd: number | null; valueUsd: number | null;
@@ -66,7 +66,7 @@ export interface ProtocolResult {
 }
 export interface Portfolio {
   walletHistory?: import('./wallet-history').WalletHistoryResponse;
-  address: string; chain: ChainName | 'Ethereum + Plasma' | 'Ethereum + Plasma + Arbitrum' | 'Ethereum + Plasma + Arbitrum + Base' | 'Ethereum + Plasma + Arbitrum + Base + Binance Smart Chain'; blockNumber: string | null; updatedAt: string;
+  address: string; chain: ChainName | 'Ethereum + Plasma' | 'Ethereum + Plasma + Arbitrum' | 'Ethereum + Plasma + Arbitrum + Base' | 'Ethereum + Plasma + Arbitrum + Base + Binance Smart Chain' | 'Ethereum + Plasma + Arbitrum + Base + Binance Smart Chain + Arc'; blockNumber: string | null; updatedAt: string;
   protocols: ProtocolResult[];
   wallets?: WalletBalances[];
   networks?: { chain: ChainName; blockNumber: string | null; updatedAt: string; status: 'ok' | 'error'; message?: string }[];

@@ -9,7 +9,7 @@ import { networks } from './networks.js';
 import { AAVE_HORIZON } from './deployments/aave-horizon.js';
 import type { ChainClient } from './rpc.js';
 // Official bgd-labs/aave-address-book AaveV3{chain}.sol UI_POOL_DATA_PROVIDER.
-export const AAVE_DISCOVERY_UI: Record<NetworkId, Address> = {
+export const AAVE_DISCOVERY_UI: Partial<Record<NetworkId, Address>> = {
   ethereum: '0x2dAd8162A989cd99D673dE4425Bb2298Db1E1aA2',
   plasma: '0x2E549104c516b8657A7D888494DfbAbD7C70b464',
   arbitrum: '0x91E04cf78e53aEBe609e8a7f2003e7EECD743F2B',
@@ -47,7 +47,7 @@ export async function aaveDiscoveryModes(
   const reserves = new Map<string, Promise<number>>();
   async function readModes(provider: Address) {
     const result = await client.readContract({
-      address: AAVE_DISCOVERY_UI[network],
+      address: AAVE_DISCOVERY_UI[network]!,
       abi: uiAbi,
       functionName: 'getEModes',
       args: [provider],

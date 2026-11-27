@@ -59,6 +59,7 @@ jobs:
           PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL || 'https://rpc.plasma.to' }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL || 'https://mainnet.base.org' }}
           BSC_RPC_URL: ${{ secrets.BSC_RPC_URL || 'https://bsc-rpc.publicnode.com' }}
+          ARC_RPC_URL: ${{ secrets.ARC_RPC_URL || 'https://rpc.mainnet.arc.io' }}
       - name: Check enabled utilization thresholds and save crossings
         if: ${{ !cancelled() }}
         run: npm run track:utilization -- --publish
@@ -71,6 +72,7 @@ jobs:
           PLASMA_RPC_URL: ${{ secrets.PLASMA_RPC_URL || 'https://rpc.plasma.to' }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL || 'https://mainnet.base.org' }}
           BSC_RPC_URL: ${{ secrets.BSC_RPC_URL || 'https://bsc-rpc.publicnode.com' }}
+          ARC_RPC_URL: ${{ secrets.ARC_RPC_URL || 'https://rpc.mainnet.arc.io' }}
       - name: Deliver new and retryable alerts to Telegram
         if: ${{ !cancelled() }}
         run: npm run deliver:telegram -- --publish

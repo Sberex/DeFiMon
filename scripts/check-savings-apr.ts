@@ -6,7 +6,7 @@ import { isNetworkId } from '../src/networks.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy) setGlobalDispatcher(new EnvHttpProxyAgent());
 const group = process.argv[2] ?? 'reUSD', network = process.argv[3] ?? 'ethereum';
 if (!isNetworkId(network) || configuredTokenRegistry[group]?.category !== 'Savings stablecoin') {
-  console.error('Usage: npm run check:savings-apr -- CONFIG_GROUP [ethereum|plasma|arbitrum|base]. The group must be marked Savings stablecoin.'); process.exitCode = 1;
+  console.error('Usage: npm run check:savings-apr -- CONFIG_GROUP [ethereum|plasma|arbitrum|base|bsc|arc]. The group must be marked Savings stablecoin.'); process.exitCode = 1;
 } else {
   console.log('Checking public on-chain savings-rate observations. No wallet, provider URL or API key will be printed.');
   const result = await savingsRateService.quote(group, { network });

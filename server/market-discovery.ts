@@ -474,7 +474,7 @@ export function createMarketDiscovery(
                 ...row,
                 ...(row.protocol === 'Aave v3'
                   ? {
-                      url: `https://app.aave.com/?marketName=${{ ethereum: 'proto_mainnet_v3', plasma: 'proto_plasma_v3', arbitrum: 'proto_arbitrum_v3', base: 'proto_base_v3', bsc: 'proto_bnb_v3' }[network]}`,
+                      url: `https://app.aave.com/?marketName=${{ ethereum: 'proto_mainnet_v3', plasma: 'proto_plasma_v3', arbitrum: 'proto_arbitrum_v3', base: 'proto_base_v3', bsc: 'proto_bnb_v3', arc: '' }[network]}`,
                     }
                   : {}),
                 ...(row.protocol === 'Compound'
@@ -538,7 +538,7 @@ export function createMarketDiscovery(
     );
     if (!networkOrder.some((n) => discoveryTargets(query, n).length))
       messages.push(
-        'The selected assets have no matching deployments on the five supported chains.',
+        'The selected assets have no matching deployments on the supported chains.',
       );
     return {
       query,

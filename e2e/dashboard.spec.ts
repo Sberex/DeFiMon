@@ -2462,3 +2462,27 @@ test('Market Discovery lists verified Aave eModes separately with mode-specific 
  await expect(section).toContainText('variants share the same pool liquidity');
  onlyEmode=true;await section.getByRole('button',{name:'Search',exact:true}).click();await expect(rows).toHaveCount(2);await expect(rows.nth(0)).toContainText('eMode 2');
 });
+
+test('Arc wallet overview values native USDC once and links its Aave v4 position to Arc Explorer',async({page})=>{
+ const usdc='0x3600000000000000000000000000000000000000',spoke='0xB843bdC3a87A05E77E07Df9FE48928b3A34b134d';
+ const fixture: import('../src/types').Portfolio={address:example.address,chain:'Arc',blockNumber:'33417113',updatedAt:'2026-11-27T12:00:00Z',protocols:[{id:'aave-v4',name:'Aave v4',chain:'Arc',status:'ok',coverage:'Arc verified deployment',positions:[{id:`aave-v4-${spoke}`,label:'Arc MAIN deposit',marketAddress:spoke,suppliedUsd:200,debtUsd:0,healthFactor:null,risk:'no-debt',notes:[],assets:[{address:usdc,symbol:'USDC',supplied:200,borrowed:0,priceUsd:1,collateral:false,liquidationThreshold:null,liquidationPriceUsd:null,supplyRate:{apr:.02,note:'Native rate'}}]}]}],wallets:[{chain:'Arc',status:'ok',pricedValueUsd:100,unpricedCount:0,coverage:'Native USDC counted once',tokens:[{address:'native',symbol:'USDC',category:'Stablecoin',balance:100,priceUsd:1,valueUsd:100}]}]};
+ await page.route('**/api/portfolio/*',route=>route.fulfill({json:fixture}));
+ await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(example.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();
+ await expect(page.locator('.summary.primary > strong')).toHaveText('$300.00');await expect(page.locator('.total-npl > strong')).toHaveText('≈ $0.33');
+ await expect(page.getByRole('link',{name:spoke,exact:true})).toHaveAttribute('href',`https://explorer.arc.io/address/${spoke}`);
+ await expect(page.getByRole('region',{name:'Other tokens',exact:true})).toContainText('Arc');
+ await page.getByText('Add another token',{exact:true}).click();await page.getByLabel('Token network').selectOption('arc');await expect(page.getByLabel('Token network')).toHaveValue('arc');
+});
+test('Arc markets and syrupUSDC strategies appear on Market Discovery with Arc contract links',async({page})=>{
+ const {strategyMarket}=await import('../tests/fixtures/strategies');
+ const id='0x28b684e2283b59170abacad24b15484c2606339183fe37d8fd7cf96478c9b684';
+ const market=strategyMarket({network:'arc',market:id,url:`https://app.morpho.org/arc/market/${id}`,supplyAsset:{name:'syrupUSDC',category:'Savings stablecoin',address:'0x0dc6b79f3c3854e4d74514fd4d29be6c96beee39',intrinsicApr:.0506},totalSupplyApr:.0506,borrowAsset:{name:'USDC',category:'Stablecoin',address:'0x3600000000000000000000000000000000000000'}});
+ for(const endpoint of ['market-discovery','leveraged-strategies'])await page.route(`**/api/${endpoint}`,route=>route.fulfill({json:{query:{supply:null,borrow:null},checkedAt:'2026-11-27T12:00:00Z',markets:[market],coverage:[],messages:[]}}));
+ await page.goto('/');await page.getByRole('button',{name:'Market Discovery',exact:true}).click();
+ for(const name of ['Market Discovery','Leveraged Borrowing Strategy Search']){
+  const section=page.getByRole('region',{name,exact:true});await section.getByRole('button',{name:'Search',exact:true}).click();
+  const chain=section.getByRole('region',{name:'Discovered markets on Arc',exact:true});await expect(chain.locator('tbody tr')).toHaveCount(1);await expect(chain).toContainText('syrupUSDC');
+  await expect(chain.locator('tbody tr').getByRole('link').first()).toHaveAttribute('href',market.url);
+  await expect(chain.locator('tbody tr td').nth(3).getByRole('link')).toHaveAttribute('href','https://explorer.arc.io/token/0x3600000000000000000000000000000000000000');
+ }
+});

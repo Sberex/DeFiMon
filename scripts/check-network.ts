@@ -6,7 +6,7 @@ import { getPortfolio } from '../server/portfolio.js';
 if (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy) setGlobalDispatcher(new EnvHttpProxyAgent());
 const [network, wallet] = process.argv.slice(2);
 if (!isNetworkId(network) || !wallet || !isAddress(wallet) || /^0x0{40}$/i.test(wallet)) {
-  console.error('Usage: tsx scripts/check-network.ts ethereum|plasma|arbitrum|base|bsc 0xYourWalletAddress');
+  console.error('Usage: tsx scripts/check-network.ts ethereum|plasma|arbitrum|base|bsc|arc 0xYourWalletAddress');
   process.exitCode = 1;
 } else {
   try {

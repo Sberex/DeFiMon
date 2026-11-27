@@ -16,7 +16,7 @@ import { readEuler } from './adapters/euler.js';
 import { readAave } from './adapters/aave.js';
 import { readCompound } from './adapters/compound.js';
 import { readAaveV4 } from './adapters/aave-v4.js';
-import { AAVE_V4_SPOKES, AAVE_V4_TOKENIZATION_SPOKES } from './deployments/aave-v4.js';
+import { aaveV4Deployment } from './deployments/aave-v4.js';
 import { AAVE_HORIZON } from './deployments/aave-horizon.js';
 import { SPARK_LEND } from './deployments/spark.js';
 import { listaDeployments } from './deployments/lista.js';
@@ -105,6 +105,7 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
   return async function read(watch: LiquidityWatch): Promise<LiquidityObservation> {
     const checkedAt = new Date(now()).toISOString(); let block = 0n;
     const result = (status: LiquidityObservation['status'], readings: LiquidityReading[] = [], message?: string): LiquidityObservation => { if (status === 'ok' && !readings.length) { status = 'error'; message = 'No verified liquidity readings; the last successful reading is retained.'; } return { watch, checkedAt, blockNumber: String(block), status, readings: [...new Map(readings.map(q => [`${q.market}:${q.token}`, q])).values()], ...(message ? { message } : {}) }; };
+    if (!networks[watch.network].protocolIds.includes(watch.protocol)) return result('unsupported', [], 'This protocol has no supported deployment on this network.');
     try {
       const s = await snapshot(watch.network), client = s.client; block = s.block;
       const wallet = address(watch.address), network = watch.network, id = watch.positionId;
@@ -161,13 +162,14 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
         const reader = createEulerReader(client, network, block), vaults = p.assets.some(a => a.borrowed > 0) ? [p.marketAddress!] : p.receiptTokens ?? [p.marketAddress!];
         return result('ok', await Promise.all(vaults.map(async v => quote(v, v, p.label, await reader.liquidity(address(v))))));
       }
-      if (watch.protocol === 'aave-v4' && network === 'ethereum') {
+      if (watch.protocol === 'aave-v4' && networks[network].protocolIds.includes('aave-v4')) {
+        const deployment = aaveV4Deployment(network);
         const market = address(id.replace(/^aave-v4-/, ''));
-        const p = (await readAaveV4(client, wallet, block, { spokes: AAVE_V4_SPOKES.filter(s => same(s.address, market)), tokenizations: AAVE_V4_TOKENIZATION_SPOKES.filter(s => same(s.address, market)) })).positions.find(p => same(p.id, id)); if (!p) return result('inactive');
+        const p = (await readAaveV4(client, wallet, block, { spokes: deployment.spokes.filter(s => same(s.address, market)), tokenizations: deployment.tokenizations.filter(s => same(s.address, market)) })).positions.find(p => same(p.id, id)); if (!p) return result('inactive');
         const readings: LiquidityReading[] = [];
         for (const a of activeAssets(p)) for (const r of a.v4Reserves ?? []) {
           if (a.borrowed > 0 ? r.borrowed <= 0 : r.supplied <= 0) continue;
-          if (AAVE_V4_TOKENIZATION_SPOKES.some(s => same(s.address, market))) {
+          if (deployment.tokenizations.some(s => same(s.address, market))) {
             const raw = await client.readContract({ address: address(r.hub), abi: parseAbi(['function getAssetLiquidity(uint256) view returns(uint256)']), functionName: 'getAssetLiquidity', args: [BigInt(r.assetId)], blockNumber: block });
             const m = await tokenMetadata(client, address(a.address), block);
             readings.push(quote(`${r.hub}:${r.assetId}`, r.hub, p.label, liquidityQuote(raw, m.decimals, m.symbol, a.address, 'Hub liquidity backing the tokenized deposit; personal withdrawal and access limits can apply.')));

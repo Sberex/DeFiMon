@@ -1,6 +1,6 @@
 # Token registry for wallet discovery and recommendations
 
-Edit **token-matches.json** to add tokens to wallet discovery and define cross-network recommendation matches. Ethereum, Plasma, Arbitrum, Base and Binance Smart Chain are the current dashboard networks; the file can also store contracts on other registered EVM mainnets, including Optimism.
+Edit **token-matches.json** to add tokens to wallet discovery and define cross-network recommendation matches. Ethereum, Plasma, Arbitrum, Base, Binance Smart Chain and Arc are the current dashboard networks; the file can also store contracts on other registered EVM mainnets, including Optimism.
 
 
 ## Categories
@@ -136,7 +136,7 @@ python3 scripts/import-coingecko-tokens.py --cache-dir /tmp/defimon-cg2000
 python3 scripts/import-coingecko-tokens.py --cache-dir /tmp/defimon-cg2000 --apply
 ```
 
-The second command writes the reviewed config and provenance files only after the ranking, chains, address uniqueness and category decisions validate. It refuses to apply while category questions remain pending. API requests respect CoinGecko rate-limit retry intervals. Adding platforms to this registry does not enable extra dashboard networks: wallet discovery continues to use Ethereum, Plasma, Arbitrum, Base and Binance Smart Chain.
+The second command writes the reviewed config and provenance files only after the ranking, chains, address uniqueness and category decisions validate. It refuses to apply while category questions remain pending. API requests respect CoinGecko rate-limit retry intervals. Adding platforms to this registry does not enable extra dashboard networks: wallet discovery uses Ethereum, Plasma, Arbitrum, Base, Binance Smart Chain and Arc.
 
 The import conflict checks can be run with:
 
@@ -197,3 +197,7 @@ Live validation on 2026-11-27:
 The observations are approximately 30.01 days apart because the feeds update periodically. These are dated validation results; the application recalculates APR using `(current rate − historical rate) × 365 / (30 × historical rate)`. They are not advertised APYs or guaranteed future returns. Historical round reads do not require Ethereum archive access. The Ethereum canonical contract was independently checked for symbol `syrupUSDC`, six share decimals, and underlying USDC `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`.
 
 Sources: [CoinGecko](https://www.coingecko.com/en/coins/syrup-usdc), [Maple Ethereum integration](https://docs.maple.finance/integrate/ethereum-mainnet/asset-integration), [Maple crosschain contracts and feeds](https://docs.maple.finance/integrate/crosschain/syrupusd-crosschain), and [Aave Base address book](https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV3Base.sol). Repeat the primary source check with `npm run check:savings-apr -- syrupUSDC ethereum`; the configured source chain is Base even when the held token is on Ethereum.
+
+### Arc native USDC identity
+
+`USDC.arc` is `0x3600000000000000000000000000000000000000`, the native USDC ERC-20 interface on Arc mainnet (5042). The previous `0xfffffffffffffffffffffffffffffffffffffffe` address is the system event emitter, not an ERC-20 token; this correction follows [Circle's Arc contract reference](https://docs.arc.io/arc/references/contract-addresses) and live contract/decimals verification. Native balances have 18 decimals while the interface has six; DeFiMon counts the shared balance only once. Config identity matching still uses chain and contract, never symbol alone. Existing configured Arc assets, including syrupUSDC, now participate in Arc wallet and market discovery.
