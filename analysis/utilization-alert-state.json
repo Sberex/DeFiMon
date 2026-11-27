@@ -1,23 +1,8 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-27T04:21:04.837Z",
+  "lastRunAt": "2026-11-27T04:25:51.701Z",
   "lastRunEvent": "external_scheduler",
   "lastScheduledRunAt": "2026-11-26T23:54:56.471Z",
-  "lastExternalRunAt": "2026-11-27T04:21:04.837Z",
-  "watches": [
-    {
-      "watch": {
-        "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
-        "network": "ethereum",
-        "protocol": "morpho",
-        "positionId": "morpho-market-0xc4f56ec8f0e89af93a7146eadb9f4330c522aa19c5d2053b0685db1f68e87550",
-        "ruleUpdatedAt": "2026-11-23T16:51:02.099Z",
-        "thresholdPercent": 90
-      },
-      "checkedAt": "2026-11-27T04:21:04.656Z",
-      "status": "inactive",
-      "message": "Position is no longer active.",
-      "baselines": []
-    }
-  ]
+  "lastExternalRunAt": "2026-11-27T04:25:51.701Z",
+  "watches": []
 }
