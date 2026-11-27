@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "minimumApr": 0.14,
-  "updatedAt": "2026-11-27T14:20:39.968Z",
+  "updatedAt": "2026-11-27T14:37:37.773Z",
   "wallets": [
     {
       "address": "0x55fa9aac40af97faab697cc74d4da452abf0272c",
@@ -397,8 +397,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Arbitrum",
-          "checkedAt": "2026-11-27T14:20:35.490Z",
-          "blockNumber": "528028601",
+          "checkedAt": "2026-11-27T14:37:34.598Z",
+          "blockNumber": "528032396",
           "complete": false,
           "positions": [
             {
@@ -565,8 +565,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-27T14:20:39.968Z",
-          "blockNumber": "26507101",
+          "checkedAt": "2026-11-27T14:37:37.773Z",
+          "blockNumber": "26507185",
           "complete": true,
           "positions": []
         },
@@ -574,8 +574,8 @@
           "protocolId": "morpho",
           "protocolName": "Morpho",
           "chain": "Ethereum",
-          "checkedAt": "2026-11-27T14:20:39.968Z",
-          "blockNumber": "26507101",
+          "checkedAt": "2026-11-27T14:37:37.773Z",
+          "blockNumber": "26507185",
           "complete": true,
           "positions": []
         },
@@ -583,8 +583,8 @@
           "protocolId": "fluid",
           "protocolName": "Fluid",
           "chain": "Plasma",
-          "checkedAt": "2026-11-27T14:20:35.578Z",
-          "blockNumber": "38813578",
+          "checkedAt": "2026-11-27T14:37:34.601Z",
+          "blockNumber": "38814600",
           "complete": true,
           "positions": []
         }
