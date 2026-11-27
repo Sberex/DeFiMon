@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795810700,
+  "asOfSec": 1795814301,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -61,7 +61,7 @@
     {
       "id": "audd-novatti",
       "grade": "C+",
-      "score": 60,
+      "score": 59,
       "ratingStatus": "rated"
     },
     {
@@ -1243,7 +1243,7 @@
     {
       "id": "sparkusdtbc-spark",
       "grade": "B-",
-      "score": 67,
+      "score": 66,
       "ratingStatus": "rated"
     },
     {
@@ -1309,7 +1309,7 @@
     {
       "id": "steakusdt-steakhouse",
       "grade": "B-",
-      "score": 67,
+      "score": 66,
       "ratingStatus": "rated"
     },
     {
@@ -1362,7 +1362,7 @@
     },
     {
       "id": "susdai-usd-ai",
-      "grade": "C-",
+      "grade": "D",
       "score": 47,
       "ratingStatus": "rated"
     },
