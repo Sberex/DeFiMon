@@ -9847,7 +9847,6 @@
   },
   "PST": {
     "ethereum": "0x22aE3D9a738471f405169Af055d31c687087d4c7",
-    "arc": "0xa6Db07ebF438d91Aa653746fc05523e435645525",
     "_category": "Savings stablecoin",
     "_intrinsicOracles": [
       {
@@ -9862,7 +9861,8 @@
         "note": "Rates are USDC per PST, not an assumed USD price. Uses the underlying Chainlink reference feed rather than Fluid’s capped liquidation rate.",
         "evidence": "Ethereum Fluid Vault 165 (0x6724C81397512197BF981629795f7aF76557e183), resolver positionByNftId(18671). configs.oracle = 0x2e95050bb3F06fe0c83Ee6E3E08ed3972c5D9263; getOracleHopSources()[0].source = 0x7Be47fb0679366B9F0aD5ed383f84fE735E047C5; configData().rateSource_ = 0x4BE50bE32dB1510240d542f77c5B36Ca0D0965E6. https://etherscan.io/address/0x7Be47fb0679366B9F0aD5ed383f84fE735E047C5#readContract"
       }
-    ]
+    ],
+    "arc": "0xa6Db07ebF438d91Aa653746fc05523e435645525"
   },
   "scrvUSD": {
     "_category": "Savings stablecoin",
