@@ -2385,3 +2385,29 @@ test('Leveraged Borrowing Strategy Search restricts token choices, models HF 1.0
   await expect.poll(() => requests.length).toBe(2); expect(requests[1]).toEqual({supply:null,borrow:null});
   await page.setViewportSize({width:390,height:844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test('Leveraged strategies collapse sub-cent USD liquidity below main results and preserve APR sorting', async ({page}) => {
+  const { strategyMarket } = await import('../tests/fixtures/strategies');
+  const markets = [
+    strategyMarket({market:'zero',borrowApr:.01,liquidityUsd:0}),
+    strategyMarket({market:'boundary',liquidityUsd:.01}),
+    strategyMarket({market:'small',borrowApr:.02,liquidityUsd:.0099}),
+    strategyMarket({market:'unknown',borrowApr:.03,liquidityUsd:null}),
+  ];
+  await page.route('**/api/leveraged-strategies', route => route.fulfill({json:{query:{supply:null,borrow:null},checkedAt:'2026-11-27T10:00:00Z',markets,coverage:[],messages:[]}}));
+  await page.goto('/'); await page.getByRole('button',{name:'Market Discovery',exact:true}).click();
+  const section = page.getByRole('region',{name:'Leveraged Borrowing Strategy Search',exact:true});
+  await section.getByRole('button',{name:'Search',exact:true}).click();
+  await expect(section.getByRole('heading',{name:'4 markets found',exact:true})).toBeVisible();
+  const dropdown = section.locator('details.strategy-small-liquidity');
+  await expect(dropdown.locator('summary').first()).toHaveText('Markets with available liquidity below $0.01 (2)');
+  await expect(dropdown).not.toHaveAttribute('open','');
+  const visible = section.locator('tbody tr:visible');
+  await expect(visible).toHaveCount(2);
+  await expect(visible.nth(0)).toContainText('unknown'); await expect(visible.nth(1)).toContainText('boundary');
+  await dropdown.locator('summary').first().click();
+  const hiddenRows = dropdown.locator('tbody tr');
+  await expect(hiddenRows.nth(0)).toBeVisible(); await expect(hiddenRows.nth(0)).toContainText('zero'); await expect(hiddenRows.nth(1)).toContainText('small');
+  expect(await dropdown.evaluate(el => (el.compareDocumentPosition(el.parentElement!.querySelector('.discovery-chain')!) & Node.DOCUMENT_POSITION_PRECEDING) !== 0)).toBe(true);
+  await dropdown.locator('summary').first().click(); await expect(hiddenRows.nth(0)).not.toBeVisible();
+});

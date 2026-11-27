@@ -9,6 +9,7 @@ import {
   discoveryTokenChoices,
   groupedDiscoveryMarkets,
   type DiscoveryAsset,
+  type DiscoveryMarket,
   type DiscoveryResult,
 } from './market-discovery';
 import { networkNames, networkExplorers } from './networks';
@@ -190,9 +191,9 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
     [result, setResult] = useState<DiscoveryResult | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState('');
-  const [visibleCounts, setVisibleCounts] = useState<
-    Partial<Record<NetworkId, number>>
-  >({});
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>(
+    {},
+  );
   const request = useRef<AbortController | null>(null);
   useEffect(() => () => request.current?.abort(), []);
   async function search(e: React.FormEvent) {
@@ -246,10 +247,178 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
       if (!controller.signal.aborted) setBusy(false);
     }
   }
-  const groups = strategy
+  const allGroups = strategy
     ? groupedStrategyMarkets(result?.markets ?? [])
     : groupedDiscoveryMarkets(result?.markets ?? []);
-  const count = groups.reduce((n, group) => n + group.markets.length, 0);
+  const count = allGroups.reduce((n, group) => n + group.markets.length, 0);
+  const belowCent = (market: DiscoveryMarket) =>
+    strategy &&
+    typeof market.liquidityUsd === 'number' &&
+    Number.isFinite(market.liquidityUsd) &&
+    market.liquidityUsd >= 0 &&
+    market.liquidityUsd < 0.01;
+  const groups = allGroups
+    .map((g) => ({ ...g, markets: g.markets.filter((m) => !belowCent(m)) }))
+    .filter((g) => g.markets.length);
+  const smallGroups = allGroups
+    .map((g) => ({ ...g, markets: g.markets.filter(belowCent) }))
+    .filter((g) => g.markets.length);
+  const smallCount = smallGroups.reduce((n, g) => n + g.markets.length, 0);
+  const renderGroups = (
+    rows: ReturnType<typeof groupedDiscoveryMarkets>,
+    prefix = '',
+  ) =>
+    rows.map(({ network, markets }) => (
+      <section
+        key={network}
+        aria-label={`Discovered markets on ${networkNames[network]}`}
+        className="discovery-chain"
+      >
+        <h3>
+          {networkNames[network]} <small>({markets.length})</small>
+        </h3>
+        <div className="table-wrap">
+          <table>
+            <caption className="sr-only">
+              Discovered markets on {networkNames[network]}, highest
+              {strategy ? 'modelled APR' : 'available liquidity'} first
+            </caption>
+            <thead>
+              <tr>
+                <th>Market</th>
+                <th>Supply Asset</th>
+                <th>Supply APR</th>
+                <th>Borrow Asset</th>
+                <th>Borrow APR</th>
+                <th aria-sort={strategy ? undefined : 'descending'}>
+                  Available Liquidity{!strategy && ' ↓'}
+                </th>
+                <th>LLTV</th>
+                {strategy && <th aria-sort="descending">APR ↓</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {markets
+                .slice(0, visibleCounts[prefix + network] ?? 50)
+                .map((market, index) => (
+                  <tr
+                    key={`${market.protocol}:${market.market}:${market.route ?? ''}:${index}`}
+                  >
+                    <td>
+                      <a href={market.url} target="_blank" rel="noreferrer">
+                        {market.protocol} · {market.supplyAsset.name}
+                        {market.borrowAsset
+                          ? ` / ${market.borrowAsset.name}`
+                          : ' deposit'}{' '}
+                        · {market.market.slice(0, 10)}… ↗
+                      </a>
+                      <details>
+                        <summary>Market details</summary>
+                        <p>{market.label}</p>
+                        <code className="discovery-contract">
+                          {market.market}
+                        </code>
+                        {market.collateralVault && (
+                          <a
+                            href={market.collateralVault.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Collateral vault: {market.collateralVault.label} ↗
+                          </a>
+                        )}
+                        <p>{market.note}</p>
+                        <p>Snapshot block: {market.block}</p>
+                      </details>
+                    </td>
+                    <td>
+                      <AssetCell
+                        asset={market.supplyAsset}
+                        network={network}
+                        required={market.requiredSupplyAssets}
+                      />
+                    </td>
+                    <td>
+                      <strong>{percent(market.totalSupplyApr)}</strong>
+                      {market.supplyRateNote && (
+                        <details>
+                          <summary>Supply rate details</summary>
+                          <p>{market.supplyRateNote}</p>
+                        </details>
+                      )}
+                      {market.supplyAsset.intrinsicApr !== 0 && (
+                        <small>
+                          Protocol: {percent(market.supplyApr)}
+                          <br />
+                          Intrinsic: {percent(market.supplyAsset.intrinsicApr)}
+                        </small>
+                      )}
+                    </td>
+                    <td>
+                      <AssetCell
+                        asset={market.borrowAsset}
+                        network={network}
+                        required={market.requiredBorrowAssets}
+                      />
+                    </td>
+                    <td>
+                      {market.borrowAsset ? percent(market.borrowApr) : '—'}
+                      {market.borrowApy != null && (
+                        <small>Borrow APY: {percent(market.borrowApy)}</small>
+                      )}
+                    </td>
+                    <td>
+                      {market.liquidity ? (
+                        <>
+                          <strong>
+                            {quantity(market.liquidity.amount)}{' '}
+                            {market.liquidity.symbol}
+                          </strong>
+                          {market.liquidityUsd !== null && (
+                            <small>{money(market.liquidityUsd)}</small>
+                          )}
+                          <details>
+                            <summary>Liquidity details</summary>
+                            <p>{market.liquidity.note}</p>
+                          </details>
+                        </>
+                      ) : (
+                        <span className="muted">Unavailable</span>
+                      )}
+                    </td>
+                    <td>{market.lltv === null ? '—' : percent(market.lltv)}</td>
+                    {strategy && (
+                      <td>
+                        <strong>{percent(market.modelledApr)}</strong>
+                        <small>Health factor: 1.02</small>
+                        <small>
+                          Debt / collateral: {percent(market.modelledDebtRatio)}
+                        </small>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+        {markets.length > (visibleCounts[prefix + network] ?? 50) && (
+          <button
+            type="button"
+            className="secondary discovery-show-more"
+            onClick={() =>
+              setVisibleCounts((old) => ({
+                ...old,
+                [prefix + network]: (old[prefix + network] ?? 50) + 50,
+              }))
+            }
+          >
+            Show more markets (
+            {Math.min(visibleCounts[prefix + network] ?? 50, markets.length)} of{' '}
+            {markets.length} shown)
+          </button>
+        )}
+      </section>
+    ));
   return (
     <section
       className="market-discovery"
@@ -350,170 +519,15 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
               before assuming no market exists.
             </p>
           )}
-          {groups.map(({ network, markets }) => (
-            <section
-              key={network}
-              aria-label={`Discovered markets on ${networkNames[network]}`}
-              className="discovery-chain"
-            >
-              <h3>
-                {networkNames[network]} <small>({markets.length})</small>
-              </h3>
-              <div className="table-wrap">
-                <table>
-                  <caption className="sr-only">
-                    Discovered markets on {networkNames[network]}, highest
-                    {strategy ? 'modelled APR' : 'available liquidity'} first
-                  </caption>
-                  <thead>
-                    <tr>
-                      <th>Market</th>
-                      <th>Supply Asset</th>
-                      <th>Supply APR</th>
-                      <th>Borrow Asset</th>
-                      <th>Borrow APR</th>
-                      <th aria-sort={strategy ? undefined : 'descending'}>
-                        Available Liquidity{!strategy && ' ↓'}
-                      </th>
-                      <th>LLTV</th>
-                      {strategy && <th aria-sort="descending">APR ↓</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {markets
-                      .slice(0, visibleCounts[network] ?? 50)
-                      .map((market, index) => (
-                        <tr
-                          key={`${market.protocol}:${market.market}:${market.route ?? ''}:${index}`}
-                        >
-                          <td>
-                            <a
-                              href={market.url}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {market.protocol} · {market.supplyAsset.name}
-                              {market.borrowAsset
-                                ? ` / ${market.borrowAsset.name}`
-                                : ' deposit'}{' '}
-                              · {market.market.slice(0, 10)}… ↗
-                            </a>
-                            <details>
-                              <summary>Market details</summary>
-                              <p>{market.label}</p>
-                              <code className="discovery-contract">
-                                {market.market}
-                              </code>
-                              {market.collateralVault && (
-                                <a
-                                  href={market.collateralVault.url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  Collateral vault:{' '}
-                                  {market.collateralVault.label} ↗
-                                </a>
-                              )}
-                              <p>{market.note}</p>
-                              <p>Snapshot block: {market.block}</p>
-                            </details>
-                          </td>
-                          <td>
-                            <AssetCell
-                              asset={market.supplyAsset}
-                              network={network}
-                              required={market.requiredSupplyAssets}
-                            />
-                          </td>
-                          <td>
-                            <strong>{percent(market.totalSupplyApr)}</strong>
-                            {market.supplyRateNote && (
-                              <details>
-                                <summary>Supply rate details</summary>
-                                <p>{market.supplyRateNote}</p>
-                              </details>
-                            )}
-                            {market.supplyAsset.intrinsicApr !== 0 && (
-                              <small>
-                                Protocol: {percent(market.supplyApr)}
-                                <br />
-                                Intrinsic:{' '}
-                                {percent(market.supplyAsset.intrinsicApr)}
-                              </small>
-                            )}
-                          </td>
-                          <td>
-                            <AssetCell
-                              asset={market.borrowAsset}
-                              network={network}
-                              required={market.requiredBorrowAssets}
-                            />
-                          </td>
-                          <td>
-                            {market.borrowAsset
-                              ? percent(market.borrowApr)
-                              : '—'}
-                            {market.borrowApy != null && (
-                              <small>
-                                Borrow APY: {percent(market.borrowApy)}
-                              </small>
-                            )}
-                          </td>
-                          <td>
-                            {market.liquidity ? (
-                              <>
-                                <strong>
-                                  {quantity(market.liquidity.amount)}{' '}
-                                  {market.liquidity.symbol}
-                                </strong>
-                                {market.liquidityUsd !== null && (
-                                  <small>{money(market.liquidityUsd)}</small>
-                                )}
-                                <details>
-                                  <summary>Liquidity details</summary>
-                                  <p>{market.liquidity.note}</p>
-                                </details>
-                              </>
-                            ) : (
-                              <span className="muted">Unavailable</span>
-                            )}
-                          </td>
-                          <td>
-                            {market.lltv === null ? '—' : percent(market.lltv)}
-                          </td>
-                          {strategy && (
-                            <td>
-                              <strong>{percent(market.modelledApr)}</strong>
-                              <small>Health factor: 1.02</small>
-                              <small>
-                                Debt / collateral:{' '}
-                                {percent(market.modelledDebtRatio)}
-                              </small>
-                            </td>
-                          )}
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-              {markets.length > (visibleCounts[network] ?? 50) && (
-                <button
-                  type="button"
-                  className="secondary discovery-show-more"
-                  onClick={() =>
-                    setVisibleCounts((old) => ({
-                      ...old,
-                      [network]: (old[network] ?? 50) + 50,
-                    }))
-                  }
-                >
-                  Show more markets (
-                  {Math.min(visibleCounts[network] ?? 50, markets.length)} of{' '}
-                  {markets.length} shown)
-                </button>
-              )}
-            </section>
-          ))}
+          {renderGroups(groups)}
+          {smallCount > 0 && (
+            <details className="strategy-small-liquidity">
+              <summary>
+                Markets with available liquidity below $0.01 ({smallCount})
+              </summary>
+              {renderGroups(smallGroups, 'small:')}
+            </details>
+          )}
           <details className="discovery-coverage">
             <summary>
               Market discovery coverage ·{' '}
