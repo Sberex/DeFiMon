@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { combinedExample, example } from '../src/example';
 import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtures/merkl-apr';
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/safety-grades', route => route.fulfill({ json: { schemaVersion: 1, asOfSec: Math.floor(Date.now() / 1000), publicationStatus: 'current', methodologyVersion: '10.57', grades: [{ id: 'usdc-circle', grade: 'A+', score: 91, ratingStatus: 'rated' }] } }));
   await page.route('**/analysis/utilization-alert-state.json*', route => route.fulfill({ json: { version: 1, lastRunAt: null, watches: [] } }));
   await page.route('**/analysis/liquidity-alert-state.json*', route => route.fulfill({ json: { version: 1, lastRunAt: null, watches: [] } }));
   await page.route('**/api/rewards/*', route => route.fulfill({ json: { address: new URL(route.request().url()).pathname.split('/').at(-1), updatedAt: new Date().toISOString(), status: 'ok', networks: [] } }));
@@ -2485,4 +2486,29 @@ test('Arc markets and syrupUSDC strategies appear on Market Discovery with Arc c
   await expect(chain.locator('tbody tr').getByRole('link').first()).toHaveAttribute('href',market.url);
   await expect(chain.locator('tbody tr td').nth(3).getByRole('link')).toHaveAttribute('href','https://explorer.arc.io/token/0x3600000000000000000000000000000000000000');
  }
+});
+
+test('Risk Assessment ranks gross asset values by Pharos grade above Bad Debt and keeps unmatched assets Not Rated', async ({ page }) => {
+ const usdc='0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',susdai='0x0b2b2b2076d95dda7817e785989fe353fe955ef9',usde='0x4c9edd5852cd905f086c759e8383e09bff1e68b3';
+ const asset=(address:string,symbol:string,amount:number)=>({address,symbol,supplied:amount,borrowed:0,priceUsd:1,collateral:false,liquidationThreshold:null,liquidationPriceUsd:null,supplyRate:{apr:0,note:''}});
+ const fixture:import('../src/types').Portfolio={address:example.address,chain:'Ethereum',updatedAt:new Date().toISOString(),blockNumber:'1',protocols:[{id:'morpho',name:'Morpho',chain:'Ethereum',status:'ok',coverage:'',positions:[{id:'bad-deposit',label:'USDC deposit with failed market oracle',suppliedUsd:200,debtUsd:0,risk:'no-debt',healthFactor:null,notes:[],assets:[asset(usdc,'USDC',200)],collateralOracleChecks:[{asset:'msY',oracle:usdc,status:'unavailable'}]}]}],wallets:[{chain:'Ethereum',status:'ok',coverage:'',pricedValueUsd:740,unpricedCount:0,tokens:[{address:usdc,symbol:'USDC',balance:100,priceUsd:1,valueUsd:100},{address:susdai,symbol:'sUSDai',balance:40,priceUsd:1,valueUsd:40},{address:usde,symbol:'USDe',balance:100,priceUsd:1,valueUsd:100},{address:'native',symbol:'ETH',balance:1,priceUsd:500,valueUsd:500},{address:'0x1111111111111111111111111111111111111111',symbol:'aUSDC',balance:200,priceUsd:1,valueUsd:200,excludedReason:'Counted through lending'}]}]};
+ await page.route('**/api/portfolio/*',route=>route.fulfill({json:fixture}));
+ await page.route('**/api/safety-grades',route=>route.fulfill({json:{schemaVersion:1,asOfSec:Math.floor(Date.now()/1000),publicationStatus:'current',methodologyVersion:'10.57',grades:[{id:'usdc-circle',grade:'A+',score:91,ratingStatus:'rated'},{id:'susdai-usd-ai',grade:'C-',score:54,ratingStatus:'rated'},{id:'usde-ethena',grade:'F',score:30,ratingStatus:'rated'}]}}));
+ await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(example.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();
+ await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();
+ const section=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await expect(section).toContainText('methodology 10.57');
+ const rows=section.locator('.safety-grade-table > tbody > tr');await expect(rows).toHaveCount(4);expect(await rows.evaluateAll(rows=>rows.map(r=>r.getAttribute('data-grade')))).toEqual(['A+','C-','F','Not Rated']);
+ await expect(rows.nth(0)).toContainText('$300.00');await expect(rows.nth(3)).toContainText('$500.00');await expect(section.locator('.asset-safety-summary')).toContainText('$940.00');
+ await rows.nth(0).locator('summary').click();await expect(rows.nth(0).getByRole('link',{name:'USDC',exact:false})).toHaveAttribute('href','https://pharos.watch/stablecoin/usdc-circle/');await expect(rows.nth(0)).toContainText('200 USDC');
+ const risk=page.getByRole('region',{name:'Risk Assessment',exact:true});await expect(risk.getByRole('heading',{name:'Bad Debt',exact:true})).toBeVisible();
+ const order=await risk.evaluate(el=>{const safety=el.querySelector('.asset-safety'),bad=Array.from(el.querySelectorAll('h3')).find(h=>h.textContent==='Bad Debt');return !!safety&&!!bad&&!!(safety.compareDocumentPosition(bad)&Node.DOCUMENT_POSITION_FOLLOWING);});expect(order).toBe(true);
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+});
+test('Risk Assessment retains known amounts as Not Rated during a grade outage and restores grades on retry',async({page})=>{
+ let fail=true;
+ const fixture=structuredClone(example);fixture.protocols=[];fixture.wallets=[{chain:'Ethereum',status:'partial',coverage:'',pricedValueUsd:100,unpricedCount:1,tokens:[{address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',symbol:'USDC',balance:100,priceUsd:1,valueUsd:100},{address:'0x1111111111111111111111111111111111111111',symbol:'UNKNOWN',balance:2,priceUsd:null,valueUsd:null}]}];
+ await page.route('**/api/portfolio/*',route=>route.fulfill({json:fixture}));await page.route('**/api/safety-grades',route=>route.fulfill(fail?{status:503,json:{error:'Unavailable'}}:{json:{schemaVersion:1,asOfSec:Math.floor(Date.now()/1000),publicationStatus:'current',methodologyVersion:'10.57',grades:[{id:'usdc-circle',grade:'A+',score:91,ratingStatus:'rated'}]}}));
+ await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(example.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();
+ const section=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await expect(section).toContainText('temporarily grouped as Not Rated');await expect(section.locator('[data-grade="Not Rated"]')).toContainText('$100.00');await expect(section).toContainText('1 holding has no individual USD valuation');
+ fail=false;await section.getByRole('button',{name:'Refresh grades',exact:true}).click();await expect(section.locator('[data-grade="A+"]')).toContainText('$100.00');await expect(section.locator('[data-grade="Not Rated"]')).toContainText('1 unpriced holding');await expect(section).not.toContainText('temporarily grouped as Not Rated');
 });

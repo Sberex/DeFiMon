@@ -1,3 +1,4 @@
+import { readPharosGrades } from './pharos-safety.js';
 import { discoveryModeResult } from '../src/market-discovery.js';
 import { validateStrategyQuery, strategyDiscovery } from '../src/leveraged-strategies.js';
 import { discoverMarkets, parseDiscoveryQuery } from './market-discovery.js';
@@ -18,11 +19,16 @@ import type { ExtraTokens, MerklRewards, NetworkId, Portfolio } from '../src/typ
 import { isNetworkId } from '../src/networks.js';
 import { readMerklRewards, unavailableMerkl } from './merkl.js';
 import { networks } from './networks.js';
-export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore, history?: WalletHistoryStore, loadDiscovery = discoverMarkets) {
+export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore, history?: WalletHistoryStore, loadDiscovery = discoverMarkets, loadSafetyGrades = readPharosGrades) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use('/api', apiCors);
+  app.get('/api/safety-grades', async (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try { res.json(await loadSafetyGrades()); }
+    catch { res.status(503).json({ error: 'Pharos safety grades are temporarily unavailable. Assets are shown as Not Rated until grades can be checked.' }); }
+  });
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', ethereumConfigured: Boolean(process.env.ETHEREUM_RPC_URL), plasmaConfigured: Boolean(process.env.PLASMA_RPC_URL || networks.plasma.defaultRpc), arbitrumConfigured: Boolean(process.env.ARBITRUM_RPC_URL || networks.arbitrum.defaultRpc), baseConfigured: Boolean(process.env.BASE_RPC_URL || networks.base.defaultRpc), bscConfigured: Boolean(process.env.BSC_RPC_URL || networks.bsc.defaultRpc), arcConfigured: Boolean(process.env.ARC_RPC_URL || networks.arc.defaultRpc) }));
   app.get('/api/cookbook', async (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
