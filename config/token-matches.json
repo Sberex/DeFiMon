@@ -9403,5 +9403,43 @@
         "evidence": "https://www.coingecko.com/en/coins/savings-crvusd; https://docs.curve.finance/developer/scrvusd/overview; https://github.com/curvefi/curve-llamalend.js/blob/d472168015e5e5db8a565a91fcedf224620dad8a/src/constants/aliases.ts (ALIASES_ETHEREUM.st_crvUSD); https://www.curve.finance/crvusd/ethereum/scrvUSD"
       }
     ]
+  },
+  "syrupUSDC": {
+    "_category": "Savings stablecoin",
+    "ethereum": "0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b",
+    "base": "0x660975730059246a68521a3e2fbd4740173100f5",
+    "monad": "0xab6e5a0c3799d020c790d34f7b2c02639e238af7",
+    "arbitrum": "0x41ca7586cc1311807b4605fbb748a3b8862b42b5",
+    "arc": "0x0dc6b79f3c3854e4d74514fd4d29be6c96beee39",
+    "ink": "0x3c23e6fb09064e9a64829fa8fee27ad19a27bfa9",
+    "tempo": "0x20c0000000000000000000008191667423f70e67",
+    "robinhood": "0xc6a4854eeb493224d5f9485e12dd3a81f22eee14",
+    "x-layer": "0xd503b0581aa504e75b345bf4cb8c359d8d1a042f",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "chainlink",
+        "address": "0x311d3a3faa1d5939c681e33c2cdac041ff388eb2",
+        "token": "0x660975730059246a68521a3e2fbd4740173100f5",
+        "description": "syrupUSDC-USDC Exchange Rate",
+        "decimals": 18,
+        "history": "rounds",
+        "label": "syrupUSDC/USDC uncapped Chainlink exchange-rate feed on Base",
+        "note": "USDC per syrupUSDC. Maple states that Chainlink feeds relay the canonical Ethereum pool convertToExitAssets() value, including unrealized losses. Uses historical oracle rounds, not a capped liquidation wrapper; lending APR, Merkl incentives and SYRUP rewards are separate.",
+        "evidence": "https://docs.maple.finance/integrate/crosschain/syrupusd-crosschain#price-feeds; https://docs.maple.finance/integrate/ethereum-mainnet/asset-integration; https://www.coingecko.com/en/coins/syrup-usdc; AaveV3Base.sol syrupUSDC_ORACLE.RATIO_PROVIDER() verified as this feed."
+      },
+      {
+        "network": "arbitrum",
+        "kind": "chainlink",
+        "address": "0xf8722c901675c4f2f7824e256b8a6477b2c105fb",
+        "token": "0x41ca7586cc1311807b4605fbb748a3b8862b42b5",
+        "description": "syrupUSDC / USDC Exchange Rate",
+        "decimals": 18,
+        "history": "rounds",
+        "label": "syrupUSDC/USDC uncapped Chainlink exchange-rate feed on Arbitrum",
+        "note": "USDC per syrupUSDC. Maple states that Chainlink feeds relay the canonical Ethereum pool convertToExitAssets() value, including unrealized losses. Uses historical oracle rounds, not a capped liquidation wrapper; lending APR, Merkl incentives and SYRUP rewards are separate.",
+        "evidence": "https://docs.maple.finance/integrate/crosschain/syrupusd-crosschain#price-feeds; https://docs.maple.finance/integrate/ethereum-mainnet/asset-integration; https://www.coingecko.com/en/coins/syrup-usdc"
+      }
+    ]
   }
 }

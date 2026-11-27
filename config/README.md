@@ -177,3 +177,23 @@ Aladdin's fxSAVE adapter `0x9dD65b6d956E31F4dc093372D975275986695827` exposes fu
 Use percentage units (`14` means 14%, `12.5` means 12.5%). Only positions with total position APR **strictly above** the threshold qualify. Values must be finite and non-negative; invalid values fail configuration validation.
 
 The server, refresh script, page filters, summary and explanatory text share this setting. After editing it, deploy/restart the server and rebuild/deploy the frontend (normal deployments do this). Existing snapshots below a raised threshold are hidden immediately by the new build, without making the historical JSON unreadable. Lowering the threshold allows previously stored qualifying snapshots to display again; analyse wallets again to capture positions that were never saved under the previous threshold. `analysis/cookbook.json.minimumApr` is snapshot metadata, not the setting.
+
+## syrupUSDC
+
+`syrupUSDC` is configured as **Savings stablecoin** with nine verified EVM token contracts: Ethereum, Base, Arbitrum, Monad, Arc, Ink, Tempo, Robinhood Chain and X Layer. CoinGecko's API ID is `syrupusdc` (the website link uses `syrup-usdc`). Its five EVM entries are cross-checked with Maple's canonical/crosschain documentation; Ink, Tempo, Robinhood and X Layer are supplemental official Maple deployments. Solana is outside this EVM registry. Token addresses are taken from the docs' **Token** rows, not the similarly named CCIP Pool contracts.
+
+The ordered `_intrinsicOracles` sources are Maple-recommended uncapped Chainlink syrupUSDC/USDC feeds:
+
+- **Base:** `0x311D3A3faA1d5939c681E33C2CDAc041FF388EB2`, description `syrupUSDC-USDC Exchange Rate`, 18 decimals.
+- **Arbitrum fallback:** `0xF8722c901675C4F2F7824E256B8A6477b2c105FB`, description `syrupUSDC / USDC Exchange Rate`, 18 decimals.
+
+Both use historical oracle rounds for the 30-day simple annualization. They report **USDC per syrupUSDC**, not the USDC/USD spot price. Maple states that these feeds relay the canonical Ethereum pool's `convertToExitAssets()` valuation, accounting for unrealized losses. Aave Base's capped syrupUSDC liquidation oracle `0x5e9eCce4aCBBc8172A40f7b8A7c086A4bb5CDeac` was checked on-chain: `RATIO_PROVIDER()` returns the configured Base feed. Intrinsic APR therefore uses the uncapped exchange rate; protocol lending APR, Merkl incentives and SYRUP rewards remain separate. The same group rate applies to exact configured wallet/collateral contracts across supported dashboard networks.
+
+Live validation on 2026-11-27:
+
+- Base block `62951103`, rounds `36893488147419103455` → `36893488147419103485`, rates **1.1901136170458433** → **1.1950672360642736** USDC per token: **5.0641409801% intrinsic APR**.
+- Arbitrum block `527999505`, rounds `36893488147419103429` → `36893488147419103459`, rates **1.1901512802747258** → **1.1951075896507897**: **5.0667310177% intrinsic APR**.
+
+The observations are approximately 30.01 days apart because the feeds update periodically. These are dated validation results; the application recalculates APR using `(current rate − historical rate) × 365 / (30 × historical rate)`. They are not advertised APYs or guaranteed future returns. Historical round reads do not require Ethereum archive access. The Ethereum canonical contract was independently checked for symbol `syrupUSDC`, six share decimals, and underlying USDC `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`.
+
+Sources: [CoinGecko](https://www.coingecko.com/en/coins/syrup-usdc), [Maple Ethereum integration](https://docs.maple.finance/integrate/ethereum-mainnet/asset-integration), [Maple crosschain contracts and feeds](https://docs.maple.finance/integrate/crosschain/syrupusd-crosschain), and [Aave Base address book](https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV3Base.sol). Repeat the primary source check with `npm run check:savings-apr -- syrupUSDC ethereum`; the configured source chain is Base even when the held token is on Ethereum.
