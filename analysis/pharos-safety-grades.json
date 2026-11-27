@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795803428,
+  "asOfSec": 1795807021,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -61,7 +61,7 @@
     {
       "id": "audd-novatti",
       "grade": "C+",
-      "score": 59,
+      "score": 60,
       "ratingStatus": "rated"
     },
     {
@@ -924,7 +924,7 @@
     },
     {
       "id": "mxnb-juno",
-      "grade": "C",
+      "grade": "C+",
       "score": 63,
       "ratingStatus": "rated"
     },
@@ -1212,7 +1212,7 @@
     },
     {
       "id": "siusd-infinifi",
-      "grade": "D",
+      "grade": "F",
       "score": 19,
       "ratingStatus": "rated"
     },
@@ -1243,7 +1243,7 @@
     {
       "id": "sparkusdtbc-spark",
       "grade": "B-",
-      "score": 66,
+      "score": 67,
       "ratingStatus": "rated"
     },
     {
@@ -1309,7 +1309,7 @@
     {
       "id": "steakusdt-steakhouse",
       "grade": "B-",
-      "score": 66,
+      "score": 67,
       "ratingStatus": "rated"
     },
     {
@@ -1362,7 +1362,7 @@
     },
     {
       "id": "susdai-usd-ai",
-      "grade": "D",
+      "grade": "C-",
       "score": 54,
       "ratingStatus": "rated"
     },
@@ -1561,7 +1561,7 @@
     {
       "id": "usd3-3jane",
       "grade": "C-",
-      "score": 52,
+      "score": 54,
       "ratingStatus": "rated"
     },
     {
@@ -2059,7 +2059,7 @@
     {
       "id": "xaut-tether",
       "grade": "A-",
-      "score": 80,
+      "score": 72,
       "ratingStatus": "rated"
     },
     {
@@ -2101,7 +2101,7 @@
     {
       "id": "xsgd-straitsx",
       "grade": "B+",
-      "score": 77,
+      "score": 80,
       "ratingStatus": "rated"
     },
     {
