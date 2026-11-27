@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "lastRunAt": "2026-11-27T01:41:03.733Z",
+  "lastRunAt": "2026-11-27T01:45:57.954Z",
   "lastRunEvent": "external_scheduler",
   "lastScheduledRunAt": "2026-11-26T23:54:56.471Z",
-  "lastExternalRunAt": "2026-11-27T01:41:03.733Z",
+  "lastExternalRunAt": "2026-11-27T01:45:57.954Z",
   "watches": [
     {
       "watch": {
@@ -14,7 +14,7 @@
         "ruleUpdatedAt": "2026-11-23T16:51:02.099Z",
         "thresholdPercent": 90
       },
-      "checkedAt": "2026-11-27T01:41:02.760Z",
+      "checkedAt": "2026-11-27T01:45:57.431Z",
       "status": "ok",
       "baselines": [
         {
@@ -25,8 +25,8 @@
           "label": "sUSDai / frxUSD",
           "utilizationPercent": 100,
           "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL.",
-          "checkedAt": "2026-11-27T01:41:02.760Z",
-          "blockNumber": "26503320"
+          "checkedAt": "2026-11-27T01:45:57.431Z",
+          "blockNumber": "26503344"
         }
       ]
     }
