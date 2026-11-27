@@ -168,6 +168,27 @@
       "timestamp": "2026-11-25T05:41:02.474Z",
       "blockNumber": "26490168",
       "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL."
+    },
+    {
+      "id": "1fb3b5e1fa6c57b75ffbee96b73b415f0dc66f2bc35e1472ee71e1a9a595a45d",
+      "type": "utilization-above-threshold",
+      "address": "0x5929d94eb4c41d91955154465a58a531ad4cf7b8",
+      "network": "ethereum",
+      "protocol": "morpho",
+      "positionId": "morpho-market-0xc4f56ec8f0e89af93a7146eadb9f4330c522aa19c5d2053b0685db1f68e87550",
+      "market": "0xc4f56ec8f0e89af93a7146eadb9f4330c522aa19c5d2053b0685db1f68e87550",
+      "marketAddress": "0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb",
+      "marketLabel": "sUSDai / frxUSD",
+      "token": "0xcacd6fd266af91b8aed52accc382b4e165586e29",
+      "symbol": "frxUSD",
+      "thresholdPercent": 90,
+      "previousUtilizationPercent": 89.939506400738,
+      "utilizationPercent": 100,
+      "utilizationChangePercentagePoints": 10.060493599262003,
+      "previousCheckedAt": "2026-11-27T00:41:03.663Z",
+      "timestamp": "2026-11-27T00:45:56.518Z",
+      "blockNumber": "26503046",
+      "note": "Accrued total loan assets borrowed / supplied × 100; excludes collateral TVL."
     }
   ]
 }
