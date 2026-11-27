@@ -610,5 +610,49 @@
   "zora-network": {
     "chainId": 7777777,
     "name": "Zora"
+  },
+  "flow": {
+    "chainId": 747,
+    "name": "Flow"
+  },
+  "edgechain": {
+    "chainId": 3343,
+    "name": "EDGE Chain"
+  },
+  "nibiru": {
+    "chainId": 6900,
+    "name": "Nibiru"
+  },
+  "abcore": {
+    "chainId": 36888,
+    "name": "AB Core"
+  },
+  "rise": {
+    "chainId": 4153,
+    "name": "RISE"
+  },
+  "0g": {
+    "chainId": 16661,
+    "name": "0G"
+  },
+  "bevm": {
+    "chainId": 11501,
+    "name": "BEVM"
+  },
+  "bifrost": {
+    "chainId": 3068,
+    "name": "Bifrost Network"
+  },
+  "filecoin": {
+    "chainId": 314,
+    "name": "Filecoin"
+  },
+  "exsat": {
+    "chainId": 7200,
+    "name": "exSat"
+  },
+  "assetchain": {
+    "chainId": 42420,
+    "name": "Asset Chain"
   }
 }

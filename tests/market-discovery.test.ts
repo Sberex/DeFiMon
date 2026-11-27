@@ -59,9 +59,10 @@ it('builds borrowing plus deposit searches for Any borrow and only borrowing for
   });
   expect(matchesSupply(b[0], other)).toBe(true);
   expect(matchesBorrow(b[0], other)).toBe(false);
-  expect(discoveryTargets({ supply: 'scrvUSD', borrow: null }, 'base')).toEqual(
-    [],
-  );
+  const baseScrv = discoveryTargets({ supply: 'scrvUSD', borrow: null }, 'base');
+  expect(baseScrv).toHaveLength(2);
+  expect(baseScrv[0].supplied).toBe('0x646a737b9b6024e49f5908762b3ff73e65b5160c');
+  expect(discoveryTargets({ supply: 'scrvUSD', borrow: null }, 'arc')).toEqual([]);
 });
 it('offers case-insensitive prefix search from the actual config including savings assets', () => {
   expect(discoveryChoices('sUsDa')).toEqual(

@@ -4,6 +4,8 @@ A read-only Ethereum, Plasma, Arbitrum, Base, Binance Smart Chain and Arc wallet
 
 ## Current scope
 
+Token metadata includes a [Pharos comparison audit](config/token-matches.pharos.json), optional **Safety Score** page links, and verified 30-day ERC-4626 rate sources. See [config documentation](config/README.md#pharos-comparison-and-safety-score-links) for identity rules and source coverage.
+
 ### Arc mainnet
 
 Arc uses network key `arc`, chain ID **5042**, explorer `https://explorer.arc.io` and optional `ARC_RPC_URL` (default `https://rpc.mainnet.arc.io`). Set `ARC_ARCHIVE_RPC_URL` for historical reads when needed. Wallet analysis, market discovery, leveraged strategies, recommendations and market alert readers support **Morpho Blue** and **Aave v4** on Arc. Other protocols are excluded until their Arc deployments are verified. Aave v4 uses three lending Spokes and four tokenized-deposit contracts from the [official Aave address book](https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV4Arc.sol); Morpho uses Arc core `0x34CD04070dD72b14E241112F6d83812Df5Af7fCD`.

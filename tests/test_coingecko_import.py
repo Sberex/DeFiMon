@@ -23,6 +23,12 @@ class CoinGeckoImport(unittest.TestCase):
         self.assertEqual(report['conflicts'][0]['rejected'], C)
         self.assertEqual(report['additions'], [{'group': 'TOKEN', 'network': 'base', 'address': B, 'coingeckoId': 'test-token'}])
 
+    def test_preserves_safety_score_metadata_without_using_it_as_contract_identity(self):
+        original = {'TOKEN': {'_category': 'Stablecoin', 'ethereum': A, 'Safety Score': 'https://pharos.watch/stablecoin/test-token/'}}
+        groups, report = merge(original, {'ethereum': A, 'base': B})
+        self.assertEqual(groups['TOKEN'], {**original['TOKEN'], 'base': B})
+        self.assertEqual(report['conflicts'], [])
+
     def test_does_not_bridge_two_existing_identities(self):
         original = {'FIRST': {'ethereum': A}, 'SECOND': {'arbitrum': B}}
         groups, report = merge(original, {'ethereum': A, 'arbitrum-one': B, 'base': C})

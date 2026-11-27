@@ -89,7 +89,7 @@ def main():
     groups = {k: dict(v) for k, v in original.items()}; occupied = {}
     for key, group in groups.items():
         for network, address in group.items():
-            if not network.startswith('_'): occupied[(network, address.lower())] = key
+            if not network.startswith('_') and network != 'Safety Score': occupied[(network, address.lower())] = key
         group.setdefault('_category', 'Savings stablecoin' if key == 'sUSDai' else 'Stablecoin' if key in ['USDC', 'USDT', 'GHO'] else 'Other')
     def chain_key(cid, label):
         key = CANONICAL.get(cid) or cg_by_id.get(cid) or slug(label)
@@ -170,7 +170,7 @@ def main():
     for key, g in groups.items():
         assert g['_category'] in CATEGORIES
         for n, a in g.items():
-            if n.startswith('_'): continue
+            if n.startswith('_') or n == 'Safety Score': continue
             assert n in registry and valid_address(a), (key, n, a)
             assert (n, a.lower()) not in seen, (key, n, a)
             seen.add((n, a.lower()))

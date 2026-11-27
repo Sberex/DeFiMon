@@ -201,3 +201,19 @@ Sources: [CoinGecko](https://www.coingecko.com/en/coins/syrup-usdc), [Maple Ethe
 ### Arc native USDC identity
 
 `USDC.arc` is `0x3600000000000000000000000000000000000000`, the native USDC ERC-20 interface on Arc mainnet (5042). The previous `0xfffffffffffffffffffffffffffffffffffffffe` address is the system event emitter, not an ERC-20 token; this correction follows [Circle's Arc contract reference](https://docs.arc.io/arc/references/contract-addresses) and live contract/decimals verification. Native balances have 18 decimals while the interface has six; DeFiMon counts the shared balance only once. Config identity matching still uses chain and contract, never symbol alone. Existing configured Arc assets, including syrupUSDC, now participate in Arc wallet and market discovery.
+
+### Pharos comparison and Safety Score links
+
+The 2026-11-27 comparison uses the MIT-licensed [Pharos catalog at commit 4afc418](https://github.com/TokenBrice/pharos-watch/tree/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins). The full comparison, imported contracts, preserved conflicts, category decisions and on-chain source checks are recorded in **token-matches.pharos.json**. New additions cover active fiat stablecoins and fiat-denominated yield shares with EVM contracts; non-EVM contracts, new metals/variable-reference assets, pre-launch, quarantined and retired records are excluded. Existing records can still receive a Pharos link by exact contract identity, including records already classified Other. WEUSD is added as Other because Pharos documents persistent off-peg pricing and disputed backing. yBOLD, USDN and stkGHO.v1 are Savings stablecoins by explicit user choice; that classification alone does not establish an intrinsic rate source.
+
+`"Safety Score"` is optional metadata containing the canonical Pharos token-page URL, for example:
+
+```json
+"Safety Score": "https://pharos.watch/stablecoin/susdai-usd-ai/"
+```
+
+It links to the current assessment instead of freezing a numeric grade in this config. The parser validates the Pharos origin and page path, and excludes this metadata from contract matching, wallet discovery and CoinGecko/CoinMarketCap import identity checks. All imported page URLs were found in Pharos's published sitemap.
+
+Identity follows exact chain ID and contract, never ticker. Existing addresses, capitalization, categories and configured oracle sources are preserved. The 18 address conflicts are recorded instead of overwritten. Same-ticker assets such as M0's M and unrelated M tokens remain separate. Gauntlet Prime's Ethereum, Base and Arbitrum vaults are explicitly non-fungible in Pharos's review and therefore have separate config groups and rate sources. Additional EVM chain keys describe token deployments only; they do not enable extra dashboard network readers.
+
+Pharos's on-chain rate configuration and reviewed ERC-4626 mechanics identify 47 additional canonical rate sources. Each added source was checked at a current block and the last block at or before 30 days earlier, with unchanged underlying, share decimals and asset decimals, and positive conversion values. Configured `kind: "erc4626"` readers use the vault's own `asset()` and `convertToAssets()` interface as a redemption-rate oracle. They apply `(current rate / old rate − 1) × 365 / 30`, preserving negative returns, and identify the exact source chain/token/underlying in `_intrinsicOracles`. Existing Chainlink/RedStone sources retain priority. Lending collateral oracles, reserve attestations and benchmark yield proxies are not substituted for token-specific share returns. Pharos reviews without a verified compatible source are listed in the audit, leaving intrinsic APR unavailable. Rebasing tokens and distributing funds need a dedicated return reader; a flat token price does not establish zero income.

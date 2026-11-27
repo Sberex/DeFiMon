@@ -88,3 +88,15 @@ it('permits explicitly identified timestamp-free NAV adapters without relaxing o
     expect(() => parseTokenRegistry({ NAV: { _category: 'Savings stablecoin', ethereum: first, _intrinsicOracles: [invalid] } })).toThrow('_intrinsicOracles');
   }
 });
+
+
+it('validates Pharos Safety Score metadata without treating its URL as a contract match', () => {
+  const url = 'https://pharos.watch/stablecoin/susdai-usd-ai/';
+  const input = { RENAMED: { _category: 'Savings stablecoin', ethereum: first, 'Safety Score': url } };
+  expect(parseTokenRegistry(input).RENAMED.safetyScore).toBe(url);
+  expect(parseTokenRegistry(input).RENAMED.addresses).toEqual({ ethereum: first });
+  expect(parseTokenMatches(input)).toEqual({ RENAMED: { ethereum: first } });
+  for (const invalid of [1, {}, null, 'https://evil.example/stablecoin/test/', 'http://pharos.watch/stablecoin/test/', 'https://pharos.watch@evil.example/stablecoin/test/', 'https://pharos.watch/stablecoin/test/?redirect=bad']) {
+    expect(() => parseTokenRegistry({ TOKEN: { ethereum: first, 'Safety Score': invalid } })).toThrow('Safety Score');
+  }
+});

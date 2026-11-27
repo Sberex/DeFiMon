@@ -62,7 +62,24 @@
     "velas": "0x01445c31581c354b7338ac35693ab2001b50b9ae",
     "x-layer": "0x1e4a5963abfd975d8c9021ce480b42188849d41d",
     "xdc-network": "0xd4b5f10d61916bd6e0860144a91ac658de8a1437",
-    "zksync": "0x493257fd37edb34451f62edf8d2a0c418852ba4c"
+    "zksync": "0x493257fd37edb34451f62edf8d2a0c418852ba4c",
+    "Safety Score": "https://pharos.watch/stablecoin/usdt-tether/",
+    "polygon": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+    "ink": "0x0200c29006150606b650577bbe7b6248f58470c1",
+    "berachain": "0x779ded0c9e1022225f8e0630b35a9b54be713736",
+    "unichain": "0x9151434b16b9763660705744891fa906f660ecc5",
+    "hyperevm": "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+    "monad": "0xe7cd86e13ac4309349f30b3435a9d337750fc82d",
+    "corn": "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+    "megaeth": "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+    "katana": "0x2dca96907fde857dd3d816880a0df407eeb2d2f2",
+    "stable": "0x779ded0c9e1022225f8e0630b35a9b54be713736",
+    "pulsechain": "0x0cb6f5a34ad42ec934882a05265a7d5f59b51a2f",
+    "taiko": "0x2def195713cf4a606b49d07e520e22c17899a736",
+    "flow": "0x674843c06ff83502ddb4d37c2e09c01cda38cbc8",
+    "mode": "0xf0f161fda2712db8b566946122a5af183995e2ed",
+    "morph-l2": "0xe7cd86e13ac4309349f30b3435a9d337750fc82d",
+    "tempo": "0x20c00000000000000000000014f22ca97301eb73"
   },
   "USDC": {
     "ethereum": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -139,7 +156,35 @@
     "zksync": "0x1d17cbcf0d6d143135ae902365d2e5e2a16538d4",
     "hyperevm": "0xb88339cb7199b77e23db6e890353e22632ba630f",
     "injective": "0xa00c59ff5a080d2b954d0c75e46e22a0c371235a",
-    "pharos": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+    "pharos": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+    "Safety Score": "https://pharos.watch/stablecoin/usdc-circle/",
+    "pulsechain": "0x15d38573d2feeb82e7ad5187ab8c1d52810b1f07",
+    "abstract": "0x84a71ccd554cc1b02749b35d22f684cc8ec987e1",
+    "berachain": "0x549943e04f40284185054145c6e4e9568c1d3241",
+    "katana": "0x203a662b0bd271a6ed5a60edfbd04bfce608fd36",
+    "edgechain": "0x98d2919b9a214e6fa5384ac81e6864ba686ad74c",
+    "fantom": "0x04068da6c83afcfa0e13ba15a6696662335d5b75",
+    "tempo": "0x20c000000000000000000000b9537d11c60e8b50",
+    "flow": "0xf1815bd50389c46847f0bda824ec8da914045d14",
+    "flare-network": "0xfbda5f676cb37624f28265a144a48b0d6e87d3b6",
+    "klay-token": "0x754288077d0ff82af7a5317c7cb8c444d421d103",
+    "immutable": "0x6de8acc0d406837030ce4dd28e7c08c5a96a30d2",
+    "soneium": "0xba9986d2381edf1da03b0b9c1f8b00dc4aacc369",
+    "iota-evm": "0xfbda5f676cb37624f28265a144a48b0d6e87d3b6",
+    "hemi": "0xad11a8beb98bbf61dbb1aa0f6d6f2ecd87b35afa",
+    "mode": "0xd988097fb8612cc24eec14542bc03424c656005f",
+    "nibiru": "0x0829f361a05d993d5ceb035ca6df3446b060970b",
+    "taiko": "0x07d83526730c7438048d55a4fc0b850e2aab6f0b",
+    "stable": "0x8a2b28364102bea189d99a475c494330ef2bdd0b",
+    "apechain": "0xf1815bd50389c46847f0bda824ec8da914045d14",
+    "bitlayer": "0xf8c374ce88a3be3d374e8888349c7768b607c755",
+    "bob": "0xe75d0fb2c24a55ca1e3f96781a2bcc7bdba058f0",
+    "b-network": "0xe544e8a38add9b1abf21922090445ba93f74b9e5",
+    "citrea": "0xe045e6c36cf77faa2cfb54466d71a3aef7bbe839",
+    "redbelly-network": "0xe08ded898d7782b085cd240d7b234063696765ad",
+    "rootstock": "0x74c9f2b00581f1b11aa7ff05aa9f608b7389de67",
+    "zircuit": "0x3b952c8c9c44e8fe201e2b26f6b2200203214cff",
+    "corn": "0xdf0b24095e15044538866576754f3c964e902ee6"
   },
   "GHO": {
     "ethereum": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
@@ -150,7 +195,10 @@
     "base": "0x6bb7a212910682dcfdbd5bcbb3e28fb4e8da10ee",
     "gnosis": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73",
     "ink": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73",
-    "monad": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73"
+    "monad": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73",
+    "Safety Score": "https://pharos.watch/stablecoin/gho-aave/",
+    "mantle": "0xfc421ad3c883bf9e7c4f42de845c4e4405799e73",
+    "x-layer": "0xde6539018b095353a40753dc54c91c68c9487d4e"
   },
   "sUSDai": {
     "ethereum": "0x0B2b2B2076d95dda7817e785989fE353fe955ef9",
@@ -169,7 +217,9 @@
         "label": "sUSDai/USDai raw exchange-rate oracle",
         "history": "rounds"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/susdai-usd-ai/",
+    "arc": "0x0b2b2b2076d95dda7817e785989fe353fe955ef9"
   },
   "wstETH": {
     "ethereum": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
@@ -376,7 +426,10 @@
     "swellchain": "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34",
     "x-layer": "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34",
     "zircuit": "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34",
-    "zksync": "0x39fe7a0dacce31bd90418e3e659fb0b5f0b3db0d"
+    "zksync": "0x39fe7a0dacce31bd90418e3e659fb0b5f0b3db0d",
+    "Safety Score": "https://pharos.watch/stablecoin/usde-ethena/",
+    "ink": "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34",
+    "tempo": "0x20c0000000000000000000002f52d5cc21a3207b"
   },
   "DAI": {
     "_category": "Stablecoin",
@@ -399,7 +452,19 @@
     "moonriver": "0x80a16016cc4a2e6a2caca8a4a498b1699ff0f844",
     "optimism": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
     "polygon": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
-    "anubis": "0x83fd06f0846d9d90b3016bf670efe2e0b11cde14"
+    "anubis": "0x83fd06f0846d9d90b3016bf670efe2e0b11cde14",
+    "Safety Score": "https://pharos.watch/stablecoin/dai-makerdao/",
+    "kava": "0x765277eebeca2e31912c9946eae1021199b39c61",
+    "pulsechain": "0xefd766ccb38eaf1dfd701853bfce31359239f305",
+    "zksync": "0x4b9eb6c0b6ea15176bbf62841c6b2a8a398cb656",
+    "astar": "0x6de33698e9e9b787e09d3bd7771ef63557e148bb",
+    "linea": "0x4af15ec2a0bd43db75dd04e62faa3b8ef36b00d5",
+    "scroll": "0xca77eb3fefe3725dc33bccb54edefc3d9f764f97",
+    "rootstock": "0x6b1a73d547f4009a26b8485b63d7015d248ad406",
+    "unichain": "0x20cab320a855b39f724131c69424240519573f81",
+    "taiko": "0x7d02a3e0180451b17e5d7f29ef78d06f8117106c",
+    "morph-l2": "0xef8a24599229d002b28ba2f5c0ebdd3c0effbed4",
+    "hemi": "0x6c851f501a3f24e29a8e39a29591cddf09369080"
   },
   "BCH": {
     "_category": "Other",
@@ -430,7 +495,11 @@
     "mantle": "0x111111d2bf19e43c34263401e0cad979ed1cdb61",
     "monad": "0x111111d2bf19e43c34263401e0cad979ed1cdb61",
     "morph-l2": "0x111111d2bf19e43c34263401e0cad979ed1cdb61",
-    "plume-network": "0x111111d2bf19e43c34263401e0cad979ed1cdb61"
+    "plume-network": "0x111111d2bf19e43c34263401e0cad979ed1cdb61",
+    "Safety Score": "https://pharos.watch/stablecoin/usd1-world-liberty-financial/",
+    "abcore": "0x111111d2bf19e43c34263401e0cad979ed1cdb61",
+    "tempo": "0x20c000000000000000000000111111111e910f0f",
+    "x-layer": "0x111111d2bf19e43c34263401e0cad979ed1cdb61"
   },
   "GRAM": {
     "_category": "Other",
@@ -440,7 +509,8 @@
   "XAUt": {
     "_category": "Other",
     "bsc": "0x21caef8a43163eea865baee23b9c2e327696a3bf",
-    "ethereum": "0x68749665ff8d2d112fa859aa293f07a622782f38"
+    "ethereum": "0x68749665ff8d2d112fa859aa293f07a622782f38",
+    "Safety Score": "https://pharos.watch/stablecoin/xaut-tether/"
   },
   "RLUSD": {
     "_category": "Stablecoin",
@@ -448,7 +518,8 @@
     "ethereum": "0x8292bb45bf1ee4d140127049757c2e0ff06317ed",
     "ink": "0x8d58c0c60b8d6b88fa98b291a646db34d0f98258",
     "optimism": "0x8d58c0c60b8d6b88fa98b291a646db34d0f98258",
-    "unichain": "0x8d58c0c60b8d6b88fa98b291a646db34d0f98258"
+    "unichain": "0x8d58c0c60b8d6b88fa98b291a646db34d0f98258",
+    "Safety Score": "https://pharos.watch/stablecoin/rlusd-ripple/"
   },
   "USDG": {
     "_category": "Stablecoin",
@@ -457,7 +528,8 @@
     "ink": "0xe343167631d89b6ffc58b88d6b7fb0228795491d",
     "mantle": "0x063c1d1ef6e9099ce3e8e9ad5c6173d12c49c086",
     "robinhood": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
-    "x-layer": "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8"
+    "x-layer": "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8",
+    "Safety Score": "https://pharos.watch/stablecoin/usdg-paxos/"
   },
   "PYUSD": {
     "_category": "Stablecoin",
@@ -466,7 +538,17 @@
     "polygon": "0x99af3eea856556646c98c8b9b2548fe815240750",
     "stable": "0x28f1f38a9f7db1f769a71af0a13e8bace2ab0e9f",
     "x-layer": "0x87b4a8176b3df6b71e26cc095edcaf4db07506b4",
-    "ink": "0x142cdc44890978b506e745bb3bd11607b7f7faef"
+    "ink": "0x142cdc44890978b506e745bb3bd11607b7f7faef",
+    "Safety Score": "https://pharos.watch/stablecoin/pyusd-paypal/",
+    "flow": "0x99af3eea856556646c98c8b9b2548fe815240750",
+    "sei-v2": "0x142cdc44890978b506e745bb3bd11607b7f7faef",
+    "avalanche": "0x142cdc44890978b506e745bb3bd11607b7f7faef",
+    "abstract": "0x142cdc44890978b506e745bb3bd11607b7f7faef",
+    "plume-network": "0x142cdc44890978b506e745bb3bd11607b7f7faef",
+    "codex": "0x99af3eea856556646c98c8b9b2548fe815240750",
+    "fraxtal": "0x99af3eea856556646c98c8b9b2548fe815240750",
+    "optimism": "0xa0c9b923f4551f1ec1a49665943160b18704ce06",
+    "berachain": "0x688e72142674041f8f6af4c808a4045ca1d6ac82"
   },
   "SHIB": {
     "_category": "Other",
@@ -495,13 +577,15 @@
   "PAXG": {
     "_category": "Other",
     "ethereum": "0x45804880de22913dafe09f4980848ece6ecbaf78",
-    "base": "0xe904aea5e1b110c9174728fa2effc8aed19e98ef"
+    "base": "0xe904aea5e1b110c9174728fa2effc8aed19e98ef",
+    "Safety Score": "https://pharos.watch/stablecoin/paxg-paxos/"
   },
   "U": {
     "_category": "Stablecoin",
     "bsc": "0xce24439f2d9c6a2289f741120fe202248b666666",
     "ethereum": "0xce24439f2d9c6a2289f741120fe202248b666666",
-    "robinhood": "0xce24439f2d9c6a2289f741120fe202248b666666"
+    "robinhood": "0xce24439f2d9c6a2289f741120fe202248b666666",
+    "Safety Score": "https://pharos.watch/stablecoin/u-united-stables/"
   },
   "PEPE": {
     "_category": "Other",
@@ -546,7 +630,8 @@
   "USDD": {
     "_category": "Stablecoin",
     "bsc": "0x45e51bc23d592eb2dba86da3985299f7895d66ba",
-    "ethereum": "0x4f8e5de400de08b164e7421b3ee387f461becd1a"
+    "ethereum": "0x4f8e5de400de08b164e7421b3ee387f461becd1a",
+    "Safety Score": "https://pharos.watch/stablecoin/usdd-tron-dao-reserve/"
   },
   "ICP": {
     "_category": "Other",
@@ -684,7 +769,11 @@
     "arbitrum": "0x4d15a3a2286d883af0aa1b3f21367843fac63e07",
     "avalanche": "0x1c20e891bab6b1727d14da358fae2984ed9b59eb",
     "bsc": "0x40af3827f39d0eacbf4a168f8d4ee67c121d11c9",
-    "ethereum": "0x0000000000085d4780b73119b644ae5ecd22b376"
+    "ethereum": "0x0000000000085d4780b73119b644ae5ecd22b376",
+    "Safety Score": "https://pharos.watch/stablecoin/tusd-trueusd/",
+    "polygon": "0x2e1ad108ff1d8c782fcbbb89aad783ac49586756",
+    "optimism": "0xcb59a0a753fdb7491d5f3d794316f1ade197b21e",
+    "fantom": "0x9879abdea01a879644185341f7af7d8343556b7a"
   },
   "币安人生": {
     "_category": "Other",
@@ -712,7 +801,10 @@
     "plasma": "0x3ee196e78d4d4248b849b8e1c7f44c5457fafd2c",
     "sonic": "0xe715cba7b5ccb33790cebff1436809d36cb17e57",
     "optimism": "0xdcb612005417dc906ff72c87df732e5a90d49e11",
-    "world-chain": "0x1c60ba0a0ed1019e8eb035e6daf4155a5ce2380b"
+    "world-chain": "0x1c60ba0a0ed1019e8eb035e6daf4155a5ce2380b",
+    "Safety Score": "https://pharos.watch/stablecoin/eurc-circle/",
+    "polygon": "0x8a037dbca8134ffc72c362e394e35e0cad618f85",
+    "tempo": "0x20c0000000000000000000001621e21f71cf12fb"
   },
   "STABLE": {
     "_category": "Other",
@@ -792,7 +884,8 @@
     "_category": "Stablecoin",
     "arbitrum": "0x93c9932e4afa59201f0b5e63f7d816516f1669fe",
     "bsc": "0xc5f0f7b66764f6ec8c8dff7ba683102295e16409",
-    "ethereum": "0xc5f0f7b66764f6ec8c8dff7ba683102295e16409"
+    "ethereum": "0xc5f0f7b66764f6ec8c8dff7ba683102295e16409",
+    "Safety Score": "https://pharos.watch/stablecoin/fdusd-first-digital/"
   },
   "STRK": {
     "_category": "Other",
@@ -999,7 +1092,10 @@
         "note": "USDT per syrupUSDT. Uses the uncapped exchange-rate reference, not Aave CAPO’s capped USD liquidation price; USDT market prices and protocol lending interest are separate.",
         "evidence": "https://github.com/bgd-labs/aave-address-book/blob/main/src/AaveV3Plasma.sol: syrupUSDT_UNDERLYING = 0xC4374775489CB9C56003BF2C9b12495fC64F0771; syrupUSDT_ORACLE = 0x0A3F8218a98337Ef37dCAE4F8a8cfaB0711C64cF. The CAPO oracle RATIO_PROVIDER() returns this feed. https://www.coingecko.com/en/coins/syrupusdt"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/syrupusdt-maple/",
+    "mantle": "0x051665f2455116e929b9972c36d23070f5054ce0",
+    "ink": "0x8a76fe7fa6da27f85a626c5c53730b38d13603d7"
   },
   "SYRUP": {
     "_category": "Other",
@@ -1225,13 +1321,16 @@
     "mantle": "0x5be26527e817998a7206475496fde1e68957c5a6",
     "plume-network": "0xd2b65e851be3d80d3c2ce795eb2e78f16cb088b2",
     "sei-v2": "0x54cd901491aef397084453f4372b93c33260e2a6",
-    "tempo": "0x20c000000000000000000000d479b9f6ec0ceff9"
+    "tempo": "0x20c000000000000000000000d479b9f6ec0ceff9",
+    "Safety Score": "https://pharos.watch/stablecoin/usdy-ondo-finance/"
   },
   "USDf": {
     "_category": "Stablecoin",
     "bsc": "0xb3b02e4a9fb2bd28cc2ff97b0ab3f6b3ec1ee9d2",
     "ethereum": "0xfa2b947eec368f42195f24f36d2af29f7c24cec2",
-    "xdc-network": "0x8210c0634ab8f273806e4b7866e9db353773c44b"
+    "xdc-network": "0x8210c0634ab8f273806e4b7866e9db353773c44b",
+    "Safety Score": "https://pharos.watch/stablecoin/usdf-falcon/",
+    "base": "0x8210c0634ab8f273806e4b7866e9db353773c44b"
   },
   "HTX": {
     "_category": "Other",
@@ -1246,13 +1345,15 @@
   "USDGO": {
     "_category": "Stablecoin",
     "ethereum": "0x4cf5920df52f5b1f246e2e38e1786ae1cf03ecf5",
-    "morph-l2": "0x4cf5920df52f5b1f246e2e38e1786ae1cf03ecf5"
+    "morph-l2": "0x4cf5920df52f5b1f246e2e38e1786ae1cf03ecf5",
+    "Safety Score": "https://pharos.watch/stablecoin/usdgo-osl/"
   },
   "OUSD": {
     "_category": "Stablecoin",
     "base": "0xb2000000000000000000002feb517dfec7415344",
     "ethereum": "0x9f6f3991d525015a6f8caf062c83b62fd3ac4436",
-    "tempo": "0x20c0000000000000000000006a37da5c996874be"
+    "tempo": "0x20c0000000000000000000006a37da5c996874be",
+    "Safety Score": "https://pharos.watch/stablecoin/ousd-open-standard/"
   },
   "CTM": {
     "_category": "Other",
@@ -1280,14 +1381,17 @@
     "arbitrum": "0x35f1c5cb7fb977e669fd244c567da99d8a3a6850",
     "ethereum": "0x73a15fed60bf67631dc6cd7bc5b6e8da8190acf5",
     "base": "0x758a3e0b1f842c9306b783f8a4078c6c8c03a270",
-    "bsc": "0x758a3e0b1f842c9306b783f8a4078c6c8c03a270"
+    "bsc": "0x758a3e0b1f842c9306b783f8a4078c6c8c03a270",
+    "Safety Score": "https://pharos.watch/stablecoin/usd0-usual/"
   },
   "USDAI": {
     "_category": "Stablecoin",
     "arbitrum": "0x0a1a1a107e45b7ced86833863f482bc5f4ed82ef",
     "plasma": "0x0a1a1a107e45b7ced86833863f482bc5f4ed82ef",
     "base": "0x0a1a1a107e45b7ced86833863f482bc5f4ed82ef",
-    "ethereum": "0x0a1a1a107e45b7ced86833863f482bc5f4ed82ef"
+    "ethereum": "0x0a1a1a107e45b7ced86833863f482bc5f4ed82ef",
+    "Safety Score": "https://pharos.watch/stablecoin/usdai-usd-ai/",
+    "arc": "0x0a1a1a107e45b7ced86833863f482bc5f4ed82ef"
   },
   "DRV": {
     "_category": "Other",
@@ -1325,7 +1429,11 @@
     "boba": "0x7562f525106f5d54e891e005867bf489b5988cd9",
     "evmos": "0xe03494d0033687543a80c9b1ca7d6237f2ea8bd8",
     "harmony-shard-0": "0xfa7191d292d5633f702b0bd7e3e3bccc0e633200",
-    "moonbeam": "0x322e86852e492a7ee17f28a78c663da38fb33bfb"
+    "moonbeam": "0x322e86852e492a7ee17f28a78c663da38fb33bfb",
+    "Safety Score": "https://pharos.watch/stablecoin/frax-frax/",
+    "zksync": "0xb4c1544cb4163f4c2eca1ae9ce999f63892d912a",
+    "base": "0x909dbde1ebe906af95660033e478d59efe831fed",
+    "blast": "0x909dbde1ebe906af95660033e478d59efe831fed"
   },
   "BTSE": {
     "_category": "Other",
@@ -1333,7 +1441,8 @@
   },
   "EURCV": {
     "_category": "Stablecoin",
-    "ethereum": "0x5f7827fdeb7c20b443265fc2f40845b715385ff2"
+    "ethereum": "0x5f7827fdeb7c20b443265fc2f40845b715385ff2",
+    "Safety Score": "https://pharos.watch/stablecoin/eurcv-societe-generale-forge/"
   },
   "KOGE": {
     "_category": "Other",
@@ -1346,7 +1455,8 @@
   "USAT": {
     "_category": "Stablecoin",
     "celo": "0xd2ab3c9a02dbbab236bfec45d1d755df4267f771",
-    "ethereum": "0x07041776f5007aca2a54844f50503a18a72a8b68"
+    "ethereum": "0x07041776f5007aca2a54844f50503a18a72a8b68",
+    "Safety Score": "https://pharos.watch/stablecoin/usat-tether/"
   },
   "WFI": {
     "_category": "Other",
@@ -1391,11 +1501,14 @@
     "mantle": "0x00000000efe302beaa2b3e6e1b18d08d69a9012a",
     "monad": "0x00000000efe302beaa2b3e6e1b18d08d69a9012a",
     "polygon": "0x00000000efe302beaa2b3e6e1b18d08d69a9012a",
-    "plume-network": "0x00000000efe302beaa2b3e6e1b18d08d69a9012a"
+    "plume-network": "0x00000000efe302beaa2b3e6e1b18d08d69a9012a",
+    "Safety Score": "https://pharos.watch/stablecoin/ausd-agora/",
+    "plasma": "0x00000000efe302beaa2b3e6e1b18d08d69a9012a"
   },
   "GUSD": {
     "_category": "Savings stablecoin",
-    "ethereum": "0xaf6186b3521b60e27396b5d23b48abc34bf585c5"
+    "ethereum": "0xaf6186b3521b60e27396b5d23b48abc34bf585c5",
+    "Safety Score": "https://pharos.watch/stablecoin/gusd-gate/"
   },
   "TIBBIR": {
     "_category": "Other",
@@ -1507,7 +1620,8 @@
   "USDon": {
     "_category": "Stablecoin",
     "bsc": "0x1f8955e640cbd9abc3c3bb408c9e2e1f5f20dfe6",
-    "ethereum": "0xace8e719899f6e91831b18ae746c9a965c2119f1"
+    "ethereum": "0xace8e719899f6e91831b18ae746c9a965c2119f1",
+    "Safety Score": "https://pharos.watch/stablecoin/usdon-ondo/"
   },
   "GOOGLB": {
     "_category": "Other",
@@ -1543,7 +1657,13 @@
     "stable": "0x80eede496655fb9047dd39d9f418d5483ed600df",
     "unichain": "0x80eede496655fb9047dd39d9f418d5483ed600df",
     "x-layer": "0x80eede496655fb9047dd39d9f418d5483ed600df",
-    "zksync": "0xea77c590bb36c43ef7139ce649cfbcfd6163170d"
+    "zksync": "0xea77c590bb36c43ef7139ce649cfbcfd6163170d",
+    "Safety Score": "https://pharos.watch/stablecoin/frxusd-frax/",
+    "tempo": "0x20c0000000000000000000003554d28269e0f3c2",
+    "monad": "0x58e3ee6accd124642ddb5d3f91928816be8d8ed3",
+    "world-chain": "0x80eede496655fb9047dd39d9f418d5483ed600df",
+    "hyperevm": "0x80eede496655fb9047dd39d9f418d5483ed600df",
+    "somnia": "0x00000000d61733e7a393a10a5b48c311abe8f1e5"
   },
   "NPC": {
     "_category": "Other",
@@ -1588,7 +1708,8 @@
   },
   "lisUSD": {
     "_category": "Stablecoin",
-    "bsc": "0x0782b6d8c4551b9760e74c0545a9bcd90bdc41e5"
+    "bsc": "0x0782b6d8c4551b9760e74c0545a9bcd90bdc41e5",
+    "Safety Score": "https://pharos.watch/stablecoin/lisusd-lista/"
   },
   "QQQX": {
     "_category": "Other",
@@ -1621,7 +1742,8 @@
     "plume-network": "0xa0c4f78a29ead4abf6b7f5b3f0d05c0f3eab8ddf",
     "hyperevm": "0x14f0dfc32e8af769961b31ba3e89389bd6797652",
     "hashkey-chain": "0x2577217c86ae2e8a5f70abb663b9231e5d47d15a",
-    "polygon": "0xa7e22972a19dd924afeedf3db28033b146801081"
+    "polygon": "0xa7e22972a19dd924afeedf3db28033b146801081",
+    "Safety Score": "https://pharos.watch/stablecoin/xaum-matrixdock/"
   },
   "TSLAX": {
     "_category": "Other",
@@ -1651,7 +1773,8 @@
   },
   "FIDD": {
     "_category": "Stablecoin",
-    "ethereum": "0x7c135549504245b5eae64fc0e99fa5ebabb8e35d"
+    "ethereum": "0x7c135549504245b5eae64fc0e99fa5ebabb8e35d",
+    "Safety Score": "https://pharos.watch/stablecoin/fidd-fidelity/"
   },
   "DIEM": {
     "_category": "Other",
@@ -2009,7 +2132,8 @@
   "XUSD": {
     "_category": "Stablecoin",
     "bsc": "0xf81ac2e1a0373dde1bce01e2fe694a9b7e3bfcb9",
-    "ethereum": "0xc08e7e23c235073c6807c2efe7021304cb7c2815"
+    "ethereum": "0xc08e7e23c235073c6807c2efe7021304cb7c2815",
+    "Safety Score": "https://pharos.watch/stablecoin/xusd-straitsx/"
   },
   "CFG": {
     "_category": "Other",
@@ -2023,7 +2147,13 @@
     "_category": "Stablecoin",
     "bsc": "0xab3dbcd9b096c3ff76275038bf58eac10d22c61f",
     "ethereum": "0x4274cd7277c7bb0806bd5fe84b9adae466a8da0a",
-    "avalanche": "0xca2671dcd031a72359f456c212f62a9bda737cd7"
+    "avalanche": "0xca2671dcd031a72359f456c212f62a9bda737cd7",
+    "Safety Score": "https://pharos.watch/stablecoin/yusd-aegis/",
+    "katana": "0xca2671dcd031a72359f456c212f62a9bda737cd7",
+    "arbitrum": "0xf07781182b47e728b040f9e35321260e359ff9f7",
+    "base": "0xca2671dcd031a72359f456c212f62a9bda737cd7",
+    "monad": "0xca2671dcd031a72359f456c212f62a9bda737cd7",
+    "plasma": "0xf07781182b47e728b040f9e35321260e359ff9f7"
   },
   "FOLKS": {
     "_category": "Other",
@@ -2103,7 +2233,8 @@
     "gnosis": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
     "optimism": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
     "polygon": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
-    "sonic": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553"
+    "sonic": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+    "Safety Score": "https://pharos.watch/stablecoin/zchf-frankencoin/"
   },
   "BARD": {
     "_category": "Other",
@@ -2170,7 +2301,11 @@
   },
   "CUSD": {
     "_category": "Stablecoin",
-    "celo": "0x765de816845861e75a25fca122bb6898b8b1282a"
+    "celo": "0x765de816845861e75a25fca122bb6898b8b1282a",
+    "Safety Score": "https://pharos.watch/stablecoin/cusd-celo/",
+    "monad": "0xbc69212b8e4d445b2307c9d32dd68e2a4df00115",
+    "ethereum": "0x9b9e2de4cb4ca479943f36dffc72c7253bb1f66a",
+    "klay-token": "0x08745bee17026ed2e0e39a98f81189b9e14ab1b3"
   },
   "KAVA": {
     "_category": "Other",
@@ -2189,7 +2324,8 @@
   },
   "GUSD#3306": {
     "_category": "Stablecoin",
-    "ethereum": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd"
+    "ethereum": "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd",
+    "Safety Score": "https://pharos.watch/stablecoin/gusd-gemini/"
   },
   "BUSD": {
     "_category": "Stablecoin",
@@ -2237,7 +2373,12 @@
     "base": "0x03569cc076654f82679c4ba2124d64774781b01d",
     "ethereum": "0x6440f144b7e50d6a8439336510312d2f54beb01d",
     "optimism": "0x03569cc076654f82679c4ba2124d64774781b01d",
-    "hyperevm": "0x84533b1512a3a23f0c9668d88fdf86feffdbb11a"
+    "hyperevm": "0x84533b1512a3a23f0c9668d88fdf86feffdbb11a",
+    "Safety Score": "https://pharos.watch/stablecoin/bold-liquity/",
+    "avalanche": "0x03569cc076654f82679c4ba2124d64774781b01d",
+    "sonic": "0xf05a207442f14e446b0e32b12d2043bfc68cb1c9",
+    "scroll": "0x03569cc076654f82679c4ba2124d64774781b01d",
+    "berachain": "0xf05a207442f14e446b0e32b12d2043bfc68cb1c9"
   },
   "DODO": {
     "_category": "Other",
@@ -2313,7 +2454,8 @@
   "EURI": {
     "_category": "Stablecoin",
     "bsc": "0x9d1a7a3191102e9f900faa10540837ba84dcbae7",
-    "ethereum": "0x9d1a7a3191102e9f900faa10540837ba84dcbae7"
+    "ethereum": "0x9d1a7a3191102e9f900faa10540837ba84dcbae7",
+    "Safety Score": "https://pharos.watch/stablecoin/euri-banking-circle/"
   },
   "PCI": {
     "_category": "Other",
@@ -2508,7 +2650,8 @@
     "_category": "Stablecoin",
     "ethereum": "0xa0d69e286b938e21cbf7e51d71f6a4c8918f482f",
     "arbitrum": "0x12275dcb9048680c4be40942ea4d92c74c63b844",
-    "base": "0xcfa3ef56d303ae4faaba0592388f19d7c3399fb4"
+    "base": "0xcfa3ef56d303ae4faaba0592388f19d7c3399fb4",
+    "Safety Score": "https://pharos.watch/stablecoin/eusd-electronic-usd/"
   },
   "RAVE": {
     "_category": "Other",
@@ -2574,7 +2717,13 @@
     "base": "0x368181499736d0c0cc614dbb145e2ec1ac86b8c6",
     "optimism": "0xc40f949f8a4e094d1b49a23ea9241d289b7b2819",
     "polygon": "0x23001f892c0c82b79303edc9b9033cd190bb21c7",
-    "zksync": "0x503234f203fc7eb888eec8513210612a43cf6115"
+    "zksync": "0x503234f203fc7eb888eec8513210612a43cf6115",
+    "Safety Score": "https://pharos.watch/stablecoin/lusd-liquity/",
+    "scroll": "0xedeabc3a1e7d21fe835ffa6f83a710c70bb1a051",
+    "bsc": "0x181002d60d504d30a39601ae13af3191cb102580",
+    "avalanche": "0xda0019e7e50ee4990440b1aa5dffcac6e27ee27b",
+    "fantom": "0x16365b45eb269b5b5dacb34b4a15399ec79b95eb",
+    "polygon-zkevm": "0x01e9a866c361ead20ab4e838287dd464dc67a50e"
   },
   "PROVE": {
     "_category": "Other",
@@ -2618,7 +2767,8 @@
     "bsc": "0x27f6c8289550fce67f6b50bed1f519966afe5287",
     "ethereum": "0x27f6c8289550fce67f6b50bed1f519966afe5287",
     "gnosis": "0x1f34490f8e8e776ffc547b39b864364035eaf44f",
-    "polygon": "0x27f6c8289550fce67f6b50bed1f519966afe5287"
+    "polygon": "0x27f6c8289550fce67f6b50bed1f519966afe5287",
+    "Safety Score": "https://pharos.watch/stablecoin/tgbp-tokenised/"
   },
   "AI": {
     "_category": "Other",
@@ -2837,7 +2987,10 @@
   },
   "USDP": {
     "_category": "Stablecoin",
-    "ethereum": "0x8e870d67f660d95d5be530380d0ec0bd388289e1"
+    "ethereum": "0x8e870d67f660d95d5be530380d0ec0bd388289e1",
+    "Safety Score": "https://pharos.watch/stablecoin/usdp-paxos/",
+    "bsc": "0xb7f8cd00c5a06c0537e2abff0b58033d02e5e094",
+    "linea": "0xd2bc272ea0154a93bf00191c8a1db23e67643ec5"
   },
   "SWFTC": {
     "_category": "Other",
@@ -2891,7 +3044,8 @@
     "_category": "Stablecoin",
     "ethereum": "0x7cd017ca5ddb86861fa983a34b5f495c6f898c41",
     "polygon": "0x7cd017ca5ddb86861fa983a34b5f495c6f898c41",
-    "tomochain": "0xba73e59f11597c1c13b0d9114688efb6a6d430f6"
+    "tomochain": "0xba73e59f11597c1c13b0d9114688efb6a6d430f6",
+    "Safety Score": "https://pharos.watch/stablecoin/wusd-worldwide/"
   },
   "CTR": {
     "_category": "Other",
@@ -3256,11 +3410,13 @@
     "_category": "Other",
     "bsc": "0x8b872732b07be325a8803cdb480d9d20b6f8d11b",
     "ethereum": "0xf3e4872e6a4cf365888d93b6146a2baa7348f1a4",
-    "hyperevm": "0xd53d98d13d93c817011645442c2e4d46e499b460"
+    "hyperevm": "0xd53d98d13d93c817011645442c2e4d46e499b460",
+    "Safety Score": "https://pharos.watch/stablecoin/slvon-ondo/"
   },
   "CGO": {
     "_category": "Other",
-    "xdc-network": "0x8f9920283470f52128bf11b0c14e798be704fd15"
+    "xdc-network": "0x8f9920283470f52128bf11b0c14e798be704fd15",
+    "Safety Score": "https://pharos.watch/stablecoin/cgo-comtech/"
   },
   "CVC": {
     "_category": "Other",
@@ -3334,7 +3490,8 @@
     "_category": "Stablecoin",
     "ethereum": "0xaca92e438df0b2401ff60da7e4337b687a2435da",
     "linea": "0xaca92e438df0b2401ff60da7e4337b687a2435da",
-    "monad": "0xaca92e438df0b2401ff60da7e4337b687a2435da"
+    "monad": "0xaca92e438df0b2401ff60da7e4337b687a2435da",
+    "Safety Score": "https://pharos.watch/stablecoin/musd-metamask/"
   },
   "CARV": {
     "_category": "Other",
@@ -3834,7 +3991,8 @@
     "base": "0x0a4c9cb2778ab3302996a34befcf9a8bc288c33b",
     "ethereum": "0x70e8de73ce538da2beed35d14187f6959a8eca96",
     "polygon": "0xdc3326e71d45186f113a2f448984ca0e8d201995",
-    "hedera-hashgraph": "0x00000000000000000000000000000000001e4d82"
+    "hedera-hashgraph": "0x00000000000000000000000000000000001e4d82",
+    "Safety Score": "https://pharos.watch/stablecoin/xsgd-straitsx/"
   },
   "AAPLX": {
     "_category": "Other",
@@ -3874,7 +4032,8 @@
   "EURR": {
     "_category": "Stablecoin",
     "ethereum": "0x50753cfaf86c094925bf976f218d043f8791e408",
-    "plasma": "0xc60bca6bd5790611b8a302d4c5df37d769c81121"
+    "plasma": "0xc60bca6bd5790611b8a302d4c5df37d769c81121",
+    "Safety Score": "https://pharos.watch/stablecoin/eurr-stablr/"
   },
   "TQQQB": {
     "_category": "Other",
@@ -4089,7 +4248,8 @@
   },
   "USDCV": {
     "_category": "Stablecoin",
-    "ethereum": "0x5422374b27757da72d5265cc745ea906e0446634"
+    "ethereum": "0x5422374b27757da72d5265cc745ea906e0446634",
+    "Safety Score": "https://pharos.watch/stablecoin/usdcv-societe-generale-forge/"
   },
   "ANYONE": {
     "_category": "Other",
@@ -4213,7 +4373,8 @@
   "GYEN": {
     "_category": "Stablecoin",
     "arbitrum": "0x589d35656641d6ab57a545f08cf473ecd9b6d5f7",
-    "ethereum": "0xc08512927d12348f6620a698105e1baac6ecd911"
+    "ethereum": "0xc08512927d12348f6620a698105e1baac6ecd911",
+    "Safety Score": "https://pharos.watch/stablecoin/gyen-gyen/"
   },
   "PORTAL": {
     "_category": "Other",
@@ -4285,7 +4446,8 @@
   "USDR": {
     "_category": "Other",
     "ethereum": "0x7b43e3875440b44613dc3bc08e7763e6da63c8f8",
-    "plasma": "0x5e2faa288a7334388fba3573712101a5cdcaba97"
+    "plasma": "0x5e2faa288a7334388fba3573712101a5cdcaba97",
+    "Safety Score": "https://pharos.watch/stablecoin/usdr-stablr/"
   },
   "AMZNX": {
     "_category": "Other",
@@ -4515,7 +4677,8 @@
   },
   "KGST": {
     "_category": "Stablecoin",
-    "bsc": "0x94be0bba8e1e303fe998c9360b57b826f1a4f828"
+    "bsc": "0x94be0bba8e1e303fe998c9360b57b826f1a4f828",
+    "Safety Score": "https://pharos.watch/stablecoin/kgst-kyrgyz-som/"
   },
   "SPCM": {
     "_category": "Other",
@@ -4701,7 +4864,8 @@
   "USDQ": {
     "_category": "Stablecoin",
     "ethereum": "0xc83e27f270cce0a3a3a29521173a83f402c1768b",
-    "polygon": "0xb291996477504506bf5f583102b5b5ea5d1e40e0"
+    "polygon": "0xb291996477504506bf5f583102b5b5ea5d1e40e0",
+    "Safety Score": "https://pharos.watch/stablecoin/usdq-quantoz/"
   },
   "CHEEL": {
     "_category": "Other",
@@ -4840,7 +5004,8 @@
         "underlying": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
         "label": "sUSDe/USDe on-chain redemption rate"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/susde-ethena/"
   },
   "sDAI": {
     "_category": "Savings stablecoin",
@@ -4856,7 +5021,9 @@
         "underlying": "0x6b175474e89094c44da98b954eedeac495271d0f",
         "label": "sDAI/DAI on-chain redemption rate"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/sdai-sky/",
+    "world-chain": "0x859dbe24b90c9f2f7742083d3cf59ca41f55be5d"
   },
   "sUSDS": {
     "_category": "Savings stablecoin",
@@ -4873,13 +5040,19 @@
         "underlying": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",
         "label": "sUSDS/USDS on-chain redemption rate"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/susds-sky/",
+    "unichain": "0xa06b10db9f390990364a3984c04fadf1c13691b5"
   },
   "USDS": {
     "_category": "Stablecoin",
     "arbitrum": "0x6491c05a82219b8d1479057361ff1654749b876b",
     "base": "0x820c137fa70c8691f0e44dc420a5e53c168921dc",
-    "ethereum": "0xdc035d45d973e3ec169d2276ddab16f1e407384f"
+    "ethereum": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",
+    "Safety Score": "https://pharos.watch/stablecoin/usds-sky/",
+    "optimism": "0x4f13a96ec5c4cf34e442b46bbd98a0791f20edc3",
+    "unichain": "0x7e10036acc4b56d4dfca3b77810356ce52313f9c",
+    "avalanche": "0x86ff09db814ac346a7c6fe2cd648f27706d1d470"
   },
   "PURR": {
     "_category": "Other",
@@ -4887,7 +5060,8 @@
   },
   "XAUT0": {
     "_category": "Other",
-    "hyperevm": "0xf4d9235269a96aadafc9adae454a0618ebe37949"
+    "hyperevm": "0xf4d9235269a96aadafc9adae454a0618ebe37949",
+    "Safety Score": "https://pharos.watch/stablecoin/xaut-tether/"
   },
   "reUSD": {
     "_category": "Savings stablecoin",
@@ -4908,7 +5082,15 @@
         "label": "reUSD/USD exchange-rate oracle",
         "evidence": "https://sourcify.dev/server/v2/contract/1/0x72B5760cFBE437DD01409f44055fDfB8f8121B46?fields=all"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/reusd-re-protocol/",
+    "plasma": "0xe08853433fdbc504240455e295b644e0f44c3b29",
+    "katana": "0xe08853433fdbc504240455e295b644e0f44c3b29",
+    "tempo": "0x20c000000000000000000000e09a4cfec804f102",
+    "berachain": "0xd156a8e80a6593ddafa099f76754fdce0f808a55",
+    "monad": "0xd25f563e12ff616262f8c947fec108db934f8059",
+    "sei-v2": "0x0a790e1f85594e27d8eb26907fe280f0e0f166de",
+    "megaeth": "0xd25f563e12ff616262f8c947fec108db934f8059"
   },
   "strUSD": {
     "_category": "Savings stablecoin",
@@ -4936,7 +5118,9 @@
         "note": "trUSD per whole strUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x280839980a7ed0d7717f64125fe241012e5f5815#readContract"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/strusd-tori/",
+    "pharos": "0x25419e949b485d481bed4ea0c5a0496f6c7f7c63"
   },
   "USD3": {
     "_category": "Savings stablecoin",
@@ -4952,7 +5136,8 @@
         "note": "USDC per whole USD3 share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc#readContract; https://www.coingecko.com/en/coins/3jane-usd3; Morpho market 0xe3df58f9d3011b7481ff36b939fa5f8da642f34ea5792d25d3958dbf1efa26d7 resolves BASE_VAULT to this exact token."
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/usd3-3jane/"
   },
   "etrUSD": {
     "_category": "Savings stablecoin",
@@ -4978,7 +5163,9 @@
   "USYC": {
     "_category": "Other",
     "bsc": "0x8d0fa28f221eb5735bc71d3a0da67ee5bc821311",
-    "ethereum": "0x136471a34f6ef19fe571effc1ca711fdb8e49f2b"
+    "ethereum": "0x136471a34f6ef19fe571effc1ca711fdb8e49f2b",
+    "Safety Score": "https://pharos.watch/stablecoin/usyc-hashnote/",
+    "arc": "0x8a5d989bbb96929f689b0200f435f53da42bf490"
   },
   "EURSAFO": {
     "_category": "Savings stablecoin",
@@ -5000,7 +5187,8 @@
         "note": "EUR-denominated per-share NAV; EUR/USD FX fluctuations are not treated as intrinsic yield.",
         "evidence": "https://reference-data-directory.vercel.app/feeds-mainnet.json; Chainlink EURSAFO NAV proxy, issuer Spiko, NAVLink, six decimals. The direct base feed of the EURSAFO Morpho market also resolves to this contract. Morpho market 0x36da61bf253b8a7e07888cb96dbcde65001508159928801aeca932a5b5548119 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/spiko-amundi-overnight-swap-fund-eur"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/eursafo-spiko/"
   },
   "OKB": {
     "_category": "Other",
@@ -5014,7 +5202,9 @@
     "bsc": "0x2d5bdc96d9c8aabbdb38c9a27398513e7e5ef84f",
     "ethereum": "0x7712c34205737192402172409a8f7ccef8aa2aec",
     "optimism": "0xa1cdab15bba75a80df4089cafba013e376957cf5",
-    "polygon": "0x2893ef551b6dd69f661ac00f11d93e5dc5dc0e99"
+    "polygon": "0x2893ef551b6dd69f661ac00f11d93e5dc5dc0e99",
+    "Safety Score": "https://pharos.watch/stablecoin/buidl-blackrock/",
+    "tempo": "0xb5ff12bd8010baef823d1bfa2ce6bdc0109cbb24"
   },
   "JUP": {
     "_category": "Other",
@@ -5023,7 +5213,8 @@
   "USTB": {
     "_category": "Other",
     "ethereum": "0x43415eb6ff9db7e26a15b704e7a3edce97d31c4e",
-    "plume-network": "0xe4fa682f94610ccd170680cc3b045d77d9e528a8"
+    "plume-network": "0xe4fa682f94610ccd170680cc3b045d77d9e528a8",
+    "Safety Score": "https://pharos.watch/stablecoin/ustb-superstate/"
   },
   "JAAA": {
     "_category": "Other",
@@ -5031,7 +5222,12 @@
     "base": "0x5a0f93d040de44e78f251b03c43be9cf317dcf64",
     "bsc": "0x58f93d6b1ef2f44ec379cb975657c132cbed3b6b",
     "ethereum": "0x5a0f93d040de44e78f251b03c43be9cf317dcf64",
-    "monad": "0xad48f183e586e92a591a610397ebf534609df797"
+    "monad": "0xad48f183e586e92a591a610397ebf534609df797",
+    "Safety Score": "https://pharos.watch/stablecoin/jaaa-janus-henderson-anemoy/",
+    "arbitrum": "0x58f93d6b1ef2f44ec379cb975657c132cbed3b6b",
+    "pharos": "0xad48f183e586e92a591a610397ebf534609df797",
+    "x-layer": "0xad48f183e586e92a591a610397ebf534609df797",
+    "arc": "0xad48f183e586e92a591a610397ebf534609df797"
   },
   "EUTBL": {
     "_category": "Other",
@@ -5039,11 +5235,13 @@
     "base": "0xa0769f7a8fc65e47de93797b4e21c073c117fc80",
     "ethereum": "0xa0769f7a8fc65e47de93797b4e21c073c117fc80",
     "etherlink": "0xa0769f7a8fc65e47de93797b4e21c073c117fc80",
-    "polygon": "0xa0769f7a8fc65e47de93797b4e21c073c117fc80"
+    "polygon": "0xa0769f7a8fc65e47de93797b4e21c073c117fc80",
+    "Safety Score": "https://pharos.watch/stablecoin/eutbl-spiko/"
   },
   "A7A5": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x6fa0be17e4bea2fcfa22ef89bf8ac9aab0ab0fc9"
+    "ethereum": "0x6fa0be17e4bea2fcfa22ef89bf8ac9aab0ab0fc9",
+    "Safety Score": "https://pharos.watch/stablecoin/a7a5-old-vector/"
   },
   "PYTH": {
     "_category": "Other",
@@ -5052,30 +5250,35 @@
   },
   "KAU": {
     "_category": "Other",
-    "ethereum": "0x14dab79fd7b7b3f748d434812fd6a9aac460ea52"
+    "ethereum": "0x14dab79fd7b7b3f748d434812fd6a9aac460ea52",
+    "Safety Score": "https://pharos.watch/stablecoin/kau-kinesis/"
   },
   "SOFID": {
     "_category": "Stablecoin",
-    "ethereum": "0x0cb6d03b0ac88a463f67b7ad99f9f3ec4678092e"
+    "ethereum": "0x0cb6d03b0ac88a463f67b7ad99f9f3ec4678092e",
+    "Safety Score": "https://pharos.watch/stablecoin/sofid-sofi/"
   },
   "OUSG": {
     "_category": "Other",
     "ethereum": "0x1b19c19393e2d034d8ff31ff34c81252fcbbee92",
-    "polygon": "0xba11c5effa33c4d6f8f593cfa394241cfe925811"
+    "polygon": "0xba11c5effa33c4d6f8f593cfa394241cfe925811",
+    "Safety Score": "https://pharos.watch/stablecoin/ousg-ondo-finance/"
   },
   "APXUSD": {
     "_category": "Stablecoin",
     "base": "0xd993935e13851dd7517af10687ec7e5022127228",
     "bsc": "0x6b3788fd6604bbf03c5378d24e57bb334baad4af",
     "ethereum": "0x98a878b1cd98131b271883b390f68d2c90674665",
-    "monad": "0x3d78455e22d5dd49709ec135a59cb1c5a87ac3c6"
+    "monad": "0x3d78455e22d5dd49709ec135a59cb1c5a87ac3c6",
+    "Safety Score": "https://pharos.watch/stablecoin/apxusd-apyx/"
   },
   "SAFO": {
     "_category": "Other",
     "arbitrum": "0x0c709396739b9cfb72bcea6ac691ce0ddf66479c",
     "base": "0x0bb754d8940e283d9ff6855ab5dafbc14165c059",
     "ethereum": "0xcbade7d9bdee88411cb6cbcbb29952b742036992",
-    "polygon": "0x6f64f47f95cf656f21b40e14798f6b49f80b3dc5"
+    "polygon": "0x6f64f47f95cf656f21b40e14798f6b49f80b3dc5",
+    "Safety Score": "https://pharos.watch/stablecoin/safo-spiko-usd/"
   },
   "OHM": {
     "_category": "Other",
@@ -5087,7 +5290,8 @@
   },
   "PC0000031": {
     "_category": "Other",
-    "zksync": "0xac4de1e9a9e83524f24af77972dd39d588de8164"
+    "zksync": "0xac4de1e9a9e83524f24af77972dd39d588de8164",
+    "Safety Score": "https://pharos.watch/stablecoin/pc0000031-tradable/"
   },
   "MGLO": {
     "_category": "Other",
@@ -5102,15 +5306,18 @@
     "base": "0xe4880249745eac5f1ed9d8f7df844792d560e750",
     "ethereum": "0xe4880249745eac5f1ed9d8f7df844792d560e750",
     "etherlink": "0xe4880249745eac5f1ed9d8f7df844792d560e750",
-    "polygon": "0xe4880249745eac5f1ed9d8f7df844792d560e750"
+    "polygon": "0xe4880249745eac5f1ed9d8f7df844792d560e750",
+    "Safety Score": "https://pharos.watch/stablecoin/ustbl-spiko/"
   },
   "KAG": {
     "_category": "Other",
-    "ethereum": "0x56ba8b58b7d1f6d384a1c4dd553f39ebc8741b8e"
+    "ethereum": "0x56ba8b58b7d1f6d384a1c4dd553f39ebc8741b8e",
+    "Safety Score": "https://pharos.watch/stablecoin/kag-kinesis/"
   },
   "PC0000033": {
     "_category": "Other",
-    "zksync": "0x6ff4fafd8d604614c704a5936d9146c0af19bd1e"
+    "zksync": "0x6ff4fafd8d604614c704a5936d9146c0af19bd1e",
+    "Safety Score": "https://pharos.watch/stablecoin/pc0000033-tradable/"
   },
   "ANVL": {
     "_category": "Other",
@@ -5132,7 +5339,9 @@
         "note": "apxUSD per whole apyUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a#readContract; https://www.coingecko.com/en/coins/apyusd; Morpho market 0xe23380494e365453f72f736f2d941959ae945773eb67a06cf4f538c7c4201264 resolves BASE_VAULT to this exact token."
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/apyusd-apyx/",
+    "monad": "0xfd957d7e27d239da5455b82303b2f618f73a9c49"
   },
   "CRVUSD": {
     "_category": "Stablecoin",
@@ -5144,7 +5353,10 @@
     "gnosis": "0xabef652195f98a91e490f047a5006b71c85f058d",
     "optimism": "0xc52d7f23a2e460248db6ee192cb23dd12bddcbf6",
     "polygon": "0xc4ce1d6f5d98d65ee25cf85e9f2e9dcfee6cb5d6",
-    "taiko": "0xc8f4518ed4bab9a972808a493107926ce8237068"
+    "taiko": "0xc8f4518ed4bab9a972808a493107926ce8237068",
+    "Safety Score": "https://pharos.watch/stablecoin/crvusd-curve/",
+    "zksync": "0x43cd37cc4b9ec54833c8ac362dd55e58bfd62b86",
+    "sonic": "0x7fff4c4a827c84e32c5e175052834111b2ccd270"
   },
   "PC0000097": {
     "_category": "Other",
@@ -5160,7 +5372,8 @@
   },
   "JPYSC": {
     "_category": "Stablecoin",
-    "ethereum": "0x6781d5631bfe47432b089e64e3eab3b6edd26177"
+    "ethereum": "0x6781d5631bfe47432b089e64e3eab3b6edd26177",
+    "Safety Score": "https://pharos.watch/stablecoin/jpysc-sbi-startale/"
   },
   "THBILL": {
     "_category": "Other",
@@ -5168,7 +5381,8 @@
     "base": "0xfdd22ce6d1f66bc0ec89b20bf16ccb6670f55a5a",
     "ethereum": "0x5fa487bca6158c64046b2813623e20755091da0b",
     "hyperevm": "0xfdd22ce6d1f66bc0ec89b20bf16ccb6670f55a5a",
-    "stable": "0xfdd22ce6d1f66bc0ec89b20bf16ccb6670f55a5a"
+    "stable": "0xfdd22ce6d1f66bc0ec89b20bf16ccb6670f55a5a",
+    "Safety Score": "https://pharos.watch/stablecoin/thbill-theo/"
   },
   "AERO#cg-aerodrome-finance": {
     "_category": "Other",
@@ -5192,7 +5406,8 @@
   },
   "USDF": {
     "_category": "Stablecoin",
-    "bsc": "0x5a110fc00474038f6c02e89c707d638602ea44b5"
+    "bsc": "0x5a110fc00474038f6c02e89c707d638602ea44b5",
+    "Safety Score": "https://pharos.watch/stablecoin/usdf-astherus/"
   },
   "NOPAL": {
     "_category": "Savings stablecoin",
@@ -5210,7 +5425,8 @@
         "note": "RedStone AggregatorV3-compatible feed. Historical observations use archive block reads; multi-feed getRoundData does not preserve attributable month-old rounds. Quote units are the provider-published fundamental value per token, excluding external lending interest and incentives.",
         "evidence": "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main/relayer-manifests-multi-feed/ethereumMultiFeed.json; exact deployed priceFeedAddress for nOPAL_FUNDAMENTAL. Morpho market 0xbc32188b61522b84140ca39b8c9ecf94fdf97acb64a6c1a5a987f025f927f9a7 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/nest-blackopal-liquidstone-ii-vault"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/nopal-nest/"
   },
   "PC0000015": {
     "_category": "Other",
@@ -5218,7 +5434,8 @@
   },
   "STAC": {
     "_category": "Other",
-    "ethereum": "0x51c2d74017390cbbd30550179a16a1c28f7210fc"
+    "ethereum": "0x51c2d74017390cbbd30550179a16a1c28f7210fc",
+    "Safety Score": "https://pharos.watch/stablecoin/stac-securitize/"
   },
   "ULTIMA": {
     "_category": "Other",
@@ -5233,7 +5450,8 @@
     "base": "0x61a10e8556bed032ea176330e7f17d6a12a10000",
     "bsc": "0x61a10e8556bed032ea176330e7f17d6a12a10000",
     "ethereum": "0x61a10e8556bed032ea176330e7f17d6a12a10000",
-    "robinhood": "0x61a10e8556bed032ea176330e7f17d6a12a10000"
+    "robinhood": "0x61a10e8556bed032ea176330e7f17d6a12a10000",
+    "Safety Score": "https://pharos.watch/stablecoin/uusd-anything-labs/"
   },
   "USELESS": {
     "_category": "Other",
@@ -5243,12 +5461,18 @@
     "_category": "Stablecoin",
     "bsc": "0x0bb150dfa86ea5d7742f07fefcd8e8eda81d64ef",
     "ethereum": "0x23238f20b894f29041f48d88ee91131c395aaa71",
-    "monad": "0x0bb150dfa86ea5d7742f07fefcd8e8eda81d64ef"
+    "monad": "0x0bb150dfa86ea5d7742f07fefcd8e8eda81d64ef",
+    "Safety Score": "https://pharos.watch/stablecoin/usdat-saturn/"
   },
   "AVUSD": {
     "_category": "Stablecoin",
     "avalanche": "0x24de8771bc5ddb3362db529fc3358f2df3a0e346",
-    "ethereum": "0xf4c13d631450de6b12a19829e37c8e2826891dc4"
+    "ethereum": "0xf4c13d631450de6b12a19829e37c8e2826891dc4",
+    "Safety Score": "https://pharos.watch/stablecoin/avusd-avant/",
+    "linea": "0x37c44fc08e403efc0946c0623cb1164a52ce1576",
+    "berachain": "0xbca138ded469f5063589bfdfdd4bc68eb1c3f252",
+    "base": "0x3af90fda10fc6509df55e959548b1ed3bc3cfa00",
+    "monad": "0x0d9d741fe423cd5419e4bcb6cb2ffa87afa93ba4"
   },
   "BABYCLAW": {
     "_category": "Other",
@@ -5263,7 +5487,8 @@
     "avalanche": "0xe7c3d8c9a439fede00d2600032d5db0be71c3c29",
     "ethereum": "0xe7c3d8c9a439fede00d2600032d5db0be71c3c29",
     "klay-token": "0xe7c3d8c9a439fede00d2600032d5db0be71c3c29",
-    "polygon": "0xe7c3d8c9a439fede00d2600032d5db0be71c3c29"
+    "polygon": "0xe7c3d8c9a439fede00d2600032d5db0be71c3c29",
+    "Safety Score": "https://pharos.watch/stablecoin/jpyc-jpyc/"
   },
   "PC0000019": {
     "_category": "Other",
@@ -5271,27 +5496,33 @@
   },
   "GGBR": {
     "_category": "Other",
-    "ethereum": "0x7e2ac793f3e692f388e66c7dc28f739d13b0b71a"
+    "ethereum": "0x7e2ac793f3e692f388e66c7dc28f739d13b0b71a",
+    "Safety Score": "https://pharos.watch/stablecoin/ggbr-goldfish-gold/"
   },
   "TRUSD": {
     "_category": "Stablecoin",
     "ethereum": "0xd0580192e98ea6ceb9c7b6191ed2e27560911697",
-    "monad": "0x770a579ea200784723b31b8668b0773ba80393c9"
+    "monad": "0x770a579ea200784723b31b8668b0773ba80393c9",
+    "Safety Score": "https://pharos.watch/stablecoin/trusd-tori/",
+    "pharos": "0x3816102cdaff06e2a5a362ca7f767ccfd2337003"
   },
   "USDA": {
     "_category": "Other",
-    "bsc": "0x17eafd08994305d8ace37efb82f1523177ec70ee"
+    "bsc": "0x17eafd08994305d8ace37efb82f1523177ec70ee",
+    "Safety Score": "https://pharos.watch/stablecoin/usda-alpha-partner/"
   },
   "PC0000101": {
     "_category": "Other",
-    "zksync": "0x3d19625bb8e4b52ac4ca28ecec2b5e243ae2ee81"
+    "zksync": "0x3d19625bb8e4b52ac4ca28ecec2b5e243ae2ee81",
+    "Safety Score": "https://pharos.watch/stablecoin/pc0000101-tradable/"
   },
   "ACRED": {
     "_category": "Other",
     "avalanche": "0x7c64925002bfa705834b118a923e9911bee32875",
     "ethereum": "0x17418038ecf73ba4026c4f428547bf099706f27b",
     "ink": "0x53ad50d3b6fcacb8965d3a49cb722917c7dae1f3",
-    "polygon": "0xfce60bbc52a5705cec5b445501fbaf3274dc43d0"
+    "polygon": "0xfce60bbc52a5705cec5b445501fbaf3274dc43d0",
+    "Safety Score": "https://pharos.watch/stablecoin/acred-apollo-securitize/"
   },
   "NXM": {
     "_category": "Other",
@@ -5311,11 +5542,13 @@
         "note": "USDC per whole cgUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical base token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://basescan.org/address/0xca72827a3d211cfd8f6b00ac98824872b72cab49#readContract; https://www.coingecko.com/en/coins/cygnus-finance-global-usd"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/cgusd-cygnus-finance/"
   },
   "FEUSD": {
     "_category": "Stablecoin",
-    "hyperevm": "0x02c6a2fa58cc01a18b8d9e00ea48d65e4df26c70"
+    "hyperevm": "0x02c6a2fa58cc01a18b8d9e00ea48d65e4df26c70",
+    "Safety Score": "https://pharos.watch/stablecoin/feusd-felix/"
   },
   "CRX": {
     "_category": "Other",
@@ -5324,7 +5557,8 @@
   "PGOLD": {
     "_category": "Other",
     "apechain": "0x64ae250e044688ddd04262f17daca23c28d241c2",
-    "arbitrum": "0x3e76bb02286bfeaa89dd35f11253f2cbce634f91"
+    "arbitrum": "0x3e76bb02286bfeaa89dd35f11253f2cbce634f91",
+    "Safety Score": "https://pharos.watch/stablecoin/pgold-pleasing/"
   },
   "IUSD": {
     "_category": "Stablecoin",
@@ -5343,7 +5577,10 @@
         "note": "Unstaked iUSD is the InfiniFi receipt token. Staking/locking rewards accrue to siUSD/liUSD, not a plain iUSD wallet balance. An unchanged verified accounting price gives 0% intrinsic APR; losses remain negative. This is not InfiniFi’s advertised staking APY.",
         "evidence": "https://github.com/InfiniFi-Labs/infinifi-protocol/blob/2ac1b13a624e65e819ee82a982a8d5382cde921a/deployment/configuration/addresses.1.json"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/iusd-infinifi/",
+    "bsc": "0x60b14ec49874af1ba471685cb11132101aebdf09",
+    "tempo": "0x20c000000000000000000000ab02d39df30bd17e"
   },
   "MTBILL": {
     "_category": "Savings stablecoin",
@@ -5365,7 +5602,8 @@
         "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
         "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mTBILL.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Morpho market 0xb98ad8501bd97ce0684b30b3645e31713e658e98d1955e8b677fb2585eaa9893 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/midas-mtbill"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/mtbill-midas/"
   },
   "APES": {
     "_category": "Other",
@@ -5379,11 +5617,26 @@
     "_category": "Other",
     "arbitrum": "0x437cc33344a0b27a429f795ff6b469c72698b291",
     "ethereum": "0x437cc33344a0b27a429f795ff6b469c72698b291",
-    "plume-network": "0x437cc33344a0b27a429f795ff6b469c72698b291"
+    "plume-network": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "Safety Score": "https://pharos.watch/stablecoin/wm-m0/",
+    "base": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "linea": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "bsc": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "hyperevm": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "soneium": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "plasma": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "citrea": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "monad": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "optimism": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "rise": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "0g": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "sei-v2": "0x437cc33344a0b27a429f795ff6b469c72698b291",
+    "fluent": "0x437cc33344a0b27a429f795ff6b469c72698b291"
   },
   "USDX": {
     "_category": "Stablecoin",
-    "ethereum": "0xa1fa7777974312f7d801a8880714a218f76233f8"
+    "ethereum": "0xa1fa7777974312f7d801a8880714a218f76233f8",
+    "Safety Score": "https://pharos.watch/stablecoin/usdx-axis/"
   },
   "MAG7.SSI": {
     "_category": "Other",
@@ -5403,7 +5656,8 @@
         "label": "Midas mF-ONE/USD native NAV oracle",
         "evidence": "https://github.com/midas-apps/contracts/blob/013a1493607ae21db33c1b7666f72088ffd37dd9/config/constants/addresses.ts"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/mf-one-midas/"
   },
   "TEMPLE": {
     "_category": "Other",
@@ -5412,7 +5666,9 @@
   "BRLV": {
     "_category": "Stablecoin",
     "base": "0xd2047ebdb205ee6862b69ae9fb3501652cc97d36",
-    "ethereum": "0xd7ca0e2c36d647446b782d1b72308e598373e2f5"
+    "ethereum": "0xd7ca0e2c36d647446b782d1b72308e598373e2f5",
+    "Safety Score": "https://pharos.watch/stablecoin/brlv-crown/",
+    "tempo": "0x20c000000000000000000000f4371867ae9754ce"
   },
   "DOLA": {
     "_category": "Stablecoin",
@@ -5421,12 +5677,16 @@
     "bsc": "0x2f29bc0ffaf9bff337b31cbe6cb5fb3bf12e5840",
     "ethereum": "0x865377367054516e17014ccded1e7d814edc9ce4",
     "fantom": "0x3129662808bec728a27ab6a6b9afd3cbaca8a43c",
-    "optimism": "0x8ae125e8653821e851f12a49f7765db9a9ce7384"
+    "optimism": "0x8ae125e8653821e851f12a49f7765db9a9ce7384",
+    "Safety Score": "https://pharos.watch/stablecoin/dola-inverse-finance/",
+    "polygon": "0xbc2b48bc930ddc4e5cfb2e87a45c379aab3aac5c",
+    "avalanche": "0x221743dc9e954be4f86844649bf19b43d6f8366d"
   },
   "REUR": {
     "_category": "Other",
     "bsc": "0x3ed0b3c4c0168a560d34e361b8130dcca4677736",
-    "ethereum": "0x3ed0b3c4c0168a560d34e361b8130dcca4677736"
+    "ethereum": "0x3ed0b3c4c0168a560d34e361b8130dcca4677736",
+    "Safety Score": "https://pharos.watch/stablecoin/reur-royal-euro/"
   },
   "MOOLAH": {
     "_category": "Other",
@@ -5450,7 +5710,8 @@
     "base": "0x2f6c0e5e06b43512706a9cdf66cd21f723fe0ec3",
     "ethereum": "0xc273986a91e4bfc543610a5cb5860b7cfefb6cc0",
     "etherlink": "0xfe20ebe3881491b2e158b9d10cb95bcfa652262d",
-    "polygon": "0x4fe515c67eeeadb3282780325f09bb7c244fe774"
+    "polygon": "0x4fe515c67eeeadb3282780325f09bb7c244fe774",
+    "Safety Score": "https://pharos.watch/stablecoin/gbpsafo-spiko/"
   },
   "PC0016245": {
     "_category": "Other",
@@ -5463,17 +5724,21 @@
   "CUSD#cg-cap-usd": {
     "_category": "Stablecoin",
     "ethereum": "0xcccc62962d17b8914c62d74ffb843d73b2a3cccc",
-    "megaeth": "0xcccc62962d17b8914c62d74ffb843d73b2a3cccc"
+    "megaeth": "0xcccc62962d17b8914c62d74ffb843d73b2a3cccc",
+    "Safety Score": "https://pharos.watch/stablecoin/cusd-cap/",
+    "tempo": "0x20c0000000000000000000000520792dcccccccc"
   },
   "EARNUSD": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x4ce1ac8f43e0e5bd7a346a98af777bf8fbea1981"
+    "ethereum": "0x4ce1ac8f43e0e5bd7a346a98af777bf8fbea1981",
+    "Safety Score": "https://pharos.watch/stablecoin/earnusd-lido/"
   },
   "VBILL": {
     "_category": "Other",
     "avalanche": "0x7f4546ef315efc65336187fe3765ea779ac90183",
     "bsc": "0x14d72634328c4d03bba184a48081df65f1911279",
-    "ethereum": "0x2255718832bc9fd3be1caf75084f4803da14ff01"
+    "ethereum": "0x2255718832bc9fd3be1caf75084f4803da14ff01",
+    "Safety Score": "https://pharos.watch/stablecoin/vbill-vaneck/"
   },
   "AP3X": {
     "_category": "Other",
@@ -5501,11 +5766,15 @@
         "note": "Computed token.nav() in USD at each pinned archive block. The verified adapter deliberately returns zero round IDs and timestamps; token() must equal the canonical fxSAVE contract at both blocks. This captures full fxSAVE NAV rather than only its fxSP-denominated ERC-4626 share ratio. Stored-feed freshness rules are not relaxed.",
         "evidence": "https://sourcify.dev/server/v2/contract/1/0x9dD65b6d956E31F4dc093372D975275986695827?fields=all; Aladdin DAO NetAssetValueChainlinkAdapter. token() was verified as 0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39. Morpho market 0x43e925e52d7873fa8acac90dd5f246087d55b3a34c344b71884a6352491ff459 uses this direct base feed."
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/fxsave-f-x-protocol/"
   },
   "NUSD": {
     "_category": "Stablecoin",
-    "ethereum": "0xe556aba6fe6036275ec1f87eda296be72c811bce"
+    "ethereum": "0xe556aba6fe6036275ec1f87eda296be72c811bce",
+    "Safety Score": "https://pharos.watch/stablecoin/nusd-neutrl/",
+    "arbitrum": "0xe556aba6fe6036275ec1f87eda296be72c811bce",
+    "plasma": "0xe556aba6fe6036275ec1f87eda296be72c811bce"
   },
   "RNT": {
     "_category": "Other",
@@ -5515,11 +5784,13 @@
     "_category": "Other",
     "ethereum": "0x9477724bb54ad5417de8baff29e59df3fb4da74f",
     "monad": "0x2fabf1c784b8583d63c00c5c9c0377d8cf1a3245",
-    "plume-network": "0x9477724bb54ad5417de8baff29e59df3fb4da74f"
+    "plume-network": "0x9477724bb54ad5417de8baff29e59df3fb4da74f",
+    "Safety Score": "https://pharos.watch/stablecoin/acrdx-anemoy-apollo/"
   },
   "BRSRV": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x3078bcf707e457d3af2f938a2a478bbeea50a942"
+    "ethereum": "0x3078bcf707e457d3af2f938a2a478bbeea50a942",
+    "Safety Score": "https://pharos.watch/stablecoin/brsrv-blackrock/"
   },
   "METAL": {
     "_category": "Other",
@@ -5527,7 +5798,8 @@
   },
   "USDKG": {
     "_category": "Stablecoin",
-    "ethereum": "0xe820c06321e60d36257c666643fa5436643445e3"
+    "ethereum": "0xe820c06321e60d36257c666643fa5436643445e3",
+    "Safety Score": "https://pharos.watch/stablecoin/usdkg-gold-dollar/"
   },
   "DAI#cg-dai-on-pulsechain": {
     "_category": "Other",
@@ -5543,12 +5815,14 @@
   },
   "PMUSD": {
     "_category": "Other",
-    "ethereum": "0xc0c17dd08263c16f6b64e772fb9b723bf1344ddf"
+    "ethereum": "0xc0c17dd08263c16f6b64e772fb9b723bf1344ddf",
+    "Safety Score": "https://pharos.watch/stablecoin/pmusd-precious-metals/"
   },
   "FIUSD": {
     "_category": "Savings stablecoin",
     "arbitrum": "0xcded6b899edba762d793f44ed295248049440e1e",
-    "zksync": "0x2ab105a3ead22731082b790ca9a00d9a3a7627f9"
+    "zksync": "0x2ab105a3ead22731082b790ca9a00d9a3a7627f9",
+    "Safety Score": "https://pharos.watch/stablecoin/fiusd-sygnum/"
   },
   "GAL": {
     "_category": "Other",
@@ -5572,7 +5846,8 @@
     "celo": "0xfecb3f7c54e2caae9dc6ac9060a822d47e053760",
     "gnosis": "0xfecb3f7c54e2caae9dc6ac9060a822d47e053760",
     "moonbeam": "0xfeb25f3fddad13f82c4d6dbc1481516f62236429",
-    "polygon": "0xe6a537a407488807f0bbeb0038b79004f19dddfb"
+    "polygon": "0xe6a537a407488807f0bbeb0038b79004f19dddfb",
+    "Safety Score": "https://pharos.watch/stablecoin/brla-brla-digital/"
   },
   "BRZ": {
     "_category": "Stablecoin",
@@ -5580,7 +5855,15 @@
     "bsc": "0x71be881e9c5d4465b3fff61e89c6f3651e69b5bb",
     "ethereum": "0x01d33fd36ec67c6ada32cf36b31e88ee190b1839",
     "polygon": "0x4ed141110f6eeeaba9a1df36d8c26f684d2475dc",
-    "rootstock": "0xe355c280131dfaf18bf1c3648aee3c396db6b5fd"
+    "rootstock": "0xe355c280131dfaf18bf1c3648aee3c396db6b5fd",
+    "Safety Score": "https://pharos.watch/stablecoin/brz-transfero/",
+    "gnosis": "0x0a06c8354a6cc1a07549a38701eac205942e3ac6",
+    "base": "0xe9185ee218cae427af7b9764a011bb89fea761b4",
+    "optimism": "0xe9185ee218cae427af7b9764a011bb89fea761b4",
+    "arbitrum": "0xa8940698fda5a07abaef4a5ccdf2f1bb525b47a2",
+    "celo": "0xe9185ee218cae427af7b9764a011bb89fea761b4",
+    "moonbeam": "0x3225edce8ad30ae282e62fa32e7418e4b9cf197b",
+    "chiliz": "0xe9185ee218cae427af7b9764a011bb89fea761b4"
   },
   "EXOD": {
     "_category": "Other",
@@ -5608,7 +5891,8 @@
         "note": "USDC per whole armUSDCs share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xa2eaad0d586cf9fd73bb2c09cf6a7e3e187d68cd#readContract; https://www.coingecko.com/en/coins/wintermute-usdc-select; Morpho market 0x46025292596c50feb9c6b736d5760373152c7536bac1cb02a1e3939b11be3409 resolves BASE_VAULT to this exact token."
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/armusdcs-wintermute/"
   },
   "EBTC": {
     "_category": "Other",
@@ -5616,14 +5900,17 @@
   },
   "USDU": {
     "_category": "Savings stablecoin",
-    "bsc": "0xea953ea6634d55dac6697c436b1e81a679db5882"
+    "bsc": "0xea953ea6634d55dac6697c436b1e81a679db5882",
+    "Safety Score": "https://pharos.watch/stablecoin/usdu-unitas/"
   },
   "MSUSD": {
     "_category": "Other",
     "base": "0x526728dbc96689597f85ae4cd716d4f7fccbae9d",
     "ethereum": "0xab5eb14c09d416f0ac63661e57edb7aecdb9befa",
     "optimism": "0x9dabae7274d28a45f0b65bf8ed201a5731492ca0",
-    "plasma": "0x29ad7fe4516909b9e498b5a65339e54791293234"
+    "plasma": "0x29ad7fe4516909b9e498b5a65339e54791293234",
+    "Safety Score": "https://pharos.watch/stablecoin/msusd-metronome/",
+    "hemi": "0x3ea24e3727a85a479e29e02cc70e792936fbbcad"
   },
   "FXNW": {
     "_category": "Other",
@@ -5634,7 +5921,9 @@
     "arc": "0xc6df1b92a6ae61a27059c41e541a91ce8dcb1605",
     "base": "0xbd4dfc058eb95b8de5ceaf39966a1a70f5556f78",
     "ethereum": "0xbd4dfc058eb95b8de5ceaf39966a1a70f5556f78",
-    "polygon": "0xbd4dfc058eb95b8de5ceaf39966a1a70f5556f78"
+    "polygon": "0xbd4dfc058eb95b8de5ceaf39966a1a70f5556f78",
+    "Safety Score": "https://pharos.watch/stablecoin/chfau-allunity/",
+    "tempo": "0x20c00000000000000000000042109aef2f8b28e1"
   },
   "SECZ": {
     "_category": "Other",
@@ -5647,7 +5936,8 @@
   "MSUSD#cg-main-street-usd": {
     "_category": "Other",
     "ethereum": "0x4ba01f22827018b4772cd326c7627fb4956a7c00",
-    "sonic": "0xe5fb2ed6832def99dde57c0b9d9a56537c89121d"
+    "sonic": "0xe5fb2ed6832def99dde57c0b9d9a56537c89121d",
+    "Safety Score": "https://pharos.watch/stablecoin/msusd-main-street/"
   },
   "VENOM": {
     "_category": "Other",
@@ -5666,15 +5956,20 @@
   "USN": {
     "_category": "Stablecoin",
     "ethereum": "0xda67b4284609d2d48e5d10cfac411572727dc1ed",
-    "zksync": "0x0469d9d1de0ee58fa1153ef00836b9bbcb84c0b6"
+    "zksync": "0x0469d9d1de0ee58fa1153ef00836b9bbcb84c0b6",
+    "Safety Score": "https://pharos.watch/stablecoin/usn-noon/",
+    "sophon": "0xc1aa99c3881b26901af70738a7c217dc32536d36",
+    "tac": "0x51a30e647d33a044967fa3dbb04d6ed6f45455f6"
   },
   "REUSD": {
     "_category": "Stablecoin",
-    "ethereum": "0x57ab1e0003f623289cd798b1824be09a793e4bec"
+    "ethereum": "0x57ab1e0003f623289cd798b1824be09a793e4bec",
+    "Safety Score": "https://pharos.watch/stablecoin/reusd-resupply/"
   },
   "PC0000089": {
     "_category": "Other",
-    "zksync": "0xfb3fccdd38a96c3f769c62e578323f22c3bfcbec"
+    "zksync": "0xfb3fccdd38a96c3f769c62e578323f22c3bfcbec",
+    "Safety Score": "https://pharos.watch/stablecoin/pc0000089-tradable/"
   },
   "SB": {
     "_category": "Other",
@@ -5686,7 +5981,8 @@
   },
   "MSY": {
     "_category": "Other",
-    "ethereum": "0x890a5122aa1da30fec4286de7904ff808f0bd74a"
+    "ethereum": "0x890a5122aa1da30fec4286de7904ff808f0bd74a",
+    "Safety Score": "https://pharos.watch/stablecoin/msy-main-street/"
   },
   "SN120": {
     "_category": "Other",
@@ -5716,7 +6012,8 @@
         "label": "mGLOBAL/USD NAV oracle",
         "evidence": "User-specified Ethereum oracle. AaveV3EthereumHorizon.sol at bgd-labs/aave-address-book@dae05acef38c4d2305776695ac81c3cab7437e29 identifies mGLOBAL_UNDERLYING = 0x7433806912Eae67919e66aea853d46Fa0aef98A8 and mGLOBAL_ORACLE = 0xe034De753a3d855B6daD1A4984de75a5c443E939. Verified on-chain decimals() = 8 and description() = mGlobal NAV - Aave Llamaguard. https://etherscan.io/address/0xe034De753a3d855B6daD1A4984de75a5c443E939#readContract"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/mglobal-midas-fasanara/"
   },
   "CX": {
     "_category": "Other",
@@ -5756,7 +6053,30 @@
         "note": "frxUSD per whole sfrxUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xcf62f905562626cfcdd2261162a51fd02fc9c5b6#readContract; https://www.coingecko.com/en/coins/staked-frax-usd"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/sfrxusd-frax/",
+    "aurora": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "avalanche": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "berachain": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "bsc": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "hyperevm": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "ink": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "optimism": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "plume-network": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "polygon": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "polygon-zkevm": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "stable": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "unichain": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "world-chain": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "monad": "0x137643f7b2c189173867b3391f6629cab46f0f1a",
+    "base": "0x91a3f8a8d7a881fbdfcfecd7a2dc92a46dcfa14e",
+    "linea": "0x592a48c0fb9c7f8bf1701cb0136b90dea2a5b7b6",
+    "scroll": "0xc6b2be25d65760b826d0c852fd35f364250619c2",
+    "zksync": "0x9f87fbb47c33cd0614e43500b9511018116f79ee",
+    "abstract": "0x9f87fbb47c33cd0614e43500b9511018116f79ee",
+    "blast": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "tempo": "0x00000000fd8c4b8a413a06821456801295921a71",
+    "robinhood": "0x00000000fd8c4b8a413a06821456801295921a71"
   },
   "MHYPER": {
     "_category": "Savings stablecoin",
@@ -5774,11 +6094,13 @@
         "label": "Midas mHYPER/USD native NAV oracle",
         "evidence": "https://github.com/midas-apps/contracts/blob/013a1493607ae21db33c1b7666f72088ffd37dd9/config/constants/addresses.ts"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/mhyper-midas/"
   },
   "USDU#cg-universal-usd": {
     "_category": "Stablecoin",
-    "ethereum": "0xe4ca6596d2c28014c6f89964f57838e0be9f369b"
+    "ethereum": "0xe4ca6596d2c28014c6f89964f57838e0be9f369b",
+    "Safety Score": "https://pharos.watch/stablecoin/usdu-universal/"
   },
   "MTX": {
     "_category": "Other",
@@ -5802,7 +6124,8 @@
         "note": "RedStone AggregatorV3-compatible feed. Historical observations use archive block reads; multi-feed getRoundData does not preserve attributable month-old rounds. Quote units are EUR NAV per share.",
         "evidence": "https://github.com/redstone-finance/redstone-oracles-monorepo/blob/bf8cb0913ac55c7fd164b7e00393452a2434aeac/packages/relayer-remote-config/main/relayer-manifests/ethereumEurspkccNav.json; exact deployed priceFeedAddress for eurSPKCC_NAV. Asset identity: https://www.coingecko.com/en/coins/spiko-digital-assets-cash-carry-fund-euro-share-class"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/eurspkcc-spiko/"
   },
   "GPT": {
     "_category": "Other",
@@ -5848,7 +6171,9 @@
     "gnosis": "0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430",
     "linea": "0x3ff47c5bf409c86533fe1f4907524d304062428d",
     "polygon": "0xe0aea583266584dafbb3f9c3211d5588c73fea8d",
-    "scroll": "0xd7bb130a48595fcdf9480e36c1ae97ff2938ac21"
+    "scroll": "0xd7bb130a48595fcdf9480e36c1ae97ff2938ac21",
+    "Safety Score": "https://pharos.watch/stablecoin/eure-monerium/",
+    "base": "0xbf6e2966a9c3d99c9e4d069e04f7bdb9c8aa762c"
   },
   "AIPF": {
     "_category": "Other",
@@ -5864,7 +6189,13 @@
     "base": "0x8c213ee79581ff4984583c6a801e5263418c4b86",
     "ethereum": "0x8c213ee79581ff4984583c6a801e5263418c4b86",
     "monad": "0xc18e6f730896971a79d748e8dea61067a9bc6040",
-    "plume-network": "0xa5d465251fbcc907f5dd6bb2145488dfc6a2627b"
+    "plume-network": "0xa5d465251fbcc907f5dd6bb2145488dfc6a2627b",
+    "Safety Score": "https://pharos.watch/stablecoin/jtrsy-anemoy/",
+    "arbitrum": "0x8c213ee79581ff4984583c6a801e5263418c4b86",
+    "bsc": "0xa5d465251fbcc907f5dd6bb2145488dfc6a2627b",
+    "pharos": "0xc18e6f730896971a79d748e8dea61067a9bc6040",
+    "x-layer": "0xc18e6f730896971a79d748e8dea61067a9bc6040",
+    "arc": "0xc18e6f730896971a79d748e8dea61067a9bc6040"
   },
   "CXO": {
     "_category": "Other",
@@ -5896,7 +6227,8 @@
   },
   "FILQ-A": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x54a4fc78431f9201824643e99bec891bb7462a1d"
+    "ethereum": "0x54a4fc78431f9201824643e99bec891bb7462a1d",
+    "Safety Score": "https://pharos.watch/stablecoin/filqa-fidelity-international/"
   },
   "SAI": {
     "_category": "Other",
@@ -5945,7 +6277,8 @@
         "note": "USDC per whole steakcUSDC share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xbeef00a59b577423653a1526c7009bde103f542b#readContract; https://www.coingecko.com/en/coins/steakhouse-confidential-prime-usdc"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/steakcusdc-steakhouse/"
   },
   "XT": {
     "_category": "Other",
@@ -5971,7 +6304,8 @@
   },
   "USDH": {
     "_category": "Stablecoin",
-    "hyperevm": "0x111111a1a0667d36bd57c0a9f569b98057111111"
+    "hyperevm": "0x111111a1a0667d36bd57c0a9f569b98057111111",
+    "Safety Score": "https://pharos.watch/stablecoin/usdh-native-markets/"
   },
   "PROS#cg-prospective": {
     "_category": "Other",
@@ -5991,11 +6325,13 @@
   "USDM": {
     "_category": "Stablecoin",
     "ethereum": "0xec2af1c8b110a61fd9c3fa6a554a031ca9943926",
-    "megaeth": "0xfafddbb3fc7688494971a79cc65dca3ef82079e7"
+    "megaeth": "0xfafddbb3fc7688494971a79cc65dca3ef82079e7",
+    "Safety Score": "https://pharos.watch/stablecoin/usdm-mega/"
   },
   "UMINT": {
     "_category": "Savings stablecoin",
-    "ethereum": "0xc06036793272219179f846ef6bfc3b16e820df0b"
+    "ethereum": "0xc06036793272219179f846ef6bfc3b16e820df0b",
+    "Safety Score": "https://pharos.watch/stablecoin/umint-ubs/"
   },
   "EWT": {
     "_category": "Other",
@@ -6004,7 +6340,9 @@
   "FXUSD": {
     "_category": "Stablecoin",
     "base": "0x55380fe7a1910dff29a47b622057ab4139da42c5",
-    "ethereum": "0x085780639cc2cacd35e474e71f4d000e2405d8f6"
+    "ethereum": "0x085780639cc2cacd35e474e71f4d000e2405d8f6",
+    "Safety Score": "https://pharos.watch/stablecoin/fxusd-f-x-protocol/",
+    "tempo": "0x20c000000000000000000000850e533bd762b72c"
   },
   "NXT": {
     "_category": "Other",
@@ -6028,7 +6366,8 @@
     "ethereum": "0x2370f9d504c7a6e775bf6e14b3f12846b594cd53",
     "gnosis": "0x417602f4fbdd471a431ae29fb5fe0a681964c11b",
     "polygon": "0x6ae7dfc73e0dde2aa99ac063dcf7e8a63265108c",
-    "shiden-network": "0x735abe48e8782948a37c7765ecb76b98cde97b0f"
+    "shiden-network": "0x735abe48e8782948a37c7765ecb76b98cde97b0f",
+    "Safety Score": "https://pharos.watch/stablecoin/jpyc-jpyc-v1/"
   },
   "MACCA": {
     "_category": "Other",
@@ -6036,7 +6375,9 @@
   },
   "NXUSD": {
     "_category": "Stablecoin",
-    "avalanche": "0xf14f4ce569cb3679e99d5059909e23b07bd2f387"
+    "avalanche": "0xf14f4ce569cb3679e99d5059909e23b07bd2f387",
+    "Safety Score": "https://pharos.watch/stablecoin/nxusd-nereus/",
+    "polygon": "0xf955a6694c6f5629f5ecd514094b3bd450b59000"
   },
   "BIB01": {
     "_category": "Other",
@@ -6046,13 +6387,15 @@
     "bsc": "0xca30c93b02514f86d5c86a6e375e3a330b435fb5",
     "ethereum": "0xca30c93b02514f86d5c86a6e375e3a330b435fb5",
     "gnosis": "0xca30c93b02514f86d5c86a6e375e3a330b435fb5",
-    "polygon": "0xca30c93b02514f86d5c86a6e375e3a330b435fb5"
+    "polygon": "0xca30c93b02514f86d5c86a6e375e3a330b435fb5",
+    "Safety Score": "https://pharos.watch/stablecoin/bib01-backed/"
   },
   "MUSD": {
     "_category": "Stablecoin",
     "base": "0xdd468a1ddc392dcdbef6db6e34e89aa338f9f186",
     "ethereum": "0xdd468a1ddc392dcdbef6db6e34e89aa338f9f186",
-    "mezo": "0xdd468a1ddc392dcdbef6db6e34e89aa338f9f186"
+    "mezo": "0xdd468a1ddc392dcdbef6db6e34e89aa338f9f186",
+    "Safety Score": "https://pharos.watch/stablecoin/meusd-mezo/"
   },
   "GATO": {
     "_category": "Other",
@@ -6142,7 +6485,8 @@
     "arbitrum": "0x26c358f7c5fedb20a6ddef108cd91efb6b8da0cb",
     "base": "0x26c358f7c5fedb20a6ddef108cd91efb6b8da0cb",
     "ethereum": "0x399b29975cbe313c56269cd5097f5ae097fa2741",
-    "etherlink": "0x6bde51212203ae5d592cc5180da2abbd41c922de"
+    "etherlink": "0x6bde51212203ae5d592cc5180da2abbd41c922de",
+    "Safety Score": "https://pharos.watch/stablecoin/usdsm-stable-mint/"
   },
   "PORKU": {
     "_category": "Other",
@@ -6158,13 +6502,18 @@
   },
   "AID": {
     "_category": "Other",
-    "ethereum": "0x18f52b3fb465118731d9e0d276d4eb3599d57596"
+    "ethereum": "0x18f52b3fb465118731d9e0d276d4eb3599d57596",
+    "Safety Score": "https://pharos.watch/stablecoin/aid-gaib/",
+    "arbitrum": "0x18f52b3fb465118731d9e0d276d4eb3599d57596",
+    "base": "0x18f52b3fb465118731d9e0d276d4eb3599d57596",
+    "bsc": "0x18f52b3fb465118731d9e0d276d4eb3599d57596"
   },
   "USDX#cg-hex-trust-usdx": {
     "_category": "Stablecoin",
     "ethereum": "0xf8750b54d86be7ae9e32b4a0c826811198d63313",
     "flare-network": "0x4a771cc1a39fdd8aa08b8ea51f7fd412e73b3d2b",
-    "songbird": "0x4a771cc1a39fdd8aa08b8ea51f7fd412e73b3d2b"
+    "songbird": "0x4a771cc1a39fdd8aa08b8ea51f7fd412e73b3d2b",
+    "Safety Score": "https://pharos.watch/stablecoin/usdx-hex-trust/"
   },
   "RSFIRO": {
     "_category": "Other",
@@ -6235,7 +6584,8 @@
     "avalanche": "0x8835a2f66a7aaccb297cb985831a616b75e2e16c",
     "ethereum": "0x888883b5f5d21fb10dfeb70e8f9722b9fb0e5e51",
     "plasma": "0x98658bd74ef231158cadc21d8aba733a4e947e6a",
-    "polygon": "0x888883b5f5d21fb10dfeb70e8f9722b9fb0e5e51"
+    "polygon": "0x888883b5f5d21fb10dfeb70e8f9722b9fb0e5e51",
+    "Safety Score": "https://pharos.watch/stablecoin/europ-schuman/"
   },
   "SURPLUS": {
     "_category": "Other",
@@ -6279,7 +6629,8 @@
     "_category": "Stablecoin",
     "avalanche": "0xba515304d8153c4b162dc79f867e152df9c127eb",
     "base": "0xba515304d8153c4b162dc79f867e152df9c127eb",
-    "katana": "0xba515304d8153c4b162dc79f867e152df9c127eb"
+    "katana": "0xba515304d8153c4b162dc79f867e152df9c127eb",
+    "Safety Score": "https://pharos.watch/stablecoin/uty-xsy/"
   },
   "HT": {
     "_category": "Other",
@@ -6292,7 +6643,9 @@
     "base": "0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0",
     "bsc": "0x302e52aff9815b9d1682473dbfb9c74f9b750aa8",
     "ethereum": "0x8238884ec9668ef77b90c6dff4d1a9f4f4823bfe",
-    "klay-token": "0x87e617c7484ade79fcd90db58beb82b057facb48"
+    "klay-token": "0x87e617c7484ade79fcd90db58beb82b057facb48",
+    "Safety Score": "https://pharos.watch/stablecoin/usdo-openeden/",
+    "plasma": "0x87e617c7484ade79fcd90db58beb82b057facb48"
   },
   "TRUE": {
     "_category": "Other",
@@ -6300,7 +6653,8 @@
   },
   "VCRED": {
     "_category": "Stablecoin",
-    "hemi": "0x71881974e96152643c74a8e0214b877cfb2a0aa1"
+    "hemi": "0x71881974e96152643c74a8e0214b877cfb2a0aa1",
+    "Safety Score": "https://pharos.watch/stablecoin/vcred-vcred/"
   },
   "$JPT": {
     "_category": "Other",
@@ -6312,7 +6666,8 @@
     "base": "0xd9aa2300e126869182dfb6ecf54984e4c687f36b",
     "ethereum": "0x18b5c15e5196a38a162b1787875295b76e4313fb",
     "etherlink": "0xef53e7d17822b641c6481837238a64a688709301",
-    "polygon": "0x9de2b2dcdcf43540e47143f28484b6d15118f089"
+    "polygon": "0x9de2b2dcdcf43540e47143f28484b6d15118f089",
+    "Safety Score": "https://pharos.watch/stablecoin/chfsafo-spiko/"
   },
   "UKTBL": {
     "_category": "Other",
@@ -6320,7 +6675,8 @@
     "base": "0xa8de1f55aa0e381cb456e1dcc9ff781ea0079068",
     "ethereum": "0xf695df6c0f3bb45918a7a82e83348fc59517734e",
     "etherlink": "0x970e2adc2fdf53aea6b5fa73ca6dc30eafedfe3d",
-    "polygon": "0x970e2adc2fdf53aea6b5fa73ca6dc30eafedfe3d"
+    "polygon": "0x970e2adc2fdf53aea6b5fa73ca6dc30eafedfe3d",
+    "Safety Score": "https://pharos.watch/stablecoin/uktbl-spiko/"
   },
   "TREAD": {
     "_category": "Other",
@@ -6384,11 +6740,24 @@
     "moonbeam": "0xdfa46478f9e5ea86d57387849598dbfb2e964b02",
     "moonriver": "0x7f5a79576620c046a293f54ffcdbd8f2468174f1",
     "polygon": "0xa3fa99a148fa48d14ed51d610c367c61876997f1",
-    "syscoin": "0x2611fa1cae2a3e20ed47fb1b293437c14f41b00f"
+    "syscoin": "0x2611fa1cae2a3e20ed47fb1b293437c14f41b00f",
+    "Safety Score": "https://pharos.watch/stablecoin/mai-qidao/",
+    "ethereum": "0x8d6cebd76f18e1558d4db88138e2defb3909fad6",
+    "arbitrum": "0x3f56e0c36d275367b8c502090edf38289b3dea0d",
+    "optimism": "0xdfa46478f9e5ea86d57387849598dbfb2e964b02",
+    "base": "0xbf1aea8670d2528e08334083616dd9c5f3b087ae",
+    "avalanche": "0x5c49b268c9841aff1cc3b0a418ff5c3442ee3f3b",
+    "fantom": "0xfb98b335551a418cd0737375a2ea0ded62ea213b",
+    "kava": "0xb84df10966a5d7e1ab46d9276f55d57bd336afc7",
+    "polygon-zkevm": "0x615b25500403eb688be49221b303084d9cf0e5b4",
+    "fraxtal": "0xb84df10966a5d7e1ab46d9276f55d57bd336afc7",
+    "bsc": "0x3f56e0c36d275367b8c502090edf38289b3dea0d",
+    "linea": "0xf3b001d64c656e30a62fbaaca003b1336b4ce12a"
   },
   "GLDY": {
     "_category": "Other",
-    "base": "0x632db1aaace73401a5dc8cde6e9062b8ec0fd819"
+    "base": "0x632db1aaace73401a5dc8cde6e9062b8ec0fd819",
+    "Safety Score": "https://pharos.watch/stablecoin/gldy-streamex/"
   },
   "YUSD#cg-yusd-stablecoin": {
     "_category": "Stablecoin",
@@ -6427,7 +6796,13 @@
     "avalanche": "0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16",
     "base": "0xfdcc3dd6671eab0709a4c0f3f53de9a333d80798",
     "ethereum": "0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16",
-    "polygon": "0xfdcc3dd6671eab0709a4c0f3f53de9a333d80798"
+    "polygon": "0xfdcc3dd6671eab0709a4c0f3f53de9a333d80798",
+    "Safety Score": "https://pharos.watch/stablecoin/sbc-brale/",
+    "arbitrum": "0xfdcc3dd6671eab0709a4c0f3f53de9a333d80798",
+    "optimism": "0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16",
+    "celo": "0xde093684c796204224bc081f937aa059d903c52a",
+    "ethereum-classic": "0xfdcc3dd6671eab0709a4c0f3f53de9a333d80798",
+    "tempo": "0x20c000000000000000000000ae247a1130450f09"
   },
   "EXC": {
     "_category": "Other",
@@ -6445,7 +6820,8 @@
   },
   "USDFR": {
     "_category": "Stablecoin",
-    "ethereum": "0xcc07e7c4e5e35affd47b351e420a22c667d7f83d"
+    "ethereum": "0xcc07e7c4e5e35affd47b351e420a22c667d7f83d",
+    "Safety Score": "https://pharos.watch/stablecoin/usdfr-forest-road/"
   },
   "ETH:GUSDTQ": {
     "_category": "Savings stablecoin",
@@ -6461,7 +6837,8 @@
         "note": "USDT per whole gUSDTq share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x71ffb6a81786ec285d429d531cf655107b9d878d#readContract; https://www.coingecko.com/en/coins/galaxy-usdt-quality"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/gusdtq-galaxy/"
   },
   "YUSD#cg-yieldfi-ytoken": {
     "_category": "Savings stablecoin",
@@ -6483,7 +6860,11 @@
         "note": "USDC per whole yUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x19ebd191f7a24ece672ba13a302212b5ef7f35cb#readContract; https://www.coingecko.com/en/coins/yieldfi-ytoken; Morpho market 0x60154d71ec96b7aee2864326662cb731172f1ebd6ca0e64af9bc8659831ed0ff resolves BASE_VAULT to this exact token."
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/yusd-yieldfi/",
+    "bsc": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+    "avalanche": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121",
+    "plasma": "0x4772d2e014f9fc3a820c444e3313968e9a5c8121"
   },
   "RIO": {
     "_category": "Other",
@@ -6527,7 +6908,9 @@
     "ethereum": "0xbc6da0fe9ad5f3b0d58160288917aa56653660e9",
     "fantom": "0xb67fa6defce4042070eb1ae1511dcd6dcc6a532e",
     "metis-andromeda": "0x303241e2b3b4aed0bb0f8623e7442368fed8faf3",
-    "optimism": "0xcb8fa9a76b8e203d8c3797bf438d8fb81ea3326a"
+    "optimism": "0xcb8fa9a76b8e203d8c3797bf438d8fb81ea3326a",
+    "Safety Score": "https://pharos.watch/stablecoin/alusd-alchemix/",
+    "base": "0x303241e2b3b4aed0bb0f8623e7442368fed8faf3"
   },
   "CUSDO": {
     "_category": "Savings stablecoin",
@@ -6545,7 +6928,9 @@
         "note": "USDO per whole cUSDO share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0#readContract; https://www.coingecko.com/en/coins/compounding-open-dollar; Morpho market 0x15f30b939b8590be30aa22cd8d6367cf90a0ae460ce7f644ddbf58b8442e619a resolves BASE_VAULT to this exact token."
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/cusdo-openeden/",
+    "klay-token": "0xbeee5862649ef24c1f1d5e799505f67f1e7bab9a"
   },
   "BMMF": {
     "_category": "Savings stablecoin",
@@ -6555,7 +6940,8 @@
     "_category": "Stablecoin",
     "base": "0x14913815bcfde78baead2111f463d038ac9c2949",
     "ethereum": "0x14913815bcfde78baead2111f463d038ac9c2949",
-    "polygon": "0x14913815bcfde78baead2111f463d038ac9c2949"
+    "polygon": "0x14913815bcfde78baead2111f463d038ac9c2949",
+    "Safety Score": "https://pharos.watch/stablecoin/eusd-telcoin/"
   },
   "ETH:GUSDCQ": {
     "_category": "Savings stablecoin",
@@ -6571,7 +6957,9 @@
         "note": "USDC per whole gUSDCq share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical ethereum token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://etherscan.io/address/0x91600e31fbedc72433d4a57f16639cfe661be7d8#readContract; https://www.coingecko.com/en/coins/galaxy-usdc-quality"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/gusdcq-galaxy/",
+    "base": "0x1e9e47583f15d45a10df48c0b1846e0492c795d7"
   },
   "DEFI.SSI": {
     "_category": "Other",
@@ -6592,7 +6980,9 @@
   "MONEY": {
     "_category": "Stablecoin",
     "arbitrum": "0x69420f9e38a4e60a62224c489be4bf7a94402496",
-    "optimism": "0x69420f9e38a4e60a62224c489be4bf7a94402496"
+    "optimism": "0x69420f9e38a4e60a62224c489be4bf7a94402496",
+    "Safety Score": "https://pharos.watch/stablecoin/money-defi-money/",
+    "base": "0x69420f9e38a4e60a62224c489be4bf7a94402496"
   },
   "XAVA": {
     "_category": "Other",
@@ -6673,7 +7063,8 @@
     "bsc": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
     "ethereum": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
     "gnosis": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
-    "polygon": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7"
+    "polygon": "0x2f123cf3f37ce3328cc9b5b8415f9ec5109b45e7",
+    "Safety Score": "https://pharos.watch/stablecoin/bc3m-backed/"
   },
   "BFG": {
     "_category": "Other",
@@ -6686,7 +7077,8 @@
   "DGLD": {
     "_category": "Other",
     "base": "0xe908475f8beb7a138b0dc6eb5a05cb27068ffb9a",
-    "ethereum": "0xa9299c296d7830a99414d1e5546f5171fa01e9c8"
+    "ethereum": "0xa9299c296d7830a99414d1e5546f5171fa01e9c8",
+    "Safety Score": "https://pharos.watch/stablecoin/dgld-gold-token-sa/"
   },
   "WEEUR": {
     "_category": "Savings stablecoin",
@@ -6710,7 +7102,8 @@
     "bsc": "0x66207e39bb77e6b99aab56795c7c340c08520d83",
     "ethereum": "0x998ffe1e43facffb941dc337dd0468d52ba5b48a",
     "harmony-shard-0": "0xcefbea899cfccdc653b171d063481b622086be3f",
-    "polygon": "0x554cd6bdd03214b10aafa3e0d4d42de0c5d2937b"
+    "polygon": "0x554cd6bdd03214b10aafa3e0d4d42de0c5d2937b",
+    "Safety Score": "https://pharos.watch/stablecoin/idrt-rupiah-token/"
   },
   "HMM": {
     "_category": "Other",
@@ -6771,7 +7164,8 @@
         "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
         "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mAPOLLO.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Morpho market 0x031c7333014af51e4fd18031d14e4eaada58348cde3f6dc6ea8cca16f7387fb2 binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/midas-mapollo"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/mapollo-midas/"
   },
   "COD": {
     "_category": "Other",
@@ -6806,7 +7200,8 @@
   },
   "USDB": {
     "_category": "Other",
-    "blast": "0x4300000000000000000000000000000000000003"
+    "blast": "0x4300000000000000000000000000000000000003",
+    "Safety Score": "https://pharos.watch/stablecoin/usdb-blast/"
   },
   "DOVU": {
     "_category": "Other",
@@ -6936,7 +7331,10 @@
         "note": "USDC per whole yoUSD share, read from the same canonical vault at current and 30-day-old blocks. Underlying identity and both share/asset decimals are verified. This is share-rate growth, not an assumed USD peg; protocol interest and rewards are separate.",
         "evidence": "Canonical base token.asset(), token.decimals(), underlying.decimals() and convertToAssets(10^shareDecimals) verified at both 30-day snapshot blocks. https://basescan.org/address/0x0000000f2eb9f69274678c76222b35eec7588a65#readContract; https://www.coingecko.com/en/coins/yield-optimizer-usd"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/yousd-yield-optimizer/",
+    "ethereum": "0x0000000f2eb9f69274678c76222b35eec7588a65",
+    "arbitrum": "0x0000000f2eb9f69274678c76222b35eec7588a65"
   },
   "EXAETH": {
     "_category": "Other",
@@ -7051,7 +7449,8 @@
   },
   "SWANUSD": {
     "_category": "Stablecoin",
-    "ethereum": "0x9bf2b2f57a2968a0e81546ed50cbbbb7c9d6e05e"
+    "ethereum": "0x9bf2b2f57a2968a0e81546ed50cbbbb7c9d6e05e",
+    "Safety Score": "https://pharos.watch/stablecoin/swanusd-swan/"
   },
   "EKUBO": {
     "_category": "Other",
@@ -7061,7 +7460,10 @@
     "_category": "Other",
     "base": "0x04d5ddf5f3a8939889f11e97f8c4bb48317f1938",
     "blast": "0x52056ed29fe015f4ba2e3b079d10c0b87f46e8c6",
-    "ethereum": "0xa469b7ee9ee773642b3e93e842e5d9b5baa10067"
+    "ethereum": "0xa469b7ee9ee773642b3e93e842e5d9b5baa10067",
+    "Safety Score": "https://pharos.watch/stablecoin/usdz-anzen/",
+    "arbitrum": "0x5018609ab477cc502e170a5accf5312b86a4b94f",
+    "manta-pacific": "0x73d23f3778a90be8846e172354a115543df2a7e4"
   },
   "JMPT": {
     "_category": "Other",
@@ -7093,7 +7495,8 @@
   },
   "SPUSD": {
     "_category": "Stablecoin",
-    "bsc": "0x40ff3dea2eec93a7b71879874dc4407918da77a6"
+    "bsc": "0x40ff3dea2eec93a7b71879874dc4407918da77a6",
+    "Safety Score": "https://pharos.watch/stablecoin/spusd-soulpeg/"
   },
   "我踏马来了": {
     "_category": "Other",
@@ -7183,7 +7586,11 @@
   "EURS": {
     "_category": "Stablecoin",
     "ethereum": "0xdb25f211ab05b1c97d595516f45794528a807ad8",
-    "polygon": "0xe111178a87a3bff0c8d18decba5798827539ae99"
+    "polygon": "0xe111178a87a3bff0c8d18decba5798827539ae99",
+    "Safety Score": "https://pharos.watch/stablecoin/eurs-stasis/",
+    "arbitrum": "0xd22a58f79e9481d1a88e00c343885a588b34b68b",
+    "xdc-network": "0x1ebb2c8a71a9ec59bf558886a8adf8f4a565814f",
+    "gnosis": "0x9ee40742182707467f78344f6b287be8704f27e2"
   },
   "ANY": {
     "_category": "Other",
@@ -7232,7 +7639,8 @@
     "arbitrum": "0x99f70a0e1786402a6796c6b0aa997ef340a5c6da",
     "base": "0xf695df6c0f3bb45918a7a82e83348fc59517734e",
     "ethereum": "0x4f33acf823e6eeb697180d553ce0c710124c8d59",
-    "polygon": "0x903d5990119bc799423e9c25c56518ba7dd19474"
+    "polygon": "0x903d5990119bc799423e9c25c56518ba7dd19474",
+    "Safety Score": "https://pharos.watch/stablecoin/spkcc-spiko/"
   },
   "QUID": {
     "_category": "Other",
@@ -7358,7 +7766,8 @@
   },
   "OUSD#cg-origin-dollar": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x2a8e1e676ec238d8a992307b495b45b3feaa5e86"
+    "ethereum": "0x2a8e1e676ec238d8a992307b495b45b3feaa5e86",
+    "Safety Score": "https://pharos.watch/stablecoin/ousd-origin-protocol/"
   },
   "DARIK": {
     "_category": "Other",
@@ -7390,7 +7799,8 @@
   },
   "BUSD#cg-honey-3": {
     "_category": "Stablecoin",
-    "berachain": "0xfcbd14dc51f0a4d49d5e53c2e0950e0bc26d0dce"
+    "berachain": "0xfcbd14dc51f0a4d49d5e53c2e0950e0bc26d0dce",
+    "Safety Score": "https://pharos.watch/stablecoin/honey-berachain/"
   },
   "OMG": {
     "_category": "Other",
@@ -7426,7 +7836,8 @@
   },
   "DUSD": {
     "_category": "Stablecoin",
-    "bsc": "0xaf44a1e76f56ee12adbb7ba8acd3cbd474888122"
+    "bsc": "0xaf44a1e76f56ee12adbb7ba8acd3cbd474888122",
+    "Safety Score": "https://pharos.watch/stablecoin/dusd-standx/"
   },
   "PCOCK": {
     "_category": "Other",
@@ -7543,7 +7954,8 @@
     "base": "0xac3fe22294beaed9d1fd752323a6d06d12ff3098",
     "ethereum": "0x6d57b2e05f26c26b549231c866bdd39779e4a488",
     "etherlink": "0x93f5475da60143c50e8be3fed10c143b0cf8b9e9",
-    "polygon": "0xc8bb8eda94931ca2f20ef43ea7dbd58e68400400"
+    "polygon": "0xc8bb8eda94931ca2f20ef43ea7dbd58e68400400",
+    "Safety Score": "https://pharos.watch/stablecoin/vnxau-vnx/"
   },
   "CBRSB": {
     "_category": "Other",
@@ -7579,7 +7991,8 @@
         "note": "Issuer-published raw NAV, not a CAPO liquidation cap or a secondary-market quote. Current and month-old values use archive block observations because this issuer uses unphased round IDs. The normal freshness and unit/identity checks remain enforced.",
         "evidence": "https://github.com/midas-apps/contracts/blob/364ce881d7483629da85b3bfd4736ca33b8314a6/config/constants/addresses.ts; main.mRE7.token matches this exact token and customFeed is this address. Midas publishes this NAV; chainlink is the reader interface, not a claim that Chainlink operates the feed. Morpho market 0x921afaedabc6597ac12ce8c0f1a8d562a2326c401ef1e3c77e861988890fc3ce binds this exact collateral contract to this single direct base feed (no second base feed/vault). Asset identity: https://www.coingecko.com/en/coins/midas-mre7yield"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/mre7yield-midas/"
   },
   "THQ": {
     "_category": "Other",
@@ -7618,7 +8031,10 @@
   },
   "BTCUSD": {
     "_category": "Stablecoin",
-    "base": "0xe4b20925d9e9a62f1e492e15a81dc0de62804dd4"
+    "base": "0xe4b20925d9e9a62f1e492e15a81dc0de62804dd4",
+    "Safety Score": "https://pharos.watch/stablecoin/btcusd-btcfi/",
+    "bifrost": "0x6906ccda405926fc3f04240187dd4fad5df6d555",
+    "bsc": "0x4f2c996248ed9592e64b59f781a15deb1e2b0d4c"
   },
   "SECT": {
     "_category": "Other",
@@ -7842,7 +8258,8 @@
   },
   "NECT": {
     "_category": "Stablecoin",
-    "berachain": "0x1ce0a25d13ce4d52071ae7e02cf1f6606f4c79d3"
+    "berachain": "0x1ce0a25d13ce4d52071ae7e02cf1f6606f4c79d3",
+    "Safety Score": "https://pharos.watch/stablecoin/nect-beraborrow/"
   },
   "EQTSLA": {
     "_category": "Other",
@@ -7869,7 +8286,12 @@
     "_category": "Stablecoin",
     "base": "0x1fca74d9ef54a6ac80ffe7d3b14e76c4330fd5d8",
     "celo": "0xc5ebea9984c485ec5d58ca5a2d376620d93af871",
-    "ethereum": "0x79d4f0232a66c4c91b89c76362016a1707cfbf4f"
+    "ethereum": "0x79d4f0232a66c4c91b89c76362016a1707cfbf4f",
+    "Safety Score": "https://pharos.watch/stablecoin/vchf-vnx/",
+    "arbitrum": "0x02cea97794d2cfb5f560e1ff4e9c59d1bec75969",
+    "avalanche": "0x228a48df6819ccc2eca01e2192ebafffdad56c19",
+    "polygon": "0xcdb3867935247049e87c38ea270edd305d84c9ae",
+    "fraxtal": "0x418126bb59457afdba1ecf376f97400b4157425d"
   },
   "HOODB": {
     "_category": "Other",
@@ -7891,7 +8313,8 @@
   },
   "XGZ": {
     "_category": "Other",
-    "ethereum": "0x69af64f409c08e9076bf7f3ed9db3a7409717161"
+    "ethereum": "0x69af64f409c08e9076bf7f3ed9db3a7409717161",
+    "Safety Score": "https://pharos.watch/stablecoin/xgz-goldzip/"
   },
   "AVGOON": {
     "_category": "Other",
@@ -7929,7 +8352,8 @@
   "AXCNH": {
     "_category": "Stablecoin",
     "conflux": "0x70bfd7f7eadf9b9827541272589a6b2bb760ae2e",
-    "ethereum": "0x2925ac3be7d585874b88ea51ed50add376ad8239"
+    "ethereum": "0x2925ac3be7d585874b88ea51ed50add376ad8239",
+    "Safety Score": "https://pharos.watch/stablecoin/axcnh-anchorx/"
   },
   "DOG": {
     "_category": "Other",
@@ -7948,7 +8372,8 @@
     "_category": "Stablecoin",
     "base": "0xb755506531786c8ac63b756bab1ac387bacb0c04",
     "ethereum": "0xb755506531786c8ac63b756bab1ac387bacb0c04",
-    "polygon": "0xb755506531786c8ac63b756bab1ac387bacb0c04"
+    "polygon": "0xb755506531786c8ac63b756bab1ac387bacb0c04",
+    "Safety Score": "https://pharos.watch/stablecoin/zarp-zarp/"
   },
   "USDX#cg-usdx-money-usdx": {
     "_category": "Other",
@@ -8016,7 +8441,8 @@
     "_category": "Stablecoin",
     "bsc": "0xf7d85ec4e7710f71992752eac2111312e73e9c9c",
     "ethereum": "0xf7d85ec4e7710f71992752eac2111312e73e9c9c",
-    "sonic": "0xf7d85ec4e7710f71992752eac2111312e73e9c9c"
+    "sonic": "0xf7d85ec4e7710f71992752eac2111312e73e9c9c",
+    "Safety Score": "https://pharos.watch/stablecoin/ftusd-flying-tulip/"
   },
   "BASECAT": {
     "_category": "Other",
@@ -8044,7 +8470,8 @@
   },
   "USP": {
     "_category": "Savings stablecoin",
-    "ethereum": "0x098697ba3fee4ea76294c5d6a466a4e3b3e95fe6"
+    "ethereum": "0x098697ba3fee4ea76294c5d6a466a4e3b3e95fe6",
+    "Safety Score": "https://pharos.watch/stablecoin/usp-pikudao/"
   },
   "犇犇牛": {
     "_category": "Other",
@@ -8129,7 +8556,9 @@
     "ethereum": "0x4cce605ed955295432958d8951d0b176c10720d5",
     "hedera-hashgraph": "0x39ceba2b467fa987546000eb5d1373acf1f3a2e1",
     "redbelly-network": "0x54a210e824b0f89da988e4b5586440ab354f0e46",
-    "xdc-network": "0x9fe4e6321eeb7c4bc537570f015e4734b15002b8"
+    "xdc-network": "0x9fe4e6321eeb7c4bc537570f015e4734b15002b8",
+    "Safety Score": "https://pharos.watch/stablecoin/audd-novatti/",
+    "arc": "0xdec15d98d8c16d9ca2f8cc94ba4b88fe4f259393"
   },
   "PEPPER": {
     "_category": "Other",
@@ -8167,7 +8596,9 @@
   },
   "USDSC": {
     "_category": "Stablecoin",
-    "soneium": "0x3f99231dd03a9f0e7e3421c92b7b90fbe012985a"
+    "soneium": "0x3f99231dd03a9f0e7e3421c92b7b90fbe012985a",
+    "Safety Score": "https://pharos.watch/stablecoin/usdsc-startale/",
+    "ethereum": "0x3f99231dd03a9f0e7e3421c92b7b90fbe012985a"
   },
   "MONTRA": {
     "_category": "Other",
@@ -8245,7 +8676,8 @@
     "gnosis": "0xd76f5faf6888e24d9f04bf92a0c8b921fe4390e0",
     "hyperevm": "0xd76f5faf6888e24d9f04bf92a0c8b921fe4390e0",
     "polygon": "0xd76f5faf6888e24d9f04bf92a0c8b921fe4390e0",
-    "world-chain": "0xd76f5faf6888e24d9f04bf92a0c8b921fe4390e0"
+    "world-chain": "0xd76f5faf6888e24d9f04bf92a0c8b921fe4390e0",
+    "Safety Score": "https://pharos.watch/stablecoin/wbrl-ripio/"
   },
   "SEND": {
     "_category": "Other",
@@ -8310,7 +8742,8 @@
   "EURQ": {
     "_category": "Stablecoin",
     "ethereum": "0x8df723295214ea6f21026eeeb4382d475f146f9f",
-    "polygon": "0xd571edb2ef29df10fcd6200fd6d0ed2389983db3"
+    "polygon": "0xd571edb2ef29df10fcd6200fd6d0ed2389983db3",
+    "Safety Score": "https://pharos.watch/stablecoin/eurq-quantoz/"
   },
   "LAZIO": {
     "_category": "Other",
@@ -8318,7 +8751,8 @@
   },
   "CTUSD": {
     "_category": "Stablecoin",
-    "citrea": "0x8d82c4e3c936c7b5724a382a9c5a4e6eb7ab6d5d"
+    "citrea": "0x8d82c4e3c936c7b5724a382a9c5a4e6eb7ab6d5d",
+    "Safety Score": "https://pharos.watch/stablecoin/ctusd-citrea/"
   },
   "SENTIS": {
     "_category": "Other",
@@ -8358,7 +8792,8 @@
     "avalanche": "0xf197ffc28c23e0309b5559e7a166f2c6164c80aa",
     "base": "0xf197ffc28c23e0309b5559e7a166f2c6164c80aa",
     "ethereum": "0xf197ffc28c23e0309b5559e7a166f2c6164c80aa",
-    "polygon": "0xf197ffc28c23e0309b5559e7a166f2c6164c80aa"
+    "polygon": "0xf197ffc28c23e0309b5559e7a166f2c6164c80aa",
+    "Safety Score": "https://pharos.watch/stablecoin/mxnb-juno/"
   },
   "STATICS": {
     "_category": "Other",
@@ -8395,7 +8830,8 @@
   },
   "USG": {
     "_category": "Stablecoin",
-    "ethereum": "0xb1c2db5d6ca03fce73dbd304d320bf76c55ae1b1"
+    "ethereum": "0xb1c2db5d6ca03fce73dbd304d320bf76c55ae1b1",
+    "Safety Score": "https://pharos.watch/stablecoin/usg-tangent/"
   },
   "ROAM": {
     "_category": "Other",
@@ -8413,7 +8849,8 @@
     "_category": "Savings stablecoin",
     "arbitrum": "0xe72fe64840f4ef80e3ec73a1c749491b5c938cb9",
     "ethereum": "0xe72fe64840f4ef80e3ec73a1c749491b5c938cb9",
-    "plume-network": "0xe72fe64840f4ef80e3ec73a1c749491b5c938cb9"
+    "plume-network": "0xe72fe64840f4ef80e3ec73a1c749491b5c938cb9",
+    "Safety Score": "https://pharos.watch/stablecoin/ntbill-nest/"
   },
   "NFTX": {
     "_category": "Other",
@@ -8444,7 +8881,8 @@
     "_category": "Other",
     "ethereum": "0xda2ffa104356688e74d9340519b8c17f00d7752e",
     "optimism": "0x720f86f4b5b5d5d0ea3e5718ec43071d4d05134b",
-    "polygon": "0x4c5ca366e26409845624e29b62c388a06961a792"
+    "polygon": "0x4c5ca366e26409845624e29b62c388a06961a792",
+    "Safety Score": "https://pharos.watch/stablecoin/hlscope-hamilton-lane/"
   },
   "AMZNB": {
     "_category": "Other",
@@ -8579,7 +9017,8 @@
   "PHT": {
     "_category": "Stablecoin",
     "ethereum": "0xbe370ad45d44eb45174c4ec60b88839fef32c077",
-    "polygon": "0xe75220cb014dfb2d354bb59be26d7458bb8d0706"
+    "polygon": "0xe75220cb014dfb2d354bb59be26d7458bb8d0706",
+    "Safety Score": "https://pharos.watch/stablecoin/pht-pht/"
   },
   "SAUCE#cg-saucecoin": {
     "_category": "Other",
@@ -8590,7 +9029,10 @@
     "avalanche": "0xd2a530170d71a9cfe1651fb468e2b98f7ed7456b",
     "base": "0xd2a530170d71a9cfe1651fb468e2b98f7ed7456b",
     "ethereum": "0xd2a530170d71a9cfe1651fb468e2b98f7ed7456b",
-    "polygon": "0xd2a530170d71a9cfe1651fb468e2b98f7ed7456b"
+    "polygon": "0xd2a530170d71a9cfe1651fb468e2b98f7ed7456b",
+    "Safety Score": "https://pharos.watch/stablecoin/audf-forte/",
+    "redbelly-network": "0xd2a530170d71a9cfe1651fb468e2b98f7ed7456b",
+    "arc": "0xd2a530170d71a9cfe1651fb468e2b98f7ed7456b"
   },
   "DEXTF": {
     "_category": "Other",
@@ -8633,7 +9075,8 @@
   },
   "XAGM": {
     "_category": "Other",
-    "ethereum": "0x123ffe0a3c62878dcbee2742227dc8990058d9e1"
+    "ethereum": "0x123ffe0a3c62878dcbee2742227dc8990058d9e1",
+    "Safety Score": "https://pharos.watch/stablecoin/xagm-matrixdock/"
   },
   "WILD": {
     "_category": "Other",
@@ -8651,11 +9094,33 @@
     "_category": "Other",
     "bsc": "0xfa9a1e901085e269f6d428f79cd5252d8b919344",
     "ethereum": "0x423d42e505e64f99b6e277eb7ed324cc5606f139",
-    "hyperevm": "0x95febdd6f447b5278c9b98743b4254eb02c6ea1d"
+    "hyperevm": "0x95febdd6f447b5278c9b98743b4254eb02c6ea1d",
+    "Safety Score": "https://pharos.watch/stablecoin/gldon-ondo/"
   },
   "USDSO": {
     "_category": "Stablecoin",
-    "somnia": "0x00000022da000002656c64d9ea6011ea952d008a"
+    "somnia": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "Safety Score": "https://pharos.watch/stablecoin/usdso-somnia/",
+    "ethereum": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "fraxtal": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "arbitrum": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "avalanche": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "base": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "bsc": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "ink": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "katana": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "linea": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "monad": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "mode": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "optimism": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "plume-network": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "polygon": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "scroll": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "sei-v2": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "sonic": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "stable": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "world-chain": "0x00000022da000002656c64d9ea6011ea952d008a",
+    "unichain": "0x00000022da000002656c64d9ea6011ea952d008a"
   },
   "BTR#cg-bitrue-token": {
     "_category": "Other",
@@ -8805,7 +9270,8 @@
   },
   "BRL1": {
     "_category": "Stablecoin",
-    "polygon": "0x5c067c80c00ecd2345b05e83a3e758ef799c40b5"
+    "polygon": "0x5c067c80c00ecd2345b05e83a3e758ef799c40b5",
+    "Safety Score": "https://pharos.watch/stablecoin/brl1-brl1/"
   },
   "GAIB": {
     "_category": "Other",
@@ -8863,7 +9329,8 @@
     "_category": "Stablecoin",
     "arc": "0xe205b4e7ac03e3f7b2060c3edf2171aa7126c0d5",
     "base": "0xe205b4e7ac03e3f7b2060c3edf2171aa7126c0d5",
-    "ethereum": "0xe205b4e7ac03e3f7b2060c3edf2171aa7126c0d5"
+    "ethereum": "0xe205b4e7ac03e3f7b2060c3edf2171aa7126c0d5",
+    "Safety Score": "https://pharos.watch/stablecoin/zaru-blocktower/"
   },
   "DEXT": {
     "_category": "Other",
@@ -8899,7 +9366,8 @@
   },
   "USDXL": {
     "_category": "Stablecoin",
-    "hyperevm": "0xca79db4b49f608ef54a5cb813fbed3a6387bc645"
+    "hyperevm": "0xca79db4b49f608ef54a5cb813fbed3a6387bc645",
+    "Safety Score": "https://pharos.watch/stablecoin/usdxl-last/"
   },
   "CATE": {
     "_category": "Other",
@@ -9001,7 +9469,9 @@
     "celo": "0xf6829d7393dae24509eb1e52ee8e572e2e271a4f",
     "ethereum": "0x17cdb2a01e7a34cbb3dd4b83260b05d0274c8dab",
     "lisk": "0xc7ab2c35ea37236e644c24a4e4a1911c082887c0",
-    "polygon": "0x52828daa48c1a9a06f37500882b42daf0be04c3b"
+    "polygon": "0x52828daa48c1a9a06f37500882b42daf0be04c3b",
+    "Safety Score": "https://pharos.watch/stablecoin/cngn-compliant-naira/",
+    "assetchain": "0x7923c0f6fa3d1ba6eafcaedaad93e737fd22fc4f"
   },
   "DVO": {
     "_category": "Other",
@@ -9150,11 +9620,13 @@
   },
   "USDM#cg-monetrix-usd": {
     "_category": "Savings stablecoin",
-    "hyperevm": "0xe2d2959f89b6389deb624bf076fe7d9e5401f377"
+    "hyperevm": "0xe2d2959f89b6389deb624bf076fe7d9e5401f377",
+    "Safety Score": "https://pharos.watch/stablecoin/usdm-monetrix/"
   },
   "AZND": {
     "_category": "Stablecoin",
-    "monad": "0x4917a5ec9fcb5e10f47cbb197abe6ab63be81fe8"
+    "monad": "0x4917a5ec9fcb5e10f47cbb197abe6ab63be81fe8",
+    "Safety Score": "https://pharos.watch/stablecoin/aznd-mu-digital/"
   },
   "TKO": {
     "_category": "Other",
@@ -9172,7 +9644,9 @@
   "DOC": {
     "_category": "Stablecoin",
     "arbitrum": "0x2ad62eb9744c720364f6ac856360a43e8a2229b5",
-    "rootstock": "0xe700691da7b9851f2f35f8b8182c69c53ccad9db"
+    "rootstock": "0xe700691da7b9851f2f35f8b8182c69c53ccad9db",
+    "Safety Score": "https://pharos.watch/stablecoin/doc-money-on-chain/",
+    "ethereum": "0x69f6d4d4813f8e2e618dae7572e04b6d5329e207"
   },
   "HOLD": {
     "_category": "Other",
@@ -9191,7 +9665,8 @@
     "_category": "Stablecoin",
     "base": "0xeded6ae915b129b67a4ad49901518f2736427063",
     "ethereum": "0x081599e4936d12c46bd48913b2329115cd26cbdd",
-    "redbelly-network": "0x081599e4936d12c46bd48913b2329115cd26cbdd"
+    "redbelly-network": "0x081599e4936d12c46bd48913b2329115cd26cbdd",
+    "Safety Score": "https://pharos.watch/stablecoin/audm-macropod/"
   },
   "FOX": {
     "_category": "Other",
@@ -9402,7 +9877,17 @@
         "note": "Uses convertToAssets for one whole scrvUSD share at the current block and the block 30 days earlier, verifying the crvUSD underlying and token decimals at both blocks. Rates are crvUSD per scrvUSD, not an assumed USD price. Protocol lending interest and incentives are separate.",
         "evidence": "https://www.coingecko.com/en/coins/savings-crvusd; https://docs.curve.finance/developer/scrvusd/overview; https://github.com/curvefi/curve-llamalend.js/blob/d472168015e5e5db8a565a91fcedf224620dad8a/src/constants/aliases.ts (ALIASES_ETHEREUM.st_crvUSD); https://www.curve.finance/crvusd/ethereum/scrvUSD"
       }
-    ]
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/scrvusd-curve/",
+    "optimism": "0x289f635106d5b822a505b39ac237a0ae9189335b",
+    "base": "0x646a737b9b6024e49f5908762b3ff73e65b5160c",
+    "fraxtal": "0xab94c721040b33aa8b0b4d159da9878e2a836ed0",
+    "fantom": "0x5191946500e75f0a74476f146df7d386e52961d9",
+    "bsc": "0x0094ad026643994c8fb2136ec912d508b15fe0e5",
+    "avalanche": "0xa3ea433509f7941df3e33857d9c9f212ad4a4e64",
+    "xdc-network": "0x3d8eadb739d1ef95dd53d718e4810721837c69c1",
+    "sonic": "0x8fb3ec8f2d1dc089e70cd61f1e49496d443b2124",
+    "etherlink": "0xe35a879e5efb4f1bb7f70dcf3250f2e19f096bd8"
   },
   "syrupUSDC": {
     "_category": "Savings stablecoin",
@@ -9440,6 +9925,1660 @@
         "note": "USDC per syrupUSDC. Maple states that Chainlink feeds relay the canonical Ethereum pool convertToExitAssets() value, including unrealized losses. Uses historical oracle rounds, not a capped liquidation wrapper; lending APR, Merkl incentives and SYRUP rewards are separate.",
         "evidence": "https://docs.maple.finance/integrate/crosschain/syrupusd-crosschain#price-feeds; https://docs.maple.finance/integrate/ethereum-mainnet/asset-integration; https://www.coingecko.com/en/coins/syrup-usdc"
       }
+    ],
+    "Safety Score": "https://pharos.watch/stablecoin/syrupusdc-maple/"
+  },
+  "spUSDT": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susdt-spark/",
+    "ethereum": "0xe2e7a17dff93280dec073c995595155283e3c372",
+    "arbitrum": "0x45d91340b3b7b96985a72b5c678f7d9e8d664b62",
+    "x-layer": "0xc358c90d32375721cb3924320fdc2f8b694347ca",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xe2e7a17dff93280dec073c995595155283e3c372",
+        "token": "0xe2e7a17dff93280dec073c995595155283e3c372",
+        "underlying": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "label": "spUSDT on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
     ]
+  },
+  "steakUSDT": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/steakusdt-steakhouse/",
+    "ethereum": "0xbeef003c68896c7d2c3c60d363e8d71a49ab2bf9",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbeef003c68896c7d2c3c60d363e8d71a49ab2bf9",
+        "token": "0xbeef003c68896c7d2c3c60d363e8d71a49ab2bf9",
+        "underlying": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "label": "steakUSDT on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/steakusdt-steakhouse.json"
+      }
+    ]
+  },
+  "skyMoneyUsdtSavings": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/skymoneyusdtsavings-sky/",
+    "ethereum": "0x23f5e9c35820f4bab695ac1f19c203cc3f8e1e11",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x23f5e9c35820f4bab695ac1f19c203cc3f8e1e11",
+        "token": "0x23f5e9c35820f4bab695ac1f19c203cc3f8e1e11",
+        "underlying": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "label": "skyMoneyUsdtSavings on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sparkUSDTbc": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sparkusdtbc-spark/",
+    "ethereum": "0xb0c424116172b55cbb6dd3136f5989f7959e5b91",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xb0c424116172b55cbb6dd3136f5989f7959e5b91",
+        "token": "0xb0c424116172b55cbb6dd3136f5989f7959e5b91",
+        "underlying": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "label": "sparkUSDTbc on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "spUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susdc-spark/",
+    "ethereum": "0x28b3a8fb53b741a8fd78c0fb9a6b2393d896a43d",
+    "avalanche": "0x28b3a8fb53b741a8fd78c0fb9a6b2393d896a43d",
+    "x-layer": "0xf90e63079d97a0a1f479b2b168457f420caff6ba",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x28b3a8fb53b741a8fd78c0fb9a6b2393d896a43d",
+        "token": "0x28b3a8fb53b741a8fd78c0fb9a6b2393d896a43d",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "spUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "gtUSDCp": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gtusdcp-gauntlet/",
+    "ethereum": "0x8c106eedad96553e64287a5a6839c3cc78afa3d0",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x8c106eedad96553e64287a5a6839c3cc78afa3d0",
+        "token": "0x8c106eedad96553e64287a5a6839c3cc78afa3d0",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "gtUSDCp on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/gtusdcp-gauntlet.json"
+      }
+    ]
+  },
+  "gtUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gtusdc-gauntlet/",
+    "ethereum": "0xdd0f28e19c1780eb6396170735d45153d261490d",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xdd0f28e19c1780eb6396170735d45153d261490d",
+        "token": "0xdd0f28e19c1780eb6396170735d45153d261490d",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "gtUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "krUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/krusdc-keyrock/",
+    "arc": "0x5befab92a5a3d60f578cb51eeb4e4fd50a1e3123",
+    "_intrinsicOracles": [
+      {
+        "network": "arc",
+        "kind": "erc4626",
+        "address": "0x5befab92a5a3d60f578cb51eeb4e4fd50a1e3123",
+        "token": "0x5befab92a5a3d60f578cb51eeb4e4fd50a1e3123",
+        "underlying": "0x3600000000000000000000000000000000000000",
+        "label": "krUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "arcUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/arcusdc-galaxy/",
+    "arc": "0x8e357432cc12ff425c36432f312968aeb16112af",
+    "_intrinsicOracles": [
+      {
+        "network": "arc",
+        "kind": "erc4626",
+        "address": "0x8e357432cc12ff425c36432f312968aeb16112af",
+        "token": "0x8e357432cc12ff425c36432f312968aeb16112af",
+        "underlying": "0x3600000000000000000000000000000000000000",
+        "label": "arcUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "pendleUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/pendleusdc-pendle/",
+    "ethereum": "0x55c1b6e461a6334b567baf0feb5d728715446f05",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x55c1b6e461a6334b567baf0feb5d728715446f05",
+        "token": "0x55c1b6e461a6334b567baf0feb5d728715446f05",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "pendleUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "yvUSDC-1": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/yvusdc-yearn/",
+    "ethereum": "0xbe53a109b494e5c9f97b9cd39fe969be68bf6204",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbe53a109b494e5c9f97b9cd39fe969be68bf6204",
+        "token": "0xbe53a109b494e5c9f97b9cd39fe969be68bf6204",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "yvUSDC-1 on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "steakUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/steakusdc-steakhouse/",
+    "ethereum": "0xbeef088055857739c12cd3765f20b7679def0f51",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbeef088055857739c12cd3765f20b7679def0f51",
+        "token": "0xbeef088055857739c12cd3765f20b7679def0f51",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "steakUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/steakusdc-steakhouse.json"
+      }
+    ]
+  },
+  "bbqUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/bbqusdc-steakhouse/",
+    "ethereum": "0xbeefff209270748ddd194831b3fa287a5386f5bc",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbeefff209270748ddd194831b3fa287a5386f5bc",
+        "token": "0xbeefff209270748ddd194831b3fa287a5386f5bc",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "bbqUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "hyperUSDCa": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/hyperusdca-hyperithm/",
+    "monad": "0x78999cc96d2ba0341588c60ccb0e91c6c33cf371"
+  },
+  "bbqUSDC#pharos-bbqusdc-steakhouse-v2": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/bbqusdc-steakhouse-v2/",
+    "ethereum": "0xbeeff2c5bf38f90e3482a8b19f12e5a6d2fca757",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbeeff2c5bf38f90e3482a8b19f12e5a6d2fca757",
+        "token": "0xbeeff2c5bf38f90e3482a8b19f12e5a6d2fca757",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "bbqUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "CSCBUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cscbusdc-clearstar/",
+    "base": "0x91c056b6d4311a743614fbc03ac32d4e6a2d3a3c",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0x91c056b6d4311a743614fbc03ac32d4e6a2d3a3c",
+        "token": "0x91c056b6d4311a743614fbc03ac32d4e6a2d3a3c",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "CSCBUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "ethenaUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/ethenausdc-steakhouse/",
+    "base": "0xbeeff0be997cca5b1c13a7433c2004637975739e",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0xbeeff0be997cca5b1c13a7433c2004637975739e",
+        "token": "0xbeeff0be997cca5b1c13a7433c2004637975739e",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "ethenaUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sparkUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sparkusdc-spark/",
+    "base": "0x7bfa7c4f149e7415b73bdedfe609237e29cbf34a",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0x7bfa7c4f149e7415b73bdedfe609237e29cbf34a",
+        "token": "0x7bfa7c4f149e7415b73bdedfe609237e29cbf34a",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "sparkUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susdc-spark-v1/",
+    "ethereum": "0xbc65ad17c5c0a2a4d159fa5a503f4992c7b545fe",
+    "arbitrum": "0x940098b108fb7d0a7e374f6eded7760787464609",
+    "base": "0x3128a0f7f0ea68e7b7c9b00afa7e41045828e858",
+    "optimism": "0xcf9326e24ebffbef22ce1050007a43a3c0b6db55",
+    "unichain": "0x14d9143becc348920b68d123687045db49a016c6",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbc65ad17c5c0a2a4d159fa5a503f4992c7b545fe",
+        "token": "0xbc65ad17c5c0a2a4d159fa5a503f4992c7b545fe",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "sUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "srUSDe": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/srusde-strata/",
+    "ethereum": "0x3d7d6fdf07ee548b939a80edbc9b2256d0cdc003"
+  },
+  "stUSDS": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/stusds-sky/",
+    "ethereum": "0x99cd4ec3f88a45940936f469e4bb72a2a701eeb9",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x99cd4ec3f88a45940936f469e4bb72a2a701eeb9",
+        "token": "0x99cd4ec3f88a45940936f469e4bb72a2a701eeb9",
+        "underlying": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",
+        "label": "stUSDS on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "skyMoneyUsdsFlagship": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/skymoneyusdsflagship-sky/",
+    "ethereum": "0xe15fcc81118895b67b6647bbd393182df44e11e0",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xe15fcc81118895b67b6647bbd393182df44e11e0",
+        "token": "0xe15fcc81118895b67b6647bbd393182df44e11e0",
+        "underlying": "0xdc035d45d973e3ec169d2276ddab16f1e407384f",
+        "label": "skyMoneyUsdsFlagship on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sUSD1+": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susd1plus-lorenzo/",
+    "bsc": "0x4f2760b32720f013e900dc92f65480137391199b"
+  },
+  "senPYUSDmain": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/senpyusdmain-sentora/",
+    "ethereum": "0xb576765fb15505433af24fee2c0325895c559fb2",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xb576765fb15505433af24fee2c0325895c559fb2",
+        "token": "0xb576765fb15505433af24fee2c0325895c559fb2",
+        "underlying": "0x6c3ea9036406852006290770bedfcaba0e23a0e8",
+        "label": "senPYUSDmain on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "senPYUSDPRIMEv2": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/senpyusdprimev2-sentora/",
+    "ethereum": "0xc21b08c16458202593d4d9b26b9984ee67b38bbd",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xc21b08c16458202593d4d9b26b9984ee67b38bbd",
+        "token": "0xc21b08c16458202593d4d9b26b9984ee67b38bbd",
+        "underlying": "0x6c3ea9036406852006290770bedfcaba0e23a0e8",
+        "label": "senPYUSDPRIMEv2 on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "senPYUSDPST": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/senpyusdpst-sentora/",
+    "ethereum": "0x8381a156958711e230f325428b5eb4b6555c75d9",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x8381a156958711e230f325428b5eb4b6555c75d9",
+        "token": "0x8381a156958711e230f325428b5eb4b6555c75d9",
+        "underlying": "0x6c3ea9036406852006290770bedfcaba0e23a0e8",
+        "label": "senPYUSDPST on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "senPYUSDmWIN": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/senpyusdmwin-sentora/",
+    "ethereum": "0x7cbcfc4f64be199ede6db1d916ddcdb69f666b57",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x7cbcfc4f64be199ede6db1d916ddcdb69f666b57",
+        "token": "0x7cbcfc4f64be199ede6db1d916ddcdb69f666b57",
+        "underlying": "0x6c3ea9036406852006290770bedfcaba0e23a0e8",
+        "label": "senPYUSDmWIN on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sUSDf": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susdf-falcon/",
+    "ethereum": "0xc8cf6d7991f15525488b2a83df53468d682ba4b0",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xc8cf6d7991f15525488b2a83df53468d682ba4b0",
+        "token": "0xc8cf6d7991f15525488b2a83df53468d682ba4b0",
+        "underlying": "0xfa2b947eec368f42195f24f36d2af29f7c24cec2",
+        "label": "sUSDf on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "AA_FalconXUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/aa-falconx-mev-capital/",
+    "ethereum": "0xc26a6fa2c37b38e549a4a1807543801db684f99c"
+  },
+  "steakUSDG": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/steakusdg-steakhouse/",
+    "robinhood": "0xbeeff033f34c046626b8d0a041844c5d1a5409dd"
+  },
+  "syrupUSDG": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/syrupusdg-maple/",
+    "ethereum": "0x87b65c4aaffa76881f9e96f3e7ed945ddfc3cd7a",
+    "robinhood": "0x40858070814a57fdf33a613ae84fe0a8b4a874f7",
+    "arbitrum": "0xe1b0dc5a21b10f1634fbfbe9976fba2ee2e1c762",
+    "ink": "0xebe9ed66efe0948d0c1b72b0157fc17733667018",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x87b65c4aaffa76881f9e96f3e7ed945ddfc3cd7a",
+        "token": "0x87b65c4aaffa76881f9e96f3e7ed945ddfc3cd7a",
+        "underlying": "0xe343167631d89b6ffc58b88d6b7fb0228795491d",
+        "label": "syrupUSDG on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "senRLUSDv2": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/senrlusdv2-sentora/",
+    "ethereum": "0x6dc58a0fdfc8d694e571dc59b9a52eeea780e6bf",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x6dc58a0fdfc8d694e571dc59b9a52eeea780e6bf",
+        "token": "0x6dc58a0fdfc8d694e571dc59b9a52eeea780e6bf",
+        "underlying": "0x8292bb45bf1ee4d140127049757c2e0ff06317ed",
+        "label": "senRLUSDv2 on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sxsRLUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sxsrlusd-sentora/",
+    "ethereum": "0xfc8c624b6080a0a780583799f2a862de936f6e22",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xfc8c624b6080a0a780583799f2a862de936f6e22",
+        "token": "0xfc8c624b6080a0a780583799f2a862de936f6e22",
+        "underlying": "0x8292bb45bf1ee4d140127049757c2e0ff06317ed",
+        "label": "sxsRLUSD on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "WTGXX": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/wtgxx-wisdomtree/",
+    "arbitrum": "0xfeb26f0943c3885b2cb85a9f933975356c81c33d",
+    "avalanche": "0x870fd36b3bf7f5abeeea2c8d4abdf1dc4e33109d",
+    "base": "0x5096b85ed11798fddcb8b5cb27c399c04689c435",
+    "ethereum": "0x1fecf3d9d4fee7f2c02917a66028a48c6706c179",
+    "optimism": "0x870fd36b3bf7f5abeeea2c8d4abdf1dc4e33109d",
+    "plume-network": "0xcf7a8813bd3bdaf70a9f46d310ce1ee8d80a4f5a"
+  },
+  "sUSDD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susdd-tron-dao-reserve/",
+    "ethereum": "0xc5d6a7b61d18afa11435a889557b068bb9f29930",
+    "bsc": "0x8ba9da757d1d66c58b1ae7e2ed6c04087348a82d"
+  },
+  "USDTB": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdtb-ethena/",
+    "ethereum": "0xc139190f447e929f090edeb554d95abb8b18ac1c",
+    "arbitrum": "0xc708b6887db46005da033501f8aebee72d191a5d",
+    "base": "0xc708b6887db46005da033501f8aebee72d191a5d"
+  },
+  "M#pharos-m-m0": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/m-m0/",
+    "ethereum": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "optimism": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "arbitrum": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "base": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "hyperevm": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "plume-network": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "bsc": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "linea": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "soneium": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "citrea": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "sei-v2": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "plasma": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "monad": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "rise": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "fluent": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b",
+    "0g": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b"
+  },
+  "bUSD0": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/busd0-usual/",
+    "ethereum": "0x35d8949372d46b7a3d5a56006ae77b215fc69bc0",
+    "arbitrum": "0x2b65f9d2e4b84a2df6ff0525741b75d1276a9c2f"
+  },
+  "sGHO": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sgho-aave/",
+    "ethereum": "0xe1753f2e00940cc31213dd92013cf019dfe4ca1d",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xe1753f2e00940cc31213dd92013cf019dfe4ca1d",
+        "token": "0xe1753f2e00940cc31213dd92013cf019dfe4ca1d",
+        "underlying": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f",
+        "label": "sGHO on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "JLTXX": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/jltxx-jpmorgan/",
+    "ethereum": "0x09864f52b035ae22ee739dfa5c748fa080d07bd8"
+  },
+  "stcUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/stcusd-cap/",
+    "ethereum": "0x88887be419578051ff9f4eb6c858a951921d8888",
+    "megaeth": "0x88887be419578051ff9f4eb6c858a951921d8888",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x88887be419578051ff9f4eb6c858a951921d8888",
+        "token": "0x88887be419578051ff9f4eb6c858a951921d8888",
+        "underlying": "0xcccc62962d17b8914c62d74ffb843d73b2a3cccc",
+        "label": "stcUSD on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sUSDx": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susdx-axis/",
+    "ethereum": "0xeb892628d1e58bc475a6dcb7f5dbc4f591632aa4",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xeb892628d1e58bc475a6dcb7f5dbc4f591632aa4",
+        "token": "0xeb892628d1e58bc475a6dcb7f5dbc4f591632aa4",
+        "underlying": "0xa1fa7777974312f7d801a8880714a218f76233f8",
+        "label": "sUSDx on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/susdx-axis.json"
+      }
+    ]
+  },
+  "sFRAX": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sfrax-frax/",
+    "ethereum": "0xa663b02cf0a4b149d2ad41910cb81e23e1c41c32",
+    "arbitrum": "0xe3b3fe7bca19ca77ad877a5bebab186becfad906",
+    "avalanche": "0x3405e88af759992937b84e58f2fe691ef0eea320",
+    "base": "0xe4796ccb6bb5de2290c417ac337f2b66ca2e770e",
+    "blast": "0xe4796ccb6bb5de2290c417ac337f2b66ca2e770e",
+    "bsc": "0xa63f56985f9c7f3bc9ffc5685535649e0c1a55f3",
+    "fraxtal": "0x5bff88ca1442c2496f7e475e9e7786383bc070c0",
+    "metis-andromeda": "0xe4796ccb6bb5de2290c417ac337f2b66ca2e770e",
+    "optimism": "0x2dd1b4d4548accea497050619965f91f78b3b532",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xa663b02cf0a4b149d2ad41910cb81e23e1c41c32",
+        "token": "0xa663b02cf0a4b149d2ad41910cb81e23e1c41c32",
+        "underlying": "0x853d955acef822db058eb8505911ed77f175b99e",
+        "label": "sFRAX on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sDOLA": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sdola-inverse-finance/",
+    "ethereum": "0xb45ad160634c528cc3d2926d9807104fa3157305",
+    "base": "0xca78ee4544ec5a33af86f1e786efc7d3652bf005",
+    "optimism": "0xfc63c9c8ba44ae89c01265453ed4f427c80cbd4e",
+    "arbitrum": "0x7a1e123e41458aabab8068bfed6010d8f9480898",
+    "berachain": "0x02eaa69646183c069fc2b64f15923f27b9cf3b03",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xb45ad160634c528cc3d2926d9807104fa3157305",
+        "token": "0xb45ad160634c528cc3d2926d9807104fa3157305",
+        "underlying": "0x865377367054516e17014ccded1e7d814edc9ce4",
+        "label": "sDOLA on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/sdola-inverse-finance.json"
+      }
+    ]
+  },
+  "asUSDF": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/asusdf-astherus/",
+    "bsc": "0x917af46b3c3c6e1bb7286b9f59637fb7c65851fb"
+  },
+  "satUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/satusd-river/",
+    "ethereum": "0x1958853a8be062dc4f401750eb233f5850f0d0d2",
+    "arbitrum": "0xb4818bb69478730ef4e33cc068dd94278e2766cb",
+    "base": "0x70654aad8b7734dc319d0c3608ec7b32e03fa162",
+    "bsc": "0xb4818bb69478730ef4e33cc068dd94278e2766cb",
+    "sonic": "0xb4818bb69478730ef4e33cc068dd94278e2766cb",
+    "bob": "0xecf21b335b41f9d5a89f6186a99c19a3c467871f",
+    "bitlayer": "0xba50ddac6b2f5482ca064efac621e0c7c0f6a783",
+    "b-network": "0x8dd8b12d55c73c08294664a5915475ed1c8b1f6f",
+    "hemi": "0xb4818bb69478730ef4e33cc068dd94278e2766cb",
+    "bevm": "0x2031c8848775a5efb7cff2a4edbe3f04c50a1478",
+    "x-layer": "0xcef6c74ce218c0e1f48ca2430635d0a65cd3737a"
+  },
+  "THUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/thusd-theo/",
+    "ethereum": "0xa3fe5c7596024e6811e14f029937d5bd8ae485b3",
+    "stable": "0x9aa9aa0530a6af70ee7bc47cf1240100f514b065",
+    "arbitrum": "0x9aa9aa0530a6af70ee7bc47cf1240100f514b065"
+  },
+  "PYUSDx": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/pyusdx-moonpay/",
+    "ethereum": "0xebdb0942ce16386ab90718c7bd10c91cdb66b14d",
+    "arbitrum": "0xebdb0942ce16386ab90718c7bd10c91cdb66b14d",
+    "monad": "0xebdb0942ce16386ab90718c7bd10c91cdb66b14d",
+    "base": "0xebdb0942ce16386ab90718c7bd10c91cdb66b14d",
+    "0g": "0xebdb0942ce16386ab90718c7bd10c91cdb66b14d"
+  },
+  "savUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/savusd-avant/",
+    "avalanche": "0x06d47f3fb376649c3a9dafe069b3d6e35572219e",
+    "ethereum": "0xb8d89678e75a973e74698c976716308abb8a46a4",
+    "linea": "0x5c247948fd58bb02b6c4678d9940f5e6b9af1127",
+    "plasma": "0xa29420057f3e3b9512d4786df135da1674bd74d4",
+    "berachain": "0xa744fe3688291ac3a4a7ec917678783ad9946a1e",
+    "bsc": "0x14063733875204b35d20d5fc52c7b5569ad00335",
+    "monad": "0x9648db94f1e6b19e7d755585542981f97dc806c6",
+    "katana": "0xb9827268ebcc4ea7b105cfc787a92c612629a3f1",
+    "megaeth": "0x68fe7f83ba331e32d9fa3def98a5538176635339",
+    "sei-v2": "0xd84a49df125f6744018518117fe59a86d39eae75",
+    "base": "0xa6ef20fe18cd529ca15a8a53a29d1832b1f848ff",
+    "arbitrum": "0xa322e23a357cb7c596a7a834102b9d6d5b15da3e"
+  },
+  "CASH": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cash-phantom/",
+    "hyperevm": "0x061af032ccf1ce35a39b556e0f442bf2dbe1ed06"
+  },
+  "PUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/pusd-polymarket/",
+    "polygon": "0xc011a7e12a19f7b1f670d46f03b03f3342e82dfb"
+  },
+  "TBILL": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/tbill-openeden/",
+    "ethereum": "0xdd50c053c096cb04a3e3362e2b622529ec5f2e8a",
+    "arbitrum": "0xf84d28a8d28292842dd73d1c5f99476a80b6666a",
+    "bsc": "0x5b4681f0d7a01b817675f25892d3ad73572fd1d9"
+  },
+  "xDAI": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/xdai-gnosis/",
+    "gnosis": "0xe91d153e0b41518a2ce8dd3d7944fa863463a97d"
+  },
+  "sDAI#pharos-sdai-gnosis": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sdai-gnosis/",
+    "gnosis": "0xaf204776c7245bf4147c2612bf6e5972ee483701"
+  },
+  "steakEURCV": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/steakeurcv-steakhouse/",
+    "ethereum": "0xbeef0c075da5d01112ae5cf34d257074fb5ddb2f",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xbeef0c075da5d01112ae5cf34d257074fb5ddb2f",
+        "token": "0xbeef0c075da5d01112ae5cf34d257074fb5ddb2f",
+        "underlying": "0x5f7827fdeb7c20b443265fc2f40845b715385ff2",
+        "label": "steakEURCV on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sreUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sreusd-resupply/",
+    "ethereum": "0x557ab1e003951a73c12d16f0fea8490e39c33c35",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x557ab1e003951a73c12d16f0fea8490e39c33c35",
+        "token": "0x557ab1e003951a73c12d16f0fea8490e39c33c35",
+        "underlying": "0x57ab1e0003f623289cd798b1824be09a793e4bec",
+        "label": "sreUSD on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "ONED": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/oned-gennius/",
+    "base": "0x10ed0050b7a5d5e1e9cc164f77a71d0bf69f64bd"
+  },
+  "sYUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/syusd-aegis/",
+    "ethereum": "0xfe0ccc9942e98c963fe6b4e5194eb6e3baa4cb64",
+    "bsc": "0x24db057b19241eefb9b522e8627c293ed8f93af2"
+  },
+  "sBOLD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sbold-k3-capital/",
+    "ethereum": "0x50bd66d59911f5e086ec87ae43c811e0d059dd11"
+  },
+  "STBT": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/stbt-matrixdock/",
+    "ethereum": "0x530824da86689c9c17cdc2871ff29b058345b44a"
+  },
+  "COPM": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/copm-minteo/",
+    "polygon": "0x12050c705152931cfee3dd56c52fb09dea816c23",
+    "celo": "0xc92e8fc2947e32f2b574cca9f2f12097a71d5606"
+  },
+  "sUSN": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susn-noon/",
+    "ethereum": "0xe24a3dc889621612422a64e6388927901608b91d",
+    "zksync": "0xb6a09d426861c63722aa0b333a9ce5d5a9b04c4f",
+    "sophon": "0xb87dbe27db932bacaaa96478443b6519d52c5004",
+    "hyperevm": "0x34a2798d47b238a7cba9d87d49618dee6c4d999f",
+    "base": "0x34a2798d47b238a7cba9d87d49618dee6c4d999f",
+    "citrea": "0xda67b4284609d2d48e5d10cfac411572727dc1ed",
+    "berachain": "0xda67b4284609d2d48e5d10cfac411572727dc1ed",
+    "tac": "0x5ced7f73b76a555ccb372cc0f0137bec5665f81e",
+    "bsc": "0xda67b4284609d2d48e5d10cfac411572727dc1ed",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xe24a3dc889621612422a64e6388927901608b91d",
+        "token": "0xe24a3dc889621612422a64e6388927901608b91d",
+        "underlying": "0xda67b4284609d2d48e5d10cfac411572727dc1ed",
+        "label": "sUSN on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "USDaf": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdaf-asymmetry/",
+    "ethereum": "0x9cf12ccd6020b6888e4d4c4e4c7aca33c1eb91f8"
+  },
+  "USDQ#pharos-usdq-quill": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdq-quill/",
+    "scroll": "0xdb9e8f82d6d45fff803161f2a5f75543972b229a"
+  },
+  "YZUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/yzusd-yuzu/",
+    "plasma": "0x6695c0f8706c5ace3bdf8995073179cca47926dc",
+    "monad": "0x9dcb0d17edde04d27f387c89fecb78654c373858"
+  },
+  "syzUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/syzusd-yuzu/",
+    "plasma": "0xc8a8df9b210243c55d31c73090f06787ad0a1bf6",
+    "ethereum": "0x6dff69eb720986e98bb3e8b26cb9e02ec1a35d12",
+    "monad": "0x484be0540ad49f351eaa04eeb35df0f937d4e73f",
+    "hyperevm": "0x34c07f50c4f55b322e85deeb265d278e6af112e4",
+    "sei-v2": "0xb98b14d316d13f012d52f30a3d46641092ac6944",
+    "pharos": "0x54df79d8edf36d15cd83fbedbdd90807fc828934",
+    "berachain": "0x11a292b4a8985bfe4ea19aad24793b4e1d91ba60",
+    "base": "0xa343e5053e26371909fb8a2e9b7b391a49e7d2fd"
+  },
+  "USDnr": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdnr-nerona/",
+    "ethereum": "0xd48e565561416de59da1050ed70b8d75e8ef28f9",
+    "fluent": "0xd48e565561416de59da1050ed70b8d75e8ef28f9"
+  },
+  "USDR#pharos-usdr-rise": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdr-rise/",
+    "rise": "0x62b7f5a5be488ea58f660c5aff465647213bc6e9"
+  },
+  "sUSDat": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/susdat-saturn/",
+    "ethereum": "0xd166337499e176bbc38a1fbd113ab144e5bd2df7",
+    "bsc": "0x9cd57d3685e6868cacaa8bdcaaf52cbdebf4fa25",
+    "monad": "0x9cd57d3685e6868cacaa8bdcaaf52cbdebf4fa25",
+    "x-layer": "0x9cd57d3685e6868cacaa8bdcaaf52cbdebf4fa25",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xd166337499e176bbc38a1fbd113ab144e5bd2df7",
+        "token": "0xd166337499e176bbc38a1fbd113ab144e5bd2df7",
+        "underlying": "0x23238f20b894f29041f48d88ee91131c395aaa71",
+        "label": "sUSDat on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "MXNT": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/mxnt-tether/",
+    "ethereum": "0xed03ed872159e199065401b6d0d487d78d9464aa"
+  },
+  "pUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/pusd-plume/",
+    "ethereum": "0xdddd73f5df1f0dc31373357beac77545dc5a6f3f",
+    "plume-network": "0xdddd73f5df1f0dc31373357beac77545dc5a6f3f"
+  },
+  "USBD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usbd-bima/",
+    "ethereum": "0x6bede1c6009a78c222d9bdb7974bb67847fdb68c",
+    "hemi": "0x6bede1c6009a78c222d9bdb7974bb67847fdb68c",
+    "plume-network": "0x6bede1c6009a78c222d9bdb7974bb67847fdb68c",
+    "sonic": "0x6bede1c6009a78c222d9bdb7974bb67847fdb68c",
+    "bsc": "0x6bede1c6009a78c222d9bdb7974bb67847fdb68c",
+    "nibiru": "0x6bede1c6009a78c222d9bdb7974bb67847fdb68c"
+  },
+  "DLLR": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/dllr-sovryn/",
+    "rootstock": "0xc1411567d2670e24d9c4daaa7cda95686e1250aa"
+  },
+  "XUSD#pharos-xusd-babelfish": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/xusd-babelfish/",
+    "rootstock": "0xb5999795be0ebb5bab23144aa5fd6a02d080299f"
+  },
+  "USDRIF": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdrif-rif/",
+    "rootstock": "0x3a15461d8ae0f0fb5fa2629e9da7d66a794a6e37",
+    "arbitrum": "0x8eef5ed361c6823156d936209e23a8e0349e5c61"
+  },
+  "USDU#pharos-usdu-usdu-finance": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdu-usdu-finance/",
+    "ethereum": "0xdde3ec717f220fc6a29d6a4be73f91da5b718e55"
+  },
+  "DUSD#pharos-dusd-alto": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/dusd-alto/",
+    "ethereum": "0x63d74d22e689c715a04f2c13962b1f77f443d35b"
+  },
+  "USDFC": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdfc-secured-finance/",
+    "filecoin": "0x80b98d3aa09ffff255c3ba4a241111ff1262f045"
+  },
+  "rUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/rusd-reservoir/",
+    "ethereum": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "berachain": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "base": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "plume-network": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "sonic": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "world-chain": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "arbitrum": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "sei-v2": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "unichain": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "hyperevm": "0x866d66f64fb81461903e1e38d998e747ecf35e78",
+    "bsc": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "avalanche": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "katana": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "linea": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "monad": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+    "tempo": "0x20c0000000000000000000007f7ba549dd0251b9",
+    "pharos": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34"
+  },
+  "wsrUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/wsrusd-reservoir/",
+    "ethereum": "0xd3fd63209fa2d55b07a0f6db36c2f43900be3094",
+    "base": "0x62344be8ca1c339b46274a4017dd87af436900b1",
+    "berachain": "0x316cd39632cac4f4cdfc21757c4500fe12f64514",
+    "sonic": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "arbitrum": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "bsc": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "avalanche": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "unichain": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "plume-network": "0x0bbcc2c1991d0af8ec6a5ed922e6f5606923fe15",
+    "sei-v2": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "world-chain": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "katana": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "hyperevm": "0x04716db62c085d9e08050fcf6f7d775a03d07720",
+    "linea": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "monad": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "pharos": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "plasma": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "megaeth": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "tempo": "0x20c000000000000000000000aeed2ec36a54d0e5",
+    "xdc-network": "0x4809010926aec940b550d34a46a52739f996d75d",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xd3fd63209fa2d55b07a0f6db36c2f43900be3094",
+        "token": "0xd3fd63209fa2d55b07a0f6db36c2f43900be3094",
+        "underlying": "0x09d4214c03d01f49544c0448dbe3a27f768f2b34",
+        "label": "wsrUSD on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "srUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/srusd-reservoir/",
+    "ethereum": "0x738d1115b90efa71ae468f1287fc864775e23a31",
+    "berachain": "0x5475611dffb8ef4d697ae39df9395513b6e947d7"
+  },
+  "USDp": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdp-parallel/",
+    "ethereum": "0x9b3a8f7cec208e247d97dee13313690977e24459",
+    "base": "0x76a9a0062ec6712b99b4f63bd2b4270185759dd5",
+    "arbitrum": "0x76a9a0062ec6712b99b4f63bd2b4270185759dd5",
+    "optimism": "0x90337e484b1cb02132fc150d3afa262147348545",
+    "avalanche": "0x9ee1963f05553ef838604dd39403be21cef26aa4",
+    "sonic": "0x08417cdb7f52a5021bb4eb6e0deaf3f295c3f182",
+    "sei-v2": "0x048c4e07d170eedee8772ca76aee1c4e2d133d5c",
+    "scroll": "0x9ee1963f05553ef838604dd39403be21cef26aa4",
+    "ink": "0x9ee1963f05553ef838604dd39403be21cef26aa4",
+    "world-chain": "0x8fcf9118fdd359f6277cdd143c2da206e64140f3",
+    "bsc": "0x048c4e07d170eedee8772ca76aee1c4e2d133d5c",
+    "x-layer": "0x8fcf9118fdd359f6277cdd143c2da206e64140f3",
+    "polygon": "0x1250304f66404cd153fa39388ddcdaec7e0f1707",
+    "berachain": "0x9ee1963f05553ef838604dd39403be21cef26aa4",
+    "gnosis": "0x9ee1963f05553ef838604dd39403be21cef26aa4",
+    "unichain": "0x9ee1963f05553ef838604dd39403be21cef26aa4",
+    "linea": "0x8fcf9118fdd359f6277cdd143c2da206e64140f3",
+    "plume-network": "0x8fcf9118fdd359f6277cdd143c2da206e64140f3",
+    "plasma": "0xc2f8b5d893217462ae9c9879c9285a5a3aabcb8f",
+    "katana": "0x8fcf9118fdd359f6277cdd143c2da206e64140f3",
+    "fraxtal": "0x8fcf9118fdd359f6277cdd143c2da206e64140f3",
+    "hemi": "0x8fcf9118fdd359f6277cdd143c2da206e64140f3"
+  },
+  "TRYB": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/tryb-bilira/",
+    "ethereum": "0x2c537e5624e4af88a7ae4060c022609376c8d0eb",
+    "base": "0xfb8718a69aed7726afb3f04d2bd4bfde1bdcb294",
+    "bsc": "0xc1fdbed7dac39cae2ccc0748f7a80dc446f6a594",
+    "avalanche": "0x564a341df6c126f90cf3ecb92120fd7190acb401",
+    "polygon": "0x4fb71290ac171e1d144f7221d882becac7196eb5",
+    "plasma": "0x90729a45948c3078890bc80f2a4e7870a2ea4c5e",
+    "codex": "0x92932acf15928c2007912bb9f90094a5b6fe7160",
+    "world-chain": "0x2c537e5624e4af88a7ae4060c022609376c8d0eb",
+    "arc": "0xfb0705023603dc86325b83d9ff6b0da7921fec17"
+  },
+  "iTRY": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/itry-brix/",
+    "ethereum": "0xb492b4afd9658093694cf9452d5c272e8230f3b0",
+    "megaeth": "0x996ce957408804fec19237d866799d9c7076e48c"
+  },
+  "EURm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/ceur-celo/",
+    "celo": "0xd8763cba276a3738e6de85b4b3bf5fded6d6ca73",
+    "monad": "0x4d502d735b4c574b487ed641ae87ceae884731c7",
+    "ethereum": "0x977453366b8d205f5c9266b6ba271e850a814a50",
+    "polygon": "0x2f0173dfe97a7dc670d5a10b35c4263cfecfa853"
+  },
+  "GBPm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gbpm-mento/",
+    "celo": "0xccf663b1ff11028f0b19058d0f7b674004a40746",
+    "monad": "0x39bb4e0a204412bb98e821d25e7d955e69d40fd1"
+  },
+  "GBPe": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gbpe-monerium/",
+    "ethereum": "0x7ba92741bf2a568abc6f1d3413c58c6e0244f8fd",
+    "gnosis": "0x8e34bfec4f6eb781f9743d9b4af99cd23f9b7053",
+    "linea": "0x3bce82cf1a2bc357f956dd494713fe11dc54780f",
+    "arbitrum": "0x2d80dbf04d0802abd7a342dafa5d7cb42bfbb52f",
+    "base": "0xc4759ed641da77cbdc9fa2f37e9260a29bf7cc52",
+    "polygon": "0x646beea7a02fdada34c8e118949fe32350ab2206"
+  },
+  "JPYm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/jpym-mento/",
+    "celo": "0xc45ecf20f3cd864b32d9794d6f76814ae8892e20",
+    "monad": "0x22f6a6752800eab67b84748fefc3cc658384af72"
+  },
+  "CHFm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/chfm-mento/",
+    "celo": "0xb55a79f398e759e43c95b979163f30ec87ee131d",
+    "monad": "0xf64e91ffef7ef43aa314f0bc2ac39f770797990c"
+  },
+  "BRLm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/brlm-mento/",
+    "celo": "0xe8537a3d056da446677b9e9d6c5db704eaab4787"
+  },
+  "KESm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/kesm-mento/",
+    "celo": "0x456a3d042c0dbd3db53d5489e98dfb038553b0d0"
+  },
+  "COPm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/copm-mento/",
+    "celo": "0x8a567e2ae79ca692bd748ab832081c45de4041ea"
+  },
+  "CADm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cadm-mento/",
+    "celo": "0xff4ab19391af240c311c54200a492233052b6325"
+  },
+  "AUDm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/audm-mento/",
+    "celo": "0x7175504c455076f15c04a2f90a8e352281f492f9"
+  },
+  "GHSm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/ghsm-mento/",
+    "celo": "0xfaea5f3404bba20d3cc2f8c4b0a888f55a3c7313"
+  },
+  "ZARm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/zarm-mento/",
+    "celo": "0x4c35853a3b4e647fd266f4de678dcc8fec410bf6"
+  },
+  "GBPA": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gbpa-agant/",
+    "ethereum": "0xbbe6aab0ed76e90aea0d1cd978ec231c8adcdf8b",
+    "base": "0xbbe6aab0ed76e90aea0d1cd978ec231c8adcdf8b",
+    "arc": "0xbbe6aab0ed76e90aea0d1cd978ec231c8adcdf8b",
+    "tempo": "0x20c0000000000000000000000a6da882d075a4c3"
+  },
+  "EURAU": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/eurau-allunity/",
+    "ethereum": "0x4933a85b5b5466fbaf179f72d3de273c287ec2c2",
+    "arbitrum": "0x4933a85b5b5466fbaf179f72d3de273c287ec2c2",
+    "optimism": "0x4933a85b5b5466fbaf179f72d3de273c287ec2c2",
+    "base": "0x4933a85b5b5466fbaf179f72d3de273c287ec2c2",
+    "polygon": "0x4933a85b5b5466fbaf179f72d3de273c287ec2c2",
+    "tempo": "0x20c0000000000000000000009a4a4b17e0dc6651",
+    "bsc": "0x4933a85b5b5466fbaf179f72d3de273c287ec2c2"
+  },
+  "DEURO": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/deuro-deuro/",
+    "ethereum": "0xba3f535bbcccca2a154b573ca6c5a49baae0a3ea",
+    "polygon": "0xc2ff25dd99e467d2589b2c26edd270f220f14e47",
+    "arbitrum": "0x5e85faf503621830ca857a5f38b982e0cc57d537",
+    "optimism": "0x1b5f7fa46ed0f487f049c42f374ca4827d65a264",
+    "base": "0x1b5f7fa46ed0f487f049c42f374ca4827d65a264"
+  },
+  "EURW": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/eurw-newrails/",
+    "monad": "0x1111b3ded9f1fe1801ad4ebef8e2788183a24111"
+  },
+  "AUDX": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/audx-aussie-dollar-token/",
+    "ethereum": "0xd687759f35bb747a29246a4b9495c8f52c49e00c",
+    "polygon": "0xd687759f35bb747a29246a4b9495c8f52c49e00c",
+    "conflux": "0x47a365e29697c700c75d58936b3d93a8a20a43c9",
+    "xdc-network": "0xd687759f35bb747a29246a4b9495c8f52c49e00c",
+    "redbelly-network": "0xd687759f35bb747a29246a4b9495c8f52c49e00c",
+    "base": "0xd687759f35bb747a29246a4b9495c8f52c49e00c"
+  },
+  "VGBP": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/vgbp-vnx/",
+    "base": "0xaeb4bb7debd1e5e82266f7c3b5cff56b3a7bf411",
+    "celo": "0x7ae4265ecfc1f31bc0e112dfcfe3d78e01f4bb7f"
+  },
+  "CADC": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cadc-cad-coin/",
+    "ethereum": "0xcadc0acd4b445166f12d2c07eac6e2544fbe2eef",
+    "polygon": "0x9de41aff9f55219d5bf4359f167d1d0c772a396d",
+    "arbitrum": "0x2b28e826b55e399f4d4699b85f68666ac51e6f70",
+    "base": "0x043eb4b75d0805c43d7c834902e335621983cf03",
+    "linea": "0xa0b18e70387ba72d1c7038bc0bd3a05e5a2287f6"
+  },
+  "QCAD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/qcad-stablecorp/",
+    "ethereum": "0x3fa142dd3f384414e05e71ad0939274edc82ec0a",
+    "base": "0xa15705e6fc8b3e08e7253f3758de1a754baa0761"
+  },
+  "CADD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cadd-cad-digital/",
+    "ethereum": "0x16f93ebc5320c89efc8701577efe49d14a276a06",
+    "base": "0x16f93ebc5320c89efc8701577efe49d14a276a06",
+    "tempo": "0x20c000000000000000000000d65b4808c85dbb81"
+  },
+  "CETES": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cetes-etherfuse/",
+    "base": "0x834df4c1d8f51be24322e39e4766697be015512f",
+    "polygon": "0x834df4c1d8f51be24322e39e4766697be015512f",
+    "monad": "0x834df4c1d8f51be24322e39e4766697be015512f",
+    "avalanche": "0xa51e029a76c58e102360836193481d41363a8352"
+  },
+  "FUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/fusd-finchain/",
+    "ethereum": "0x9f6714c302ffe3c3bafaf2ccb44201ff64f6371c",
+    "avalanche": "0x9f6714c302ffe3c3bafaf2ccb44201ff64f6371c",
+    "sonic": "0x9f6714c302ffe3c3bafaf2ccb44201ff64f6371c",
+    "monad": "0x9f6714c302ffe3c3bafaf2ccb44201ff64f6371c",
+    "exsat": "0x9f6714c302ffe3c3bafaf2ccb44201ff64f6371c"
+  },
+  "autoUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/autousd-auto-finance/",
+    "ethereum": "0xa7569a44f348d3d70d8ad5889e50f78e33d80d35"
+  },
+  "eEARN": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/eearn-ember/",
+    "ethereum": "0x9be9294722f8aad37b11a9792be2c782182cafa2",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x9be9294722f8aad37b11a9792be2c782182cafa2",
+        "token": "0x9be9294722f8aad37b11a9792be2c782182cafa2",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "eEARN on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/eearn-ember.json"
+      }
+    ]
+  },
+  "DUSD#pharos-dusd-dialectic": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/dusd-dialectic/",
+    "ethereum": "0x1e33e98af620f1d563fcd3cfd3c75ace841204ef",
+    "ink": "0xa95c8ff7be2a1c898fe01b90fdc9621e8ea5c9fc"
+  },
+  "sAID": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/said-gaib/",
+    "ethereum": "0xb3b3c527ba57cd61648e2ec2f5e006a0b390a9f8",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xb3b3c527ba57cd61648e2ec2f5e006a0b390a9f8",
+        "token": "0xb3b3c527ba57cd61648e2ec2f5e006a0b390a9f8",
+        "underlying": "0x18f52b3fb465118731d9e0d276d4eb3599d57596",
+        "label": "sAID on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/said-gaib.json"
+      }
+    ]
+  },
+  "NUSD#pharos-nusd-nexus": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/nusd-nexus/",
+    "ethereum": "0x1b84765de8b7566e4ceaf4d0fd3c5af52d3dde4f",
+    "optimism": "0x67c10c397dd0ba417329543c1a40eb48aaa7cd00",
+    "cronos": "0x396c9c192dd323995346632581bef92a31ac623b",
+    "bsc": "0x23b891e5c62e0955ae2bd185990103928ab817b3",
+    "polygon": "0xb6c473756050de474286bed418b77aeac39b02af",
+    "fantom": "0xed2a7edd7413021d440b09d654f3b87712abab66",
+    "boba": "0x6b4712ae9797c199edd44f897ca09bc57628a1cf",
+    "metis-andromeda": "0x961318fc85475e125b99cc9215f62679ae5200ab",
+    "arbitrum": "0x2913e812cf0dcca30fb28e6cac3d2dcff4497688",
+    "avalanche": "0xcfc37a6ab183dd4aed08c204d1c2773c0b1bdf46",
+    "blast": "0x3194b0a295d87fdaa54df852c248f7a6baf6c6e0",
+    "aurora": "0x07379565cd8b0cae7c60dc78e7f601b34af2a21c",
+    "harmony-shard-0": "0xed2a7edd7413021d440b09d654f3b87712abab66"
+  },
+  "stUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/stusd-stoneyield/",
+    "bsc": "0x806dd21af6de051fb811760a5768d04a99160eb9"
+  },
+  "KPK_USDC_Prime": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/kpkusdcprime-kpk/",
+    "ethereum": "0x4ef53d2caa51c447fdfeeedee8f07fd1962c9ee6",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0x4ef53d2caa51c447fdfeeedee8f07fd1962c9ee6",
+        "token": "0x4ef53d2caa51c447fdfeeedee8f07fd1962c9ee6",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "KPK_USDC_Prime on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "sirloinUSDC": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/sirloinusdc-steakhouse/",
+    "base": "0xbeeff2490feffa212fac2f6553682c219e6a8845",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0xbeeff2490feffa212fac2f6553682c219e6a8845",
+        "token": "0xbeeff2490feffa212fac2f6553682c219e6a8845",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "sirloinUSDC on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "KPK_USDC_Yield": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/kpkusdcyield-kpk/",
+    "ethereum": "0xd5cce260e7a755ddf0fb9cdf06443d593aaeaa13",
+    "base": "0x392b3ccf36c8adb8094f45573346b457414cd752",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xd5cce260e7a755ddf0fb9cdf06443d593aaeaa13",
+        "token": "0xd5cce260e7a755ddf0fb9cdf06443d593aaeaa13",
+        "underlying": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "label": "KPK_USDC_Yield on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "LVUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/lvusd-leverup/",
+    "monad": "0xfd44b35139ae53fff7d8f2a9869c503d987f00d1"
+  },
+  "CDP": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cdp-enosys/",
+    "flare-network": "0x6cd3a5ba46fa254d4d2e3c2b37350ae337e94a0f"
+  },
+  "USDGLO": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdglo-glo/",
+    "ethereum": "0x4f604735c1cf31399c6e711d5962b2b3e0225ad3",
+    "celo": "0x4f604735c1cf31399c6e711d5962b2b3e0225ad3",
+    "optimism": "0x4f604735c1cf31399c6e711d5962b2b3e0225ad3",
+    "base": "0x4f604735c1cf31399c6e711d5962b2b3e0225ad3",
+    "polygon": "0x4f604735c1cf31399c6e711d5962b2b3e0225ad3",
+    "arbitrum": "0x4f604735c1cf31399c6e711d5962b2b3e0225ad3",
+    "vechain": "0x29c630cce4ddb23900f5fe66ab55e488c15b9f5e"
+  },
+  "pathUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/pathusd-bridge/",
+    "tempo": "0x20c0000000000000000000000000000000000000"
+  },
+  "senpathUSD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/senpathusd-sentora/",
+    "tempo": "0x9a044ae05e5e6290dcf56afd69548565e957a626"
+  },
+  "USSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/ussd-sonic-labs/",
+    "sonic": "0x000000000eccff26b795f73fb0a70d48da657fef",
+    "ethereum": "0x000000000eccff26b795f73fb0a70d48da657fef",
+    "base": "0x000000000eccff26b795f73fb0a70d48da657fef",
+    "arbitrum": "0x000000000eccff26b795f73fb0a70d48da657fef",
+    "optimism": "0x000000000eccff26b795f73fb0a70d48da657fef",
+    "scroll": "0x000000000eccff26b795f73fb0a70d48da657fef"
+  },
+  "FRNT": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/frnt-wyoming/",
+    "ethereum": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+    "avalanche": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+    "base": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+    "polygon": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+    "arbitrum": "0x5e817f2abccb9095585d26c2a3ce234a440574fc",
+    "optimism": "0x5e817f2abccb9095585d26c2a3ce234a440574fc"
+  },
+  "IDRX": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/idrx-idrx/",
+    "polygon": "0x649a2da7b28e0d54c13d5eff95d3a660652742cc",
+    "base": "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22",
+    "bsc": "0x649a2da7b28e0d54c13d5eff95d3a660652742cc",
+    "klay-token": "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22",
+    "gnosis": "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22",
+    "etherlink": "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22",
+    "world-chain": "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22",
+    "celo": "0x18bc5bcc660cf2b9ce3cd51a404afe1a0cbd3c22"
+  },
+  "wARS": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/wars-argentine-peso/",
+    "ethereum": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "base": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "world-chain": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "bsc": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "polygon": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "gnosis": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "celo": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "arc": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "hyperevm": "0x0dc4f92879b7670e5f4e4e6e3c801d229129d90d",
+    "tempo": "0x20c0000000000000000000009ebea3d43a08bad1"
+  },
+  "WCLP": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/wclp-ripio/",
+    "ethereum": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "base": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "world-chain": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "bsc": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "polygon": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "gnosis": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "celo": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "hyperevm": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "arc": "0x61d450a098b6a7f69fc4b98ce68198fe59768651",
+    "tempo": "0x20c000000000000000000000f6af9c68e4c4b6e5"
+  },
+  "wCOP": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/wcop-ripio/",
+    "ethereum": "0x8a1d45e102e886510e891d2ec656a708991e2d76",
+    "base": "0x8a1d45e102e886510e891d2ec656a708991e2d76",
+    "world-chain": "0x8a1d45e102e886510e891d2ec656a708991e2d76",
+    "bsc": "0x8a1d45e102e886510e891d2ec656a708991e2d76",
+    "polygon": "0x8a1d45e102e886510e891d2ec656a708991e2d76",
+    "gnosis": "0x8a1d45e102e886510e891d2ec656a708991e2d76",
+    "celo": "0x8a1d45e102e886510e891d2ec656a708991e2d76"
+  },
+  "WPEN": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/wpen-ripio/",
+    "ethereum": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe",
+    "base": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe",
+    "world-chain": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe",
+    "bsc": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe",
+    "polygon": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe",
+    "gnosis": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe",
+    "celo": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe",
+    "hyperevm": "0x4f34c8b3b5fb6d98da888f0fea543d4d9c9f2ebe"
+  },
+  "CJPY": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/cjpy-yamato/",
+    "ethereum": "0x1cfa5641c01406ab8ac350ded7d735ec41298372"
+  },
+  "MYRC": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/myrc-blox/",
+    "ethereum": "0xbed7d999f1d71ac70c263f64c7c7e009d691be2e",
+    "arbitrum": "0x3ed03e95dd894235090b3d4a49e0c3239edce59e",
+    "base": "0x3ed03e95dd894235090b3d4a49e0c3239edce59e"
+  },
+  "KRWQ": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/krwq-iq/",
+    "ethereum": "0xc00db6b41473d065027f5ed6fada20fde75f142e",
+    "base": "0x370923d39f139c64813f173a1bf0b4f9ba36a24f",
+    "polygon": "0x44c3950a6ed303c863a6568ea18c1a01e504ffd2",
+    "fraxtal": "0xbe5b2eb217bb04a7ddd1a451e6a1567dc15e2fd6",
+    "codex": "0xe898e1cffa565aae8bacc364aa7d65d6a2d20f16",
+    "morph-l2": "0xe898e1cffa565aae8bacc364aa7d65d6a2d20f16"
+  },
+  "EUR0": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/eur0-usual/",
+    "ethereum": "0x3c89cd1884e7bef73ca3ef08d2ef6ec338fd8e49"
+  },
+  "eMXN": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/emxn-telcoin/",
+    "polygon": "0x68727e573d21a49c767c3c86a92d9f24bd933c99"
+  },
+  "EUROT": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/eurot-token-teknoloji/",
+    "avalanche": "0x14eb40fb7900185c01adc6a5b8ac506d8a600e3c",
+    "polygon": "0x14eb40fb7900185c01adc6a5b8ac506d8a600e3c",
+    "ethereum": "0x14eb40fb7900185c01adc6a5b8ac506d8a600e3c"
+  },
+  "MXNe": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/mxne-real-mxn/",
+    "base": "0x269cae7dc59803e5c596c95756faeebb6030e0af"
+  },
+  "JPYT": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/jpyt-dephaser/",
+    "optimism": "0xc47da4cb96ce65a96844a01bfae509f9d5454534",
+    "base": "0xc47da4cb96ce65a96844a01bfae509f9d5454534"
+  },
+  "wMXN": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/wmxn-ripio/",
+    "ethereum": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "base": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "world-chain": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "bsc": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "polygon": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "gnosis": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "celo": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "arc": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "hyperevm": "0x337e7456b420bd3481e7fa61fa9850343d610d34",
+    "tempo": "0x20c00000000000000000000032449be232fd987e"
+  },
+  "XOFm": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/xofm-mento/",
+    "celo": "0x73f93dcc49cb8a239e2032663e9475dd5ef29a08"
+  },
+  "hbUSDT": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/hbusdt-hyperbeat/",
+    "hyperevm": "0x5e105266db42f78fa814322bce7f388b4c2e61eb"
+  },
+  "gtUSDTp": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gtusdtp-gauntlet/",
+    "ethereum": "0xf3557ad5e984211ac8a0874a670344f2c3376471",
+    "_intrinsicOracles": [
+      {
+        "network": "ethereum",
+        "kind": "erc4626",
+        "address": "0xf3557ad5e984211ac8a0874a670344f2c3376471",
+        "token": "0xf3557ad5e984211ac8a0874a670344f2c3376471",
+        "underlying": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "label": "gtUSDTp on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/worker/src/lib/yield-config/yield-config-rate-sources.ts"
+      }
+    ]
+  },
+  "wiTRY": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/witry-brix/",
+    "ethereum": "0xe346c29b5b60ef870b9724c57ccfbbc631e47dee",
+    "megaeth": "0x15b271d9012b5820fc42b1c495b4c1e206547de5",
+    "robinhood": "0x15b271d9012b5820fc42b1c495b4c1e206547de5"
+  },
+  "scUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/scusd-rings/",
+    "ethereum": "0xd3dce716f3ef535c5ff8d041c1a41c3bd89b97ae",
+    "sonic": "0xd3dce716f3ef535c5ff8d041c1a41c3bd89b97ae"
+  },
+  "WEUSD": {
+    "_category": "Other",
+    "Safety Score": "https://pharos.watch/stablecoin/weusd-picwe/",
+    "bsc": "0xdd73ea766b80417c0607a3f08e34a0c415d89d56",
+    "base": "0xdd73ea766b80417c0607a3f08e34a0c415d89d56",
+    "arbitrum": "0xdd73ea766b80417c0607a3f08e34a0c415d89d56",
+    "plume-network": "0xdd73ea766b80417c0607a3f08e34a0c415d89d56"
+  },
+  "JPYdf": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/jpydf-deltaforesight/",
+    "ethereum": "0xb122f4a154f84708407213d6a715181180012f45"
+  },
+  "tMXN": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/tmxn-tenbin/",
+    "ethereum": "0x8d015afcb6f437010653352eb1e58152c4e23734"
+  },
+  "tBRL": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/tbrl-tenbin/",
+    "ethereum": "0x4c1b46adb8877e389171ec6ef67b385094c0afad"
+  },
+  "invUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/invusd-inverse-finance/",
+    "ethereum": "0x5377680b5986296aa4f9e684e5315a4f24832e56"
+  },
+  "USDV#pharos-usdv-delpho": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdv-delpho/",
+    "hyperevm": "0x8c6eb3c8d1fddc752684274fb4a3eb98dbe9cd26"
+  },
+  "bnbUSD": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/bnbusd-sigma-money/",
+    "bsc": "0x5519a479da8ce3af7f373c16f14870bbeafda265"
+  },
+  "USDhl": {
+    "_category": "Stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdhl-felix/",
+    "hyperevm": "0xb50a96253abdf803d85efcdce07ad8becbc52bd5"
+  },
+  "gtUSDCp#pharos-gauntlet-base-ee8f4ec5": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gtusdcp-gauntlet/",
+    "base": "0xee8f4ec5672f09119b96ab6fb59c27e1b7e44b61",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0xee8f4ec5672f09119b96ab6fb59c27e1b7e44b61",
+        "token": "0xee8f4ec5672f09119b96ab6fb59c27e1b7e44b61",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "gtUSDCp on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/gtusdcp-gauntlet.json"
+      }
+    ]
+  },
+  "gtUSDCp#pharos-gauntlet-arbitrum-7c574174": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gtusdcp-gauntlet/",
+    "arbitrum": "0x7c574174da4b2be3f705c6244b4bfa0815a8b3ed",
+    "_intrinsicOracles": [
+      {
+        "network": "arbitrum",
+        "kind": "erc4626",
+        "address": "0x7c574174da4b2be3f705c6244b4bfa0815a8b3ed",
+        "token": "0x7c574174da4b2be3f705c6244b4bfa0815a8b3ed",
+        "underlying": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+        "label": "gtUSDCp on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/gtusdcp-gauntlet.json"
+      }
+    ]
+  },
+  "gtUSDCp#pharos-gauntlet-base-050ce30b": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/gtusdcp-gauntlet/",
+    "base": "0x050ce30b927da55177a4914ec73480238bad56f0",
+    "_intrinsicOracles": [
+      {
+        "network": "base",
+        "kind": "erc4626",
+        "address": "0x050ce30b927da55177a4914ec73480238bad56f0",
+        "token": "0x050ce30b927da55177a4914ec73480238bad56f0",
+        "underlying": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "label": "gtUSDCp on-chain assets per share (Pharos)",
+        "note": "Canonical vault exchange rate; protocol lending interest and reward incentives are separate. The 30-day change can be negative.",
+        "evidence": "https://github.com/TokenBrice/pharos-watch/blob/4afc418ff8ebe59259ba72fc2341dc76fc0adce1/shared/data/stablecoins/coins/gtusdcp-gauntlet.json"
+      }
+    ]
+  },
+  "stkGHO.v1": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/stkgho-umbrella-aave/",
+    "ethereum": "0x4f827a63755855cdf3e8f3bcd20265c833f15033"
+  },
+  "yBOLD": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/ybold-yearn/",
+    "ethereum": "0x9f4330700a36b29952869fac9b33f45eedd8a3d8"
+  },
+  "USDN": {
+    "_category": "Savings stablecoin",
+    "Safety Score": "https://pharos.watch/stablecoin/usdn-smardex/",
+    "ethereum": "0xde17a000ba631c5d7c2bd9fb692efea52d90dee2"
   }
 }

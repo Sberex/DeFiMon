@@ -3,7 +3,7 @@ import { isAddress } from 'viem';
 import { parseIntrinsicOracles, type IntrinsicOracle } from './intrinsic-oracles.js';
 import type { NetworkId, TokenCategory } from '../src/types.js';
 export type TokenAddresses = Partial<Record<NetworkId, string>> & Record<string, string | undefined>;
-export interface RegistryToken { category: TokenCategory; addresses: TokenAddresses; intrinsicOracles?: IntrinsicOracle[] }
+export interface RegistryToken { category: TokenCategory; addresses: TokenAddresses; intrinsicOracles?: IntrinsicOracle[]; safetyScore?: string }
 export type TokenRegistry = Record<string, RegistryToken>;
 const categories = new Set<TokenCategory>(['Other', 'Stablecoin', 'Savings stablecoin']);
 export const evmChains: Record<string, { chainId: number; name: string }> = JSON.parse(readFileSync(new URL('../config/evm-chains.json', import.meta.url), 'utf8'));
@@ -15,9 +15,11 @@ export function parseTokenRegistry(value: unknown): TokenRegistry {
     if (!name.trim() || name.length > 160 || !group || typeof group !== 'object' || Array.isArray(group)) throw new Error('Each token match needs a name and network addresses.');
     const category = '_category' in group ? group._category : 'Other';
     if (typeof category !== 'string' || !categories.has(category as TokenCategory)) throw new Error(`Invalid _category for ${name}. Use Stablecoin, Savings stablecoin or Other.`);
+    const safetyScore = 'Safety Score' in group ? group['Safety Score'] : undefined;
+    if (safetyScore !== undefined && (typeof safetyScore !== 'string' || !/^https:\/\/pharos\.watch\/stablecoin\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/.test(safetyScore))) throw new Error(`Invalid Safety Score for ${name}. Use a canonical Pharos stablecoin page URL.`);
     const addresses: TokenAddresses = Object.create(null);
     for (const [network, address] of Object.entries(group)) {
-      if (network === '_category' || network === '_intrinsicOracles') continue;
+      if (network === '_category' || network === '_intrinsicOracles' || network === 'Safety Score') continue;
       if (!Object.hasOwn(evmChains, network) || typeof address !== 'string' || !isAddress(address, { strict: false }) || /^0x0{40}$/i.test(address) || /^0x[eE]{40}$/.test(address)) throw new Error(`Invalid EVM network or contract address in token-matches.json for ${name}.`);
       const key = `${network}:${address.toLowerCase()}`;
       if (seen.has(key)) throw new Error(`Duplicate network/address in token-matches.json for ${name}. Each contract must belong to only one token group.`);
@@ -25,7 +27,7 @@ export function parseTokenRegistry(value: unknown): TokenRegistry {
     }
     if (!Object.keys(addresses).length) throw new Error(`Token ${name} needs at least one EVM contract address.`);
     const intrinsicOracles = '_intrinsicOracles' in group ? parseIntrinsicOracles(group._intrinsicOracles, addresses, name) : undefined;
-    result[name] = { category: category as TokenCategory, addresses, ...(intrinsicOracles ? { intrinsicOracles } : {}) };
+    result[name] = { category: category as TokenCategory, addresses, ...(intrinsicOracles ? { intrinsicOracles } : {}), ...(safetyScore ? { safetyScore } : {}) };
   }
   return result;
 }

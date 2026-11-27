@@ -78,7 +78,7 @@ def resolve_platforms(platforms, existing, chains):
 def merge(original, rows, coins, platform_keys, stable_ids, savings_ids, decisions):
     """Exact contract identity only. Existing values and capitalization win conflicts."""
     groups = copy.deepcopy(original)
-    occupied = {(n, a.lower()): k for k, g in groups.items() for n, a in g.items() if not n.startswith('_')}
+    occupied = {(n, a.lower()): k for k, g in groups.items() for n, a in g.items() if not n.startswith('_') and n != 'Safety Score'}
     report = {'ranking': [], 'conflicts': [], 'excludedPlatforms': [], 'additions': [], 'categoryChanges': [], 'sources': {}}
     by_id = {c['id']: c for c in coins}
     for row in rows:
@@ -179,13 +179,13 @@ def main():
     platform_keys, expanded_registry = resolve_platforms(platforms, registry, chains)
     groups, report = merge(original, rows, coins, platform_keys, {r['id'] for r in stable}, {r['id'] for r in savings}, decisions['assets'])
     # Retain only newly verified platforms actually used by an imported token.
-    used = {n for g in groups.values() for n in g if not n.startswith('_')}
+    used = {n for g in groups.values() for n in g if not n.startswith('_') and n != 'Safety Score'}
     expanded_registry = {k: v for k, v in expanded_registry.items() if k in registry or k in used}
     seen = set()
     for group in groups.values():
         assert group.get('_category', 'Other') in CATEGORIES
         for network, address in group.items():
-            if network.startswith('_'):
+            if network.startswith('_') or network == 'Safety Score':
                 continue
             assert network in expanded_registry and valid_address(address)
             assert (network, address.lower()) not in seen
