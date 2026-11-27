@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795792639,
+  "asOfSec": 1795796294,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -49,7 +49,7 @@
     {
       "id": "armusdcs-wintermute",
       "grade": "C+",
-      "score": 62,
+      "score": 61,
       "ratingStatus": "rated"
     },
     {
@@ -61,7 +61,7 @@
     {
       "id": "audd-novatti",
       "grade": "C+",
-      "score": 60,
+      "score": 59,
       "ratingStatus": "rated"
     },
     {
@@ -134,6 +134,12 @@
       "id": "bold-liquity",
       "grade": "A",
       "score": 84,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "bread-bread-coop",
+      "grade": "C-",
+      "score": 52,
       "ratingStatus": "rated"
     },
     {
@@ -253,7 +259,7 @@
     {
       "id": "chfm-mento",
       "grade": "C-",
-      "score": 53,
+      "score": 47,
       "ratingStatus": "rated"
     },
     {
@@ -361,7 +367,7 @@
     {
       "id": "dusd-dialectic",
       "grade": "D",
-      "score": 46,
+      "score": 47,
       "ratingStatus": "rated"
     },
     {
@@ -467,6 +473,12 @@
       "ratingStatus": "rated"
     },
     {
+      "id": "eusd-own",
+      "grade": "C-",
+      "score": 51,
+      "ratingStatus": "rated"
+    },
+    {
       "id": "eusd-telcoin",
       "grade": "C",
       "score": 58,
@@ -495,6 +507,12 @@
       "grade": "A",
       "score": 84,
       "ratingStatus": "rated"
+    },
+    {
+      "id": "fliteusd-fluid",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "pipeline-gap"
     },
     {
       "id": "frax-frax",
@@ -599,6 +617,12 @@
       "ratingStatus": "rated"
     },
     {
+      "id": "gpyusdse-galaxy",
+      "grade": "C-",
+      "score": 50,
+      "ratingStatus": "rated"
+    },
+    {
       "id": "gtusdc-gauntlet",
       "grade": "B",
       "score": 72,
@@ -667,7 +691,7 @@
     {
       "id": "hyperusdca-hyperithm",
       "grade": "C-",
-      "score": 52,
+      "score": 53,
       "ratingStatus": "rated"
     },
     {
@@ -863,6 +887,12 @@
       "ratingStatus": "not-rated"
     },
     {
+      "id": "mglo-midas-fasanara",
+      "grade": "NR",
+      "score": null,
+      "ratingStatus": "not-rated"
+    },
+    {
       "id": "mglobal-midas-fasanara",
       "grade": "NR",
       "score": null,
@@ -912,7 +942,7 @@
     },
     {
       "id": "myrc-blox",
-      "grade": "B-",
+      "grade": "B+",
       "score": 76,
       "ratingStatus": "rated"
     },
@@ -1181,6 +1211,12 @@
       "ratingStatus": "rated"
     },
     {
+      "id": "siusd-infinifi",
+      "grade": "D",
+      "score": 47,
+      "ratingStatus": "rated"
+    },
+    {
       "id": "skymoneyusdsflagship-sky",
       "grade": "C+",
       "score": 62,
@@ -1256,6 +1292,12 @@
       "id": "steakusdc-steakhouse",
       "grade": "C+",
       "score": 62,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "steakusdc-steakhouse-base",
+      "grade": "C-",
+      "score": 52,
       "ratingStatus": "rated"
     },
     {
@@ -1380,6 +1422,12 @@
     },
     {
       "id": "susn-noon",
+      "grade": "C-",
+      "score": 54,
+      "ratingStatus": "rated"
+    },
+    {
+      "id": "svzchf-frankencoin",
       "grade": "C-",
       "score": 54,
       "ratingStatus": "rated"
