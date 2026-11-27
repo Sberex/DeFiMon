@@ -353,6 +353,30 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
                           Intrinsic: {percent(market.supplyAsset.intrinsicApr)}
                         </small>
                       )}
+                      {!!market.merklSupplyApr && (
+                        <small>
+                          Merkl supply incentive: +
+                          {percent(market.merklSupplyApr)}
+                        </small>
+                      )}
+                      {market.merklPrograms
+                        ?.filter((p) => p.side === 'supply')
+                        .map((p) => (
+                          <details key={p.id}>
+                            <summary>Merkl reward details</summary>
+                            <a href={p.url} target="_blank" rel="noreferrer">
+                              {p.name} ↗
+                            </a>
+                            <p>{p.note}</p>
+                            <p>
+                              Ends:{' '}
+                              {new Date(p.endAt).toLocaleString(undefined, {
+                                timeZone: 'Europe/Kiev',
+                                timeZoneName: 'short',
+                              })}
+                            </p>
+                          </details>
+                        ))}
                     </td>
                     <td>
                       <AssetCell
@@ -363,6 +387,39 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
                     </td>
                     <td>
                       {market.borrowAsset ? percent(market.borrowApr) : '—'}
+                      {market.protocolBorrowApr != null && (
+                        <small>
+                          Protocol APR: {percent(market.protocolBorrowApr)}
+                          <br />
+                          Merkl incentive: −
+                          {percent(market.merklBorrowApr ?? 0)}
+                        </small>
+                      )}
+                      {market.merklPrograms
+                        ?.filter((p) => p.side === 'borrow')
+                        .map((p) => (
+                          <details key={p.id}>
+                            <summary>Merkl reward details</summary>
+                            <a href={p.url} target="_blank" rel="noreferrer">
+                              {p.name} ↗
+                            </a>
+                            <p>{p.note}</p>
+                            <p>
+                              Ends:{' '}
+                              {new Date(p.endAt).toLocaleString(undefined, {
+                                timeZone: 'Europe/Kiev',
+                                timeZoneName: 'short',
+                              })}
+                            </p>
+                            {market.protocolBorrowApy !== undefined && (
+                              <p>
+                                Protocol APY:{' '}
+                                {percent(market.protocolBorrowApy)} · Merkl
+                                reward APY: {percent(p.apy)}
+                              </p>
+                            )}
+                          </details>
+                        ))}
                       {market.borrowApy != null && (
                         <small>Borrow APY: {percent(market.borrowApy)}</small>
                       )}
@@ -441,8 +498,9 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
             Stablecoin borrow APR. Modelled health factor: 1.02. Debt /
             collateral = LLTV / 1.02; APR = (Supply APR − Borrow APR × debt
             ratio) / (1 − debt ratio). Supply APR includes protocol interest and
-            intrinsic yield. Assumes constant prices and rates, excluding
-            rewards and fees. This is a model, not an execution quote.
+            intrinsic yield and verified Merkl incentives. Assumes constant
+            prices and rates, excluding unverified rewards and fees. This is a
+            model, not an execution quote.
           </>
         ) : (
           <>
@@ -535,10 +593,12 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
               completed
             </summary>
             <p>
-              Current protocol rates exclude external rewards. Supply APR
-              includes verified savings-token intrinsic yield where applicable.
-              Caps, collateral eligibility, LLAMMA bands and access rules can
-              affect entry; available liquidity is a market snapshot.
+              Rates include verified Merkl incentives for the displayed pair.
+              Other wallet supplies or debts may change eligibility; unverified
+              programs are excluded. Supply APR includes verified savings-token
+              intrinsic yield where applicable. Caps, collateral eligibility,
+              LLAMMA bands and access rules can affect entry; available
+              liquidity is a market snapshot.
             </p>
             <ul>
               {result.coverage.map((c, index) => (

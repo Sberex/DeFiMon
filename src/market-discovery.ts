@@ -13,6 +13,11 @@ export interface DiscoveryAsset {
   intrinsicApr?: number | null;
 }
 export interface DiscoveryMarket extends MarketAlternative {
+  protocolBorrowApr?: number | null;
+  protocolBorrowApy?: number;
+  merklSupplyApr?: number;
+  merklBorrowApr?: number;
+  merklPrograms?: { id: string; name: string; side: 'supply' | 'borrow'; apr: number; apy?: number; url: string; note: string; endAt: string }[];
   modelledApr?: number;
   modelledDebtRatio?: number;
   requiredSupplyAssets?: DiscoveryAsset[];

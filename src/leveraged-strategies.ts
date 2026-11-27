@@ -69,7 +69,15 @@ export function leveragedMarkets(markets: DiscoveryMarket[]) {
       ) ||
       !finite(intrinsic) ||
       !finite(m.borrowApr) ||
-      m.borrowApr < 0 ||
+      (m.borrowApr < 0 &&
+        !(
+          finite(m.merklBorrowApr) &&
+          m.merklBorrowApr > 0 &&
+          finite(m.protocolBorrowApr) &&
+          m.protocolBorrowApr >= 0 &&
+          Math.abs(m.borrowApr - (m.protocolBorrowApr - m.merklBorrowApr)) <
+            1e-10
+        )) ||
       intrinsic <= m.borrowApr ||
       !finite(m.totalSupplyApr) ||
       !finite(m.lltv) ||

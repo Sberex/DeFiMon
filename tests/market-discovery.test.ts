@@ -1,4 +1,5 @@
 import { expect, it, vi } from 'vitest';
+vi.mock('../server/market-merkl', () => ({ applyMarketMerkl: async (markets: unknown[]) => ({ markets, coverage: [], messages: [] }) }));
 import {
   discoveryChoices,
   groupedDiscoveryMarkets,

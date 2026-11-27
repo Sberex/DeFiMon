@@ -107,3 +107,10 @@ it('groups chains and ranks by APR rather than liquidity; matches addresses case
     ['base', ['base']],
   ]);
 });
+
+it('uses verified Merkl-adjusted rates in qualification and permits incentive-driven negative borrow APR', () => {
+  const market = strategyMarket({ protocolBorrowApr: .09, borrowApr: .03, merklBorrowApr: .06 });
+  expect(leveragedMarkets([market])[0].modelledApr).toBeCloseTo((.08-.03*.86/1.02)/(1-.86/1.02),12);
+  expect(leveragedMarkets([strategyMarket({ protocolBorrowApr: .03, merklBorrowApr: .04, borrowApr: -.01 })])).toHaveLength(1);
+  expect(leveragedMarkets([strategyMarket({ protocolBorrowApr: .03, merklBorrowApr: .04, borrowApr: -.5 })])).toHaveLength(0);
+});

@@ -2411,3 +2411,19 @@ test('Leveraged strategies collapse sub-cent USD liquidity below main results an
   expect(await dropdown.evaluate(el => (el.compareDocumentPosition(el.parentElement!.querySelector('.discovery-chain')!) & Node.DOCUMENT_POSITION_PRECEDING) !== 0)).toBe(true);
   await dropdown.locator('summary').first().click(); await expect(hiddenRows.nth(0)).not.toBeVisible();
 });
+
+test('Market Discovery and leveraged results show net Merkl rates, protocol breakdown and APR/APY distinction', async ({page}) => {
+  const {strategyMarket} = await import('../tests/fixtures/strategies');
+  const {merklMarketTokens:t,merklMarketPool:pool} = await import('../tests/fixtures/merkl-market');
+  const market = strategyMarket({protocol:'Aave v3',network:'plasma',market:pool,borrowApr:.03579433700734498,borrowApy:.03672684278355218,protocolBorrowApr:.04356198626422072,protocolBorrowApy:Math.expm1(.04356198626422072),merklBorrowApr:.007767649256875737,totalSupplyApr:.0497,supplyAsset:{address:t.susde,name:'sUSDe',category:'Savings stablecoin',intrinsicApr:.0497},borrowAsset:{address:t.usdt,name:'USDT0',category:'Stablecoin'},merklPrograms:[{id:'699654958170586655',name:'Borrow USDT0 on Aave',side:'borrow',apr:.007767649256875737,apy:.007797895708253579,url:'https://app.merkl.xyz/opportunities/plasma/AAVE_NET_BORROWING/f740d3e02581e9c4',note:'USDT0 or GHO supplies reduce net borrowing eligibility.',endAt:'2026-12-03T14:00:00Z'}]});
+  for(const path of ['market-discovery','leveraged-strategies'])await page.route(`**/api/${path}`,route=>route.fulfill({json:{query:{supply:null,borrow:null},checkedAt:'2026-11-27T10:00:00Z',markets:[market],coverage:[],messages:[]}}));
+  await page.goto('/');await page.getByRole('button',{name:'Market Discovery',exact:true}).click();
+  for(const name of ['Market Discovery','Leveraged Borrowing Strategy Search']){
+    const section=page.getByRole('region',{name,exact:true});await section.getByRole('button',{name:'Search',exact:true}).click();
+    const row=section.locator('tbody tr');await expect(row).toHaveCount(1);
+    const borrow=row.locator('td').nth(4);
+    await expect(borrow).toContainText('3.58%');await expect(borrow).toContainText('Protocol APR: 4.36%');await expect(borrow).toContainText('Merkl incentive: −0.78%');await expect(borrow).toContainText('Borrow APY: 3.67%');
+    await borrow.getByText('Merkl reward details',{exact:true}).click();await expect(borrow).toContainText('GHO supplies reduce');await expect(borrow.getByRole('link')).toHaveAttribute('href',market.merklPrograms![0].url);
+    if(name==='Leveraged Borrowing Strategy Search')await expect(row.locator('td').last()).toContainText(`${((.0497-market.borrowApr!*.86/1.02)/(1-.86/1.02)*100).toFixed(2)}%`);
+  }
+});

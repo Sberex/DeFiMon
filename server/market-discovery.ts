@@ -1,3 +1,4 @@
+import { applyMarketMerkl } from './market-merkl.js';
 import { applyPtCollateralRates } from './pendle-collateral.js';
 import { slisBnbStakingApr, SLISBNB } from './slisbnb-rates.js';
 import type { Address } from 'viem';
@@ -108,6 +109,7 @@ export function createMarketDiscovery(
     lido?: typeof lidoStakingApr;
     pt?: typeof applyPtCollateralRates;
     slis?: typeof slisBnbStakingApr;
+    merkl?: typeof applyMarketMerkl;
   } = {},
 ) {
   const clientFor = options.clientFor ?? makeClient,
@@ -116,7 +118,8 @@ export function createMarketDiscovery(
     intrinsic = options.intrinsic ?? intrinsicTokenRate,
     lido = options.lido ?? lidoStakingApr,
     pt = options.pt ?? applyPtCollateralRates,
-    slis = options.slis ?? slisBnbStakingApr;
+    slis = options.slis ?? slisBnbStakingApr,
+    merkl = options.merkl ?? applyMarketMerkl;
   const horizon = createAaveMarketReader(
     () => AAVE_HORIZON.provider,
     'Aave Horizon',
@@ -367,7 +370,11 @@ export function createMarketDiscovery(
                 },
                 decimals: null,
               });
-          const liquidityTokens=new Set(distinct.flatMap(row=>row.liquidity?[row.liquidity.token.toLowerCase()]:[]));
+          const liquidityTokens = new Set(
+            distinct.flatMap((row) =>
+              row.liquidity ? [row.liquidity.token.toLowerCase()] : [],
+            ),
+          );
           const pricedTokens = [...metadata].flatMap(([address, m]) =>
             liquidityTokens.has(address) && m.decimals !== null
               ? [{ address: address as Address, decimals: m.decimals }]
@@ -433,7 +440,7 @@ export function createMarketDiscovery(
               );
             return income.get(address)!;
           }
-          return await Promise.all(
+          const enriched = await Promise.all(
             distinct.map(async (row) => {
               const supplyAsset = {
                   ...metadata.get(row.marketTokens!.supplied.toLowerCase())!
@@ -501,6 +508,10 @@ export function createMarketDiscovery(
               } satisfies DiscoveryMarket;
             }),
           );
+          const rewarded = await merkl(enriched, client, network, block);
+          coverage.push(...rewarded.coverage);
+          messages.push(...rewarded.messages);
+          return rewarded.markets;
         } catch {
           for (const id of networks[network].protocolIds)
             coverage.push({
