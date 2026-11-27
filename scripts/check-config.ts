@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 // Validate server configuration before producing a deployable build. TypeScript
 // alone does not parse JSON files loaded with readFileSync at runtime.
-const files = ['token-matches.json', 'evm-chains.json'];
+const files = ['token-matches.json', 'evm-chains.json', 'config.json'];
 try {
   for (const file of files) {
     try {
@@ -12,6 +12,7 @@ try {
       throw new Error(`Invalid config/${file}: ${error instanceof Error ? error.message : 'Unable to read JSON.'}`);
     }
   }
+  await import('../src/app-config.js');
   const { configuredTokenRegistry } = await import('../server/token-registry.js');
   console.log(`Configuration valid: ${Object.keys(configuredTokenRegistry).length} token groups; EVM networks and contract identities checked.`);
 } catch (error) {

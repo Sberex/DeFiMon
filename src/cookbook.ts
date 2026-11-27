@@ -1,3 +1,4 @@
+import { cookbookMinimumAprPercent } from './app-config';
 import type { ChainName, Portfolio, Position } from './types';
 import { annualizedNplApr, positionMonthlyInterest } from './monthly-interest';
 import { isBadDebtPosition } from './risk-assessment';
@@ -12,7 +13,8 @@ for (const [group, contracts] of Object.entries(tokenMatches as Record<string, R
     if (typeof contract === 'string' && /^0x[\da-f]{40}$/i.test(contract)) configuredAssetGroups.set(`${chain}:${contract.toLowerCase()}`, group);
   }
 }
-export const COOKBOOK_MIN_APR = .14;
+export const COOKBOOK_MIN_APR = cookbookMinimumAprPercent / 100;
+const qualifies = (apr: number) => apr > COOKBOOK_MIN_APR + 1e-12;
 export interface CookbookPosition {
   snapshotAt: string; blockNumber?: string | null; apr: number; netValueUsd: number; monthlyNplUsd: number;
   verification: 'verified' | 'unavailable'; position: Position;
@@ -39,7 +41,7 @@ function newer(a: Pick<CookbookScope, 'checkedAt' | 'blockNumber'>, b: Pick<Cook
 const scopeKey = (s: CookbookScope) => `${s.chain}:${s.protocolId}`;
 export function parseCookbook(value: unknown): CookbookFile {
   const f = value as CookbookFile;
-  if (!f || f.schemaVersion !== 1 || f.minimumApr !== COOKBOOK_MIN_APR || !Array.isArray(f.wallets) || f.updatedAt !== null && !date(f.updatedAt)) throw new Error('Invalid Cookbook file');
+  if (!f || f.schemaVersion !== 1 || !finite(f.minimumApr) || f.minimumApr < 0 || !Array.isArray(f.wallets) || f.updatedAt !== null && !date(f.updatedAt)) throw new Error('Invalid Cookbook file');
   const wallets = new Set<string>();
   for (const w of f.wallets) {
     if (!address(w.address) || !Array.isArray(w.scopes) || wallets.has(w.address.toLowerCase())) throw new Error('Invalid Cookbook wallet');
@@ -48,7 +50,7 @@ export function parseCookbook(value: unknown): CookbookFile {
       if (!Object.values(networkNames).includes(s.chain) || typeof s.protocolId !== 'string' || !s.protocolId || typeof s.protocolName !== 'string' || !date(s.checkedAt) || !Array.isArray(s.positions) || typeof s.complete !== 'boolean' || s.blockNumber !== null && !/^\d+$/.test(s.blockNumber) || scopes.has(scopeKey(s))) throw new Error('Invalid Cookbook scope');
       scopes.add(scopeKey(s)); const positions = new Set<string>();
       for (const p of s.positions) {
-        if (!date(p.snapshotAt) || !finite(p.apr) || p.apr <= COOKBOOK_MIN_APR || !finite(p.netValueUsd) || p.netValueUsd <= 0 || !finite(p.monthlyNplUsd) || !['verified', 'unavailable'].includes(p.verification) || !p.position || typeof p.position.id !== 'string' || typeof p.position.label !== 'string' || !Array.isArray(p.position.assets) || !Array.isArray(p.position.notes) || positions.has(p.position.id.toLowerCase())) throw new Error('Invalid Cookbook position');
+        if (!date(p.snapshotAt) || !finite(p.apr) || !finite(p.netValueUsd) || p.netValueUsd <= 0 || !finite(p.monthlyNplUsd) || !['verified', 'unavailable'].includes(p.verification) || !p.position || typeof p.position.id !== 'string' || typeof p.position.label !== 'string' || !Array.isArray(p.position.assets) || !Array.isArray(p.position.notes) || positions.has(p.position.id.toLowerCase())) throw new Error('Invalid Cookbook position');
         positions.add(p.position.id.toLowerCase());
       }
     }
@@ -58,7 +60,7 @@ export function parseCookbook(value: unknown): CookbookFile {
 /** Replace only the scopes actually checked; unread data never proves a position disappeared. */
 export function updateCookbook(file: CookbookFile, portfolio: Portfolio): CookbookFile {
   if (!address(portfolio.address)) throw new Error('Invalid snapshot wallet');
-  const result = structuredClone(file), walletAddress = portfolio.address.toLowerCase();
+  const result = { ...structuredClone(file), minimumApr: COOKBOOK_MIN_APR }, walletAddress = portfolio.address.toLowerCase();
   let wallet = result.wallets.find(w => w.address.toLowerCase() === walletAddress);
   const next = new Map((wallet?.scopes ?? []).map(s => [scopeKey(s), s]));
   for (const protocol of portfolio.protocols) {
@@ -80,7 +82,7 @@ export function updateCookbook(file: CookbookFile, portfolio: Portfolio): Cookbo
       const apr = annualizedNplApr(monthly, net);
       if (position.assets.length && position.assets.every(a => a.supplied === 0 && a.borrowed === 0) || finite(net) && net <= 0) { positions.delete(id); continue; }
       if (!finite(apr) || !finite(monthly) || !finite(net)) continue;
-      if (apr <= COOKBOOK_MIN_APR + 1e-12) { positions.delete(id); continue; }
+      if (!qualifies(apr)) { positions.delete(id); continue; }
       positions.set(id, { snapshotAt: checkedAt, blockNumber: snapshot?.blockNumber ?? portfolio.blockNumber, apr, netValueUsd: net, monthlyNplUsd: monthly, verification: 'verified', position: structuredClone(position) });
     }
     if (complete) for (const id of positions.keys()) if (!seen.has(id)) positions.delete(id);
@@ -95,7 +97,7 @@ export function updateCookbook(file: CookbookFile, portfolio: Portfolio): Cookbo
 }
 /** Per-scope timestamps and empty scopes preserve deletions when servers race or restart. */
 export function mergeCookbooks(a: CookbookFile, b: CookbookFile): CookbookFile {
-  const out = structuredClone(a);
+  const out = { ...structuredClone(a), minimumApr: COOKBOOK_MIN_APR };
   for (const wallet of b.wallets) {
     let existing = out.wallets.find(w => w.address.toLowerCase() === wallet.address.toLowerCase());
     if (!existing) { out.wallets.push(structuredClone(wallet)); continue; }
@@ -111,7 +113,7 @@ export function mergeCookbooks(a: CookbookFile, b: CookbookFile): CookbookFile {
   return out;
 }
 export function cookbookPositions(file: CookbookFile) {
-  return file.wallets.flatMap(w => w.scopes.flatMap(s => s.positions.map(p => ({ ...p, address: w.address, protocolId: s.protocolId, protocolName: s.protocolName, chain: s.chain, checkedAt: s.checkedAt, blockNumber: p.blockNumber ?? s.blockNumber })))).sort((a, b) => b.apr - a.apr || b.netValueUsd - a.netValueUsd);
+  return file.wallets.flatMap(w => w.scopes.flatMap(s => s.positions.filter(p => qualifies(p.apr)).map(p => ({ ...p, address: w.address, protocolId: s.protocolId, protocolName: s.protocolName, chain: s.chain, checkedAt: s.checkedAt, blockNumber: p.blockNumber ?? s.blockNumber })))).sort((a, b) => b.apr - a.apr || b.netValueUsd - a.netValueUsd);
 }
 
 /** Configured cross-chain identities count once; unknown contracts stay separate. */

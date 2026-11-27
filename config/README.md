@@ -161,3 +161,19 @@ Preferred provider sources include Chainlink EURSAFO NAV and Base vyUSD exchange
 Canonical ERC-4626 sources cover the remaining verified share tokens, including USDC/USDT lending vaults, sFRXUSD, cUSDO, apyUSD, srUSDat, yoUSD and the YieldFi shares. Their exact underlying and both token decimal units are checked at both blocks. A zero verified change remains zero; losses remain negative. Rebasing tokens and distributing funds are not assigned dollar-peg or constant-$1 NAV feeds as a substitute for income. The attributable mM1-USD candidate remained stale beyond the existing three-day bound, so freshness rules were not loosened to fill it.
 
 Aladdin's fxSAVE adapter `0x9dD65b6d956E31F4dc093372D975275986695827` exposes full USD `token.nav()` rather than only the fxSP-denominated share conversion. Its verified implementation deliberately returns zero round IDs and timestamps. It is explicitly configured with `computed: true`, `tokenGetter: "token"`, and `computedTimestamp: "none"`, pinned description/decimals, and an exact token match at both archive blocks. Only that explicit computed mode uses the queried block as the observation time; ordinary stored-feed freshness checks remain unchanged. InfiniFi's existing computed adapter keeps its block-timestamp mode. RedStone multi-feed historical observations and unphased Midas rounds use archive block reads; `getRoundData` availability alone is not taken as proof of attributable month-old round history.
+
+## Cookbook APR threshold
+
+`config.json` is the source of truth for Cookbook discovery and display:
+
+```json
+{
+  "cookbook": {
+    "minimumAprPercent": 14
+  }
+}
+```
+
+Use percentage units (`14` means 14%, `12.5` means 12.5%). Only positions with total position APR **strictly above** the threshold qualify. Values must be finite and non-negative; invalid values fail configuration validation.
+
+The server, refresh script, page filters, summary and explanatory text share this setting. After editing it, deploy/restart the server and rebuild/deploy the frontend (normal deployments do this). Existing snapshots below a raised threshold are hidden immediately by the new build, without making the historical JSON unreadable. Lowering the threshold allows previously stored qualifying snapshots to display again; analyse wallets again to capture positions that were never saved under the previous threshold. `analysis/cookbook.json.minimumApr` is snapshot metadata, not the setting.
