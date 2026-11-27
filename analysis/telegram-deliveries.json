@@ -65,11 +65,12 @@
     {
       "notificationId": "1fb3b5e1fa6c57b75ffbee96b73b415f0dc66f2bc35e1472ee71e1a9a595a45d",
       "kind": "utilization",
-      "status": "sending",
+      "status": "sent",
       "attempts": 1,
       "lastAttemptAt": "2026-11-27T00:46:02.432Z",
-      "nextAttemptAt": "2026-11-27T00:51:02.432Z",
-      "owner": "8e10d64d-b4f6-4c7d-b9b7-327ef31aaac2"
+      "nextAttemptAt": null,
+      "messageId": 8,
+      "sentAt": "2026-11-27T00:46:05.692Z"
     }
   ]
 }
