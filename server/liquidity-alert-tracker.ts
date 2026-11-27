@@ -8,7 +8,7 @@ export interface LiquidityBaseline extends LiquidityReading { checkedAt: string;
 export interface LiquidityWatchState { watch: LiquidityWatch; checkedAt: string; status: LiquidityObservation['status'] | 'pending'; message?: string; baselines: LiquidityBaseline[] }
 export interface LiquidityTrackerState { version: 1; lastRunAt: string | null; lastRunEvent?: string; lastScheduledRunAt?: string | null; lastExternalRunAt?: string | null; watches: LiquidityWatchState[] }
 export interface LiquidityNotification {
-  id: string; type: 'available-liquidity-increased'; address: string; network: LiquidityWatch['network']; protocol: string; positionId: string;
+  id: string; type: 'available-liquidity-increased' | 'available-liquidity-decreased'; address: string; network: LiquidityWatch['network']; protocol: string; positionId: string;
   market: string; marketAddress: string; marketLabel: string; token: string; symbol: string; decimals: number;
   previousLiquidity: string; availableLiquidity: string; liquidityChange: string; previousRaw: string; availableRaw: string; changeRaw: string;
   previousCheckedAt: string; timestamp: string; blockNumber: string; note: string;
@@ -21,7 +21,7 @@ const readingKey = (q: LiquidityReading) => `${q.market.toLowerCase()}:${q.token
 const iso = (v: unknown): v is string => typeof v === 'string' && Number.isFinite(Date.parse(v)) && new Date(v).toISOString() === v;
 const raw = (v: unknown): v is string => typeof v === 'string' && /^\d+$/.test(v);
 export function enabledLiquidityWatches(history: WalletHistoryFile): LiquidityWatch[] {
-  return parseWalletHistory(history).wallets.flatMap(wallet => (wallet.alerts ?? []).filter(a => a.rules.newLiquidityAdded).map(a => ({ address: wallet.address, network: a.network, protocol: a.protocol, positionId: a.positionId, ruleUpdatedAt: a.updatedAt })));
+  return parseWalletHistory(history).wallets.flatMap(wallet => (wallet.alerts ?? []).filter(a => a.rules.newLiquidityAdded || a.rules.liquidityWithdrawn).map(a => ({ address: wallet.address, network: a.network, protocol: a.protocol, positionId: a.positionId, ruleUpdatedAt: a.updatedAt })));
 }
 function validReading(q: LiquidityReading) {
   return q && typeof q.market === 'string' && q.market.length > 0 && typeof q.marketAddress === 'string' && /^0x[\da-f]{40}$/i.test(q.marketAddress) && /^0x[\da-f]{40}$/i.test(q.token) && typeof q.symbol === 'string' && q.symbol.length > 0 && q.symbol.length <= 128 && Number.isInteger(q.decimals) && q.decimals >= 0 && q.decimals <= 36 && raw(q.rawAmount) && typeof q.label === 'string' && typeof q.note === 'string';
@@ -47,22 +47,24 @@ export function parseLiquidityNotifications(value: unknown): LiquidityNotificati
   if (!f || f.version !== 1 || !Array.isArray(f.notifications)) throw Error('Invalid notifications; existing file was not replaced.');
   const ids = new Set<string>();
   for (const n of f.notifications) {
-    if (!n || typeof n.id !== 'string' || !/^[\da-f]{64}$/.test(n.id) || ids.has(n.id) || n.type !== 'available-liquidity-increased' || !iso(n.timestamp) || !iso(n.previousCheckedAt) || !raw(n.previousRaw) || !raw(n.availableRaw) || !raw(n.changeRaw) || BigInt(n.changeRaw) <= 0n || BigInt(n.availableRaw) - BigInt(n.previousRaw) !== BigInt(n.changeRaw) || !raw(n.blockNumber)) throw Error('Invalid liquidity notification');
+    if (!n || typeof n.id !== 'string' || !/^[\da-f]{64}$/.test(n.id) || ids.has(n.id) || !['available-liquidity-increased', 'available-liquidity-decreased'].includes(n.type) || !iso(n.timestamp) || !iso(n.previousCheckedAt) || !raw(n.previousRaw) || !raw(n.availableRaw) || !raw(n.changeRaw) || BigInt(n.changeRaw) <= 0n || BigInt(n.availableRaw) - BigInt(n.previousRaw) !== (n.type === 'available-liquidity-decreased' ? -BigInt(n.changeRaw) : BigInt(n.changeRaw)) || !raw(n.blockNumber)) throw Error('Invalid liquidity notification');
     if (!validReading({ market: n.market, marketAddress: n.marketAddress, label: n.marketLabel, token: n.token, symbol: n.symbol, decimals: n.decimals, rawAmount: n.availableRaw, note: n.note }) || n.previousLiquidity !== formatUnits(BigInt(n.previousRaw), n.decimals) || n.availableLiquidity !== formatUnits(BigInt(n.availableRaw), n.decimals) || n.liquidityChange !== formatUnits(BigInt(n.changeRaw), n.decimals)) throw Error('Invalid notification units');
     parseWalletHistory({ version: 1, wallets: [{ address: n.address, lastCheckedAt: n.timestamp, manualLiquidationPrices: [], alerts: [{ network: n.network, protocol: n.protocol, positionId: n.positionId, updatedAt: n.timestamp, rules: defaultAlertRules() }] }] });
     ids.add(n.id);
   }
   return structuredClone(f);
 }
-/** Pure transition: baseline first, exact raw-unit increases only, independent wallets. */
+/** Pure transition: baseline first, exact raw-unit changes in enabled directions, independent wallets. */
 export function advanceLiquidityAlerts(history: WalletHistoryFile, previous: LiquidityTrackerState, previousNotifications: LiquidityNotifications, observations: LiquidityObservation[], runAt: string, runEvent?: AlertRunEvent) {
   if (!iso(runAt)) throw Error('Invalid tracker time');
   const state = parseLiquidityState(previous), notifications = parseLiquidityNotifications(previousNotifications);
-  const enabled = enabledLiquidityWatches(history), old = new Map(state.watches.map(w => [watchKey(w.watch), w]));
+  const parsedHistory = parseWalletHistory(history);
+  const enabled = enabledLiquidityWatches(parsedHistory), old = new Map(state.watches.map(w => [watchKey(w.watch), w]));
+  const preferences = new Map(parsedHistory.wallets.flatMap(w => (w.alerts ?? []).map(a => [watchKey({ address: w.address, ...a, ruleUpdatedAt: a.updatedAt }), a.rules] as const)));
   const incoming = new Map(observations.map(o => [watchKey(o.watch), o]));
   const ids = new Set(notifications.notifications.map(n => n.id)); let added = 0;
   const watches = enabled.map(watch => {
-    const key = watchKey(watch), existing = old.get(key), observation = incoming.get(key);
+    const key = watchKey(watch), rules = preferences.get(key)!, existing = old.get(key), observation = incoming.get(key);
     const prior = existing?.watch.ruleUpdatedAt === watch.ruleUpdatedAt ? existing : undefined;
     if (prior && prior.checkedAt >= runAt) return prior;
     if (!observation || observation.watch.ruleUpdatedAt !== watch.ruleUpdatedAt) return prior ?? { watch, checkedAt: runAt, status: 'pending' as const, baselines: [] };
@@ -73,12 +75,15 @@ export function advanceLiquidityAlerts(history: WalletHistoryFile, previous: Liq
     const baselines = observation.readings.map(q => {
       const before = last.get(readingKey(q));
       if (before && BigInt(observation.blockNumber) <= BigInt(before.blockNumber)) return before;
-      if (before && before.decimals === q.decimals && before.marketAddress.toLowerCase() === q.marketAddress.toLowerCase() && BigInt(q.rawAmount) > BigInt(before.rawAmount)) {
-        const change = BigInt(q.rawAmount) - BigInt(before.rawAmount);
+      if (before && before.decimals === q.decimals && before.marketAddress.toLowerCase() === q.marketAddress.toLowerCase() && BigInt(q.rawAmount) !== BigInt(before.rawAmount)) {
+        const delta = BigInt(q.rawAmount) - BigInt(before.rawAmount);
+        const decrease = delta < 0n;
+        const change = decrease ? -delta : delta;
+        const enabledDirection = decrease ? rules.liquidityWithdrawn : rules.newLiquidityAdded;
         const id = createHash('sha256').update(JSON.stringify([key, readingKey(q), watch.ruleUpdatedAt, before.blockNumber, observation.blockNumber, before.rawAmount, q.rawAmount])).digest('hex');
-        if (!ids.has(id)) {
+        if (enabledDirection && !ids.has(id)) {
           ids.add(id); added++;
-          notifications.notifications.push({ id, type: 'available-liquidity-increased', address: watch.address, network: watch.network, protocol: watch.protocol, positionId: watch.positionId, market: q.market, marketAddress: q.marketAddress, marketLabel: q.label, token: q.token, symbol: q.symbol, decimals: q.decimals, previousLiquidity: formatUnits(BigInt(before.rawAmount), q.decimals), availableLiquidity: formatUnits(BigInt(q.rawAmount), q.decimals), liquidityChange: formatUnits(change, q.decimals), previousRaw: before.rawAmount, availableRaw: q.rawAmount, changeRaw: String(change), previousCheckedAt: before.checkedAt, timestamp: observation.checkedAt, blockNumber: observation.blockNumber, note: q.note });
+          notifications.notifications.push({ id, type: decrease ? 'available-liquidity-decreased' : 'available-liquidity-increased', address: watch.address, network: watch.network, protocol: watch.protocol, positionId: watch.positionId, market: q.market, marketAddress: q.marketAddress, marketLabel: q.label, token: q.token, symbol: q.symbol, decimals: q.decimals, previousLiquidity: formatUnits(BigInt(before.rawAmount), q.decimals), availableLiquidity: formatUnits(BigInt(q.rawAmount), q.decimals), liquidityChange: formatUnits(change, q.decimals), previousRaw: before.rawAmount, availableRaw: q.rawAmount, changeRaw: String(change), previousCheckedAt: before.checkedAt, timestamp: observation.checkedAt, blockNumber: observation.blockNumber, note: q.note });
         }
       }
       return { ...q, checkedAt: observation.checkedAt, blockNumber: observation.blockNumber };

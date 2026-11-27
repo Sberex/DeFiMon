@@ -33,17 +33,19 @@ export function telegramAlertEnabled(n: TelegramAlert, history: WalletHistoryFil
   const wallet = history.wallets.find(w => w.address.toLowerCase() === n.address.toLowerCase());
   const rule = wallet?.alerts?.find(a => a.network === n.network && a.protocol === n.protocol && a.positionId.toLowerCase() === n.positionId.toLowerCase());
   if (!rule || rule.updatedAt > n.timestamp) return false;
-  return n.type === 'available-liquidity-increased' ? rule.rules.newLiquidityAdded : rule.rules.utilizationAbove.enabled && rule.rules.utilizationAbove.thresholdPercent === n.thresholdPercent;
+  if (n.type === 'utilization-above-threshold') return rule.rules.utilizationAbove.enabled && rule.rules.utilizationAbove.thresholdPercent === n.thresholdPercent;
+  return n.type === 'available-liquidity-increased' ? rule.rules.newLiquidityAdded : rule.rules.liquidityWithdrawn;
 }
 const clip = (s: string, length: number) => s.length > length ? s.slice(0, length - 1).replace(/[\uD800-\uDBFF]$/, '') + '…' : s;
 export function telegramAlertText(n: TelegramAlert) {
   const at = new Date(n.timestamp).toLocaleString('en-GB', { timeZone: 'Europe/Kiev', timeZoneName: 'short', hour12: false });
-  if (n.type === 'available-liquidity-increased') {
+  if (n.type !== 'utilization-above-threshold') {
     const names: Record<string, string> = { 'curve-llamalend': 'Curve LlamaLend', morpho: 'Morpho', lista: 'Lista DAO', spark: 'Spark', 'aave-v3': 'Aave v3', 'aave-v4': 'Aave v4', euler: 'Euler', compound: 'Compound', fluid: 'Fluid' };
     const protocol = names[n.protocol] ?? n.protocol, label = clip(n.marketLabel.replace(/\s+/g, ' ').trim(), 200);
     const market = label.toLowerCase().startsWith(protocol.toLowerCase() + ' · ') || label === protocol ? label : `${protocol} · ${label}`;
     const symbol = n.symbol.replace(/\s+/g, ' ').trim();
-    return clip(['New market liquidity', `Wallet: ${n.address}`, `Chain: ${networkNames[n.network]}`, `Market: ${market}`, `Asset: ${symbol}`, `Available: ${n.previousLiquidity} → ${n.availableLiquidity} ${symbol}`, `Increase: +${n.liquidityChange} ${symbol}`, `Observed: ${at} (Kyiv)`].join('\n'), 3800);
+    const decrease = n.type === 'available-liquidity-decreased';
+    return clip([decrease ? 'Liquidity is withdrawn from the market' : 'New market liquidity', `Wallet: ${n.address}`, `Chain: ${networkNames[n.network]}`, `Market: ${market}`, `Asset: ${symbol}`, `Available: ${n.previousLiquidity} → ${n.availableLiquidity} ${symbol}`, `${decrease ? 'Decrease: -' : 'Increase: +'}${n.liquidityChange} ${symbol}`, `Observed: ${at} (Kyiv)`].join('\n'), 3800);
   }
   const common = [`Wallet: ${n.address}`, `Chain: ${networkNames[n.network]}`, `Market: ${clip(n.marketLabel, 200)}`, `Market ID: ${clip(n.market, 512)}`, `Market contract: ${n.marketAddress}`, `Asset: ${n.symbol} (${n.token})`];
   const values = ['DeFiMon · Utilization above threshold', `Threshold: ${n.thresholdPercent}%`, `Utilization: ${n.utilizationPercent}%`, `Previous: ${n.previousUtilizationPercent === null ? 'unknown (first observation)' : `${n.previousUtilizationPercent}%`}`, `Change: ${n.utilizationChangePercentagePoints === null ? 'unknown (first observation)' : `${n.utilizationChangePercentagePoints >= 0 ? '+' : ''}${n.utilizationChangePercentagePoints} percentage points`}`];
@@ -66,7 +68,7 @@ export async function deliverTelegramAlerts(options: { store: TelegramStore; sen
   if (!/^[\w-]{1,128}$/.test(owner) || options.testId !== undefined && !id(options.testId)) throw Error('Invalid delivery run identifier.');
   const start = now(), initial = await store.read();
   const initialReceipts = new Map(initial.state.deliveries.map(r => [r.notificationId, r]));
-  const candidates: { id: string; kind: TelegramReceipt['kind'] }[] = initial.notifications.filter(n => n.timestamp >= initial.state.enabledAt).sort((a,b) => a.timestamp.localeCompare(b.timestamp) || a.id.localeCompare(b.id)).map(n => ({ id: n.id, kind: n.type === 'available-liquidity-increased' ? 'liquidity' as const : 'utilization' as const }));
+  const candidates: { id: string; kind: TelegramReceipt['kind'] }[] = initial.notifications.filter(n => n.timestamp >= initial.state.enabledAt).sort((a,b) => a.timestamp.localeCompare(b.timestamp) || a.id.localeCompare(b.id)).map(n => ({ id: n.id, kind: n.type !== 'utilization-above-threshold' ? 'liquidity' as const : 'utilization' as const }));
   if (options.testId) candidates.unshift({ id: options.testId, kind: 'test' });
   let sent = 0, failed = 0, skipped = 0, attempted = 0, lastSendAt = -Infinity;
   const failureCodes: DeliveryError[] = [];

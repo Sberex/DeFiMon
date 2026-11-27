@@ -55,7 +55,7 @@ it('retains only enabled saved alerts for closed positions without changing over
   expect(alertPositions(p)).toEqual([]);
   expect(retainedAlertPositions(p, [{ ...saved, rules: defaultAlertRules() }])).toEqual([]);
   expect(retainedAlertPositions(p, [{ ...saved, network: 'base' }])[0].closed).toBe(false);
-  for (const field of ['borrowAprAboveSupplyApr', 'newLiquidityAdded', 'utilizationAbove', 'healthFactorBelow', 'positionAprBelow'] as const) {
+  for (const field of ['borrowAprAboveSupplyApr', 'newLiquidityAdded', 'liquidityWithdrawn', 'utilizationAbove', 'healthFactorBelow', 'positionAprBelow'] as const) {
     const rules = defaultAlertRules();
     if (typeof rules[field] === 'boolean') Object.assign(rules, { [field]: true });
     else Object.assign(rules, { [field]: { ...rules[field] as object, enabled: true } });
@@ -74,4 +74,11 @@ it('does not manufacture zero balances after incomplete checks or for active ris
   protocol.status = 'ok'; protocol.balanceDiscoveryComplete = false; expect(retainedAlertPositions(p, [saved])[0].closed).toBe(false);
   protocol.balanceDiscoveryComplete = true; p.networks = [{ chain: 'Ethereum', status: 'error', blockNumber: null, updatedAt: day }];
   expect(retainedAlertPositions(p, [saved])[0].closed).toBe(false);
+});
+
+it('restores legacy preferences with withdrawal alerts off and validates the new boolean', () => {
+  const { liquidityWithdrawn, ...legacy } = defaultAlertRules();
+  expect(parsePositionAlertInput({ ...input, rules: legacy }).rules.liquidityWithdrawn).toBe(false);
+  expect(parsePositionAlertInput({ ...input, rules: { ...legacy, liquidityWithdrawn: true } }).rules.liquidityWithdrawn).toBe(true);
+  for (const value of [null, 'true', 1]) expect(() => parsePositionAlertInput({ ...input, rules: { ...legacy, liquidityWithdrawn: value } })).toThrow();
 });

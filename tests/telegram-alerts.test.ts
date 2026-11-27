@@ -64,3 +64,19 @@ it('rejects malformed or secret-bearing delivery state rather than overwriting i
   expect(() => parseTelegramState({ ...snapshot().state, botToken: 'secret' })).toThrow();
   const s = snapshot().state; s.deliveries.push({ notificationId: liquidity.id, kind: 'liquidity', status: 'sent', attempts: 1, lastAttemptAt: at(2), nextAttemptAt: null }); expect(() => parseTelegramState(s)).toThrow();
 });
+
+it('delivers withdrawal alerts only when that direction is enabled, using the compact decrease format', async () => {
+  const s = snapshot();
+  const withdrawal = { ...liquidity, type: 'available-liquidity-decreased' as const, previousLiquidity: '2', availableLiquidity: '1', previousRaw: '2000000', availableRaw: '1000000', marketLabel: 'sUSDai / USDC' };
+  s.notifications = [withdrawal];
+  const text = telegramAlertText(withdrawal);
+  expect(text.split('\n')).toEqual(['Liquidity is withdrawn from the market', `Wallet: ${liquidity.address}`, 'Chain: Ethereum', 'Market: Morpho · sUSDai / USDC', 'Asset: USDC', 'Available: 2 → 1 USDC', 'Decrease: -1 USDC', 'Observed: 23/11/2026, 17:01:00 EET (Kyiv)']);
+  const send = vi.fn(async () => ({ ok: true as const, messageId: 10 }));
+  expect(await deliverTelegramAlerts({ store: memory(structuredClone(s)).store, send, owner: 'worker', now: () => Date.parse(at(2)) })).toMatchObject({ sent: 0, skipped: 1 });
+  s.history.wallets[0].alerts![0].rules.newLiquidityAdded = false;
+  s.history.wallets[0].alerts![0].rules.liquidityWithdrawn = true;
+  const m = memory(s);
+  expect(await deliverTelegramAlerts({ store: m.store, send, owner: 'worker', now: () => Date.parse(at(2)) })).toMatchObject({ sent: 1 });
+  expect(send).toHaveBeenCalledWith(text);
+  expect(m.value.state.deliveries[0]).toMatchObject({ kind: 'liquidity', status: 'sent' });
+});

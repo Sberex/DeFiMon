@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { SavedWallet } from './wallet-history';
 import { liquidityMonitorStatus } from './liquidity-monitor-status';
 export function LiquidityMonitorStatus({ wallet, kind = 'liquidity' }: { wallet: SavedWallet; kind?: 'liquidity' | 'utilization' }) {
-  const enabled = wallet.alerts?.some(a => kind === 'liquidity' ? a.rules.newLiquidityAdded : a.rules.utilizationAbove.enabled) ?? false;
+  const enabled = wallet.alerts?.some(a => kind === 'liquidity' ? (a.rules.newLiquidityAdded || a.rules.liquidityWithdrawn) : a.rules.utilizationAbove.enabled) ?? false;
   const [state, setState] = useState<unknown>(null), [now, setNow] = useState(Date.now);
   useEffect(() => {
     if (!enabled) return;

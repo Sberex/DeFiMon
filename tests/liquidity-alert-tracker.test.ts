@@ -70,3 +70,39 @@ it('persists external-dispatch attribution without claiming a GitHub cron run an
   expect(() => parseLiquidityState({ ...s.state, lastExternalRunAt: 'invalid' })).toThrow();
   expect(parseLiquidityState(emptyLiquidityState())).toEqual(emptyLiquidityState());
 });
+
+it('monitors withdrawals independently, records exact decreases to zero, and validates their direction', () => {
+  const h = history(false); h.wallets[0].alerts![0].rules.liquidityWithdrawn = true;
+  expect(enabledLiquidityWatches(h)).toHaveLength(1);
+  let s = advanceLiquidityAlerts(h, emptyLiquidityState(), emptyLiquidityNotifications(), [observe('100000000')], day);
+  expect(s.added).toBe(0);
+  s = advanceLiquidityAlerts(h, s.state, s.notifications, [observe('120000000', '101', next)], next);
+  expect(s.added).toBe(0); // A withdrawal-only watch still updates its baseline on increases.
+  s = advanceLiquidityAlerts(h, s.state, s.notifications, [observe('100000001', '102', later)], later);
+  expect(s.added).toBe(1);
+  expect(s.notifications.notifications[0]).toMatchObject({ type: 'available-liquidity-decreased', previousLiquidity: '120', availableLiquidity: '100.000001', liquidityChange: '19.999999', changeRaw: '19999999', address, market, timestamp: later });
+  expect(parseLiquidityNotifications(s.notifications)).toEqual(s.notifications);
+  const corrupt = structuredClone(s.notifications); corrupt.notifications[0].type = 'available-liquidity-increased';
+  expect(() => parseLiquidityNotifications(corrupt)).toThrow();
+  const repeat = advanceLiquidityAlerts(h, s.state, s.notifications, [observe('100000001', '102', later)], later);
+  expect(repeat.added).toBe(0);
+  const at = '2026-11-22T10:15:00.000Z';
+  s = advanceLiquidityAlerts(h, s.state, s.notifications, [{ ...observe('0', '103', at), status: 'error', readings: [] }], at);
+  expect(s.added).toBe(0); expect(s.state.watches[0].baselines[0].rawAmount).toBe('100000001');
+  const after = '2026-11-22T10:20:00.000Z';
+  s = advanceLiquidityAlerts(h, s.state, s.notifications, [observe('0', '104', after)], after);
+  expect(s.added).toBe(1); expect(s.notifications.notifications[1]).toMatchObject({ type: 'available-liquidity-decreased', availableRaw: '0', changeRaw: '100000001' });
+  h.wallets[0].alerts![0].rules.liquidityWithdrawn = false;
+  expect(advanceLiquidityAlerts(h, s.state, s.notifications, [], after).state.watches).toEqual([]);
+});
+it('handles both directions without duplicate watches and resets a baseline when withdrawal preferences change', () => {
+  const h = history(); h.wallets[0].alerts![0].rules.liquidityWithdrawn = true;
+  expect(enabledLiquidityWatches(h)).toHaveLength(1);
+  let s = advanceLiquidityAlerts(h, emptyLiquidityState(), emptyLiquidityNotifications(), [observe('9007199254740993000000')], day);
+  s = advanceLiquidityAlerts(h, s.state, s.notifications, [observe('9007199254740992999999', '101', next)], next);
+  expect(s.notifications.notifications[0]).toMatchObject({ type: 'available-liquidity-decreased', liquidityChange: '0.000001' });
+  s = advanceLiquidityAlerts(h, s.state, s.notifications, [observe('9007199254740993000000', '102', later)], later);
+  expect(s.notifications.notifications.map(n => n.type)).toEqual(['available-liquidity-decreased', 'available-liquidity-increased']);
+  h.wallets[0].alerts![0].updatedAt = later;
+  expect(advanceLiquidityAlerts(h, s.state, s.notifications, [observe('0', '103', later, { ...watch, ruleUpdatedAt: later })], later).added).toBe(0);
+});

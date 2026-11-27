@@ -42,3 +42,11 @@ it('recognizes recent external triggers for both metrics without mistaking them 
   expect(liquidityMonitorStatus({ ...external, watches: [] }, wallet, now).warning).toBe(true);
   const failed = structuredClone(external); failed.watches[0].status = 'error'; expect(liquidityMonitorStatus(failed, wallet, now).warning).toBe(true);
 });
+
+it('shows monitoring status when only liquidity withdrawal is enabled', () => {
+  const withdrawal = structuredClone(wallet);
+  withdrawal.alerts![0].rules.newLiquidityAdded = false;
+  withdrawal.alerts![0].rules.liquidityWithdrawn = true;
+  expect(liquidityMonitorStatus(state(), withdrawal, now)).toMatchObject({ warning: false });
+  expect(liquidityMonitorStatus(null, withdrawal, now)).toMatchObject({ warning: true });
+});

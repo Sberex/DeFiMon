@@ -43,7 +43,7 @@ export async function publishTrackerFiles(runAt: string, options: TrackerPublish
       tree.push({ path, mode: '100644', type: 'blob', sha: blob.sha });
     }
     const mergedTree = await json('/git/trees', 'POST', { base_tree: parent.tree.sha, tree });
-    const commit = await json('/git/commits', 'POST', { message: `Track ${tracker.label}: ${next.added} increase notifications [skip ci] [skip render]`, tree: mergedTree.sha, parents: [head] });
+    const commit = await json('/git/commits', 'POST', { message: `Track ${tracker.label}: ${next.added} change notifications [skip ci] [skip render]`, tree: mergedTree.sha, parents: [head] });
     const update = await request(`/git/refs/heads/${encodeURIComponent(branch)}`, 'PATCH', { sha: commit.sha, force: false });
     if (update.ok) return { committed: true, added: next.added, watches: next.state.watches.length };
     if (![409, 422].includes(update.status)) throw Error(`Tracker commit could not be published (${update.status}).`);

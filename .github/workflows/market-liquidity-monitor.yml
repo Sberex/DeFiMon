@@ -48,7 +48,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Check enabled markets and save increases
+      - name: Check enabled markets and save liquidity increases and decreases
         run: npm run track:liquidity -- --publish
         env:
           GITHUB_TOKEN: ${{ github.token }}

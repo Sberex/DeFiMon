@@ -6,7 +6,7 @@ interface MonitorState {
 const date = (v: unknown): v is string => typeof v === 'string' && Number.isFinite(Date.parse(v));
 export function liquidityMonitorStatus(value: unknown, wallet: SavedWallet, now = Date.now(), kind: 'liquidity' | 'utilization' = 'liquidity') {
   const label = kind === 'liquidity' ? 'Liquidity' : 'Utilization';
-  const rules = (wallet.alerts ?? []).filter(a => kind === 'liquidity' ? a.rules.newLiquidityAdded : a.rules.utilizationAbove.enabled);
+  const rules = (wallet.alerts ?? []).filter(a => kind === 'liquidity' ? (a.rules.newLiquidityAdded || a.rules.liquidityWithdrawn) : a.rules.utilizationAbove.enabled);
   if (!rules.length) return { warning: false, text: `No ${kind} alerts are enabled for this wallet.`, lastRunAt: null, lastScheduledRunAt: null, lastExternalRunAt: null };
   const s = value as MonitorState;
   if (!s || s.version !== 1 || !(s.lastRunAt === null || date(s.lastRunAt)) || !(s.lastScheduledRunAt == null || date(s.lastScheduledRunAt)) || !(s.lastExternalRunAt == null || date(s.lastExternalRunAt)) || !Array.isArray(s.watches) || s.watches.some(w => !w?.watch || typeof w.watch.address !== 'string' || typeof w.watch.positionId !== 'string' || !date(w.checkedAt))) return { warning: true, text: `${label} monitoring status could not be verified. Check Monitoring runs.`, lastRunAt: null, lastScheduledRunAt: null, lastExternalRunAt: null };

@@ -2158,6 +2158,7 @@ test('Alerts saves and restores active loan and deposit preferences independentl
   const form = alerts.getByRole('form', { name: `Alert rules for ${loan.label}`, exact: true });
   await form.getByRole('checkbox', { name: 'Borrow APR higher than supply APR' }).check();
   await form.getByRole('checkbox', { name: 'New liquidity added to the market' }).check();
+  await form.getByRole('checkbox', { name: 'Liquidity is withdrawn from the market' }).check();
   await form.getByRole('checkbox', { name: 'Utilization ratio higher than' }).check();
   await form.getByLabel('Utilization threshold (%)').fill('90');
   await form.getByRole('checkbox', { name: 'Health factor is lower than 1.01' }).check();
@@ -2169,11 +2170,12 @@ test('Alerts saves and restores active loan and deposit preferences independentl
   await expect(alerts.getByRole('region', { name: 'Utilization monitoring status' })).toContainText('no scheduled run has been recorded');
   await expect(alerts.getByRole('link', { name: 'Utilization notifications JSON' })).toHaveAttribute('href', 'https://github.com/Sberex/DeFiMon/blob/main/analysis/utilization-alert-notifications.json');
   await expect(alerts.getByRole('link', { name: 'Telegram delivery status JSON' })).toHaveAttribute('href', 'https://github.com/Sberex/DeFiMon/blob/main/analysis/telegram-deliveries.json');
-  expect(writes[0]).toMatchObject({ network: 'ethereum', protocol: fixture.protocols[0].id, positionId: loan.id, rules: { borrowAprAboveSupplyApr: true, newLiquidityAdded: true, utilizationAbove: { enabled: true, thresholdPercent: 90 }, healthFactorBelow: { enabled: true, threshold: 1.01 }, positionAprBelow: { enabled: true, thresholdPercent: -1.5 } } });
+  expect(writes[0]).toMatchObject({ network: 'ethereum', protocol: fixture.protocols[0].id, positionId: loan.id, rules: { borrowAprAboveSupplyApr: true, newLiquidityAdded: true, liquidityWithdrawn: true, utilizationAbove: { enabled: true, thresholdPercent: 90 }, healthFactorBelow: { enabled: true, threshold: 1.01 }, positionAprBelow: { enabled: true, thresholdPercent: -1.5 } } });
   await nav.getByRole('button', { name: 'Wallet Overview', exact: true }).click(); await nav.getByRole('button', { name: 'Alerts', exact: true }).click();
   await expect(form.getByRole('checkbox', { name: 'Borrow APR higher than supply APR' })).toBeChecked();
   await expect(form.getByLabel('Utilization threshold (%)')).toHaveValue('90');
   await expect(form.getByRole('checkbox', { name: 'New liquidity added to the market' })).toBeChecked();
+  await expect(form.getByRole('checkbox', { name: 'Liquidity is withdrawn from the market' })).toBeChecked();
   await form.getByLabel('Utilization threshold (%)').fill('95');
   const depositForm = alerts.getByRole('form', { name: 'Alert rules for Pure USDC deposit', exact: true });
   await depositForm.getByRole('checkbox', { name: 'Position total APR is lower than' }).check();
@@ -2189,6 +2191,7 @@ test('Alerts saves and restores active loan and deposit preferences independentl
   await expect(form.getByLabel('Utilization threshold (%)')).toHaveValue('95');
   await expect(depositForm.getByLabel('Position APR threshold (%)')).toHaveValue('2');
   await expect(form.getByRole('checkbox', { name: 'New liquidity added to the market' })).toBeChecked();
+  await expect(form.getByRole('checkbox', { name: 'Liquidity is withdrawn from the market' })).toBeChecked();
   await expect(form.locator('time')).toHaveAttribute('datetime', '2026-11-22T11:00:03.000Z');
   await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await alerts.screenshot({ path: '/tmp/defimon-alerts-mobile.png' });
@@ -2200,6 +2203,7 @@ test('Alerts saves and restores active loan and deposit preferences independentl
   await expect(form.getByRole('checkbox', { name: 'Borrow APR higher than supply APR' })).not.toBeChecked();
   await expect(form.getByLabel('Utilization threshold (%)')).toHaveValue('');
   await expect(form.getByRole('checkbox', { name: 'New liquidity added to the market' })).not.toBeChecked();
+  await expect(form.getByRole('checkbox', { name: 'Liquidity is withdrawn from the market' })).not.toBeChecked();
 });
 
 test('Alerts retains selections after failed saves, validates thresholds, and never saves example preferences', async ({ page }) => {
