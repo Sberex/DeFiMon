@@ -1131,7 +1131,7 @@ test('shows supply-only Morpho msY and PT markets as USDC deposits without loan 
     const deposit = deposits.filter({ has: page.getByRole('heading', { name: new RegExp(collaterals[i]) }) });
     await expect(deposit.getByRole('columnheader')).toHaveText(['Asset', 'Supplied', 'Supply APR', 'Current price', 'Monthly interest earned']);
     await expect(deposit.getByRole('region', { name: 'Morpho market deposit information' })).toContainText(`Market collateral: ${collaterals[i]}`);
-    await expect(deposit.locator('tbody tr')).toHaveCount(1); await expect(deposit.locator('tbody td').first()).toHaveText('USDC');
+    await expect(deposit.locator('tbody tr')).toHaveCount(1); await expect(deposit.locator('tbody td').first()).toHaveText('USDC (A+)');
     for (const field of ['Borrowed', 'Net value', 'Health factor ⓘ', 'Borrow APR', 'Est. liquidation price']) await expect(deposit.getByText(field, { exact: true })).toHaveCount(0);
     await expect(deposit.locator('.position-market-links a')).toHaveAttribute('href', `https://app.morpho.org/ethereum/market/${ids[i]}`);
   }
@@ -1734,7 +1734,7 @@ test('collapses tokens below one cent in both wallet categories without changing
   await page.route('**/api/rewards/*', route => route.fulfill({ status: 503, json: {} }));
   await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
   const interest = page.getByRole('region', { name: 'Interest bearing tokens', exact: true }), other = page.getByRole('region', { name: 'Other tokens', exact: true });
-  await expect(interest.locator('.wallet-network > .position tbody td:first-child strong')).toHaveText(['YIELD_BIG', 'YIELD_CENT']);
+  await expect(interest.locator('.wallet-network > .position tbody td:first-child strong')).toHaveText(['YIELD_BIG (NR)', 'YIELD_CENT (NR)']);
   await expect(other.locator('.wallet-network > .position tbody td:first-child strong')).toHaveText(['OTHER_BIG', 'OTHER_CENT']);
   await expect(interest.locator('.wallet-category-stats strong').first()).toHaveText('$100.02');
   await expect(page.locator('.summary.primary strong')).toHaveText('$101.03');
@@ -1746,7 +1746,7 @@ test('collapses tokens below one cent in both wallet categories without changing
     await expect(collapsed.locator(':scope > summary')).toHaveText('Tokens below $0.01 (2)');
     await expect(collapsed.getByText(tiny, { exact: true })).toBeHidden();
     await collapsed.locator(':scope > summary').click();
-    await expect(collapsed.locator('tbody td:first-child strong')).toHaveText([tiny, zero]);
+    await expect(collapsed.locator('tbody td:first-child strong')).toHaveText(section === interest ? [`${tiny} (NR)`, `${zero} (NR)`] : [tiny, zero]);
   }
   await expect(page.locator('.summary.primary strong')).toHaveText('$101.03');
   await expect(page.locator('.total-npl > strong')).toHaveText('≈ $1.01');
@@ -2523,4 +2523,17 @@ test('sUSDai stays in D across wallet networks and Morpho when Render is missing
  await page.route('**/analysis/pharos-safety-grades.json*',route=>route.fulfill({headers:{'Access-Control-Allow-Origin':'*'},json:{schemaVersion:1,publicationStatus:'current',methodologyVersion:'10.57',asOfSec:Math.floor(Date.now()/1000),grades:[{id:'susdai-usd-ai',score:47,grade:'D',ratingStatus:'rated'},{id:'tbrl-tenbin',score:null,grade:null,ratingStatus:'pipeline-gap'},{id:'tmxn-tenbin',score:null,grade:null,ratingStatus:'pipeline-gap'}]}}));
  await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(fixture.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();
  const section=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await expect(section).toContainText('GitHub feed snapshot');const row=section.locator('[data-grade="D"]');await expect(row).toContainText('$313,828.85');await row.locator('summary').click();await expect(row).toContainText('Pharos score: 47/100');await expect(row).toContainText('Ethereum · Wallet');await expect(row).toContainText('Plasma · Wallet');await expect(row).toContainText('Morpho');await expect(section.locator('[data-grade="Not Rated"]')).toHaveCount(0);
+});
+
+test('stablecoin and savings asset names share Pharos grades across wallet, positions and Risk Assessment',async({page})=>{
+ const susdai='0x0b2b2b2076d95dda7817e785989fe353fe955ef9',usdc='0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',gho='0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f';
+ let calls=0,grade='D';
+ const fixture=structuredClone(example);fixture.updatedAt=new Date().toISOString();fixture.protocols=[{id:'aave-v3',name:'Aave v3',status:'ok',chain:'Ethereum',coverage:'',positions:[{id:'inline-grade-test',label:'Test lending pair',suppliedUsd:100,debtUsd:20,healthFactor:2,risk:'lower',notes:[],assets:[{address:susdai,symbol:'sUSDai',supplied:100,borrowed:0,priceUsd:1,collateral:true,liquidationThreshold:.8,liquidationPriceUsd:null},{address:usdc,symbol:'USDC',supplied:0,borrowed:20,priceUsd:1,collateral:false,liquidationThreshold:null,liquidationPriceUsd:null}]}]}];fixture.wallets=[{chain:'Ethereum',status:'ok',coverage:'',pricedValueUsd:40,unpricedCount:0,tokens:[{address:susdai,symbol:'sUSDai',category:'Savings stablecoin',balance:10,priceUsd:1,valueUsd:10},{address:usdc,symbol:'USDC',category:'Stablecoin',balance:10,priceUsd:1,valueUsd:10},{address:gho,symbol:'GHO',category:'Stablecoin',balance:10,priceUsd:1,valueUsd:10},{address:'0x1111111111111111111111111111111111111111',symbol:'sUSDai',category:'Other',balance:10,priceUsd:1,valueUsd:10}]}];
+ await page.route('**/api/portfolio/*',route=>route.fulfill({json:fixture}));await page.route('**/api/safety-grades',route=>{calls++;return route.fulfill({json:{schemaVersion:1,asOfSec:Math.floor(Date.now()/1000),publicationStatus:'current',methodologyVersion:'10.57',grades:[{id:'susdai-usd-ai',grade,score:47,ratingStatus:'rated'},{id:'usdc-circle',grade:'A+',score:87,ratingStatus:'rated'}]}})});
+ await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(fixture.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();
+ const interest=page.getByRole('region',{name:'Interest bearing tokens',exact:true}),other=page.getByRole('region',{name:'Other tokens',exact:true});await expect(interest.locator('tbody tr').first().locator('td').first()).toContainText('sUSDai (D)');await expect(other).toContainText('USDC (A+)');await expect(other).toContainText('GHO (NR)');
+ const unknown=other.locator('tbody tr').filter({hasText:'sUSDai'});await expect(unknown.locator('strong').first()).toHaveText('sUSDai');
+ const position=page.locator('.position').filter({has:page.getByRole('heading',{name:'Test lending pair'})});await expect(position.locator('tbody')).toContainText('sUSDai (D)');await expect(position.locator('tbody')).toContainText('USDC (A+)');expect(calls).toBe(1);
+ await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();const risk=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await risk.locator('[data-grade="D"] summary').click();await expect(risk.locator('[data-grade="D"]')).toContainText('sUSDai (D)');expect(calls).toBe(1);
+ grade='C';await risk.getByRole('button',{name:'Refresh grades',exact:true}).click();await expect(risk.locator('[data-grade="C"]')).toBeVisible();await page.getByRole('button',{name:'Wallet Overview',exact:true}).click();await expect(interest).toContainText('sUSDai (C)');expect(calls).toBe(2);
 });

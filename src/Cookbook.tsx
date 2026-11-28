@@ -1,3 +1,4 @@
+import { AssetName } from './SafetyScore';
 import { cookbookMinimumAprPercent } from './app-config';
 import { networkExplorers as explorers } from './networks';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -57,7 +58,7 @@ export function Cookbook({ revision, renderPosition }: { revision: object | null
       <h3>Supplied assets</h3>
       <p>Sorted by intrinsic APR from each asset’s latest saved snapshot, including Pendle PT Implied APY. Configured cross-network matches count once; expand additional networks to see their saved rates. Assets without intrinsic yield show 0%.</p>
       {suppliedAssets.length ? <div className="table-wrap"><table><thead><tr><th>Asset</th><th>Network</th><th>Intrinsic APR ↓</th></tr></thead><tbody>{suppliedAssets.map(asset => <tr key={asset.id}>
-        <td><strong>{asset.symbol}</strong><small>{tokenLink(asset)}</small>{asset.additionalNetworks.length > 0 && <details className="cookbook-asset-networks"><summary>Additional networks ({asset.additionalNetworks.length})</summary><ul>{asset.additionalNetworks.map(network => <li key={`${network.chain}:${network.address}`}><strong>{network.chain}</strong><span>{tokenLink(network)}</span><span title={`Snapshot: ${network.snapshotAt}`}>{intrinsicApr(network.intrinsicApr)}</span></li>)}</ul></details>}</td>
+        <td><strong><AssetName symbol={asset.symbol} address={asset.address} chain={asset.chain} /></strong><small>{tokenLink(asset)}</small>{asset.additionalNetworks.length > 0 && <details className="cookbook-asset-networks"><summary>Additional networks ({asset.additionalNetworks.length})</summary><ul>{asset.additionalNetworks.map(network => <li key={`${network.chain}:${network.address}`}><strong>{network.chain}</strong><span>{tokenLink(network)}</span><span title={`Snapshot: ${network.snapshotAt}`}>{intrinsicApr(network.intrinsicApr)}</span></li>)}</ul></details>}</td>
         <td>{asset.chain}</td><td title={`Snapshot: ${asset.snapshotAt}`}><strong>{intrinsicApr(asset.intrinsicApr)}</strong></td>
       </tr>)}</tbody></table></div> : <p>No supplied assets in the saved positions.</p>}
     </section>}

@@ -32,6 +32,7 @@ try {
   page.on('response', response => { if (response.url().includes('/assets/')) assets.push(response.status()); });
   await page.route('**/api/**', route => {
     apiRequests.push(route.request().url());
+    if (route.request().url().endsWith('/safety-grades')) return route.fulfill({ json: { schemaVersion: 1, asOfSec: Math.floor(Date.now() / 1000), publicationStatus: 'current', methodologyVersion: '10.57', grades: [{ id: 'usdc-circle', grade: 'A+', score: 87, ratingStatus: 'rated' }] } });
     return route.fulfill({ json: route.request().url().includes('/portfolio/') ? liveFixture : route.request().url().endsWith('/recommendations') ? { alternatives: [], coverage: [], checkedAt: new Date().toISOString() } : { address: combinedExample.address, status: 'ok', networks: [] } });
   });
   const url = `http://127.0.0.1:${address.port}${basePath}`;
@@ -47,9 +48,9 @@ try {
     expect(apiRequests).toEqual([]);
   } else {
     await expect(page.getByRole('region', { name: 'Wallet results' })).toBeVisible();
-    await expect.poll(() => apiRequests.length).toBe(2);
-    await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
     await expect.poll(() => apiRequests.length).toBe(3);
+    await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Recommendations', exact: true }).click();
+    await expect.poll(() => apiRequests.length).toBe(4);
     expect(apiRequests.every(url => new URL(url).origin === new URL(apiOrigin).origin)).toBe(true);
   }
   expect(assets.length).toBeGreaterThan(0);

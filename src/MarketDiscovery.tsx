@@ -1,3 +1,4 @@
+import { AssetName } from './SafetyScore';
 import {
   strategySupplyChoices,
   strategyBorrowChoices,
@@ -164,7 +165,7 @@ function AssetCell({
   if (!asset) return <span className="muted">No borrowing</span>;
   return (
     <>
-      <strong>{asset.name}</strong>
+      <strong><AssetName symbol={asset.name} address={asset.address} chain={networkNames[network]} category={asset.category} /></strong>
       <small>{asset.category}</small>
       <a
         className="discovery-contract"
@@ -306,9 +307,9 @@ function DiscoverySearch({ strategy = false }: { strategy?: boolean }) {
                   >
                     <td>
                       <a href={market.url} target="_blank" rel="noreferrer">
-                        {market.protocol} · {market.supplyAsset.name}
+                        {market.protocol} · <AssetName symbol={market.supplyAsset.name} address={market.supplyAsset.address} chain={networkNames[network]} category={market.supplyAsset.category} />
                         {market.borrowAsset
-                          ? ` / ${market.borrowAsset.name}`
+                          ? <> / <AssetName symbol={market.borrowAsset.name} address={market.borrowAsset.address} chain={networkNames[network]} category={market.borrowAsset.category} /></>
                           : ' deposit'}{' '}
                         · {market.market.slice(0, 10)}…
                         {!strategy &&

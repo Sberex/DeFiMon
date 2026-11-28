@@ -60,3 +60,15 @@ it('keeps sUSDai rated D when unrelated Pharos entries have pipeline gaps', () =
   expect(assetSafetySummary(p, feed).groups.map(g => g.grade)).toEqual(['D']);
   expect(parsePharosGrades(feed, now)).toEqual(feed);
 });
+
+it('adds grade metadata only for exact configured Stablecoin or Savings stablecoin contracts', async () => {
+  const { tokenSafety } = await import('../src/pharos-safety');
+  const feed = parsePharosGrades({ ...payload(), grades: [{ id: 'susdai-usd-ai', grade: 'D', score: 47, ratingStatus: 'rated' }, rows[0]] }, now);
+  expect(tokenSafety('Ethereum', susdai, feed)).toMatchObject({ grade: 'D', score: 47 });
+  expect(tokenSafety('Plasma', susdai, feed)?.grade).toBe('D');
+  expect(tokenSafety('Arc', 'native', feed)?.grade).toBe('A+');
+  expect(tokenSafety('Ethereum', unknown, feed)).toBeUndefined();
+  expect(tokenSafety('Ethereum', 'native', feed)).toBeUndefined();
+  expect(tokenSafety('Ethereum', susdai, null)?.grade).toBe('NR');
+  expect(tokenSafety('Ethereum', '0x45804880de22913dafe09f4980848ece6ecbaf78', feed)).toBeUndefined();
+});

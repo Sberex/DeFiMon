@@ -22,18 +22,25 @@ export function parsePharosGrades(value: unknown, now = Date.now()): PharosGrade
   });
   return { schemaVersion: 1, asOfSec: data.asOfSec, publicationStatus: 'current', methodologyVersion: data.methodologyVersion, grades };
 }
-interface Identity { group: string; url?: string; id?: string }
+interface Identity { group: string; url?: string; id?: string; category: unknown }
 const identities = new Map<string, Identity>();
 for (const [group, entry] of Object.entries(config) as [string, Record<string, unknown>][]) {
   const url = typeof entry['Safety Score'] === 'string' ? entry['Safety Score'] : undefined;
   const id = url?.match(/^https:\/\/pharos\.watch\/stablecoin\/([a-z0-9-]+)\/$/)?.[1];
   for (const [network, chain] of Object.entries(networkNames)) {
     const address = entry[network];
-    if (typeof address === 'string' && /^0x[\da-f]{40}$/i.test(address)) identities.set(`${chain}:${address.toLowerCase()}`, { group, url, id });
+    if (typeof address === 'string' && /^0x[\da-f]{40}$/i.test(address)) identities.set(`${chain}:${address.toLowerCase()}`, { group, url, id, category: entry._category });
   }
 }
+export function tokenSafety(chain: ChainName, address: string, feed: PharosGrades | null) {
+  const contract = address === 'native' && chain === 'Arc' ? config.USDC.arc : address;
+  const identity = identities.get(`${chain}:${contract.toLowerCase()}`);
+  if (!identity || !['Stablecoin', 'Savings stablecoin'].includes(String(identity.category))) return undefined;
+  const row = identity.id ? feed?.grades.find(row => row.id === identity.id) : undefined;
+  return { grade: row?.ratingStatus === 'rated' ? row.grade : 'NR' as const, score: row?.ratingStatus === 'rated' ? row.score : null, url: identity.url };
+}
 export interface SafetyAsset {
-  key: string; symbol: string; url?: string; grade: SafetyGrade | 'Not Rated'; score: number | null;
+  key: string; symbol: string; chain: ChainName; address: string; url?: string; grade: SafetyGrade | 'Not Rated'; score: number | null;
   valueUsd: number; unpriced: number;
   holdings: { chain: ChainName; location: string; amount: number | null; valueUsd: number | null }[];
 }
@@ -49,7 +56,7 @@ export function assetSafetySummary(portfolio: Portfolio, feed: PharosGrades | nu
     const rating = identity?.id ? ratings.get(identity.id) : undefined;
     const grade = rating?.ratingStatus === 'rated' ? rating.grade as SafetyGrade : 'Not Rated';
     let asset = assets.get(key);
-    if (!asset) { asset = { key, symbol: identity?.group.split('#')[0] ?? symbol, url: identity?.url, grade, score: rating?.ratingStatus === 'rated' ? rating.score : null, valueUsd: 0, unpriced: 0, holdings: [] }; assets.set(key, asset); }
+    if (!asset) { asset = { key, chain, address, symbol: identity?.group.split('#')[0] ?? symbol, url: identity?.url, grade, score: rating?.ratingStatus === 'rated' ? rating.score : null, valueUsd: 0, unpriced: 0, holdings: [] }; assets.set(key, asset); }
     if (value === null) asset.unpriced++; else asset.valueUsd += value;
     asset.holdings.push({ chain, location, amount, valueUsd: value });
   };
