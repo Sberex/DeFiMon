@@ -2,6 +2,11 @@
   "version": 1,
   "wallets": [
     {
+      "address": "0x3dab3d64af2ce47b3609739969dbfd8e93ce1d91",
+      "lastCheckedAt": "2026-11-28T05:34:40.088Z",
+      "manualLiquidationPrices": []
+    },
+    {
       "address": "0x55fa9aac40af97faab697cc74d4da452abf0272c",
       "lastCheckedAt": "2026-11-27T20:46:16.625Z",
       "manualLiquidationPrices": []
