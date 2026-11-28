@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795846655,
+  "asOfSec": 1795850250,
   "publicationStatus": "current",
   "methodologyVersion": "10.58",
   "grades": [
@@ -25,7 +25,7 @@
     {
       "id": "alusd-alchemix",
       "grade": "F",
-      "score": 31,
+      "score": 36,
       "ratingStatus": "rated"
     },
     {
@@ -205,7 +205,7 @@
     {
       "id": "cadd-cad-digital",
       "grade": "A-",
-      "score": 80,
+      "score": 81,
       "ratingStatus": "rated"
     },
     {
@@ -414,13 +414,13 @@
     },
     {
       "id": "eurc-circle",
-      "grade": "B-",
+      "grade": "A",
       "score": 83,
       "ratingStatus": "rated"
     },
     {
       "id": "eurcv-societe-generale-forge",
-      "grade": "C+",
+      "grade": "A-",
       "score": 80,
       "ratingStatus": "rated"
     },
@@ -961,7 +961,7 @@
     {
       "id": "nusd-nexus",
       "grade": "F",
-      "score": 57,
+      "score": 19,
       "ratingStatus": "rated"
     },
     {
