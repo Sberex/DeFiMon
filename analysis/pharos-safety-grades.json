@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795857478,
+  "asOfSec": 1795861139,
   "publicationStatus": "current",
   "methodologyVersion": "10.58",
   "grades": [
@@ -205,7 +205,7 @@
     {
       "id": "cadd-cad-digital",
       "grade": "A-",
-      "score": 81,
+      "score": 80,
       "ratingStatus": "rated"
     },
     {
@@ -414,13 +414,13 @@
     },
     {
       "id": "eurc-circle",
-      "grade": "A",
+      "grade": "B-",
       "score": 65,
       "ratingStatus": "rated"
     },
     {
       "id": "eurcv-societe-generale-forge",
-      "grade": "A-",
+      "grade": "B+",
       "score": 77,
       "ratingStatus": "rated"
     },
@@ -535,7 +535,7 @@
     {
       "id": "ftusd-flying-tulip",
       "grade": "C+",
-      "score": 63,
+      "score": 62,
       "ratingStatus": "rated"
     },
     {
@@ -619,7 +619,7 @@
     {
       "id": "gpyusdse-galaxy",
       "grade": "C+",
-      "score": 63,
+      "score": 64,
       "ratingStatus": "rated"
     },
     {
@@ -690,7 +690,7 @@
     },
     {
       "id": "hyperusdca-hyperithm",
-      "grade": "C+",
+      "grade": "C-",
       "score": 53,
       "ratingStatus": "rated"
     },
@@ -961,7 +961,7 @@
     {
       "id": "nusd-nexus",
       "grade": "F",
-      "score": 19,
+      "score": 57,
       "ratingStatus": "rated"
     },
     {
@@ -1002,7 +1002,7 @@
     },
     {
       "id": "paxg-paxos",
-      "grade": "F",
+      "grade": "A-",
       "score": 80,
       "ratingStatus": "rated"
     },
@@ -1645,7 +1645,7 @@
     {
       "id": "usdfr-forest-road",
       "grade": "C",
-      "score": 57,
+      "score": 58,
       "ratingStatus": "rated"
     },
     {
@@ -2028,7 +2028,7 @@
     },
     {
       "id": "wsrusd-reservoir",
-      "grade": "C-",
+      "grade": "C",
       "score": 57,
       "ratingStatus": "rated"
     },
@@ -2058,7 +2058,7 @@
     },
     {
       "id": "xaut-tether",
-      "grade": "B-",
+      "grade": "A-",
       "score": 81,
       "ratingStatus": "rated"
     },
