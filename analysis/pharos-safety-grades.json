@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795861139,
+  "asOfSec": 1795864700,
   "publicationStatus": "current",
   "methodologyVersion": "10.58",
   "grades": [
@@ -25,7 +25,7 @@
     {
       "id": "alusd-alchemix",
       "grade": "F",
-      "score": 31,
+      "score": 36,
       "ratingStatus": "rated"
     },
     {
@@ -205,7 +205,7 @@
     {
       "id": "cadd-cad-digital",
       "grade": "A-",
-      "score": 80,
+      "score": 81,
       "ratingStatus": "rated"
     },
     {
@@ -289,7 +289,7 @@
     {
       "id": "crvusd-curve",
       "grade": "C+",
-      "score": 63,
+      "score": 62,
       "ratingStatus": "rated"
     },
     {
@@ -535,7 +535,7 @@
     {
       "id": "ftusd-flying-tulip",
       "grade": "C+",
-      "score": 62,
+      "score": 63,
       "ratingStatus": "rated"
     },
     {
@@ -961,7 +961,7 @@
     {
       "id": "nusd-nexus",
       "grade": "F",
-      "score": 57,
+      "score": 19,
       "ratingStatus": "rated"
     },
     {
@@ -1033,7 +1033,7 @@
     {
       "id": "pusd-polymarket",
       "grade": "B+",
-      "score": 77,
+      "score": 76,
       "ratingStatus": "rated"
     },
     {
@@ -1075,7 +1075,7 @@
     {
       "id": "rlusd-ripple",
       "grade": "A",
-      "score": 83,
+      "score": 82,
       "ratingStatus": "rated"
     },
     {
@@ -1117,7 +1117,7 @@
     {
       "id": "scrvusd-curve",
       "grade": "C",
-      "score": 58,
+      "score": 57,
       "ratingStatus": "rated"
     },
     {
@@ -2101,7 +2101,7 @@
     {
       "id": "xsgd-straitsx",
       "grade": "B-",
-      "score": 65,
+      "score": 79,
       "ratingStatus": "rated"
     },
     {
