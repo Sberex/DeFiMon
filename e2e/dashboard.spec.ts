@@ -1631,7 +1631,7 @@ test('groups wallet income tokens first, weights category APR and includes walle
   const section = page.getByRole('region', { name: 'Interest bearing tokens', exact: true });
   await expect(page.locator('.wallet-category>h3')).toHaveText(['Interest bearing tokens', 'Other tokens']);
   await expect(section.locator('.wallet-category-stats strong')).toHaveText(['$6,000.00', '≈ 5.40%', '≈ $27.00 / month']);
-  await expect(section.locator('.wallet-network').first().locator('tbody td:first-child strong')).toHaveText(['reUSD', 'sUSDai', 'wstETH']);
+  await expect(section.locator('.wallet-network').first().locator('tbody td:first-child strong')).toHaveText(['reUSD (NR)', 'sUSDai (NR)', 'wstETH']);
   await expect(page.getByRole('region', { name: 'Other tokens', exact: true }).locator('tbody td:first-child strong')).toHaveText(['ETH']);
   await expect(page.locator('.summary.primary strong')).toHaveText('$7,000.00');
   await expect(page.locator('.total-npl strong')).toHaveText('≈ $27.00');
@@ -2082,7 +2082,7 @@ test('Cookbook counts configured cross-chain collateral once, expands used netwo
   await page.goto('/'); await page.getByRole('button', { name: 'Cookbook', exact: true }).click();
   const cookbook = page.getByRole('region', { name: 'Cookbook', exact: true });
   const assets = cookbook.getByRole('region', { name: 'Cookbook supplied assets', exact: true });
-  await expect(assets.locator('tbody > tr > td:first-child > strong')).toHaveText(['Higher yield', 'sUSDai', 'Plain']);
+  await expect(assets.locator('tbody > tr > td:first-child > strong')).toHaveText(['Higher yield', 'sUSDai (NR)', 'Plain']);
   await expect(assets.locator('tbody > tr > td:last-child')).toHaveText(['15.00%', '8.20%', '0%']);
   const count = cookbook.getByRole('region', { name: 'Cookbook summary' }).locator('.summary').filter({ hasText: 'Number of collateral assets' }).locator('strong');
   await expect(count).toHaveText('3');
