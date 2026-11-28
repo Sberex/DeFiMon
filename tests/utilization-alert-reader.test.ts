@@ -35,3 +35,14 @@ it('uses Aave v4 drawn debt and swept assets, excluding premium debt and Spoke c
   const reader = createUtilizationAlertReader(() => client({ getAssetLiquidity: 10n, getAssetOwed: [80n, 200n], getAssetSwept: 10n }), Date.now, async w => ({ ...verified(w as UtilizationWatch), readings: [{ ...verified(w as UtilizationWatch).readings[0], market: `${market}:${token}:1` }] }));
   const result = await reader({ ...watch, protocol: 'aave-v4' }); expect(result.status).toBe('ok'); expect(result.readings[0].utilizationPercent).toBe(80);
 });
+
+it('retains the same-block Borrow APR from the verified liquidity observation, including zero and unknown rates', async () => {
+  for (const borrowApr of [.05689, 0, null, undefined]) {
+    const reader = createUtilizationAlertReader(() => client({cash: 5n, totalBorrows: 95n}), Date.now, async w => {
+      const observation=verified(w as UtilizationWatch); observation.readings[0].borrowApr=borrowApr; return observation;
+    });
+    const result=await reader(watch);
+    expect(result.status).toBe('ok');expect(result.blockNumber).toBe('100');
+    expect(result.readings[0]).toMatchObject({utilizationPercent:95,borrowApr:borrowApr??null});
+  }
+});

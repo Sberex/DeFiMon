@@ -11,7 +11,7 @@ export interface UtilizationNotification {
   id: string; type: 'utilization-above-threshold'; address: string; network: UtilizationWatch['network']; protocol: string; positionId: string;
   market: string; marketAddress: string; marketLabel: string; token: string; symbol: string; thresholdPercent: number;
   previousUtilizationPercent: number | null; utilizationPercent: number; utilizationChangePercentagePoints: number | null;
-  previousCheckedAt: string | null; timestamp: string; blockNumber: string; note: string;
+  previousCheckedAt: string | null; timestamp: string; blockNumber: string; note: string; borrowApr?: number | null;
 }
 export interface UtilizationNotifications { version: 1; notifications: UtilizationNotification[] }
 export const emptyUtilizationState = (): UtilizationState => ({ version: 1, lastRunAt: null, watches: [] });
@@ -20,7 +20,7 @@ const iso = (v: unknown): v is string => typeof v === 'string' && Number.isFinit
 const percent = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const raw = (v: unknown): v is string => typeof v === 'string' && /^\d+$/.test(v);
 const key = (q: UtilizationReading) => `${q.market.toLowerCase()}:${q.token.toLowerCase()}`;
-function validReading(q: UtilizationReading) { return q && typeof q.market === 'string' && q.market.length > 0 && /^0x[\da-f]{40}$/i.test(q.marketAddress) && /^0x[\da-f]{40}$/i.test(q.token) && typeof q.symbol === 'string' && q.symbol.length > 0 && q.symbol.length <= 128 && typeof q.label === 'string' && typeof q.note === 'string' && percent(q.utilizationPercent); }
+function validReading(q: UtilizationReading) { return q && typeof q.market === 'string' && q.market.length > 0 && /^0x[\da-f]{40}$/i.test(q.marketAddress) && /^0x[\da-f]{40}$/i.test(q.token) && typeof q.symbol === 'string' && q.symbol.length > 0 && q.symbol.length <= 128 && typeof q.label === 'string' && typeof q.note === 'string' && percent(q.utilizationPercent) && (q.borrowApr === undefined || q.borrowApr === null || typeof q.borrowApr === 'number' && Number.isFinite(q.borrowApr)); }
 function validateWatch(w: UtilizationWatch, checkedAt: string) {
   if (!w || !percent(w.thresholdPercent) || w.thresholdPercent > 100) throw Error('Invalid utilization watch');
   parseWalletHistory({ version: 1, wallets: [{ address: w.address, lastCheckedAt: checkedAt, manualLiquidationPrices: [], alerts: [{ network: w.network, protocol: w.protocol, positionId: w.positionId, updatedAt: w.ruleUpdatedAt, rules: { ...defaultAlertRules(), utilizationAbove: { enabled: true, thresholdPercent: w.thresholdPercent } } }] }] });
@@ -69,7 +69,7 @@ export function advanceUtilizationAlerts(history: WalletHistoryFile, previous: U
       if (before && BigInt(observation.blockNumber) <= BigInt(before.blockNumber)) return before;
       if (q.utilizationPercent > watch.thresholdPercent && (!before || before.utilizationPercent <= watch.thresholdPercent)) {
         const id = createHash('sha256').update(JSON.stringify([watchKey(watch), key(q), watch.ruleUpdatedAt, watch.thresholdPercent, before?.blockNumber ?? null, observation.blockNumber])).digest('hex');
-        if (!ids.has(id)) { ids.add(id); added++; notifications.notifications.push({ id, type: 'utilization-above-threshold', address: watch.address, network: watch.network, protocol: watch.protocol, positionId: watch.positionId, market: q.market, marketAddress: q.marketAddress, marketLabel: q.label, token: q.token, symbol: q.symbol, thresholdPercent: watch.thresholdPercent, previousUtilizationPercent: before?.utilizationPercent ?? null, utilizationPercent: q.utilizationPercent, utilizationChangePercentagePoints: before ? q.utilizationPercent - before.utilizationPercent : null, previousCheckedAt: before?.checkedAt ?? null, timestamp: observation.checkedAt, blockNumber: observation.blockNumber, note: q.note }); }
+        if (!ids.has(id)) { ids.add(id); added++; notifications.notifications.push({ id, type: 'utilization-above-threshold', address: watch.address, network: watch.network, protocol: watch.protocol, positionId: watch.positionId, market: q.market, marketAddress: q.marketAddress, marketLabel: q.label, token: q.token, symbol: q.symbol, thresholdPercent: watch.thresholdPercent, previousUtilizationPercent: before?.utilizationPercent ?? null, utilizationPercent: q.utilizationPercent, utilizationChangePercentagePoints: before ? q.utilizationPercent - before.utilizationPercent : null, previousCheckedAt: before?.checkedAt ?? null, timestamp: observation.checkedAt, blockNumber: observation.blockNumber, note: q.note, borrowApr: q.borrowApr ?? null }); }
       }
       return { ...q, checkedAt: observation.checkedAt, blockNumber: observation.blockNumber };
     });

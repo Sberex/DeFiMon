@@ -53,3 +53,20 @@ it('records external runs separately from native cron and preserves the heartbea
   expect(manual.state.lastExternalRunAt).toBe(time(0)); expect(manual.state.lastScheduledRunAt).toBeNull();
   expect(() => parseUtilizationState({ ...s.state, lastExternalRunAt: 'invalid' })).toThrow();
 });
+
+it('stores the threshold crossing observation APR, reads legacy files and rejects malformed APR values', () => {
+  const initial=seed(), crossing=observe(95,1);crossing.readings[0].borrowApr=.05689;
+  const result=advanceUtilizationAlerts(history(),initial.state,initial.notifications,[crossing],time(1));
+  expect(parseUtilizationNotifications(result.notifications).notifications[0].borrowApr).toBe(.05689);
+  expect(parseUtilizationState(result.state).watches[0].baselines[0].borrowApr).toBe(.05689);
+  const legacy=structuredClone(result.notifications);delete legacy.notifications[0].borrowApr;
+  expect(parseUtilizationNotifications(legacy)).toEqual(legacy);
+  for(const value of [NaN,Infinity,'5.69']) {
+    const invalid=structuredClone(result.notifications);invalid.notifications[0].borrowApr=value as number;
+    expect(()=>parseUtilizationNotifications(invalid)).toThrow();
+    const invalidState=structuredClone(result.state);invalidState.watches[0].baselines[0].borrowApr=value as number;
+    expect(()=>parseUtilizationState(invalidState)).toThrow();
+  }
+  crossing.readings[0].borrowApr=0;
+  expect(advanceUtilizationAlerts(history(),initial.state,initial.notifications,[crossing],time(1)).notifications.notifications[0].borrowApr).toBe(0);
+});

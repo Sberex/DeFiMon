@@ -9,7 +9,7 @@ import { SPARK_LEND } from './deployments/spark.js';
 import { networks } from './networks.js';
 import { fluidUtilizationAbi } from './abis/fluid-utilization.js';
 export interface UtilizationWatch extends LiquidityWatch { thresholdPercent: number }
-export interface UtilizationReading { market: string; marketAddress: string; token: string; symbol: string; label: string; utilizationPercent: number; note: string }
+export interface UtilizationReading { market: string; marketAddress: string; token: string; symbol: string; label: string; utilizationPercent: number; note: string; borrowApr?: number | null }
 export interface UtilizationObservation { watch: UtilizationWatch; checkedAt: string; blockNumber: string; status: 'ok' | 'error' | 'inactive' | 'unsupported'; readings: UtilizationReading[]; message?: string }
 const abi = parseAbi([
   'function getUtilization() view returns(uint256)', 'function cash() view returns(uint256)', 'function totalBorrows() view returns(uint256)',
@@ -79,7 +79,7 @@ export function createUtilizationAlertReader(clientFor: (n: NetworkId) => ChainC
             percent = utilizationPercent(owed[0], cash + owed[0] + swept); note = 'Aave v4 native interest-model usage: drawn debt / (Hub liquidity + drawn debt + swept assets) × 100; excludes premium debt and Spoke draw caps.';
           } else throw Error('Unsupported utilization');
           if (!Number.isFinite(percent) || percent < 0) throw Error('Invalid utilization');
-          return { market: q.market, marketAddress: q.marketAddress, token: q.token, symbol: q.symbol, label: q.label, utilizationPercent: percent, note };
+          return { market: q.market, marketAddress: q.marketAddress, token: q.token, symbol: q.symbol, label: q.label, utilizationPercent: percent, note, borrowApr: q.borrowApr ?? null };
         })());
         readings.push(await cache.get(key)!);
       }
