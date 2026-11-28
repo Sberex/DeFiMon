@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795832332,
+  "asOfSec": 1795835888,
   "publicationStatus": "current",
-  "methodologyVersion": "10.57",
+  "methodologyVersion": "10.58",
   "grades": [
     {
       "id": "a7a5-old-vector",
@@ -325,7 +325,7 @@
     {
       "id": "dai-makerdao",
       "grade": "B",
-      "score": 71,
+      "score": 70,
       "ratingStatus": "rated"
     },
     {
@@ -1135,7 +1135,7 @@
     {
       "id": "sdai-sky",
       "grade": "B-",
-      "score": 66,
+      "score": 65,
       "ratingStatus": "rated"
     },
     {
@@ -1243,7 +1243,7 @@
     {
       "id": "sparkusdtbc-spark",
       "grade": "B-",
-      "score": 67,
+      "score": 66,
       "ratingStatus": "rated"
     },
     {
@@ -1309,7 +1309,7 @@
     {
       "id": "steakusdt-steakhouse",
       "grade": "B-",
-      "score": 67,
+      "score": 66,
       "ratingStatus": "rated"
     },
     {
@@ -1417,7 +1417,7 @@
     {
       "id": "susdx-axis",
       "grade": "D",
-      "score": 44,
+      "score": 43,
       "ratingStatus": "rated"
     },
     {
@@ -1861,7 +1861,7 @@
     {
       "id": "usdx-axis",
       "grade": "D",
-      "score": 49,
+      "score": 48,
       "ratingStatus": "rated"
     },
     {
