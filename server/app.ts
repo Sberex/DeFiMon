@@ -1,3 +1,5 @@
+import { readSavingsCatalogRate } from './savings-catalog.js';
+import { configuredTokenRegistry } from './token-registry.js';
 import { pendleCatalog } from './pendle.js';
 import { pendleSafetyMarket } from '../src/pendle-safety.js';
 import { readPharosGrades } from './pharos-safety.js';
@@ -21,11 +23,22 @@ import type { ExtraTokens, MerklRewards, NetworkId, Portfolio } from '../src/typ
 import { isNetworkId } from '../src/networks.js';
 import { readMerklRewards, unavailableMerkl } from './merkl.js';
 import { networks } from './networks.js';
-export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore, history?: WalletHistoryStore, loadDiscovery = discoverMarkets, loadSafetyGrades = readPharosGrades) {
+export function createApp(load: (wallet: Address, network: NetworkId, extraTokens?: ExtraTokens) => Promise<Portfolio> = getPortfolio, loadRewards: (wallet: Address) => Promise<MerklRewards> = readMerklRewards, loadMarkets = searchMarkets, cookbook?: CookbookStore, testCases?: TestCasesStore, history?: WalletHistoryStore, loadDiscovery = discoverMarkets, loadSafetyGrades = readPharosGrades, loadSavingsCatalog = readSavingsCatalogRate) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use('/api', apiCors);
+  let activeSavings = 0;
+  app.get('/api/savings-stablecoins/:group', async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const group = req.params.group;
+    if (!Object.hasOwn(configuredTokenRegistry, group) || configuredTokenRegistry[group].category !== 'Savings stablecoin') { res.status(404).json({ error: 'Choose a configured Savings stablecoin.' }); return; }
+    if (activeSavings >= 6) { res.setHeader('Retry-After', '2'); res.status(429).json({ error: 'Rate calculations are busy. Retry shortly.' }); return; }
+    activeSavings++;
+    try { res.json(await loadSavingsCatalog(group)); }
+    catch { res.status(503).json({ error: 'This intrinsic rate could not be verified. It is unavailable, not zero.' }); }
+    finally { activeSavings--; }
+  });
   app.get('/api/pendle-safety-assets/:network', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     if (!isNetworkId(req.params.network) || req.params.network === 'arc') { res.status(400).json({ error: 'Choose a supported Pendle network.' }); return; }
