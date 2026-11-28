@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795835888,
+  "asOfSec": 1795839429,
   "publicationStatus": "current",
   "methodologyVersion": "10.58",
   "grades": [
@@ -67,7 +67,7 @@
     {
       "id": "audf-forte",
       "grade": "C",
-      "score": 55,
+      "score": 49,
       "ratingStatus": "rated"
     },
     {
@@ -367,7 +367,7 @@
     {
       "id": "dusd-dialectic",
       "grade": "D",
-      "score": 47,
+      "score": 45,
       "ratingStatus": "rated"
     },
     {
@@ -925,7 +925,7 @@
     {
       "id": "mxnb-juno",
       "grade": "C+",
-      "score": 64,
+      "score": 58,
       "ratingStatus": "rated"
     },
     {
@@ -1243,7 +1243,7 @@
     {
       "id": "sparkusdtbc-spark",
       "grade": "B-",
-      "score": 66,
+      "score": 67,
       "ratingStatus": "rated"
     },
     {
@@ -1309,7 +1309,7 @@
     {
       "id": "steakusdt-steakhouse",
       "grade": "B-",
-      "score": 66,
+      "score": 67,
       "ratingStatus": "rated"
     },
     {
@@ -1387,7 +1387,7 @@
     {
       "id": "susdd-tron-dao-reserve",
       "grade": "C",
-      "score": 59,
+      "score": 55,
       "ratingStatus": "rated"
     },
     {
@@ -1561,7 +1561,7 @@
     {
       "id": "usd3-3jane",
       "grade": "C-",
-      "score": 54,
+      "score": 52,
       "ratingStatus": "rated"
     },
     {
@@ -1615,7 +1615,7 @@
     {
       "id": "usdd-tron-dao-reserve",
       "grade": "C+",
-      "score": 64,
+      "score": 60,
       "ratingStatus": "rated"
     },
     {
@@ -2041,7 +2041,7 @@
     {
       "id": "xagm-matrixdock",
       "grade": "D",
-      "score": 49,
+      "score": 55,
       "ratingStatus": "rated"
     },
     {
