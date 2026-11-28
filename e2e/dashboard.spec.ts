@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { combinedExample, example } from '../src/example';
 import { portfolio as aprPortfolio, rewards as aprRewards } from '../tests/fixtures/merkl-apr';
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/pendle-safety-assets/*', route => { const chain = new URL(route.request().url()).pathname.split('/').at(-1)!; return route.fulfill({ json: { chainId: ({ethereum:1,plasma:9745,arbitrum:42161,base:8453,bsc:56} as Record<string,number>)[chain], markets: [] } }); });
   await page.route('**/analysis/pharos-safety-grades.json*', route => route.fulfill({ status: 503, json: { error: 'Snapshot unavailable in this fixture' }, headers: { 'Access-Control-Allow-Origin': '*' } }));
   await page.route('**/api/safety-grades', route => route.fulfill({ json: { schemaVersion: 1, asOfSec: Math.floor(Date.now() / 1000), publicationStatus: 'current', methodologyVersion: '10.57', grades: [{ id: 'usdc-circle', grade: 'A+', score: 91, ratingStatus: 'rated' }] } }));
   await page.route('**/analysis/utilization-alert-state.json*', route => route.fulfill({ json: { version: 1, lastRunAt: null, watches: [] } }));
@@ -1524,7 +1525,7 @@ test('shows Pendle wallet holdings, accounting-asset prices, APYs, TVL and exact
   await expect(section.getByText('Not applicable · expired', { exact: true }).first()).toBeHidden();
   await section.locator('.pendle-inactive > summary').click();
   await expect(section.locator('.pendle-collapsed-networks .protocol-heading h2')).toHaveText(['Pendle · Ethereum', 'Pendle · Plasma', 'Pendle · Arbitrum', 'Pendle · Base', 'Pendle · Binance Smart Chain']);
-  const position = section.locator('.pendle-position').filter({ has: page.getByRole('heading', { name: 'PT reUSD (USDC) ↗' }) });
+  const position = section.locator('.pendle-position').filter({ has: page.getByRole('heading', { name: 'PT reUSD (USDC) (NR) ↗' }) });
   await expect(position.getByText('99 USDC', { exact: true })).toBeVisible();
   await expect(position.getByText('0.99 USDC', { exact: true })).toBeVisible();
   await expect(position.getByText('12.00%', { exact: true })).toBeVisible(); await expect(position.getByText('7.00%', { exact: true })).toBeVisible();
@@ -1547,7 +1548,7 @@ test('shows sUSDat PT and YT market metrics including zero underlying APY', asyn
   await page.route('**/api/portfolio/*', route => route.fulfill({ json: fixture }));
   await page.goto('/'); await page.getByLabel('Wallet address', { exact: true }).fill(example.address); await page.getByRole('button', { name: 'Check wallet' }).click();
   for (const kind of ['PT', 'YT']) {
-    const position = page.getByRole('region', { name: 'Pendle positions' }).locator('.pendle-position').filter({ has: page.getByRole('heading', { name: `${kind} sUSDat (USDat) ↗` }) });
+    const position = page.getByRole('region', { name: 'Pendle positions' }).locator('.pendle-position').filter({ has: page.getByRole('heading', { name: `${kind} sUSDat (USDat) (NR) ↗` }) });
     await expect(position.getByText('14.16%', { exact: true })).toBeVisible();
     await expect(position.getByText('0.00%', { exact: true })).toBeVisible();
     await expect(position.getByText('$1,409,156.50', { exact: true })).toBeVisible();
@@ -2536,4 +2537,19 @@ test('stablecoin and savings asset names share Pharos grades across wallet, posi
  const position=page.locator('.position').filter({has:page.getByRole('heading',{name:'Test lending pair'})});await expect(position.locator('tbody')).toContainText('sUSDai (D)');await expect(position.locator('tbody')).toContainText('USDC (A+)');expect(calls).toBe(1);
  await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();const risk=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await risk.locator('[data-grade="D"] summary').click();await expect(risk.locator('[data-grade="D"]')).toContainText('sUSDai (D)');expect(calls).toBe(1);
  grade='C';await risk.getByRole('button',{name:'Refresh grades',exact:true}).click();await expect(risk.locator('[data-grade="C"]')).toBeVisible();await page.getByRole('button',{name:'Wallet Overview',exact:true}).click();await expect(interest).toContainText('sUSDai (C)');expect(calls).toBe(2);
+});
+
+test('Pendle PT and YT labels and collateral inherit USD3 safety rather than the USDC quote grade',async({page})=>{
+ const pt='0x7f47c3e6b2c00fc4eb4d5ae50d0ab0ab6888eb4d',yt='0x5cffcc9ddef0fdcf395e2ea24ca5ed5a12032706',usd3='0x056b269eb1f75477a8666ae8c7fe01b64dd55ecc',usdc='0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',market='0x4a5067c3ff1abb7449244025b0e37feaf77d8e3e';let catalogCalls=0;
+ const fixture=structuredClone(example);fixture.updatedAt=new Date().toISOString();
+ const info={marketAddress:market,syAddress:'0xea3bc608f32847b97965c5e1648bdfcd4c2c40d0',quoteAsset:{address:usdc,symbol:'USDC'},oraclePrice:1,quoteValue:100,impliedApy:.15,underlyingApy:.1,tvlUsd:1000000,expiry:Date.parse('2026-12-17T00:00:00Z')/1000,matured:false,oracleAddress:'0x5542be50420E88dd7D5B4a3D488FA6ED82F6DAc2',blockNumber:'1',marketUpdatedAt:new Date().toISOString(),notes:[]};
+ fixture.wallets=[{chain:'Ethereum',status:'ok',coverage:'',pricedValueUsd:130,unpricedCount:0,tokens:[{address:pt,symbol:'PT-USD3-17DEC2026',balance:100,priceUsd:1,valueUsd:100,pendle:{...info,kind:'PT',name:'PT USD3 (USDC)'}},{address:yt,symbol:'YT-USD3-17DEC2026',balance:100,priceUsd:.1,valueUsd:10,pendle:{...info,kind:'YT',name:'YT USD3 (USDC)'}},{address:usd3,symbol:'USD3',category:'Savings stablecoin',balance:20,priceUsd:1,valueUsd:20}],pendle:{status:'ok',coverage:'',marketCount:1,blockNumber:'1'}}];
+ fixture.protocols=[{id:'morpho',name:'Morpho',chain:'Ethereum',status:'ok',coverage:'',positions:[{id:'pt-collateral',label:'PT USD3 collateral',suppliedUsd:1000,debtUsd:500,healthFactor:1.7,risk:'lower',notes:[],assets:[{address:pt,symbol:'PT-USD3-17DEC2026',supplied:1000,borrowed:0,priceUsd:1,collateral:true,liquidationThreshold:.86,liquidationPriceUsd:null}]}]}];
+ await page.route('**/api/portfolio/*',route=>route.fulfill({json:fixture}));await page.route('**/api/safety-grades',route=>route.fulfill({json:{schemaVersion:1,publicationStatus:'current',asOfSec:Math.floor(Date.now()/1000),methodologyVersion:'10.58',grades:[{id:'usd3-3jane',grade:'F',score:20,ratingStatus:'rated'},{id:'usdc-circle',grade:'A+',score:90,ratingStatus:'rated'}]}}));
+ await page.route('**/api/pendle-safety-assets/ethereum',route=>{catalogCalls++;return route.fulfill({json:{chainId:1,markets:[{address:market,chainId:1,pt,yt,base:{address:usd3,chainId:1,symbol:'USD3'}}]}})});
+ await page.goto('/');await page.getByLabel('Wallet address',{exact:true}).fill(fixture.address);await page.getByRole('button',{name:'Check wallet',exact:true}).click();
+ const pendle=page.getByRole('region',{name:'Pendle positions',exact:true});await expect(pendle.getByRole('heading',{name:'PT USD3 (USDC) (F) ↗',exact:true})).toBeVisible();await expect(pendle.getByRole('heading',{name:'YT USD3 (USDC) (F) ↗',exact:true})).toBeVisible();
+ await expect(page.getByRole('region',{name:'Interest bearing tokens',exact:true})).toContainText('USD3 (F)');await expect(page.locator('.position').filter({has:page.getByRole('heading',{name:'PT USD3 collateral',exact:true})}).locator('tbody')).toContainText('PT-USD3-17DEC2026 (F)');
+ await expect(pendle.locator('.asset-safety-inline').first()).toHaveAttribute('title',/inherited from USD3/);expect(catalogCalls).toBe(1);
+ await page.getByRole('button',{name:'Risk Assessment',exact:true}).click();const risk=page.getByRole('region',{name:'Assets by Safety Score',exact:true});await expect(risk.locator('[data-grade="F"]')).toContainText('$1,130.00');await risk.locator('[data-grade="F"] summary').click();await expect(risk.locator('[data-grade="F"] a').first()).toHaveAttribute('href','https://pharos.watch/stablecoin/usd3-3jane/');expect(catalogCalls).toBe(1);
 });

@@ -1,3 +1,5 @@
+import { pendleCatalog } from './pendle.js';
+import { pendleSafetyMarket } from '../src/pendle-safety.js';
 import { readPharosGrades } from './pharos-safety.js';
 import { discoveryModeResult } from '../src/market-discovery.js';
 import { validateStrategyQuery, strategyDiscovery } from '../src/leveraged-strategies.js';
@@ -24,6 +26,13 @@ export function createApp(load: (wallet: Address, network: NetworkId, extraToken
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use('/api', apiCors);
+  app.get('/api/pendle-safety-assets/:network', async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (!isNetworkId(req.params.network) || req.params.network === 'arc') { res.status(400).json({ error: 'Choose a supported Pendle network.' }); return; }
+    const network = req.params.network, chainId = networks[network].id;
+    try { const markets = (await pendleCatalog(network)).map(m => pendleSafetyMarket(m, chainId)).filter(m => m !== null); res.json({ chainId, markets }); }
+    catch { res.status(503).json({ error: 'Pendle underlying assets could not be checked.' }); }
+  });
   app.get('/api/safety-grades', async (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try { res.json(await loadSafetyGrades()); }

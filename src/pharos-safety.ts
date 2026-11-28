@@ -1,3 +1,5 @@
+import evmChains from '../config/evm-chains.json';
+import type { PendleBaseAsset } from './pendle-safety';
 import config from '../config/token-matches.json';
 import { networkNames, portfolioNetwork } from './networks';
 import type { ChainName, Portfolio } from './types';
@@ -24,27 +26,34 @@ export function parsePharosGrades(value: unknown, now = Date.now()): PharosGrade
 }
 interface Identity { group: string; url?: string; id?: string; category: unknown }
 const identities = new Map<string, Identity>();
+const chainIdentities = new Map<string, Identity>();
 for (const [group, entry] of Object.entries(config) as [string, Record<string, unknown>][]) {
   const url = typeof entry['Safety Score'] === 'string' ? entry['Safety Score'] : undefined;
   const id = url?.match(/^https:\/\/pharos\.watch\/stablecoin\/([a-z0-9-]+)\/$/)?.[1];
+  for (const [network, value] of Object.entries(evmChains)) {
+    const address = entry[network];
+    if (typeof address === 'string' && /^0x[\da-f]{40}$/i.test(address)) chainIdentities.set(`${value.chainId}:${address.toLowerCase()}`, { group, url, id, category: entry._category });
+  }
   for (const [network, chain] of Object.entries(networkNames)) {
     const address = entry[network];
     if (typeof address === 'string' && /^0x[\da-f]{40}$/i.test(address)) identities.set(`${chain}:${address.toLowerCase()}`, { group, url, id, category: entry._category });
   }
 }
-export function tokenSafety(chain: ChainName, address: string, feed: PharosGrades | null) {
+export function tokenSafety(chain: ChainName, address: string, feed: PharosGrades | null, pendleBases?: Map<string, PendleBaseAsset>) {
   const contract = address === 'native' && chain === 'Arc' ? config.USDC.arc : address;
-  const identity = identities.get(`${chain}:${contract.toLowerCase()}`);
-  if (!identity || !['Stablecoin', 'Savings stablecoin'].includes(String(identity.category))) return undefined;
+  const base = pendleBases?.get(`${chain}:${address.toLowerCase()}`);
+  const identity = base ? chainIdentities.get(`${base.chainId}:${base.address}`) : identities.get(`${chain}:${contract.toLowerCase()}`);
+  if (base && !identity) return { grade: 'NR' as const, score: null, url: undefined, inheritedFrom: base.symbol };
+  if (!identity || !base && !['Stablecoin', 'Savings stablecoin'].includes(String(identity.category))) return undefined;
   const row = identity.id ? feed?.grades.find(row => row.id === identity.id) : undefined;
-  return { grade: row?.ratingStatus === 'rated' ? row.grade : 'NR' as const, score: row?.ratingStatus === 'rated' ? row.score : null, url: identity.url };
+  return { grade: row?.ratingStatus === 'rated' ? row.grade : 'NR' as const, score: row?.ratingStatus === 'rated' ? row.score : null, url: identity.url, ...(base ? { inheritedFrom: base.symbol } : {}) };
 }
 export interface SafetyAsset {
   key: string; symbol: string; chain: ChainName; address: string; url?: string; grade: SafetyGrade | 'Not Rated'; score: number | null;
   valueUsd: number; unpriced: number;
   holdings: { chain: ChainName; location: string; amount: number | null; valueUsd: number | null }[];
 }
-export function assetSafetySummary(portfolio: Portfolio, feed: PharosGrades | null) {
+export function assetSafetySummary(portfolio: Portfolio, feed: PharosGrades | null, pendleBases?: Map<string, PendleBaseAsset>) {
   const ratings = new Map(feed?.grades.map(row => [row.id, row]));
   const assets = new Map<string, SafetyAsset>();
   let incomplete = portfolio.networks?.some(n => n.status === 'error') ?? false;
@@ -54,9 +63,10 @@ export function assetSafetySummary(portfolio: Portfolio, feed: PharosGrades | nu
     const identity = identities.get(`${chain}:${contract.toLowerCase()}`);
     const key = identity?.group ?? `${chain}:${address.toLowerCase()}`;
     const rating = identity?.id ? ratings.get(identity.id) : undefined;
-    const grade = rating?.ratingStatus === 'rated' ? rating.grade as SafetyGrade : 'Not Rated';
+    const inherited = pendleBases?.has(`${chain}:${address.toLowerCase()}`) ? tokenSafety(chain, address, feed, pendleBases) : undefined;
+    const grade = inherited ? inherited.grade === 'NR' ? 'Not Rated' : inherited.grade as SafetyGrade : rating?.ratingStatus === 'rated' ? rating.grade as SafetyGrade : 'Not Rated';
     let asset = assets.get(key);
-    if (!asset) { asset = { key, chain, address, symbol: identity?.group.split('#')[0] ?? symbol, url: identity?.url, grade, score: rating?.ratingStatus === 'rated' ? rating.score : null, valueUsd: 0, unpriced: 0, holdings: [] }; assets.set(key, asset); }
+    if (!asset) { asset = { key, chain, address, symbol: identity?.group.split('#')[0] ?? symbol, url: inherited?.url ?? identity?.url, grade, score: inherited ? inherited.score : rating?.ratingStatus === 'rated' ? rating.score : null, valueUsd: 0, unpriced: 0, holdings: [] }; assets.set(key, asset); }
     if (value === null) asset.unpriced++; else asset.valueUsd += value;
     asset.holdings.push({ chain, location, amount, valueUsd: value });
   };

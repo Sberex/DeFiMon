@@ -14,7 +14,7 @@ const abi = parseAbi([
   'function getPtToAssetRate(address,uint32) view returns(uint256)', 'function getYtToAssetRate(address,uint32) view returns(uint256)',
 ]);
 type ApiToken = { address: Address; symbol: string; decimals: number; chainId: number; price?: { usd?: number }; priceUpdatedAt?: string; proName?: string };
-export type PendleMarket = { address: Address; chainId: number; pt: ApiToken; yt: ApiToken; sy: ApiToken; accountingAsset: ApiToken; expiry: string; impliedApy?: number; underlyingApy?: number; liquidity?: { usd?: number }; dataUpdatedAt?: string };
+export type PendleMarket = { address: Address; chainId: number; pt: ApiToken; yt: ApiToken; sy: ApiToken; accountingAsset: ApiToken; underlyingAsset?: ApiToken; expiry: string; impliedApy?: number; underlyingApy?: number; liquidity?: { usd?: number }; dataUpdatedAt?: string };
 export interface PendleRead { tokens: WalletToken[]; coverage: PendleCoverage }
 const addr = (a: unknown): a is Address => typeof a === 'string' && isAddress(a, { strict: false }) && !/^0x0{40}$/i.test(a);
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();

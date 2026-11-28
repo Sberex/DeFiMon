@@ -5,8 +5,8 @@ import { assetSafetySummary } from './pharos-safety';
 const money = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
 const quantity = (n: number) => new Intl.NumberFormat('en-US', { maximumSignificantDigits: 7 }).format(n);
 export function AssetSafetyBreakdown({ portfolio, loading }: { portfolio: Portfolio | null; loading: boolean }) {
-  const { feed, source, busy, error, refresh } = useSafetyScores(!!portfolio && !loading);
-  const summary = useMemo(() => portfolio ? assetSafetySummary(portfolio, feed) : null, [portfolio, feed]);
+  const { feed, source, busy, error, refresh, pendleBases } = useSafetyScores(!!portfolio && !loading);
+  const summary = useMemo(() => portfolio ? assetSafetySummary(portfolio, feed, pendleBases) : null, [portfolio, feed, pendleBases]);
   return <section className="asset-safety" aria-label="Assets by Safety Score">
     <div className="section-label"><h3>Assets by Safety Score</h3>{portfolio && <button className="text-button" disabled={busy || loading} onClick={() => void refresh(true)}>Refresh grades</button>}</div>
     <p>Wallet tokens and supplied assets, including positions shown in Bad Debt. Borrowings are liabilities and are not added or deducted here. Grades apply to the configured asset, not its lending protocol or position. Receipt tokens already excluded from wallet balances are counted through their supplied assets once.</p>
