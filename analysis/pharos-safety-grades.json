@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795821523,
+  "asOfSec": 1795825094,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -67,13 +67,13 @@
     {
       "id": "audf-forte",
       "grade": "C",
-      "score": 56,
+      "score": 49,
       "ratingStatus": "rated"
     },
     {
       "id": "audm-macropod",
       "grade": "B",
-      "score": 73,
+      "score": 62,
       "ratingStatus": "rated"
     },
     {
@@ -205,7 +205,7 @@
     {
       "id": "cadd-cad-digital",
       "grade": "A-",
-      "score": 80,
+      "score": 66,
       "ratingStatus": "rated"
     },
     {
@@ -415,19 +415,19 @@
     {
       "id": "eurc-circle",
       "grade": "A",
-      "score": 83,
+      "score": 65,
       "ratingStatus": "rated"
     },
     {
       "id": "eurcv-societe-generale-forge",
       "grade": "A-",
-      "score": 80,
+      "score": 64,
       "ratingStatus": "rated"
     },
     {
       "id": "eure-monerium",
       "grade": "C",
-      "score": 59,
+      "score": 55,
       "ratingStatus": "rated"
     },
     {
@@ -757,13 +757,13 @@
     {
       "id": "jpyc-jpyc",
       "grade": "C+",
-      "score": 62,
+      "score": 55,
       "ratingStatus": "rated"
     },
     {
       "id": "jpydf-deltaforesight",
       "grade": "B-",
-      "score": 68,
+      "score": 61,
       "ratingStatus": "rated"
     },
     {
@@ -835,7 +835,7 @@
     {
       "id": "krwq-iq",
       "grade": "C+",
-      "score": 64,
+      "score": 56,
       "ratingStatus": "rated"
     },
     {
@@ -925,7 +925,7 @@
     {
       "id": "mxnb-juno",
       "grade": "C+",
-      "score": 63,
+      "score": 58,
       "ratingStatus": "rated"
     },
     {
@@ -943,7 +943,7 @@
     {
       "id": "myrc-blox",
       "grade": "B+",
-      "score": 76,
+      "score": 65,
       "ratingStatus": "rated"
     },
     {
@@ -1003,7 +1003,7 @@
     {
       "id": "paxg-paxos",
       "grade": "A",
-      "score": 83,
+      "score": 81,
       "ratingStatus": "rated"
     },
     {
@@ -1033,7 +1033,7 @@
     {
       "id": "pusd-polymarket",
       "grade": "B+",
-      "score": 76,
+      "score": 77,
       "ratingStatus": "rated"
     },
     {
@@ -1213,7 +1213,7 @@
     {
       "id": "siusd-infinifi",
       "grade": "F",
-      "score": 19,
+      "score": 46,
       "ratingStatus": "rated"
     },
     {
@@ -1285,7 +1285,7 @@
     {
       "id": "steakeurcv-steakhouse",
       "grade": "B-",
-      "score": 66,
+      "score": 54,
       "ratingStatus": "rated"
     },
     {
@@ -1482,14 +1482,14 @@
     },
     {
       "id": "tbrl-tenbin",
-      "grade": "NR",
-      "score": null,
-      "ratingStatus": "pipeline-gap"
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
     },
     {
       "id": "tgbp-tokenised",
       "grade": "C+",
-      "score": 64,
+      "score": 57,
       "ratingStatus": "rated"
     },
     {
@@ -1506,9 +1506,9 @@
     },
     {
       "id": "tmxn-tenbin",
-      "grade": "NR",
-      "score": null,
-      "ratingStatus": "pipeline-gap"
+      "grade": "C-",
+      "score": 52,
+      "ratingStatus": "rated"
     },
     {
       "id": "trusd-tori",
@@ -1783,7 +1783,7 @@
     {
       "id": "usdrif-rif",
       "grade": "B",
-      "score": 71,
+      "score": 72,
       "ratingStatus": "rated"
     },
     {
@@ -2059,7 +2059,7 @@
     {
       "id": "xaut-tether",
       "grade": "B",
-      "score": 72,
+      "score": 81,
       "ratingStatus": "rated"
     },
     {
@@ -2101,7 +2101,7 @@
     {
       "id": "xsgd-straitsx",
       "grade": "A-",
-      "score": 80,
+      "score": 65,
       "ratingStatus": "rated"
     },
     {
@@ -2167,7 +2167,7 @@
     {
       "id": "zarp-zarp",
       "grade": "C",
-      "score": 56,
+      "score": 51,
       "ratingStatus": "rated"
     },
     {
@@ -2185,7 +2185,7 @@
     {
       "id": "zchf-frankencoin",
       "grade": "A",
-      "score": 84,
+      "score": 82,
       "ratingStatus": "rated"
     },
     {
