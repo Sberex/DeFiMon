@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795825094,
+  "asOfSec": 1795828681,
   "publicationStatus": "current",
   "methodologyVersion": "10.57",
   "grades": [
@@ -67,12 +67,12 @@
     {
       "id": "audf-forte",
       "grade": "C",
-      "score": 49,
+      "score": 55,
       "ratingStatus": "rated"
     },
     {
       "id": "audm-macropod",
-      "grade": "B",
+      "grade": "C+",
       "score": 62,
       "ratingStatus": "rated"
     },
@@ -205,7 +205,7 @@
     {
       "id": "cadd-cad-digital",
       "grade": "A-",
-      "score": 66,
+      "score": 81,
       "ratingStatus": "rated"
     },
     {
@@ -414,20 +414,20 @@
     },
     {
       "id": "eurc-circle",
-      "grade": "A",
+      "grade": "B-",
       "score": 65,
       "ratingStatus": "rated"
     },
     {
       "id": "eurcv-societe-generale-forge",
-      "grade": "A-",
+      "grade": "C+",
       "score": 64,
       "ratingStatus": "rated"
     },
     {
       "id": "eure-monerium",
       "grade": "C",
-      "score": 55,
+      "score": 59,
       "ratingStatus": "rated"
     },
     {
@@ -757,13 +757,13 @@
     {
       "id": "jpyc-jpyc",
       "grade": "C+",
-      "score": 55,
+      "score": 62,
       "ratingStatus": "rated"
     },
     {
       "id": "jpydf-deltaforesight",
       "grade": "B-",
-      "score": 61,
+      "score": 68,
       "ratingStatus": "rated"
     },
     {
@@ -834,7 +834,7 @@
     },
     {
       "id": "krwq-iq",
-      "grade": "C+",
+      "grade": "C",
       "score": 56,
       "ratingStatus": "rated"
     },
@@ -925,7 +925,7 @@
     {
       "id": "mxnb-juno",
       "grade": "C+",
-      "score": 58,
+      "score": 64,
       "ratingStatus": "rated"
     },
     {
@@ -943,7 +943,7 @@
     {
       "id": "myrc-blox",
       "grade": "B+",
-      "score": 65,
+      "score": 76,
       "ratingStatus": "rated"
     },
     {
@@ -1002,7 +1002,7 @@
     },
     {
       "id": "paxg-paxos",
-      "grade": "A",
+      "grade": "A-",
       "score": 81,
       "ratingStatus": "rated"
     },
@@ -1212,7 +1212,7 @@
     },
     {
       "id": "siusd-infinifi",
-      "grade": "F",
+      "grade": "D",
       "score": 46,
       "ratingStatus": "rated"
     },
@@ -1284,7 +1284,7 @@
     },
     {
       "id": "steakeurcv-steakhouse",
-      "grade": "B-",
+      "grade": "C-",
       "score": 54,
       "ratingStatus": "rated"
     },
@@ -1488,7 +1488,7 @@
     },
     {
       "id": "tgbp-tokenised",
-      "grade": "C+",
+      "grade": "C",
       "score": 57,
       "ratingStatus": "rated"
     },
@@ -2058,7 +2058,7 @@
     },
     {
       "id": "xaut-tether",
-      "grade": "B",
+      "grade": "A-",
       "score": 81,
       "ratingStatus": "rated"
     },
@@ -2100,7 +2100,7 @@
     },
     {
       "id": "xsgd-straitsx",
-      "grade": "A-",
+      "grade": "B-",
       "score": 65,
       "ratingStatus": "rated"
     },
@@ -2167,7 +2167,7 @@
     {
       "id": "zarp-zarp",
       "grade": "C",
-      "score": 51,
+      "score": 56,
       "ratingStatus": "rated"
     },
     {
@@ -2184,7 +2184,7 @@
     },
     {
       "id": "zchf-frankencoin",
-      "grade": "A",
+      "grade": "A-",
       "score": 82,
       "ratingStatus": "rated"
     },
