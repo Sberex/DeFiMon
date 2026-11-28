@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiUrl } from './api';
 import { useSafetyScores } from './SafetyScore';
+import { safetyGrades } from './pharos-safety';
 import { savingsCatalogAssets, savingsRateLink, type SavingsCatalogRate } from './savings-catalog';
 export function SavingsStablecoins() {
   const { feed, error: scoreError, busy: scoreLoading } = useSafetyScores();
   const [rates, setRates] = useState<Record<string, SavingsCatalogRate>>({}), [failures, setFailures] = useState<Record<string, string>>({}), [loading, setLoading] = useState(false), [revision, setRevision] = useState(0), [filter, setFilter] = useState('');
+  const [sort, setSort] = useState<{ key: 'name' | 'safety' | 'apr'; direction: 'ascending' | 'descending' }>({ key: 'name', direction: 'ascending' });
+  const toggleSort = (key: typeof sort.key) => setSort(old => ({ key, direction: old.key === key ? old.direction === 'ascending' ? 'descending' : 'ascending' : key === 'name' ? 'ascending' : 'descending' }));
   useEffect(() => {
     const request = new AbortController(); let index = 0;
     const assets = savingsCatalogAssets.filter(a => a.sources.length > 0);
@@ -25,7 +28,24 @@ export function SavingsStablecoins() {
     return () => request.abort();
   }, [revision]);
   const grades = useMemo(() => new Map(feed?.grades.map(row => [row.id, row])), [feed]);
-  const assets = savingsCatalogAssets.filter(a => a.id.toLowerCase().includes(filter.trim().toLowerCase()));
+  const assets = savingsCatalogAssets.filter(a => a.id.toLowerCase().includes(filter.trim().toLowerCase())).sort((a, b) => {
+    const nameOrder = a.name.localeCompare(b.name) || a.id.localeCompare(b.id), direction = sort.direction === 'ascending' ? 1 : -1;
+    if (sort.key === 'name') return direction * nameOrder;
+    const value = (asset: typeof a) => {
+      if (sort.key === 'apr') return rates[asset.id]?.quote?.apr ?? null;
+      const grade = asset.pharosId ? grades.get(asset.pharosId) : undefined;
+      return grade?.ratingStatus === 'rated' && grade.grade !== 'NR' ? safetyGrades.length - safetyGrades.indexOf(grade.grade) : null;
+    };
+    const av = value(a), bv = value(b);
+    // Unknown values stay below verified values in either direction.
+    if (av === null || bv === null) return av === bv ? nameOrder : av === null ? 1 : -1;
+    if (av !== bv) return direction * (av - bv);
+    if (sort.key === 'safety') {
+      const as = grades.get(a.pharosId!)?.score ?? null, bs = grades.get(b.pharosId!)?.score ?? null;
+      if (as !== null && bs !== null && as !== bs) return direction * (as - bs);
+    }
+    return nameOrder;
+  });
   const calculated = Object.values(rates).filter(r => r.quote?.apr != null).length;
   return <section className="savings-stablecoins" aria-label="Savings stablecoins">
     <div className="section-label"><h2>Savings stablecoins</h2><span>{savingsCatalogAssets.length} configured assets</span></div>
@@ -34,7 +54,7 @@ export function SavingsStablecoins() {
     <p role="status">{calculated} APRs available · {Object.keys(rates).length + Object.keys(failures).length} of {savingsCatalogAssets.filter(a => a.sources.length > 0).length} configured sources checked{loading ? ' · Calculations in progress' : ''}. Assets without a verified source remain Unavailable.</p>
     {scoreError && <p className="notice">{scoreError}</p>}
     {feed && <p className="savings-score-asof">Pharos grades as of {new Date(feed.asOfSec * 1000).toLocaleString('en-GB', { timeZone: 'Europe/Kyiv' })} Kyiv.</p>}
-    <div className="table-wrap"><table><thead><tr><th>Name</th><th>Safety Score</th><th>Intrinsic APR</th><th>Price oracle / source</th></tr></thead><tbody>{assets.map(asset => {
+    <div className="table-wrap"><table><thead><tr>{([['name', 'Name'], ['safety', 'Safety Score'], ['apr', 'Intrinsic APR']] as const).map(([key, label]) => <th key={key} aria-sort={sort.key === key ? sort.direction : 'none'}><button type="button" className="savings-sort" onClick={() => toggleSort(key)}>{label}<span aria-hidden="true"> {sort.key === key ? sort.direction === 'ascending' ? '↑' : '↓' : '↕'}</span></button></th>)}<th>Price oracle / source</th></tr></thead><tbody>{assets.map(asset => {
       const row = asset.pharosId ? grades.get(asset.pharosId) : undefined, grade = row?.ratingStatus === 'rated' ? row.grade : 'NR';
       const rate = rates[asset.id], quote = rate?.quote, link = savingsRateLink(asset, quote), pending = loading && asset.sources.length > 0 && !rate && !failures[asset.id];
       const unavailable = failures[asset.id] ?? quote?.note ?? 'No verified intrinsic-rate source configured.';
