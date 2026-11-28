@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795864700,
+  "asOfSec": 1795868281,
   "publicationStatus": "current",
-  "methodologyVersion": "10.58",
+  "methodologyVersion": "10.59",
   "grades": [
     {
       "id": "a7a5-old-vector",
@@ -91,7 +91,7 @@
     {
       "id": "ausd-agora",
       "grade": "B+",
-      "score": 76,
+      "score": 77,
       "ratingStatus": "rated"
     },
     {
@@ -367,7 +367,7 @@
     {
       "id": "dusd-dialectic",
       "grade": "D",
-      "score": 45,
+      "score": 46,
       "ratingStatus": "rated"
     },
     {
@@ -961,13 +961,13 @@
     {
       "id": "nusd-nexus",
       "grade": "F",
-      "score": 19,
+      "score": 57,
       "ratingStatus": "rated"
     },
     {
       "id": "nxusd-nereus",
       "grade": "C-",
-      "score": 51,
+      "score": 52,
       "ratingStatus": "rated"
     },
     {
@@ -1075,7 +1075,7 @@
     {
       "id": "rlusd-ripple",
       "grade": "A",
-      "score": 82,
+      "score": 83,
       "ratingStatus": "rated"
     },
     {
@@ -1321,7 +1321,7 @@
     {
       "id": "strusd-tori",
       "grade": "D",
-      "score": 44,
+      "score": 45,
       "ratingStatus": "rated"
     },
     {
@@ -1513,7 +1513,7 @@
     {
       "id": "trusd-tori",
       "grade": "D",
-      "score": 49,
+      "score": 50,
       "ratingStatus": "rated"
     },
     {
@@ -2100,7 +2100,7 @@
     },
     {
       "id": "xsgd-straitsx",
-      "grade": "B-",
+      "grade": "B+",
       "score": 79,
       "ratingStatus": "rated"
     },
