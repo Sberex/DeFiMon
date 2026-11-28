@@ -85,6 +85,11 @@
       "address": "0xe16be042f9433779909a972669be3a2003956348",
       "lastCheckedAt": "2026-11-22T15:45:53.349Z",
       "manualLiquidationPrices": []
+    },
+    {
+      "address": "0xf484725b49dcdfb6c9162ef34cb61ecf1dd0db01",
+      "lastCheckedAt": "2026-11-28T05:32:27.087Z",
+      "manualLiquidationPrices": []
     }
   ]
 }
