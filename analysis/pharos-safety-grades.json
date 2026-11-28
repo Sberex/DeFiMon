@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795853868,
+  "asOfSec": 1795857478,
   "publicationStatus": "current",
   "methodologyVersion": "10.58",
   "grades": [
@@ -73,7 +73,7 @@
     {
       "id": "audm-macropod",
       "grade": "C+",
-      "score": 74,
+      "score": 62,
       "ratingStatus": "rated"
     },
     {
@@ -415,13 +415,13 @@
     {
       "id": "eurc-circle",
       "grade": "A",
-      "score": 83,
+      "score": 65,
       "ratingStatus": "rated"
     },
     {
       "id": "eurcv-societe-generale-forge",
       "grade": "A-",
-      "score": 80,
+      "score": 77,
       "ratingStatus": "rated"
     },
     {
@@ -456,7 +456,7 @@
     },
     {
       "id": "eurs-stasis",
-      "grade": "D",
+      "grade": "C-",
       "score": 52,
       "ratingStatus": "rated"
     },
@@ -619,7 +619,7 @@
     {
       "id": "gpyusdse-galaxy",
       "grade": "C+",
-      "score": 64,
+      "score": 63,
       "ratingStatus": "rated"
     },
     {
@@ -691,7 +691,7 @@
     {
       "id": "hyperusdca-hyperithm",
       "grade": "C+",
-      "score": 61,
+      "score": 53,
       "ratingStatus": "rated"
     },
     {
@@ -757,7 +757,7 @@
     {
       "id": "jpyc-jpyc",
       "grade": "C+",
-      "score": 63,
+      "score": 62,
       "ratingStatus": "rated"
     },
     {
@@ -961,7 +961,7 @@
     {
       "id": "nusd-nexus",
       "grade": "F",
-      "score": 57,
+      "score": 19,
       "ratingStatus": "rated"
     },
     {
@@ -1003,7 +1003,7 @@
     {
       "id": "paxg-paxos",
       "grade": "F",
-      "score": 56,
+      "score": 80,
       "ratingStatus": "rated"
     },
     {
@@ -1225,7 +1225,7 @@
     {
       "id": "skymoneyusdtsavings-sky",
       "grade": "C+",
-      "score": 64,
+      "score": 60,
       "ratingStatus": "rated"
     },
     {
@@ -1387,7 +1387,7 @@
     {
       "id": "susdd-tron-dao-reserve",
       "grade": "C",
-      "score": 57,
+      "score": 59,
       "ratingStatus": "rated"
     },
     {
@@ -1518,7 +1518,7 @@
     },
     {
       "id": "tryb-bilira",
-      "grade": "D",
+      "grade": "C",
       "score": 55,
       "ratingStatus": "rated"
     },
@@ -1555,7 +1555,7 @@
     {
       "id": "usd1-world-liberty-financial",
       "grade": "C",
-      "score": 58,
+      "score": 59,
       "ratingStatus": "rated"
     },
     {
@@ -1615,7 +1615,7 @@
     {
       "id": "usdd-tron-dao-reserve",
       "grade": "C+",
-      "score": 62,
+      "score": 64,
       "ratingStatus": "rated"
     },
     {
@@ -2029,7 +2029,7 @@
     {
       "id": "wsrusd-reservoir",
       "grade": "C-",
-      "score": 52,
+      "score": 57,
       "ratingStatus": "rated"
     },
     {
@@ -2059,7 +2059,7 @@
     {
       "id": "xaut-tether",
       "grade": "B-",
-      "score": 65,
+      "score": 81,
       "ratingStatus": "rated"
     },
     {
