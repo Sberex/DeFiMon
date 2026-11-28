@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795839429,
+  "asOfSec": 1795843067,
   "publicationStatus": "current",
   "methodologyVersion": "10.58",
   "grades": [
@@ -66,7 +66,7 @@
     },
     {
       "id": "audf-forte",
-      "grade": "C",
+      "grade": "D",
       "score": 49,
       "ratingStatus": "rated"
     },
@@ -205,7 +205,7 @@
     {
       "id": "cadd-cad-digital",
       "grade": "A-",
-      "score": 81,
+      "score": 80,
       "ratingStatus": "rated"
     },
     {
@@ -421,7 +421,7 @@
     {
       "id": "eurcv-societe-generale-forge",
       "grade": "C+",
-      "score": 64,
+      "score": 77,
       "ratingStatus": "rated"
     },
     {
@@ -924,7 +924,7 @@
     },
     {
       "id": "mxnb-juno",
-      "grade": "C+",
+      "grade": "C",
       "score": 58,
       "ratingStatus": "rated"
     },
@@ -1003,7 +1003,7 @@
     {
       "id": "paxg-paxos",
       "grade": "A-",
-      "score": 81,
+      "score": 35,
       "ratingStatus": "rated"
     },
     {
@@ -1285,7 +1285,7 @@
     {
       "id": "steakeurcv-steakhouse",
       "grade": "C-",
-      "score": 54,
+      "score": 66,
       "ratingStatus": "rated"
     },
     {
@@ -1561,7 +1561,7 @@
     {
       "id": "usd3-3jane",
       "grade": "C-",
-      "score": 52,
+      "score": 54,
       "ratingStatus": "rated"
     },
     {
@@ -2041,7 +2041,7 @@
     {
       "id": "xagm-matrixdock",
       "grade": "D",
-      "score": 55,
+      "score": 49,
       "ratingStatus": "rated"
     },
     {
@@ -2059,7 +2059,7 @@
     {
       "id": "xaut-tether",
       "grade": "A-",
-      "score": 81,
+      "score": 65,
       "ratingStatus": "rated"
     },
     {
@@ -2185,7 +2185,7 @@
     {
       "id": "zchf-frankencoin",
       "grade": "A-",
-      "score": 82,
+      "score": 84,
       "ratingStatus": "rated"
     },
     {
