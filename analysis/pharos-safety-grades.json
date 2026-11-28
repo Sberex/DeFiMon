@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfSec": 1795868281,
+  "asOfSec": 1795871868,
   "publicationStatus": "current",
   "methodologyVersion": "10.59",
   "grades": [
@@ -619,7 +619,7 @@
     {
       "id": "gpyusdse-galaxy",
       "grade": "C+",
-      "score": 64,
+      "score": 63,
       "ratingStatus": "rated"
     },
     {
@@ -960,7 +960,7 @@
     },
     {
       "id": "nusd-nexus",
-      "grade": "F",
+      "grade": "C",
       "score": 57,
       "ratingStatus": "rated"
     },
@@ -1033,7 +1033,7 @@
     {
       "id": "pusd-polymarket",
       "grade": "B+",
-      "score": 76,
+      "score": 77,
       "ratingStatus": "rated"
     },
     {
@@ -1225,7 +1225,7 @@
     {
       "id": "skymoneyusdtsavings-sky",
       "grade": "C+",
-      "score": 60,
+      "score": 64,
       "ratingStatus": "rated"
     },
     {
@@ -1285,7 +1285,7 @@
     {
       "id": "steakeurcv-steakhouse",
       "grade": "B-",
-      "score": 66,
+      "score": 65,
       "ratingStatus": "rated"
     },
     {
@@ -1512,7 +1512,7 @@
     },
     {
       "id": "trusd-tori",
-      "grade": "D",
+      "grade": "C-",
       "score": 50,
       "ratingStatus": "rated"
     },
@@ -2029,7 +2029,7 @@
     {
       "id": "wsrusd-reservoir",
       "grade": "C",
-      "score": 57,
+      "score": 52,
       "ratingStatus": "rated"
     },
     {
@@ -2197,7 +2197,7 @@
     {
       "id": "zys-zephyr-protocol",
       "grade": "C-",
-      "score": 53,
+      "score": 51,
       "ratingStatus": "rated"
     }
   ]
