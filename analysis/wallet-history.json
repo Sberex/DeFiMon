@@ -82,6 +82,11 @@
       "manualLiquidationPrices": []
     },
     {
+      "address": "0xdc3abf85e090528669cf1b44ef4082b269c21a95",
+      "lastCheckedAt": "2026-11-28T05:33:50.296Z",
+      "manualLiquidationPrices": []
+    },
+    {
       "address": "0xe16be042f9433779909a972669be3a2003956348",
       "lastCheckedAt": "2026-11-22T15:45:53.349Z",
       "manualLiquidationPrices": []
