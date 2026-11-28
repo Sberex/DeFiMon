@@ -11,7 +11,7 @@ export interface LiquidityNotification {
   id: string; type: 'available-liquidity-increased' | 'available-liquidity-decreased'; address: string; network: LiquidityWatch['network']; protocol: string; positionId: string;
   market: string; marketAddress: string; marketLabel: string; token: string; symbol: string; decimals: number;
   previousLiquidity: string; availableLiquidity: string; liquidityChange: string; previousRaw: string; availableRaw: string; changeRaw: string;
-  previousCheckedAt: string; timestamp: string; blockNumber: string; note: string;
+  previousCheckedAt: string; timestamp: string; blockNumber: string; note: string; borrowApr?: number | null;
 }
 export interface LiquidityNotifications { version: 1; notifications: LiquidityNotification[] }
 export const emptyLiquidityState = (): LiquidityTrackerState => ({ version: 1, lastRunAt: null, watches: [] });
@@ -24,7 +24,7 @@ export function enabledLiquidityWatches(history: WalletHistoryFile): LiquidityWa
   return parseWalletHistory(history).wallets.flatMap(wallet => (wallet.alerts ?? []).filter(a => a.rules.newLiquidityAdded || a.rules.liquidityWithdrawn).map(a => ({ address: wallet.address, network: a.network, protocol: a.protocol, positionId: a.positionId, ruleUpdatedAt: a.updatedAt })));
 }
 function validReading(q: LiquidityReading) {
-  return q && typeof q.market === 'string' && q.market.length > 0 && typeof q.marketAddress === 'string' && /^0x[\da-f]{40}$/i.test(q.marketAddress) && /^0x[\da-f]{40}$/i.test(q.token) && typeof q.symbol === 'string' && q.symbol.length > 0 && q.symbol.length <= 128 && Number.isInteger(q.decimals) && q.decimals >= 0 && q.decimals <= 36 && raw(q.rawAmount) && typeof q.label === 'string' && typeof q.note === 'string';
+  return q && typeof q.market === 'string' && q.market.length > 0 && typeof q.marketAddress === 'string' && /^0x[\da-f]{40}$/i.test(q.marketAddress) && /^0x[\da-f]{40}$/i.test(q.token) && typeof q.symbol === 'string' && q.symbol.length > 0 && q.symbol.length <= 128 && Number.isInteger(q.decimals) && q.decimals >= 0 && q.decimals <= 36 && raw(q.rawAmount) && typeof q.label === 'string' && typeof q.note === 'string' && (q.borrowApr === undefined || q.borrowApr === null || typeof q.borrowApr === 'number' && Number.isFinite(q.borrowApr));
 }
 export function parseLiquidityState(value: unknown): LiquidityTrackerState {
   const f = value as LiquidityTrackerState;
@@ -48,7 +48,7 @@ export function parseLiquidityNotifications(value: unknown): LiquidityNotificati
   const ids = new Set<string>();
   for (const n of f.notifications) {
     if (!n || typeof n.id !== 'string' || !/^[\da-f]{64}$/.test(n.id) || ids.has(n.id) || !['available-liquidity-increased', 'available-liquidity-decreased'].includes(n.type) || !iso(n.timestamp) || !iso(n.previousCheckedAt) || !raw(n.previousRaw) || !raw(n.availableRaw) || !raw(n.changeRaw) || BigInt(n.changeRaw) <= 0n || BigInt(n.availableRaw) - BigInt(n.previousRaw) !== (n.type === 'available-liquidity-decreased' ? -BigInt(n.changeRaw) : BigInt(n.changeRaw)) || !raw(n.blockNumber)) throw Error('Invalid liquidity notification');
-    if (!validReading({ market: n.market, marketAddress: n.marketAddress, label: n.marketLabel, token: n.token, symbol: n.symbol, decimals: n.decimals, rawAmount: n.availableRaw, note: n.note }) || n.previousLiquidity !== formatUnits(BigInt(n.previousRaw), n.decimals) || n.availableLiquidity !== formatUnits(BigInt(n.availableRaw), n.decimals) || n.liquidityChange !== formatUnits(BigInt(n.changeRaw), n.decimals)) throw Error('Invalid notification units');
+    if (!validReading({ market: n.market, marketAddress: n.marketAddress, label: n.marketLabel, token: n.token, symbol: n.symbol, decimals: n.decimals, rawAmount: n.availableRaw, note: n.note, borrowApr: n.borrowApr }) || n.previousLiquidity !== formatUnits(BigInt(n.previousRaw), n.decimals) || n.availableLiquidity !== formatUnits(BigInt(n.availableRaw), n.decimals) || n.liquidityChange !== formatUnits(BigInt(n.changeRaw), n.decimals)) throw Error('Invalid notification units');
     parseWalletHistory({ version: 1, wallets: [{ address: n.address, lastCheckedAt: n.timestamp, manualLiquidationPrices: [], alerts: [{ network: n.network, protocol: n.protocol, positionId: n.positionId, updatedAt: n.timestamp, rules: defaultAlertRules() }] }] });
     ids.add(n.id);
   }
@@ -83,7 +83,7 @@ export function advanceLiquidityAlerts(history: WalletHistoryFile, previous: Liq
         const id = createHash('sha256').update(JSON.stringify([key, readingKey(q), watch.ruleUpdatedAt, before.blockNumber, observation.blockNumber, before.rawAmount, q.rawAmount])).digest('hex');
         if (enabledDirection && !ids.has(id)) {
           ids.add(id); added++;
-          notifications.notifications.push({ id, type: decrease ? 'available-liquidity-decreased' : 'available-liquidity-increased', address: watch.address, network: watch.network, protocol: watch.protocol, positionId: watch.positionId, market: q.market, marketAddress: q.marketAddress, marketLabel: q.label, token: q.token, symbol: q.symbol, decimals: q.decimals, previousLiquidity: formatUnits(BigInt(before.rawAmount), q.decimals), availableLiquidity: formatUnits(BigInt(q.rawAmount), q.decimals), liquidityChange: formatUnits(change, q.decimals), previousRaw: before.rawAmount, availableRaw: q.rawAmount, changeRaw: String(change), previousCheckedAt: before.checkedAt, timestamp: observation.checkedAt, blockNumber: observation.blockNumber, note: q.note });
+          notifications.notifications.push({ id, type: decrease ? 'available-liquidity-decreased' : 'available-liquidity-increased', address: watch.address, network: watch.network, protocol: watch.protocol, positionId: watch.positionId, market: q.market, marketAddress: q.marketAddress, marketLabel: q.label, token: q.token, symbol: q.symbol, decimals: q.decimals, previousLiquidity: formatUnits(BigInt(before.rawAmount), q.decimals), availableLiquidity: formatUnits(BigInt(q.rawAmount), q.decimals), liquidityChange: formatUnits(change, q.decimals), previousRaw: before.rawAmount, availableRaw: q.rawAmount, changeRaw: String(change), previousCheckedAt: before.checkedAt, timestamp: observation.checkedAt, blockNumber: observation.blockNumber, note: q.note, borrowApr: q.borrowApr ?? null });
         }
       }
       return { ...q, checkedAt: observation.checkedAt, blockNumber: observation.blockNumber };

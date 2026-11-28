@@ -5,7 +5,8 @@ import type { MarketLiquidity } from '../src/market-comparison.js';
 import type { ChainClient } from './rpc.js';
 import { makeClient } from './rpc.js';
 import { networks } from './networks.js';
-import { accruedMorphoMarket } from './morpho-rates.js';
+import { rayApr } from './rates.js';
+import { accruedMorphoMarket, createMorphoRates } from './morpho-rates.js';
 import { morphoCoreAbi } from './abis/morpho.js';
 import { aaveLiquidity, compoundLiquidity, liquidityQuote, liquidityTokenAbi, tokenMetadata, v4Liquidity } from './market-liquidity.js';
 import { fluidMarketLiquidity } from './fluid-market-liquidity.js';
@@ -21,7 +22,7 @@ import { AAVE_HORIZON } from './deployments/aave-horizon.js';
 import { SPARK_LEND } from './deployments/spark.js';
 import { listaDeployments } from './deployments/lista.js';
 export interface LiquidityWatch { address: string; network: NetworkId; protocol: string; positionId: string; ruleUpdatedAt: string }
-export interface LiquidityReading { market: string; marketAddress: string; label: string; token: string; symbol: string; decimals: number; rawAmount: string; note: string }
+export interface LiquidityReading { market: string; marketAddress: string; label: string; token: string; symbol: string; decimals: number; rawAmount: string; note: string; borrowApr?: number | null }
 export interface LiquidityObservation { watch: LiquidityWatch; checkedAt: string; blockNumber: string; status: 'ok' | 'error' | 'inactive' | 'unsupported'; readings: LiquidityReading[]; message?: string }
 const abi = parseAbi([
  'function getPool() view returns(address)', 'function getPoolDataProvider() view returns(address)',
@@ -38,9 +39,9 @@ const abi = parseAbi([
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 const address = (value: string): Address => { if (!/^0x[\da-f]{40}$/i.test(value)) throw Error('Invalid market address'); return value as Address; };
 const activeAssets = (p: Position) => p.assets.filter(a => p.assets.some(a => a.borrowed > 0) ? a.borrowed > 0 : a.supplied > 0);
-function quote(market: string, marketAddress: string, label: string, q: MarketLiquidity | null): LiquidityReading {
+function quote(market: string, marketAddress: string, label: string, q: MarketLiquidity | null, borrowApr: number | null = null): LiquidityReading {
   if (!q || q.rawAmount === undefined || q.decimals === undefined) throw Error('Unavailable exact liquidity');
-  return { market: market.toLowerCase(), marketAddress: marketAddress.toLowerCase(), label, token: q.token.toLowerCase(), symbol: q.symbol, decimals: q.decimals, rawAmount: q.rawAmount, note: q.note };
+  return { market: market.toLowerCase(), marketAddress: marketAddress.toLowerCase(), label, token: q.token.toLowerCase(), symbol: q.symbol, decimals: q.decimals, rawAmount: q.rawAmount, note: q.note, borrowApr: borrowApr !== null && Number.isFinite(borrowApr) ? borrowApr : null };
 }
 export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainClient = n => makeClient(n, process.env[`${n.toUpperCase()}_RPC_URL`] || (n === 'ethereum' ? 'https://eth.drpc.org' : undefined)), now = Date.now) {
   const snapshots = new Map<NetworkId, Promise<{ client: ChainClient; block: bigint }>>();
@@ -61,7 +62,8 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
           collateral = typeof symbol === 'string' && symbol.trim() && symbol.length <= 128 ? symbol.replace(/\s+/g, ' ').trim() : 'Unknown collateral';
         } catch { collateral = 'Unknown collateral'; }
       }
-      return quote(id, core, `${collateral} / ${info.symbol}`, liquidityQuote(state.totalSupplyAssets - state.totalBorrowAssets, info.decimals, info.symbol, params.loanToken, 'Accrued market loan assets supplied minus borrowed; excludes collateral TVL.'));
+      const interest = await createMorphoRates(client, block, core).market(params, state);
+      return quote(id, core, `${collateral} / ${info.symbol}`, liquidityQuote(state.totalSupplyAssets - state.totalBorrowAssets, info.decimals, info.symbol, params.loanToken, 'Accrued market loan assets supplied minus borrowed; excludes collateral TVL.'), interest.borrowRate.apr);
     })());
     return marketReads.get(key)!;
   }
@@ -137,7 +139,7 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
           const token = address(a.address), metadata = await tokenMetadata(client, token, block);
           const [config, state] = await Promise.all([client.readContract({ address: pool, abi, functionName: 'getConfiguration', args: [token], blockNumber: block }), client.readContract({ address: data, abi, functionName: 'getReserveData', args: [token], blockNumber: block })]);
           const enabled = (config.data & (1n << 56n)) !== 0n && (config.data & (1n << 58n)) !== 0n && (config.data & ((1n << 57n) | (1n << 60n))) === 0n;
-          return quote(pool, pool, p.label, enabled ? await aaveLiquidity(client, data, pool, token, config.data, metadata.decimals, state[3] + state[4], block, watch.protocol !== 'spark') : liquidityQuote(0n, metadata.decimals, metadata.symbol, token, 'Borrowing is disabled, paused or frozen for this reserve.'));
+          return quote(pool, pool, p.label, enabled ? await aaveLiquidity(client, data, pool, token, config.data, metadata.decimals, state[3] + state[4], block, watch.protocol !== 'spark') : liquidityQuote(0n, metadata.decimals, metadata.symbol, token, 'Borrowing is disabled, paused or frozen for this reserve.'), typeof state[6] === 'bigint' ? rayApr(state[6]) : null);
         }));
         return result('ok', readings);
       }
@@ -150,17 +152,17 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
         const owned = await reader.ownership(market, wallet);
         if (match[1] === 'loan' ? !owned.loan : owned.shares + owned.staked === 0n) return result('inactive');
         const q = await reader.quote(market);
-        return result('ok', [quote(market.controller, market.controller, q.label, q.liquidity)]);
+        return result('ok', [quote(market.controller, market.controller, q.label, q.liquidity, q.borrowRate.apr)]);
       }
       if (watch.protocol === 'compound') {
         const portfolio = await readCompound(client, wallet, block, network), p = portfolio.positions.find(p => same(p.id, id)); if (!p) { if (portfolio.status !== 'ok') throw Error('Incomplete positions'); return result('inactive'); }
         const market = address(p.marketAddress ?? p.id); const base = await client.readContract({ address: market, abi: parseAbi(['function baseToken() view returns(address)']), functionName: 'baseToken', blockNumber: block });
-        return result('ok', [quote(market, market, p.label, await compoundLiquidity(client, market, base, block))]);
+        return result('ok', [quote(market, market, p.label, await compoundLiquidity(client, market, base, block), p.assets.find(a => same(a.address, base))?.borrowRate?.apr ?? null)]);
       }
       if (watch.protocol === 'euler') {
         const portfolio = await readEuler(client, wallet, block, network), p = portfolio.positions.find(p => same(p.id, id)); if (!p) { if (portfolio.status !== 'ok') throw Error('Incomplete positions'); return result('inactive'); }
         const reader = createEulerReader(client, network, block), vaults = p.assets.some(a => a.borrowed > 0) ? [p.marketAddress!] : p.receiptTokens ?? [p.marketAddress!];
-        return result('ok', await Promise.all(vaults.map(async v => quote(v, v, p.label, await reader.liquidity(address(v))))));
+        return result('ok', await Promise.all(vaults.map(async v => { const liquidity = await reader.liquidity(address(v)), interest = await reader.interest(address(v)); return quote(v, v, p.label, liquidity, interest.borrowRate.apr); })));
       }
       if (watch.protocol === 'aave-v4' && networks[network].protocolIds.includes('aave-v4')) {
         const deployment = aaveV4Deployment(network);
@@ -172,8 +174,8 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
           if (deployment.tokenizations.some(s => same(s.address, market))) {
             const raw = await client.readContract({ address: address(r.hub), abi: parseAbi(['function getAssetLiquidity(uint256) view returns(uint256)']), functionName: 'getAssetLiquidity', args: [BigInt(r.assetId)], blockNumber: block });
             const m = await tokenMetadata(client, address(a.address), block);
-            readings.push(quote(`${r.hub}:${r.assetId}`, r.hub, p.label, liquidityQuote(raw, m.decimals, m.symbol, a.address, 'Hub liquidity backing the tokenized deposit; personal withdrawal and access limits can apply.')));
-          } else readings.push(quote(`${market}:${r.hub}:${r.assetId}`, market, p.label, await v4Liquidity(client, address(r.hub), BigInt(r.assetId), market, address(a.address), block)));
+            readings.push(quote(`${r.hub}:${r.assetId}`, r.hub, p.label, liquidityQuote(raw, m.decimals, m.symbol, a.address, 'Hub liquidity backing the tokenized deposit; personal withdrawal and access limits can apply.'), a.v4Reserves?.length === 1 ? a.borrowRate?.apr ?? null : null));
+          } else readings.push(quote(`${market}:${r.hub}:${r.assetId}`, market, p.label, await v4Liquidity(client, address(r.hub), BigInt(r.assetId), market, address(a.address), block), a.v4Reserves?.length === 1 ? a.borrowRate?.apr ?? null : null));
         }
         return result('ok', readings);
       }
@@ -183,7 +185,7 @@ export function createLiquidityAlertReader(clientFor: (n: NetworkId) => ChainCli
           const [p, v] = await client.readContract({ address: networks[network].fluid.vault, abi: vaultResolverAbi, functionName: 'positionByNftId', args: [BigInt(nft[1])], blockNumber: block });
           if (!same(p.owner, wallet) || p.supply === 0n && p.borrow === 0n) return result('inactive');
           const readings = await fluidMarketLiquidity(client, network, block, v); if (readings.size !== (v.isSmartDebt ? 2 : 1)) throw Error('Incomplete Fluid liquidity');
-          return result('ok', [...readings.values()].map(q => quote(v.vault, v.vault, `Fluid Vault ${v.constantVariables.vaultId}`, q)));
+          return result('ok', [...readings.values()].map(q => quote(v.vault, v.vault, `Fluid Vault ${v.constantVariables.vaultId}`, q, !v.isSmartDebt && typeof v.exchangePricesAndRates?.borrowRateVault === 'bigint' ? Number(v.exchangePricesAndRates.borrowRateVault) / 10000 : null)));
         }
         const lending = id.match(/^fluid-lending-(0x[\da-f]{40})$/i);
         if (lending) {

@@ -67,10 +67,10 @@ it('rejects malformed or secret-bearing delivery state rather than overwriting i
 
 it('delivers withdrawal alerts only when that direction is enabled, using the compact decrease format', async () => {
   const s = snapshot();
-  const withdrawal = { ...liquidity, type: 'available-liquidity-decreased' as const, previousLiquidity: '2', availableLiquidity: '1', previousRaw: '2000000', availableRaw: '1000000', marketLabel: 'sUSDai / USDC' };
+  const withdrawal = { ...liquidity, type: 'available-liquidity-decreased' as const, previousLiquidity: '2', availableLiquidity: '1', previousRaw: '2000000', availableRaw: '1000000', marketLabel: 'sUSDai / USDC', borrowApr: .045678 };
   s.notifications = [withdrawal];
   const text = telegramAlertText(withdrawal);
-  expect(text.split('\n')).toEqual(['Liquidity is withdrawn from the market', `Wallet: ${liquidity.address}`, 'Chain: Ethereum', 'Market: Morpho · sUSDai / USDC', 'Asset: USDC', 'Available: 2 → 1 USDC', 'Decrease: -1 USDC', 'Observed: 23/11/2026, 17:01:00 EET (Kyiv)']);
+  expect(text.split('\n')).toEqual(['Liquidity is withdrawn from the market', `Wallet: ${liquidity.address}`, 'Chain: Ethereum', 'Market: Morpho · sUSDai / USDC', 'Asset: USDC', 'Borrow APR: 4.57%', 'Available: 2 → 1 USDC', 'Decrease: -1 USDC', 'Observed: 23/11/2026, 17:01:00 EET (Kyiv)']);
   const send = vi.fn(async () => ({ ok: true as const, messageId: 10 }));
   expect(await deliverTelegramAlerts({ store: memory(structuredClone(s)).store, send, owner: 'worker', now: () => Date.parse(at(2)) })).toMatchObject({ sent: 0, skipped: 1 });
   s.history.wallets[0].alerts![0].rules.newLiquidityAdded = false;
@@ -79,4 +79,11 @@ it('delivers withdrawal alerts only when that direction is enabled, using the co
   expect(await deliverTelegramAlerts({ store: m.store, send, owner: 'worker', now: () => Date.parse(at(2)) })).toMatchObject({ sent: 1 });
   expect(send).toHaveBeenCalledWith(text);
   expect(m.value.state.deliveries[0]).toMatchObject({ kind: 'liquidity', status: 'sent' });
+});
+
+it('keeps unknown historical borrowing rates unavailable and preserves verified zero APR', () => {
+  const withdrawal = { ...liquidity, type: 'available-liquidity-decreased' as const };
+  expect(telegramAlertText(withdrawal)).toContain('Borrow APR: Unavailable');
+  expect(telegramAlertText({ ...withdrawal, borrowApr: null })).toContain('Borrow APR: Unavailable');
+  expect(telegramAlertText({ ...withdrawal, borrowApr: 0 })).toContain('Borrow APR: 0.00%');
 });

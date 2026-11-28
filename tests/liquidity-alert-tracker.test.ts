@@ -106,3 +106,24 @@ it('handles both directions without duplicate watches and resets a baseline when
   h.wallets[0].alerts![0].updatedAt = later;
   expect(advanceLiquidityAlerts(h, s.state, s.notifications, [observe('0', '103', later, { ...watch, ruleUpdatedAt: later })], later).added).toBe(0);
 });
+
+it('saves the observed borrowing APR with a withdrawal, keeps legacy files readable and rejects invalid rates', () => {
+  const h = history(false); h.wallets[0].alerts![0].rules.liquidityWithdrawn = true;
+  const initial = observe('2000000'); initial.readings[0].borrowApr = .01;
+  const seeded = advanceLiquidityAlerts(h, emptyLiquidityState(), emptyLiquidityNotifications(), [initial], day);
+  const current = observe('1000000', '101', next); current.readings[0].borrowApr = .045678;
+  const result = advanceLiquidityAlerts(h, seeded.state, seeded.notifications, [current], next);
+  expect(result.notifications.notifications[0].borrowApr).toBe(.045678);
+  expect(parseLiquidityNotifications(result.notifications)).toEqual(result.notifications);
+  expect(parseLiquidityState(result.state).watches[0].baselines[0].borrowApr).toBe(.045678);
+  const legacy = structuredClone(result.notifications); delete legacy.notifications[0].borrowApr;
+  expect(parseLiquidityNotifications(legacy)).toEqual(legacy);
+  for (const invalid of [NaN, Infinity, '4.56']) {
+    const bad = structuredClone(result.notifications); bad.notifications[0].borrowApr = invalid as number;
+    expect(() => parseLiquidityNotifications(bad)).toThrow();
+    const badState = structuredClone(result.state); badState.watches[0].baselines[0].borrowApr = invalid as number;
+    expect(() => parseLiquidityState(badState)).toThrow();
+  }
+  current.readings[0].borrowApr = 0;
+  expect(advanceLiquidityAlerts(h, seeded.state, seeded.notifications, [current], next).notifications.notifications[0].borrowApr).toBe(0);
+});

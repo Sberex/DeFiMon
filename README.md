@@ -736,3 +736,5 @@ Live Plasma validation at block **38,800,501** on 2026-11-27 used the screenshot
 
 
 `/api/market-discovery` expands the raw cached Aave pairs into these verified mode variants; the frontend handles expansion idempotently. `/api/leveraged-strategies` still selects the best verified mode for each pair from the same unexpanded cache. Discovery includes potential eMode-only collateral even when the standard reserve collateral setting is disabled or its threshold is zero, then emits it only after positive entry-LTV and collateral/borrow membership checks. Recommendations matching retains its existing standard-mode eligibility checks.
+
+Withdrawal Telegram notifications include the market’s protocol Borrow APR from the same monitoring observation/block as the liquidity change. The APR is stored as a decimal in `borrowApr` in the liquidity baseline and notification JSON. Historical notifications or unreadable rates show `Borrow APR: Unavailable`; verified zero rates show `0.00%`. Incentives are excluded.

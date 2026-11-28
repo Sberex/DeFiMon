@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import { encodeAbiParameters, encodeFunctionResult, keccak256, parseAbiParameters } from 'viem';
 import { createLiquidityAlertReader, type LiquidityWatch } from '../server/liquidity-alert-reader';
-import { morphoCoreAbi, morphoMulticallAbi } from '../server/abis/morpho';
+import { morphoCoreAbi, morphoMulticallAbi, morphoIrmAbi } from '../server/abis/morpho';
 import type { ChainClient } from '../server/rpc';
 const token = '0x1111111111111111111111111111111111111111', zero = '0x0000000000000000000000000000000000000000';
 const params = { loanToken: token, collateralToken: token, oracle: token, irm: zero, lltv: 800000000000000000n } as const;
@@ -25,7 +25,7 @@ function fixture(fail = false, inactive = false) {
 it('reads pinned, accrued Morpho liquidity exactly and shares market reads across watched wallets', async () => {
   const f = fixture(), reader = createLiquidityAlertReader(() => f.client);
   const first = await reader(watch), second = await reader({ ...watch, address: '0x2222222222222222222222222222222222222222' });
-  expect(first.status).toBe('ok'); expect(first.readings[0]).toMatchObject({ rawAmount: '300000000', decimals: 6, market: id, symbol: 'USDC', label: 'USDC / USDC' });
+  expect(first.status).toBe('ok'); expect(first.readings[0]).toMatchObject({ rawAmount: '300000000', decimals: 6, market: id, symbol: 'USDC', label: 'USDC / USDC', borrowApr: 0 });
   expect(second.readings).toEqual(first.readings); expect(f.call).toHaveBeenCalledTimes(1);
 });
 it('separates unreadable liquidity and inactive positions from real zero and never leaks RPC details', async () => {
@@ -70,4 +70,21 @@ it('monitors Aave reserve liquidity with its virtual accounting and remaining bo
   } } as unknown as ChainClient;
   const result = await createLiquidityAlertReader(() => client)({ ...watch, protocol: 'aave-v3', positionId: 'aave-main' });
   expect(result.status).toBe('ok'); expect(result.readings[0]).toMatchObject({ market, rawAmount: '400000000' });
+});
+
+it('captures Morpho instantaneous borrowing APR at the liquidity block and keeps liquidity readable if its rate fails', async () => {
+  for (const unavailable of [false, true]) {
+    const f = fixture(), marketParams = { ...params, irm: token } as const;
+    const marketId = keccak256(encodeAbiParameters(parseAbiParameters('address,address,address,address,uint256'), [marketParams.loanToken, marketParams.collateralToken, marketParams.oracle, marketParams.irm, marketParams.lltv]));
+    const originalRead = f.client.readContract;
+    f.client.readContract = (async (args: any) => args.functionName === 'idToMarketParams' ? marketParams : originalRead(args)) as any;
+    f.call.mockImplementationOnce(f.call.getMockImplementation()!).mockImplementationOnce(async ({blockNumber}:any) => {
+      expect(blockNumber).toBe(100n); if (unavailable) throw Error('private-provider-url');
+      return {data: encodeFunctionResult({abi:morphoMulticallAbi,functionName:'aggregate3',result:[{success:true,returnData:'0x'},{success:true,returnData:encodeFunctionResult({abi:morphoIrmAbi,functionName:'borrowRateView',result:1000000000n})}]})};
+    });
+    const reader=createLiquidityAlertReader(()=>f.client), result=await reader({...watch,positionId:`morpho-market-${marketId}`});
+    expect(result.status).toBe('ok');expect(result.readings[0]).toMatchObject({rawAmount:'300000000',borrowApr:unavailable?null:.031536});
+    expect(f.call).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(result)).not.toContain('private-provider-url');
+  }
 });
